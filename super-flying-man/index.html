@@ -998,3 +998,920 @@ function startGame(T) {
             g.connect(this.master);
             osc.start(t);
             osc.stop(t + duration + .02);
+        }
+        burst(cutoff, duration, gain) { if (!this.ctx || !this.enabled || !this.noiseBuffer || !this.master)
+            return; const ctx = this.ctx, t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = this.noiseBuffer; f.type = 'lowpass'; f.frequency.value = cutoff; g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(.0001, t + duration); s.connect(f); f.connect(g); g.connect(this.master); s.start(t, Math.random()); s.stop(t + duration); }
+        ping() { this.tone(1046.5, .29, .14); this.tone(1568, .39, .10, .085); }
+        flap() { this.burst(260, .24, .40); this.tone(78, .2, .19); }
+        land(snow) { this.burst(snow ? 480 : 260, .30, .28); this.tone(53, .20, .22); }
+        update(speed, cold, riverDist, paused, t) {
+            if (!this.ctx || !this.master)
+                return;
+            const now = this.ctx.currentTime;
+            this.master.gain.setTargetAtTime(this.enabled && !paused ? this.volume * .58 : 0, now, .1);
+            this.wind.gain.setTargetAtTime(.025 + clamp(speed / 45, 0, 1) * .21 + (Math.sin(t * 13) * .005), now, .2);
+            this.windFilter.frequency.setTargetAtTime(300 + speed * 40, now, .2);
+            this.river.gain.setTargetAtTime(Math.exp(-riverDist * .055) * .11, now, .4);
+            this.pad.gain.setTargetAtTime(.023 * (1 - cold * .75), now, .8);
+            if (cold > .6 && t - this.lastTick > 2.7 && Math.random() < .02) {
+                this.lastTick = t;
+                this.tone(2200 + Math.random() * 1500, .06, .01);
+            }
+        }
+    }
+    const audio = new ValeAudio();
+    const keys = new Set();
+    const state = { position: new T.Vector3(), velocity: new T.Vector3(), yaw: -.16, pitch: 0, roll: 0, turn: 0, speed: 18, stamina: 1, grounded: false, folded: false, flapTimer: 0, flapAge: 4, bounceTimer: 0, cameraMode: 0, orbit: 0, zoom: 1, mouseX: 0, mouseY: 0, mouseActive: false, dragging: false, paused: false, help: false, tools: false, map: false, cold: 0, time: 0, zone: 'Embervale', landedShelf: false, quality: 'medium', fog: 1, snow: 1, impact: 0, diveBlend: 0, mobileTurn:0, mobilePitch:0, mobileDive:false };
+    let currentZoneTime = 0, lastToastTime = -99, toastUntil = 0;
+    function toast(text, seconds = 2.7) { $('toast').textContent = text; $('toast').classList.add('show'); toastUntil = performance.now() + seconds * 1000; lastToastTime = state.time; }
+    function syncSoundUI() {
+        const on = audio.enabled;
+        $('soundState').textContent = on ? 'Sound on' : 'Sound off';
+        $('soundButton').setAttribute('aria-label', on ? 'Mute audio' : 'Enable audio');
+        for (const id of ['toolsMute', 'pauseMute'])
+            $(id).textContent = on ? 'Mute sound' : 'Enable sound';
+    }
+    function reset(clear = false) {
+        const z = 275;
+        state.position.set(riverX(z), 41.5, z);
+        state.velocity.set(-2.7, -.4, -18);
+        state.yaw = -.15;
+        state.pitch = 0;
+        state.roll = 0;
+        state.turn = 0;
+        state.speed = 18;
+        state.stamina = 1;
+        state.grounded = false;
+        state.folded = false;
+        state.flapTimer = 0;
+        state.flapAge = 4;
+        state.bounceTimer = 0;
+        state.orbit = 0;
+        state.mouseX = 0;
+        state.mouseY = 0;
+        state.mouseActive = false;
+        state.cold = 0;
+        state.diveBlend = 0;
+        state.impact = 0;
+        state.landedShelf = false;
+        state.paused = false;
+        state.help = false;
+        keys.clear();
+        $('pauseOverlay').classList.add('hidden');
+        $('howOverlay').classList.add('hidden');
+        $('toolsPanel').classList.add('hidden');
+        state.tools = false;
+        $('toolsButton').setAttribute('aria-expanded', 'false');
+        if (clear) {
+            collected = 0;
+            for (const m of markers) {
+                m.touched = false;
+                m.pop = 0;
+                m.sprite.material.opacity = .96;
+                if (m.active) updateMarkerTexture(m);
+            }
+        }
+        $('markerCount').textContent = `${collected} / ${activeTargetCount}`;
+        setZone('Embervale', true);
+        camera.position.copy(state.position).add(new T.Vector3(-2.9, 5.6, 16.5));
+        camera.lookAt(state.position.clone().add(new T.Vector3(0, 1, -14)));
+        playerRoot.position.copy(state.position);
+        figure.rotation.x = -Math.PI / 2;
+        cameraLook.copy(state.position).add(new T.Vector3(0, 1, -14));
+    }
+    function flap() {
+        if (state.grounded) {
+            takeoff();
+            return;
+        }
+        if (state.flapTimer > 0)
+            return;
+        if (state.stamina < .19) {
+            if (state.time - lastToastTime > 2)
+                toast('Let the wings breathe. Cruise to recover.');
+            return;
+        }
+        state.folded = false;
+        state.velocity.y += 7.6;
+        state.speed = Math.min(42, state.speed + 1.7);
+        state.stamina -= .19;
+        state.flapTimer = .64;
+        state.flapAge = 0;
+        audio.flap();
+    }
+    function takeoff() { if (!state.grounded) {
+        if (state.folded) {
+            state.folded = false;
+            toast('Wings open.');
+        }
+        return;
+    } state.grounded = false; state.folded = false; state.velocity.set(Math.sin(state.yaw) * 12, 9, -Math.cos(state.yaw) * 12); state.position.y += .5; state.speed = 13; state.flapTimer = .7; state.flapAge = 0; state.stamina = Math.max(.1, state.stamina - .12); audio.flap(); toast('The wind has you.'); }
+    function fold() {
+        if (state.grounded) {
+            takeoff();
+            return;
+        }
+        state.folded = !state.folded;
+        if (state.folded)
+            toast('Wings folded. Hold S to flare near a surface.');
+        else
+            toast('Wings open.');
+    }
+    const zoneLines = { 'Embervale': 'The vale already has a wind.', 'Stone Road': 'A cut through rock. Keep the wings level.', 'Cutwater': 'Grey water, orange sky. Do not drink it. Fly it.', 'First Ridge': 'The trees stop pretending they are tall.', 'Grey Steps': 'Someone stacked a keep and left the stairs.', 'Frostspine': 'The colour leaves. The snow stays.', 'Blizzard Shelf': 'Land if you want. The slope will wait.', 'The Dive': 'Look down. That is the whole map.', 'Palisade Bend': 'Wood and crates. You are almost home.' };
+    const zoneNames = Object.keys(zoneLines);
+    function setZone(name, force = false) {
+        if (state.zone === name && !force)
+            return;
+        state.zone = name;
+        currentZoneTime = state.time;
+        $('zoneName').textContent = name;
+        $('zoneLine').textContent = zoneLines[name];
+        $('zoneNumber').textContent = String(zoneNames.indexOf(name) + 1).padStart(2, '0');
+        $('location').style.opacity = '1';
+    }
+    function chooseZone() {
+        const p = state.position;
+        if (Math.hypot(p.x - SHELF.x, p.z - SHELF.z) < 47 && p.y > 140)
+            return 'Blizzard Shelf';
+        if (Math.hypot(p.x - 122, p.z + 119) < 54 && p.y > 80)
+            return 'Grey Steps';
+        if (p.y > 156 && p.z < -155 && p.x > 22)
+            return 'Frostspine';
+        if (p.z < -80 && Math.abs(p.x - riverX(p.z)) < 70)
+            return 'The Dive';
+        if (p.y > 78 || p.z < -25)
+            return 'First Ridge';
+        if (p.z > 153 && p.z < 216)
+            return 'Cutwater';
+        if (p.z > 38 && p.z < 139 && Math.cos(state.yaw) < -.25)
+            return 'Palisade Bend';
+        if (p.z < 158)
+            return 'Stone Road';
+        return 'Embervale';
+    }
+    const oldPos = new T.Vector3(), nextPos = new T.Vector3(), normal = new T.Vector3();
+    function impact(kind) {
+        if (state.bounceTimer > .1)
+            return;
+        state.bounceTimer = .5;
+        state.impact = .7;
+        emitPuff(state.position, kind);
+        audio.land(kind === 'snow');
+    }
+    function land(height) {
+        state.grounded = true;
+        state.folded = true;
+        state.position.y = height + 1.86;
+        state.velocity.set(0, 0, 0);
+        state.speed = 0;
+        state.pitch = 0;
+        state.mouseY = 0;
+        state.mouseX = 0;
+        state.roll = 0;
+        audio.land(state.cold > .5);
+        emitPuff(state.position, state.cold > .5 ? 'snow' : 'dirt');
+        if (Math.hypot(state.position.x - SHELF.x, state.position.z - SHELF.z) < 34) {
+            state.landedShelf = true;
+            toast('The slope will wait. F to take flight.', 4);
+        }
+        else
+            toast('Boots down. F to take flight.');
+    }
+    function physics(dt) {
+        const left = keys.has('KeyA') || keys.has('ArrowLeft'), right = keys.has('KeyD') || keys.has('ArrowRight'), forward = keys.has('KeyW') || keys.has('ArrowUp'), brake = keys.has('KeyS') || keys.has('ArrowDown'), dive = ((keys.has('ShiftLeft') || keys.has('ShiftRight')) || state.mobileDive) && !state.grounded && !state.folded;
+        state.flapTimer = Math.max(0, state.flapTimer - dt);
+        state.flapAge += dt;
+        state.bounceTimer = Math.max(0, state.bounceTimer - dt);
+        state.impact = Math.max(0, state.impact - dt * 2.4);
+        const aimTurn = (state.mouseActive && !state.dragging ? state.mouseX * .68 : 0) + state.mobileTurn * .92;
+        const turnInput = (right ? 1 : 0) - (left ? 1 : 0) + aimTurn;
+        state.turn = damp(state.turn, turnInput * (state.grounded ? 1.7 : 1.13), 3.3, dt);
+        state.yaw += state.turn * dt;
+        if (keys.has('KeyQ'))
+            state.orbit = clamp(state.orbit + dt * 1.05, -1.05, 1.05);
+        else if (keys.has('KeyE'))
+            state.orbit = clamp(state.orbit - dt * 1.05, -1.05, 1.05);
+        else if (!state.dragging)
+            state.orbit = damp(state.orbit, 0, 1.7, dt);
+        state.roll = damp(state.roll, clamp(-state.turn * .47, -.6, .6), 4.0, dt);
+        state.diveBlend = damp(state.diveBlend, dive ? 1 : 0, 2.8, dt);
+        if (keys.has('Space'))
+            flap();
+        const p = state.position, v = state.velocity;
+        oldPos.copy(p);
+        if (state.grounded) {
+            state.stamina = Math.min(1, state.stamina + dt * .32);
+            const walk = (forward ? 3.3 : 0) - (brake ? 2.0 : 0);
+            state.speed = damp(state.speed, Math.abs(walk), 8, dt);
+            nextPos.copy(p);
+            nextPos.x += Math.sin(state.yaw) * walk * dt;
+            nextPos.z -= Math.cos(state.yaw) * walk * dt;
+            const current = groundHeight(p.x, p.z), next = groundHeight(nextPos.x, nextPos.z);
+            if (next - current < .48 && nextPos.x > -427 && nextPos.x < 427 && nextPos.z > -427 && nextPos.z < 427) {
+                p.x = nextPos.x;
+                p.z = nextPos.z;
+            }
+            const h = groundHeight(p.x, p.z);
+            if (current - h > 2) {
+                state.grounded = false;
+                state.velocity.set(0, -1, 0);
+            }
+            else
+                p.y = h + 1.86;
+        }
+        else {
+            const aimPitch = (state.mouseActive && !state.dragging ? state.mouseY * .72 : 0) + state.mobilePitch * .72;
+            const desiredPitch = dive ? -1.12 : state.folded ? -.12 : clamp(aimPitch + (brake ? .14 : 0), -.77, .67);
+            state.pitch = damp(state.pitch, desiredPitch, 2.55, dt);
+            let target = dive ? 47 : state.folded ? 10 : forward ? 30 : brake ? 6.5 : 18;
+            target -= Math.max(0, state.pitch) * 7;
+            if (state.bounceTimer > 0)
+                target *= .55;
+            state.speed = damp(state.speed, target, dive ? 1.0 : brake ? 1.5 : .8, dt);
+            state.speed = clamp(state.speed, 3, 53);
+            const horizontal = state.speed * Math.cos(state.pitch);
+            v.x = damp(v.x, Math.sin(state.yaw) * horizontal, 2.45, dt);
+            v.z = damp(v.z, -Math.cos(state.yaw) * horizontal, 2.45, dt);
+            const gravity = 7.0, lift = 6.15 * clamp(state.speed / 18, 0, 1.45) * Math.max(0, Math.cos(state.pitch)) * (state.folded ? .12 : 1);
+            v.y += (state.speed * Math.sin(state.pitch) - v.y) * .52 * dt + (lift - gravity) * dt;
+            if (p.y > 217)
+                v.y -= ((p.y - 217) * 2.5 + Math.max(0, v.y) * 3) * dt;
+            v.y = clamp(v.y, -60, 25);
+            nextPos.copy(p).addScaledVector(v, dt);
+            const nextGround = groundHeight(nextPos.x, nextPos.z), currentGround = groundHeight(p.x, p.z);
+            // Resolve a near-vertical terrain or keep side in the horizontal plane. Do not teleport up walls.
+            if (nextGround > p.y - .85 && nextGround - currentGround > 1.1) {
+                const dx = surfaceHeight(nextPos.x + .75, nextPos.z) - surfaceHeight(nextPos.x - .75, nextPos.z), dz = surfaceHeight(nextPos.x, nextPos.z + .75) - surfaceHeight(nextPos.x, nextPos.z - .75);
+                normal.set(-dx, 0, -dz);
+                if (normal.lengthSq() < .01)
+                    normal.set(-v.x, 0, -v.z);
+                normal.normalize();
+                const dot = v.dot(normal);
+                if (dot < 0)
+                    v.addScaledVector(normal, -dot * 1.55);
+                p.addScaledVector(normal, .3);
+                state.speed *= .69;
+                v.y = Math.max(v.y, 1.4);
+                impact(state.cold > .5 ? 'snow' : 'dirt');
+            }
+            else {
+                p.copy(nextPos);
+            }
+            const actual = groundHeight(p.x, p.z), clearance = p.y - actual;
+            if (clearance < 1.86 && v.y <= 2.0) {
+                if (isWater(p.x, p.z) && surfaceHeight(p.x, p.z) < riverY(p.z) + .5) {
+                    p.y = riverY(p.z) + 2.1;
+                    v.y = 5.5;
+                    state.speed *= .59;
+                    impact('water');
+                }
+                else if ((brake || state.folded) && state.speed < 14) {
+                    land(actual);
+                }
+                else {
+                    p.y = actual + 1.9;
+                    v.y = Math.max(3.8, Math.abs(v.y) * .28);
+                    state.speed *= .72;
+                    impact(state.cold > .5 ? 'snow' : 'dirt');
+                }
+            }
+            // A narrow trunk collision leaves canopies forgiving, like a playful elytra toy.
+            const gx = Math.floor(p.x / 24), gz = Math.floor(p.z / 24);
+            for (let dx = -1; dx <= 1; dx++)
+                for (let dz = -1; dz <= 1; dz++) {
+                    const ts = treeGrid.get(`${gx + dx},${gz + dz}`);
+                    if (!ts)
+                        continue;
+                    for (const tr of ts) {
+                        if (tr.index >= qualityCount)
+                            continue;
+                        if (p.y < tr.y - .5 || p.y > tr.y + tr.h * .80)
+                            continue;
+                        const x = p.x - tr.x, z = p.z - tr.z, ds = x * x + z * z;
+                        if (ds < 1.12 * 1.12) {
+                            normal.set(x, 0, z);
+                            if (normal.lengthSq() < .001)
+                                normal.set(1, 0, 0);
+                            normal.normalize();
+                            p.x = tr.x + normal.x * 1.2;
+                            p.z = tr.z + normal.z * 1.2;
+                            const d = v.dot(normal);
+                            if (d < 0)
+                                v.addScaledVector(normal, -d * 1.4);
+                            state.speed *= .85;
+                            impact(state.cold > .5 ? 'snow' : 'dirt');
+                        }
+                    }
+                }
+            const recovery = dive ? .22 : state.folded ? .09 : .11;
+            if (state.flapAge > .36)
+                state.stamina = Math.min(1, state.stamina + dt * recovery);
+        }
+        // The compact world has a gentle boundary, not chunks or sudden loading.
+        if (Math.abs(p.x) > 420 || Math.abs(p.z) > 420) {
+            const toward = Math.atan2(-p.x, p.z);
+            let diff = ((toward - state.yaw + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+            state.yaw += clamp(diff, -1.4 * dt, 1.4 * dt);
+            p.x = clamp(p.x, -444, 444);
+            p.z = clamp(p.z, -444, 444);
+            state.velocity.x += -Math.sign(p.x) * smooth(415, 444, Math.abs(p.x)) * dt * 13;
+            state.velocity.z += -Math.sign(p.z) * smooth(415, 444, Math.abs(p.z)) * dt * 13;
+            if (state.time - lastToastTime > 6)
+                toast('The wind turns you back toward the vale.');
+        }
+        if (!Number.isFinite(p.x + p.y + p.z)) {
+            reset();
+            toast('Back to a steady wind.');
+        }
+        for (const m of markers) {
+            if (!m.active || m.touched)
+                continue;
+            // Segment distance also catches a fast dive that crosses a word gate between fixed steps.
+            const seg = nextPos.copy(p).sub(oldPos), len = seg.lengthSq();
+            const u = len > 0 ? clamp(m.position.clone().sub(oldPos).dot(seg) / len, 0, 1) : 0;
+            const nearest = oldPos.clone().addScaledVector(seg, u);
+            if (nearest.distanceToSquared(m.position) < 5.2 * 5.2) {
+                m.touched = true;
+                m.pop = 1;
+                collected++;
+                updateMarkerTexture(m);
+                audio.ping();
+                speakLearningWord(m.learningWord);
+                addToReview(m);
+                showWordCard(m);
+                $('markerCount').textContent = `${collected} / ${activeTargetCount}`;
+                $('mapTotal').textContent = `${collected} / ${activeTargetCount} learned`;
+                toast(collected === activeTargetCount ? `Lesson complete — ${collected} words saved.` : `${m.learningWord}${m.primaryWord ? ' · ' + m.primaryWord : ''}`);
+            }
+        }
+    }
+    const lookTarget = new T.Vector3(), cameraIdeal = new T.Vector3(), cameraLook = new T.Vector3(), ahead = new T.Vector3();
+    function animateBrick(dt) {
+        playerRoot.position.copy(state.position);
+        yawRoot.rotation.y = -state.yaw;
+        rollRoot.rotation.z = state.roll;
+        const flyPose = -Math.PI / 2 + state.pitch;
+        figure.rotation.x = damp(figure.rotation.x, state.grounded ? 0 : flyPose, 5, dt);
+        figure.position.y = state.grounded ? 0 : Math.sin(state.time * 2.1) * .085;
+        head.rotation.x = state.grounded ? 0 : -.08;
+        const beat = state.flapAge < .64 ? Math.sin(state.flapAge / .64 * Math.PI * 2) * .48 : Math.sin(state.time * 2.5) * .025;
+        const foldAmount = state.grounded || state.folded ? 1 : 0;
+        for (const w of wings) {
+            const base = foldAmount * 1.35 + state.diveBlend * .89 + .045 + (!foldAmount ? smooth(13, 5, state.speed) * .22 : 0);
+            w.hinge.rotation.y = damp(w.hinge.rotation.y, w.s * (base + beat) + state.roll * .42, 9, dt);
+            w.hinge.rotation.z = damp(w.hinge.rotation.z, -w.s * (state.diveBlend * .31 + foldAmount * .1), 7, dt);
+        }
+        if (state.grounded) {
+            legs[0].rotation.x = Math.sin(state.time * 9) * state.speed * .08;
+            legs[1].rotation.x = -legs[0].rotation.x;
+            legs[0].position.y = -.64;
+            legs[1].position.y = -.64;
+        }
+        else {
+            legs[0].rotation.x = .05;
+            legs[1].rotation.x = .17;
+            legs[0].position.y = -.64;
+            legs[1].position.y = -.76;
+        }
+        const h = groundHeight(state.position.x, state.position.z), distance = state.position.y - h;
+        shadow.position.set(state.position.x, h + .055, state.position.z);
+        shadow.material.opacity = clamp(1 - distance / 35, 0, .78);
+        const spread = 1 + Math.max(0, distance - 2) * .08;
+        shadow.scale.set(spread, spread, 1);
+        shadow.rotation.z = state.yaw;
+    }
+    function updateCamera(dt) {
+        const mode = state.cameraMode, dist = (mode === 0 ? 16.2 : mode === 1 ? 22.0 : 13.5) * state.zoom, above = mode === 0 ? 5.4 : mode === 1 ? 12 : 4.8;
+        const angle = state.yaw + state.orbit;
+        cameraIdeal.set(state.position.x - Math.sin(angle) * dist, state.position.y + above, state.position.z + Math.cos(angle) * dist);
+        if (mode === 2) {
+            cameraIdeal.x += Math.cos(angle) * 4.0;
+            cameraIdeal.z += Math.sin(angle) * 4.0;
+        }
+        const diving = state.diveBlend;
+        cameraIdeal.y += diving * 19;
+        cameraIdeal.x = mix(cameraIdeal.x, state.position.x - Math.sin(angle) * 3.5, diving * .70);
+        cameraIdeal.z = mix(cameraIdeal.z, state.position.z + Math.cos(angle) * 3.5, diving * .70);
+        if (state.position.y > 165 && !state.grounded)
+            cameraIdeal.y -= Math.max(0, 1 - diving) * 2.2;
+        if (state.grounded) {
+            cameraIdeal.y = state.position.y + 3.5;
+        }
+        // Test the whole spring segment against the world, then lift the camera over obstructions.
+        let requiredY = cameraIdeal.y;
+        for (let i = 2; i <= 12; i++) {
+            const f = i / 12, x = mix(state.position.x, cameraIdeal.x, f), z = mix(state.position.z, cameraIdeal.z, f), h = groundHeight(x, z) + 2.2;
+            requiredY = Math.max(requiredY, (h - state.position.y * (1 - f)) / f);
+        }
+        cameraIdeal.y = requiredY;
+        camera.position.lerp(cameraIdeal, 1 - Math.exp(-3.5 * dt));
+        camera.position.y = Math.max(camera.position.y, groundHeight(camera.position.x, camera.position.z) + 2.0);
+        ahead.set(Math.sin(state.yaw) * 14, Math.sin(state.pitch) * 8, -Math.cos(state.yaw) * 14);
+        lookTarget.copy(state.position).add(ahead);
+        lookTarget.y += 1.0;
+        lookTarget.lerp(state.position.clone().add(new T.Vector3(Math.sin(state.yaw) * 3, -12, -Math.cos(state.yaw) * 3)), diving * .50);
+        cameraLook.lerp(lookTarget, 1 - Math.exp(-5 * dt));
+        camera.lookAt(cameraLook);
+        camera.fov = damp(camera.fov, (mode === 2 ? 64 : 66) + smooth(22, 48, state.speed) * 8, 2, dt);
+        camera.updateProjectionMatrix();
+        sky.position.copy(camera.position);
+        sun.position.copy(state.position).add(new T.Vector3(-175, 230, -240));
+        sun.target.position.copy(state.position);
+    }
+    const warmFog = new T.Color(0xc09570), coldFog = new T.Color(0x9eafb7), warmHemi = new T.Color(0xf6dcc3), coldHemi = new T.Color(0xc7dce9), warmSun = new T.Color(0xffcf96), coldSun = new T.Color(0xd8e4ed);
+    function updateWeather(dt) {
+        const p = state.position, altCold = smooth(82, 178, p.y), canyonCold = smooth(30, -200, p.z) * .86;
+        let target = Math.max(altCold, canyonCold);
+        if (Math.hypot(p.x - SHELF.x, p.z - SHELF.z) < 60)
+            target = Math.max(target, .96);
+        state.cold = damp(state.cold, target, .55, dt);
+        coldUniform.value = state.cold;
+        scene.fog.color.copy(warmFog).lerp(coldFog, state.cold);
+        scene.fog.density = mix(.00315, .0055, state.cold) * state.fog;
+        fogDensityUniform.value = scene.fog.density;
+        hemi.color.copy(warmHemi).lerp(coldHemi, state.cold);
+        hemi.intensity = mix(1.58, 1.48, state.cold);
+        sun.color.copy(warmSun).lerp(coldSun, state.cold);
+        sun.intensity = mix(1.72, .56, state.cold);
+        sun.castShadow = state.quality !== 'low';
+        shafts.visible = state.quality === 'high' && state.cold < .7;
+        for (const s of shafts.children)
+            s.material.opacity = .24 * (1 - state.cold);
+        const snowAmount = smooth(.37, .83, state.cold);
+        snowParticles.material.uniforms.uCold = { value: snowAmount };
+        snowParticles.visible = snowAmount > .015 && state.snow > 0;
+        snowStreaks.visible = snowParticles.visible;
+        snowParticles.position.copy(camera.position);
+        snowStreaks.position.copy(camera.position);
+        const count = Math.floor((state.quality === 'low' ? 450 : state.quality === 'high' ? 2200 : 1150) * state.snow);
+        snowGeo.setDrawRange(0, Math.min(MAX_SNOW, count));
+        for (let i = 0; i < Math.min(MAX_SNOW, count); i++) {
+            snowPositions[i * 3] += dt * (3.8 + state.cold * 4.2) * snowSpeeds[i];
+            snowPositions[i * 3 + 1] -= dt * (2.5 + snowSpeeds[i] * 3.5);
+            snowPositions[i * 3 + 2] += dt * .75;
+            if (snowPositions[i * 3] > 55)
+                snowPositions[i * 3] = -55;
+            if (snowPositions[i * 3 + 1] < -34)
+                snowPositions[i * 3 + 1] = 38;
+            if (snowPositions[i * 3 + 2] > 55)
+                snowPositions[i * 3 + 2] = -55;
+            if (i < 160) {
+                streakPos.set([snowPositions[i * 3], snowPositions[i * 3 + 1], snowPositions[i * 3 + 2], snowPositions[i * 3] + .55, snowPositions[i * 3 + 1] - .35, snowPositions[i * 3 + 2]], i * 6);
+            }
+        }
+        snowGeo.attributes.position.needsUpdate = true;
+        streakGeo.attributes.position.needsUpdate = true;
+        snowStreaks.material.opacity = snowAmount * .095;
+        $('coldEdges').style.opacity = String(state.cold * .7);
+        for (let i = 0; i < puffCount; i++) {
+            if (puffLife[i] > 0) {
+                puffLife[i] -= dt;
+                puffVelocity[i].y -= dt * 3;
+                puffPositions[i * 3] += puffVelocity[i].x * dt;
+                puffPositions[i * 3 + 1] += puffVelocity[i].y * dt;
+                puffPositions[i * 3 + 2] += puffVelocity[i].z * dt;
+                if (puffLife[i] <= 0)
+                    puffPositions[i * 3 + 1] = -999;
+            }
+        }
+        puffGeo.attributes.position.needsUpdate = true;
+        millWheel.rotation.x += dt * .12;
+        for (const m of markers) {
+            if (!m.active) continue;
+            if (m.pop > 0) {
+                m.pop = Math.max(0, m.pop - dt * 1.65);
+                const pulse = 1 + (1 - m.pop) * .38;
+                m.sprite.scale.set(13.5*pulse, 5.65*pulse, 1);
+                m.sprite.material.opacity = m.pop * .75 + .16;
+            }
+            else if (m.touched) {
+                m.sprite.scale.set(10.8, 4.52, 1);
+                m.sprite.material.opacity = .28;
+            }
+            else {
+                const pulse = 1 + Math.sin(state.time * 1.6 + m.index) * .025;
+                m.sprite.scale.set(13.5*pulse, 5.65*pulse, 1);
+                m.sprite.material.opacity = .96;
+            }
+        }
+        for (const l of labels) {
+            const d = l.position.distanceTo(camera.position);
+            l.material.opacity = smooth(22, 70, d) * (1 - smooth(340, 550, d)) * .70;
+        }
+    }
+    // A single inexpensive post pass: depth-aware edge streaking, no blur over Brick or nearby rock.
+    const renderTarget = new T.WebGLRenderTarget(1, 1, { minFilter: T.LinearFilter, magFilter: T.LinearFilter, format: T.RGBAFormat });
+    renderTarget.texture.encoding = T.sRGBEncoding;
+    const canDepth = renderer.capabilities.isWebGL2 || renderer.extensions.has('WEBGL_depth_texture');
+    if (canDepth)
+        renderTarget.depthTexture = new T.DepthTexture(1, 1, T.UnsignedShortType);
+    const postScene = new T.Scene(), postCamera = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const postMat = new T.ShaderMaterial({ depthTest: false, depthWrite: false, toneMapped: false, uniforms: { tScene: { value: renderTarget.texture }, tDepth: { value: renderTarget.depthTexture || renderTarget.texture }, uBlur: { value: 0 }, uTime: clockUniform, uDepth: { value: canDepth ? 1 : 0 }, uNear: { value: .25 }, uFar: { value: 1800 } }, vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`, fragmentShader: `
+    varying vec2 vUv;uniform sampler2D tScene;uniform sampler2D tDepth;uniform float uBlur,uTime,uDepth,uNear,uFar;
+    void main(){vec2 offset=vUv-.5;float edge=smoothstep(.20,.59,length(offset));float z=texture2D(tDepth,vUv).x;float dist=-(uNear*uFar)/((uFar-uNear)*z-uFar);float depthMask=mix(1.,smoothstep(24.,66.,dist),uDepth);vec2 stepUV=offset*edge*uBlur*depthMask;
+      vec3 col=texture2D(tScene,vUv).rgb*.4;col+=texture2D(tScene,vUv-stepUV).rgb*.23;col+=texture2D(tScene,vUv-stepUV*2.).rgb*.16;col+=texture2D(tScene,vUv-stepUV*3.).rgb*.12;col+=texture2D(tScene,vUv-stepUV*4.).rgb*.09;
+      float grain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233))+uTime*.3)*43758.5453)-.5;col+=grain*.006;
+      gl_FragColor=vec4(col,1.);
+    }` });
+    postScene.add(new T.Mesh(new T.PlaneGeometry(2, 2), postMat));
+    let pixelRatio = 1, qualityCount = 3000;
+    function resize() {
+        const cap = state.quality === 'low' ? .78 : state.quality === 'high' ? 1.5 : 1.05;
+        pixelRatio = Math.min(devicePixelRatio || 1, cap);
+        renderer.setPixelRatio(pixelRatio);
+        renderer.setSize(innerWidth, innerHeight, false);
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderTarget.setSize(Math.max(1, Math.floor(innerWidth * pixelRatio)), Math.max(1, Math.floor(innerHeight * pixelRatio)));
+        snowParticles.material.uniforms.uPixelRatio.value = pixelRatio;
+    }
+    function quality(value) {
+        state.quality = ['low', 'medium', 'high'].includes(value) ? value : 'medium';
+        qualityCount = state.quality === 'low' ? 1550 : state.quality === 'high' ? treeData.length : Math.min(3050, treeData.length);
+        trunks.count = qualityCount;
+        for (const t of tiers)
+            t.count = qualityCount;
+        renderer.shadowMap.enabled = state.quality !== 'low';
+        sun.shadow.mapSize.set(state.quality === 'high' ? 2048 : 1024, state.quality === 'high' ? 2048 : 1024);
+        if (sun.shadow.map) {
+            sun.shadow.map.dispose();
+            sun.shadow.map = null;
+        }
+        renderTarget.samples = renderer.capabilities.isWebGL2 ? (state.quality === 'high' ? 4 : state.quality === 'medium' ? 2 : 0) : 0;
+        $('quality').value = state.quality;
+        $('pauseQuality').value = state.quality;
+        resize();
+    }
+    function pause(value) {
+        state.paused = value;
+        state.dragging = false;
+        keys.clear();
+        $('pauseOverlay').classList.toggle('hidden', !value);
+        if (value) {
+            $('toolsPanel').classList.add('hidden');
+            state.tools = false;
+            $('toolsButton').setAttribute('aria-expanded', 'false');
+        }
+    }
+    function showHelp(value) { state.help = value; keys.clear(); state.dragging = false; $('howOverlay').classList.toggle('hidden', !value); }
+    function showTools(value) { state.tools = value; keys.clear(); state.dragging = false; $('toolsPanel').classList.toggle('hidden', !value); $('toolsButton').setAttribute('aria-expanded', String(value)); }
+    function showMap(value) { state.map = value; $('mapPanel').classList.toggle('hidden', !value); if (value)
+        drawMap(); }
+    function renderMapBase() {
+        const base = document.createElement('canvas');
+        base.width = 560;
+        base.height = 560;
+        const ctx = base.getContext('2d');
+        ctx.fillStyle = '#29373a';
+        ctx.fillRect(0, 0, 560, 560);
+        const img = ctx.createImageData(224, 224);
+        for (let j = 0; j < 224; j++)
+            for (let i = 0; i < 224; i++) {
+                const x = i / 224 * 900 - 450, z = j / 224 * 900 - 450, h = terrainHeight(x, z);
+                const light = clamp((h + 5) / 230, 0, 1), band = Math.abs((h % 20) - 10) < .9 ? 1.11 : 1;
+                const index = (j * 224 + i) * 4;
+                img.data[index] = (36 + light * 78) * band;
+                img.data[index + 1] = (54 + light * 74) * band;
+                img.data[index + 2] = (54 + light * 66) * band;
+                img.data[index + 3] = 255;
+            }
+        const small = document.createElement('canvas');
+        small.width = 224;
+        small.height = 224;
+        small.getContext('2d').putImageData(img, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(small, 0, 0, 560, 560);
+        const xy = (x, z) => [(x + 450) / 900 * 560, (z + 450) / 900 * 560];
+        ctx.strokeStyle = '#a2b4b18c';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        for (let z = -440; z <= 440; z += 5) {
+            const p = xy(riverX(z), z);
+            z === -440 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([3, 7]);
+        ctx.strokeStyle = '#e1d1b35c';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        route.forEach((r, i) => { const p = xy(r.x, r.z); i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]); });
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#dbd3c1';
+        ctx.textAlign = 'center';
+        for (const [name, x, z] of [['EMBERVALE', -135, 312], ['GREY STEPS', 214, -89], ['FROSTSPINE', 127, -327]]) {
+            const p = xy(x, z);
+            ctx.fillText(name, p[0], p[1]);
+        }
+        ctx.strokeStyle = '#d3cfc199';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(510, 40);
+        ctx.lineTo(510, 17);
+        ctx.moveTo(506, 24);
+        ctx.lineTo(510, 17);
+        ctx.lineTo(514, 24);
+        ctx.stroke();
+        ctx.font = '10px Arial';
+        ctx.fillText('N', 510, 56);
+        return base;
+    }
+    const mapBase = renderMapBase();
+    function drawMap() {
+        const ctx = $('map').getContext('2d');
+        ctx.drawImage(mapBase, 0, 0);
+        const xy = (x, z) => [(x + 450) / 900 * 560, (z + 450) / 900 * 560];
+        markers.forEach(m => { if(!m.active)return; const p = xy(m.x, m.z); ctx.save(); ctx.translate(p[0], p[1]); ctx.fillStyle = m.touched ? '#a7c5ad' : '#f6e7cc'; ctx.strokeStyle=m.touched?'#a7c5ad':'#fff0d8'; ctx.lineWidth=1.8; ctx.beginPath(); ctx.arc(0,0,m.touched?3:5,0,Math.PI*2); m.touched?ctx.fill():ctx.stroke(); ctx.restore(); });
+        const p = xy(state.position.x, state.position.z);
+        ctx.save();
+        ctx.translate(p[0], p[1]);
+        ctx.rotate(state.yaw);
+        ctx.shadowColor = '#8ae6ff';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#9bddf1';
+        ctx.beginPath();
+        ctx.moveTo(0, -9);
+        ctx.lineTo(6, 6);
+        ctx.lineTo(0, 3);
+        ctx.lineTo(-6, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        $('mapTotal').textContent = `${collected} / ${activeTargetCount} learned`;
+    }
+    let hudAccumulator = 0;
+    function updateHUD(dt) {
+        hudAccumulator += dt;
+        if (hudAccumulator < .09)
+            return;
+        hudAccumulator = 0;
+        const p = state.position, clearance = p.y - groundHeight(p.x, p.z);
+        setZone(chooseZone());
+        $('speed').textContent = String(Math.round(state.grounded ? state.speed : state.velocity.length()));
+        $('altitude').textContent = `${Math.round(Math.max(0, p.y))} m`;
+        $('staminaBar').style.width = `${state.stamina * 100}%`;
+        $('staminaBar').style.background = state.stamina < .22 ? '#d6ab88' : '#ddd9c6';
+        $('flightState').textContent = state.grounded ? 'BOOTS DOWN' : state.folded ? 'WINGS FOLDED' : state.diveBlend > .5 ? 'IN THE DIVE' : 'WINGS OPEN';
+        $('actionHint').textContent = state.grounded ? 'F TO TAKE FLIGHT' : state.folded ? 'S TO FLARE' : clearance < 8 ? 'Z TO FOLD / LAND' : 'SPACE TO CLIMB';
+        $('foldLabel').textContent = state.grounded ? 'Take flight' : state.folded ? 'Open wings' : 'Fold / land';
+        $('climateLabel').textContent = state.cold > .7 ? 'FROST / LOW VISIBILITY' : state.cold > .35 ? 'AT THE SNOW LINE' : 'APRICOT DUSK';
+        $('windLabel').textContent = state.cold > .7 ? 'WIND 11 / W' : 'WIND 04 / SW';
+        const heading = ((state.yaw * 180 / Math.PI) % 360 + 360) % 360, dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const dir = Math.round(heading / 45) % 8;
+        $('compassMain').textContent = dirs[dir];
+        $('compassLeft').textContent = dirs[(dir + 7) % 8];
+        $('compassRight').textContent = dirs[(dir + 1) % 8];
+        $('bearing').textContent = `${String(Math.round(heading) % 360).padStart(3, '0')}°`;
+        let chapter = 'The vale already has a wind';
+        if (state.grounded && state.zone === 'Blizzard Shelf')
+            chapter = 'The slope will wait.';
+        else if (state.diveBlend > .45 || state.zone === 'The Dive' && p.y > 95)
+            chapter = 'Look down.';
+        else if (state.cold > .70)
+            chapter = 'The colour leaves.';
+        else if (p.y > 80)
+            chapter = 'Hold the wings. The rest is weather.';
+        $('chapterLine').textContent = chapter;
+        $('location').style.opacity = state.time - currentZoneTime > 12 && state.zone !== 'Embervale' ? '.66' : '1';
+        $('bootHint').style.opacity = state.time < 19 ? '1' : '.4';
+        $('impact').style.opacity = String(state.impact);
+        $('speedEdges').style.opacity = String(smooth(24, 48, state.speed) * .45);
+        if (performance.now() > toastUntil)
+            $('toast').classList.remove('show');
+        if (lesson.cardTimer && performance.now() > lesson.cardTimer) $('wordCard').classList.remove('show');
+        if (state.map)
+            drawMap();
+    }
+    function exportToGoLingo(){
+        if(!lesson.review.length){toast('Fly through a word first, then export it to GoLingo.');return;}
+        const payload={source:'Super Flying Man',primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.review.map(x=>({id:x.id,word:x.learning,translation:x.primary,translations:x.translations}))};
+        // Native GoLingo / WKWebView gets the data directly when the message handler exists.
+        try{ if(window.webkit?.messageHandlers?.golingoExport){window.webkit.messageHandlers.golingoExport.postMessage(payload);toast(`${lesson.review.length} words sent to GoLingo.`);return;} }catch{}
+        // Browser fallback: save an importable JSON file and open the sponsor site.
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='golingo-super-flying-man-words.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+        window.open('https://golingoapp.com','_blank','noopener'); toast('Words exported. Open the JSON in GoLingo to continue practicing.');
+    }
+    function setupMobileFlight(){
+        const stick=$('mobileStick'),knob=$('mobileKnob'); if(!stick||!knob)return;
+        let pid=null; const resetStick=()=>{pid=null;state.mobileTurn=0;state.mobilePitch=0;knob.style.transform='translate(0px,0px)';};
+        const move=(e)=>{const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=r.width*.32,len=Math.hypot(dx,dy)||1,k=Math.min(1,max/len),x=dx*k,y=dy*k;state.mobileTurn=clamp(x/max,-1,1);state.mobilePitch=clamp(-y/max,-1,1);knob.style.transform=`translate(${x}px,${y}px)`;};
+        stick.addEventListener('pointerdown',e=>{if(state.paused||state.help)return;audio.ensure();pid=e.pointerId;stick.setPointerCapture(pid);move(e);e.preventDefault();});
+        stick.addEventListener('pointermove',e=>{if(e.pointerId===pid){move(e);e.preventDefault();}}); stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);stick.addEventListener('lostpointercapture',resetStick);
+        const hold=(id,on,off)=>{const b=$(id);b.addEventListener('pointerdown',e=>{audio.ensure();on();b.setPointerCapture(e.pointerId);e.preventDefault();});const end=e=>{off?.();if(b.hasPointerCapture(e.pointerId))b.releasePointerCapture(e.pointerId);};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);};
+        hold('mobileFlap',()=>flap()); hold('mobileDive',()=>state.mobileDive=true,()=>state.mobileDive=false);
+        $('mobileLand').addEventListener('click',()=>{audio.ensure();fold();}); $('mobileCamera').addEventListener('click',()=>{state.cameraMode=(state.cameraMode+1)%3;toast(['Chase camera','High chase camera','Shoulder camera'][state.cameraMode]);});
+    }
+    // UI is native HTML: every button remains clickable on desktop, including while paused.
+    // Language-flight controls and native-app bridge.
+    for(const [code,meta] of Object.entries(LANGUAGE_META)){
+        for(const id of ['primaryLanguage','learningLanguage']){const o=document.createElement('option');o.value=code;o.textContent=meta.name;$(id).appendChild(o);}
+    }
+    loadSavedReview();
+    $('primaryLanguage').value=lesson.primary; $('learningLanguage').value=lesson.learning;
+    $('languageButton').onclick=()=>openLanguage(true);
+    $('closeLanguage').onclick=()=>openLanguage(false);
+    $('reviewButton').onclick=()=>openReviewPanel(true);
+    $('openReview').onclick=()=>openReviewPanel(true);
+    $('closeReview').onclick=()=>openReviewPanel(false);
+    $('primaryLanguage').onchange=e=>{lesson.primary=e.target.value;if(lesson.primary===lesson.learning){const other=Object.keys(LANGUAGE_META).find(k=>k!==lesson.learning);lesson.primary=other;$('primaryLanguage').value=other;}lesson.offset=0;applyLanguageTargets(true);};
+    $('learningLanguage').onchange=e=>{lesson.learning=e.target.value;if(lesson.primary===lesson.learning){const other=Object.keys(LANGUAGE_META).find(k=>k!==lesson.learning);lesson.primary=other;$('primaryLanguage').value=other;}lesson.offset=0;applyLanguageTargets(true);};
+    $('loadWords').onclick=()=>{try{const parsed=parsePaste($('wordData').value);if(!parsed?.concepts?.length)throw new Error('Paste at least one word.');lesson.concepts=parsed.concepts;lesson.offset=0;applyLanguageTargets(true);toast(`${lesson.concepts.length} words are now in the sky.`);}catch(e){toast(e.message||'Could not read those words.');}};
+    $('demoWords').onclick=()=>{lesson.concepts=DEMO_CONCEPTS.map(x=>({...x}));lesson.offset=0;applyLanguageTargets(true);toast('Demo lesson loaded in every supported language.');};
+    $('nextWords').onclick=()=>{const pool=lesson.concepts.filter(c=>conceptValue(c,lesson.learning));if(pool.length<=route.length){toast('All loaded words already fit in this flight.');return;}lesson.offset=(lesson.offset+route.length)%pool.length;applyLanguageTargets(true);toast(`Next ${Math.min(route.length,pool.length-lesson.offset)} words placed in the vale.`);};
+    $('clearReview').onclick=()=>{lesson.review=[];saveReview();drawReviewList();toast('Review list cleared.');};
+    $('copyReview').onclick=()=>{const text=lesson.review.map(x=>`${x.learning}\\t${x.primary||''}`).join('\\n');if(!text){toast('The review list is empty.');return;}const fallback=()=>{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Review list copied.');}catch{toast('Copy is unavailable here.');}ta.remove();};if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>toast('Review list copied.')).catch(fallback);else fallback();};
+    $('downloadReview').onclick=()=>{const blob=new Blob([JSON.stringify({primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.review},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='super-flying-man-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+    $('exportGoLingo').onclick=exportToGoLingo; $('sponsorExport').onclick=exportToGoLingo; setupMobileFlight();
+    window.addEventListener('message',e=>{const d=e.data;if(d?.type==='golingo.words'||d?.type==='super-flying-man.lesson'||d?.words||d?.concepts)importLesson(d,true);});
+    window.SuperFlyingManLanguage={load:(data)=>importLesson(data,true),getReview:()=>lesson.review.map(x=>({...x})),setLanguages:(primary,learning)=>{const p=normalizeLang(primary),l=normalizeLang(learning);if(p)lesson.primary=p;if(l)lesson.learning=l;lesson.offset=0;applyLanguageTargets(true);return {primary:lesson.primary,learning:lesson.learning};},clearReview:()=>{lesson.review=[];saveReview();drawReviewList();},exportToGoLingo};
+    readLaunchLesson();
+    applyLanguageTargets(true);
+    $('soundButton').onclick = () => audio.toggle();
+    $('toolsMute').onclick = () => audio.toggle();
+    $('pauseMute').onclick = () => audio.toggle();
+    $('toolsButton').onclick = () => showTools(!state.tools);
+    $('closeTools').onclick = () => showTools(false);
+    $('quality').onchange = (e) => quality(e.target.value);
+    $('pauseQuality').onchange = (e) => quality(e.target.value);
+    $('fog').oninput = (e) => { state.fog = Number(e.target.value); };
+    $('snow').oninput = (e) => { state.snow = Number(e.target.value); };
+    $('volume').oninput = (e) => { audio.volume = Number(e.target.value); if (!audio.ctx)
+        audio.ensure(); };
+    $('toolsReset').onclick = () => { reset(); toast('Back over Embervale. Learned words are kept.'); };
+    $('pauseReset').onclick = () => { reset(); toast('Back over Embervale. Learned words are kept.'); };
+    $('resumeButton').onclick = () => pause(false);
+    $('pauseHow').onclick = () => showHelp(true);
+    $('toolsHelp').onclick = () => { showTools(false); showHelp(true); };
+    $('howButton').onclick = () => showHelp(true);
+    $('closeHow').onclick = () => showHelp(false);
+    $('foldButton').onclick = () => { if (!audio.ctx)
+        audio.ensure(); fold(); };
+    $('markersButton').onclick = () => showMap(!state.map);
+    $('closeMap').onclick = () => showMap(false);
+    $('altitudeButton').onclick = () => toast(`${Math.round(state.position.y)} m altitude · ${Math.round(Math.max(0, state.position.y - groundHeight(state.position.x, state.position.z)))} m above the surface`);
+    $('clearFlight').onclick = () => { reset(true); toast('A new language flight. The words are waiting in the sky.'); drawMap(); };
+    window.addEventListener('keydown', (e) => {
+        const form = /INPUT|SELECT|TEXTAREA/.test(e.target?.tagName || '');
+        if (form)
+            return;
+        if (e.target?.tagName === 'BUTTON' && (e.code === 'Space' || e.code === 'Enter'))
+            return;
+        if (e.code === 'Escape') {
+            e.preventDefault();
+            if (!$('languagePanel').classList.contains('hidden')) openLanguage(false);
+            else if (!$('reviewPanel').classList.contains('hidden')) openReviewPanel(false);
+            else if (state.help)
+                showHelp(false);
+            else if (state.tools)
+                showTools(false);
+            else if (state.map)
+                showMap(false);
+            else
+                pause(!state.paused);
+            return;
+        }
+        if (e.code === 'KeyI' && !e.repeat) {
+            e.preventDefault();
+            showHelp(!state.help);
+            return;
+        }
+        if (state.paused || state.help || state.tools)
+            return;
+        const controls = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'KeyZ', 'KeyF', 'KeyC', 'KeyR', 'KeyQ', 'KeyE'];
+        if (!controls.includes(e.code))
+            return;
+        e.preventDefault();
+        if (!audio.ctx)
+            audio.ensure();
+        keys.add(e.code);
+        if (e.repeat)
+            return;
+        if (e.code === 'KeyR') {
+            reset();
+            toast('Back over Embervale. Learned words are kept.');
+        }
+        if (e.code === 'KeyZ' || e.code === 'ControlLeft' || e.code === 'ControlRight')
+            fold();
+        if (e.code === 'Space')
+            flap();
+        if (e.code === 'KeyF')
+            takeoff();
+        if (e.code === 'KeyC') {
+            state.cameraMode = (state.cameraMode + 1) % 3;
+            toast(['Chase camera', 'High chase camera', 'Shoulder camera'][state.cameraMode]);
+        }
+    });
+    window.addEventListener('keyup', (e) => keys.delete(e.code));
+    const canvas = $('world');
+    let lastMouseX = 0;
+    canvas.addEventListener('pointerdown', (e) => { if (e.button !== 0 && e.button !== 2)
+        return; if (state.paused || state.help || state.tools)
+        return; canvas.focus({ preventScroll: true }); if (!audio.ctx)
+        audio.ensure(); state.dragging = true; lastMouseX = e.clientX; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', (e) => { if (state.paused || state.help || state.tools)
+        return; if (state.dragging) {
+        state.orbit = clamp(state.orbit - (e.clientX - lastMouseX) * .004, -1.05, 1.05);
+        lastMouseX = e.clientX;
+    }
+    else {
+        state.mouseActive = true;
+        state.mouseX = clamp((e.clientX / innerWidth - .5) * 2, -1, 1);
+        state.mouseY = clamp((.45 - e.clientY / innerHeight) * 2, -1, 1);
+    } });
+    canvas.addEventListener('pointerup', (e) => { state.dragging = false; if (canvas.hasPointerCapture(e.pointerId))
+        canvas.releasePointerCapture(e.pointerId); });
+    canvas.addEventListener('pointerleave', () => { if (!state.dragging) {
+        state.mouseActive = false;
+        state.mouseX = 0;
+        state.mouseY = 0;
+    } });
+    canvas.addEventListener('lostpointercapture', () => { state.dragging = false; });
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    canvas.addEventListener('wheel', (e) => { e.preventDefault(); state.zoom = clamp(state.zoom + e.deltaY * .0005, .74, 1.4); }, { passive: false });
+    window.addEventListener('resize', () => { keys.clear(); resize(); });
+    window.addEventListener('blur', () => { keys.clear(); state.dragging = false; if (!state.help)
+        pause(true); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) {
+        keys.clear();
+        pause(true);
+    } });
+    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); pause(true); $('fatal').classList.remove('hidden'); $('fatalMessage').textContent = 'The graphics context was lost. Close other graphics-heavy tabs, then try again.'; });
+    // Diagnostic hook is opt-in via ?test=1. It is not a game menu or a second camera mode.
+    if (new URLSearchParams(location.search).has('test')) {
+        window.__SFM_TEST__ = {
+            snapshot: () => ({ position: state.position.toArray(), velocity: state.velocity.toArray(), yaw: state.yaw, pitch: state.pitch, speed: state.speed, grounded: state.grounded, folded: state.folded, roll: state.roll, cold: state.cold, stamina: state.stamina, zone: state.zone, markers: collected, paused: state.paused, quality: state.quality, trees: treeData.length, clearance: state.position.y - groundHeight(state.position.x, state.position.z), wings: wings.map(w => w.hinge.rotation.y), camera: camera.position.toArray(), drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
+            teleport: (x, y, z, heading = 0, standing = false) => { state.position.set(x, y, z); state.velocity.set(0, 0, 0); state.speed = standing ? 0 : 8; state.yaw = heading; state.turn = 0; state.roll = 0; state.grounded = standing; state.folded = standing; state.pitch = 0; state.mouseActive = false; state.paused = false; state.help = false; $('pauseOverlay').classList.add('hidden'); $('howOverlay').classList.add('hidden'); camera.position.set(x + 3, y + 6, z + 17); cameraLook.copy(state.position).add(new T.Vector3(0, 0, -10)); keys.clear(); },
+            present: (seconds = 6) => { for (let i = 0; i < Math.ceil(seconds / .05); i++) {
+                animateBrick(.05);
+                updateCamera(.05);
+                updateWeather(.05);
+                updateHUD(.1);
+            } renderer.info.reset(); renderer.setRenderTarget(renderTarget); renderer.render(scene, camera); renderer.setRenderTarget(null); renderer.render(postScene, postCamera); },
+            markers: () => markers.map(m => ({ x: m.x, y: m.y, z: m.z, touched: m.touched, active:m.active, word:m.learningWord, translation:m.primaryWord, ground: groundHeight(m.x, m.z) })),
+            language: () => ({primary:lesson.primary,learning:lesson.learning,offset:lesson.offset,total:lesson.concepts.length,active:activeTargetCount,review:lesson.review.length}),
+            surface: (x, z) => groundHeight(x, z), reset, flap, fold, takeoff, quality, pause, shelf: SHELF, terraces: [terraceA, terraceB], step: (count = 120) => { for (let i = 0; i < count; i++) {
+                state.time += 1 / 120;
+                physics(1 / 120);
+            } return state.position.toArray(); }
+        };
+    }
+    quality('medium');
+    reset();
+    cameraLook.copy(state.position).add(new T.Vector3(0, 1, -14));
+    let previous = performance.now(), accumulator = 0, frames = 0, perfStart = previous, cpuTotal = 0, frameMs = 0, lastRender = 0;
+    const fixed = 1 / 120;
+    function frame(now) {
+        requestAnimationFrame(frame);
+        const elapsed = Math.min(.10, Math.max(0, (now - previous) / 1000));
+        previous = now;
+        const blocked = state.paused || state.help || state.tools;
+        if (!blocked) {
+            accumulator += Math.min(elapsed, .065);
+            let steps = 0;
+            while (accumulator >= fixed && steps < 8) {
+                state.time += fixed;
+                physics(fixed);
+                accumulator -= fixed;
+                steps++;
+            }
+            if (steps === 8)
+                accumulator = 0;
+        }
+        else
+            accumulator = 0;
+        const animDt = blocked ? 0 : Math.min(elapsed, .065);
+        clockUniform.value = state.time;
+        animateBrick(animDt);
+        updateCamera(animDt);
+        updateWeather(animDt);
+        updateHUD(elapsed);
+        audio.update(state.speed, state.cold, Math.hypot(state.position.x - riverX(state.position.z), state.position.y - riverY(state.position.z)), blocked, state.time);
+        postMat.uniforms.uBlur.value = state.quality === 'low' ? 0 : smooth(16, 47, state.speed) * (state.quality === 'high' ? .009 : .0055);
+        // Still-frame overlays need no 60 Hz GPU work. UI and resize remain live.
+        if (blocked && now - lastRender < 160)
+            return;
+        const start = performance.now();
+        renderer.info.reset();
+        renderer.setRenderTarget(renderTarget);
+        renderer.clear();
+        renderer.render(scene, camera);
+        renderer.setRenderTarget(null);
+        renderer.render(postScene, postCamera);
+        cpuTotal += performance.now() - start;
+        frames++;
+        lastRender = now;
+        if (now - perfStart > 1000) {
+            const fps = frames * 1000 / (now - perfStart), cpu = cpuTotal / Math.max(1, frames);
+            frameMs = 1000 / Math.max(.1, fps);
+            $('performance').textContent = `${Math.round(fps)} fps · CPU ${cpu.toFixed(1)} ms · ${pixelRatio.toFixed(2)}×`;
+            frames = 0;
+            cpuTotal = 0;
+            perfStart = now;
+        }
+    }
+    requestAnimationFrame(frame);
+}
+
+try{startGame(THREE);}catch(error){console.error(error);document.getElementById("fatal").classList.remove("hidden");document.getElementById("fatalMessage").textContent="The game encountered a startup error: "+error.message;}
+})();</script></body></html>
