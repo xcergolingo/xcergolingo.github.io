@@ -1,0 +1,1000 @@
+<!doctype html>
+<!--
+Bundled Three.js r140 license:
+The MIT License
+
+Copyright © 2010-2022 Three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Original game source license:
+MIT License
+
+Copyright (c) 2026 Super Flying Man contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#242b2c"><meta name="description" content="A mobile and desktop language-learning flight game sponsored by GoLingoApp.com."><title>SUPER FLYING MAN — The Hold</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23212c33'/%3E%3Cpath d='M4 9l10 5v12L4 19zm24 0l-10 5v12l10-7z' fill='%234e9ddd'/%3E%3C/svg%3E"><style>:root{color-scheme:dark;--ink:#faf1de;--quiet:#d1c8b8;--line:rgba(247,233,211,.17);--amber:#f3c894;--blue:#b8d9e4;font-family:Arial,Helvetica,sans-serif;font-synthesis:none}*{box-sizing:border-box}html,body{margin:0;overflow:hidden;width:100%;height:100%;background:#ce8e68;color:var(--ink)}body{user-select:none}button,select,input{font:inherit}button{cursor:pointer;color:inherit;touch-action:manipulation}button,select{border:1px solid var(--line);background:rgba(20,28,31,.36);border-radius:5px}button{padding:10px 14px;transition:background .2s,border-color .2s}button:hover{background:rgba(228,212,186,.14);border-color:rgba(245,230,208,.5)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:4px}select{padding:8px 12px;color:var(--ink)}select option{background:#293438}kbd{font-family:inherit;font-size:10px;line-height:1;border:1px solid rgba(239,232,214,.24);border-radius:3px;padding:4px 5px;display:inline-block;color:#e4dccf;letter-spacing:.04em}.glass{background:linear-gradient(125deg,rgba(29,37,39,.79),rgba(27,33,35,.6));border:1px solid var(--line);box-shadow:0 5px 22px rgba(0,0,0,.07);backdrop-filter:blur(16px)}.hidden{display:none!important}#world{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 43%,transparent 40%,rgba(11,20,23,.14) 100%);z-index:1}#speedEdges{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 50%,transparent 38%,rgba(220,226,224,.09) 74%,rgba(223,230,229,.22));z-index:1}#coldEdges{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse,transparent 50%,rgba(220,233,241,.24));z-index:1}#impact{position:fixed;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 100px rgba(240,236,220,.8);z-index:2}#brand{position:fixed;top:26px;left:28px;padding:17px 22px 13px;border-radius:6px;z-index:3;min-width:253px}.eyebrow{font-size:9px;letter-spacing:.24em;color:var(--amber);display:flex;align-items:center;gap:9px}.tiny-diamond{display:inline-block;width:5px;height:5px;background:#f1c899;transform:rotate(45deg)}h1{font-size:20px;letter-spacing:.01em;font-weight:800;margin:11px 0 5px;line-height:1.1}.subtitle{font-size:9px;letter-spacing:.29em;color:#ded5c6}#performance{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:9px;letter-spacing:.03em;color:rgba(220,220,210,.52);margin-top:12px}#topActions{position:fixed;top:26px;right:28px;display:flex;gap:9px;z-index:8}#topActions button{font-size:11px;letter-spacing:.04em;height:39px;display:flex;align-items:center;gap:9px;padding:10px 14px}.sliders{font-size:18px;line-height:14px}#soundButton{font-size:16px!important}#soundState{font-size:10px}#compass{position:fixed;top:30px;left:50%;transform:translateX(-50%);width:194px;display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.13em;z-index:3;text-shadow:0 1px 5px #35383188;pointer-events:none;color:#f4e4cf}#compass b{font-size:12px;letter-spacing:.08em}#compass span{opacity:.68}#compass:after{content:'';height:1px;position:absolute;top:26px;width:100%;background:linear-gradient(90deg,transparent,rgba(247,232,214,.7),transparent)}#compass i{position:absolute;left:calc(50% - 2px);top:24px;width:4px;height:4px;transform:rotate(45deg);background:var(--ink)}#bearing{position:absolute;top:36px;left:0;width:100%;text-align:center;font-size:9px;letter-spacing:.12em}#aim{position:fixed;left:50%;top:45%;width:9px;height:9px;transform:translate(-50%,-50%);opacity:.6;pointer-events:none;z-index:2}#aim i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff7df;left:3px;top:3px}#aim span{position:absolute;inset:0;border:1px solid #fff5d65c;border-radius:50%}#location{position:fixed;bottom:100px;left:28px;width:296px;padding:18px 20px 14px;border-radius:5px;z-index:3;transition:opacity 1.8s}.loc-heading{display:flex;align-items:center;gap:11px;letter-spacing:.2em;font-size:8px;color:#dcc3a2}.loc-heading>span:first-child{font-family:ui-monospace,monospace;color:var(--amber)}.short-rule{width:23px;height:1px;background:rgba(248,213,167,.4)}#location h2{font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;margin:12px 0 9px;letter-spacing:-.035em}#location p{font-size:11px;line-height:1.6;margin:0 0 15px;color:#ded4c7;max-width:245px}.loc-bottom{border-top:1px solid var(--line);padding-top:11px;display:flex;justify-content:space-between;font-size:7px;letter-spacing:.12em;color:#babaae}#chapter{position:fixed;bottom:142px;left:50%;transform:translateX(-50%);z-index:3;text-align:center;pointer-events:none;white-space:nowrap}#chapterLine{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:23px;font-weight:400;text-shadow:0 2px 14px rgba(21,26,24,.8);margin:0 0 15px;color:#f8e9d2;transition:opacity .35s}#bootHint{font-size:8px;letter-spacing:.15em;color:#eed9bd;text-shadow:0 1px 7px #242e2c;transition:opacity 2s}#bootHint kbd{font-size:8px;background:#26333755;margin-right:4px}#bootHint span{margin:0 9px;color:#d8c4a8}#bottomControls{position:fixed;bottom:42px;left:50%;transform:translateX(-50%);display:flex;gap:0;align-items:center;padding:7px 5px;border-radius:6px;z-index:4;height:49px}#bottomControls button{display:flex;align-items:center;gap:11px;border:0;background:none;padding:8px 15px;white-space:nowrap;font-size:11px;letter-spacing:.03em;height:35px}#bottomControls button:hover{background:#ffffff0f}.control-sep{width:1px;height:20px;background:var(--line)}.diamond-icon{font-size:27px;line-height:16px}.alt-icon{font-size:22px;line-height:20px;color:#ddd6c8}#bottomControls small{font-size:7px;letter-spacing:.09em;opacity:.6}#foldButton kbd{font-size:8px;padding:3px 4px;opacity:.6}#helpShortcut{position:fixed;bottom:30px;left:28px;z-index:3;display:flex;flex-direction:column;gap:10px;font-size:7px;letter-spacing:.1em;color:#ded3bd}#helpShortcut button{border:none;background:none;padding:0;text-align:left;font-size:10px;letter-spacing:.04em;color:#e7dbc8;width:max-content}#helpShortcut kbd{margin-right:7px}#helpShortcut>span{opacity:.65}#rightInfo{position:fixed;bottom:113px;right:31px;width:115px;z-index:3;text-align:right;text-shadow:0 1px 9px #34414280}.flightstate{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:8px;letter-spacing:.15em;color:#e4dccf}.flightstate i{width:4px;height:4px;background:#e7d8bd;border-radius:50%}.speed{margin:9px 0 9px;line-height:1;display:flex;align-items:baseline;justify-content:flex-end;gap:6px}.speed span{font-size:39px;font-weight:300;letter-spacing:-.05em;font-variant-numeric:tabular-nums}.speed small{font-size:10px;opacity:.6}.wing-meter{height:2px;background:#eeebd735;width:82px;margin-left:auto}.wing-meter span{display:block;background:#ddd9c6;height:100%;width:100%;transition:background 1s}#actionHint{margin-top:9px;font-size:7px;letter-spacing:.11em;color:#cfcbbd}#toast{position:fixed;top:110px;left:50%;transform:translateX(-50%) translateY(-5px);color:#fff7e1;background:#263134bb;border:1px solid var(--line);backdrop-filter:blur(10px);padding:10px 19px;border-radius:4px;font-size:11px;letter-spacing:.08em;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;z-index:12}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}#toolsPanel{position:fixed;right:28px;top:78px;width:296px;z-index:11;border-radius:6px;padding:17px 20px}.panel-head{display:flex;justify-content:space-between;align-items:center;font-size:8px;letter-spacing:.16em;color:var(--amber)}.panel-head button{border:none;background:none;font-size:20px;padding:0 3px;color:#dbd7cc}#toolsPanel h2{font-family:Georgia,serif;font-weight:400;font-size:23px;line-height:1.2;margin:16px 0 22px}label{display:flex;align-items:center;justify-content:space-between;font-size:11px;gap:10px;margin:15px 0;color:#e1d9cb}input[type=range]{width:132px;accent-color:#c9af88;height:3px;cursor:pointer}.wide{width:100%;font-size:11px;text-align:left;margin-top:8px;padding:11px 12px;display:flex;justify-content:space-between;align-items:center}.footnote{font-size:10px;line-height:1.65;color:#bbb7ac;border-top:1px solid var(--line);padding-top:17px;margin:19px 0 2px}.overlay{position:fixed;inset:0;z-index:20;background:rgba(16,26,30,.55);backdrop-filter:blur(9px);display:flex;align-items:center;justify-content:center;padding:26px}.modal{width:430px;padding:35px;border-radius:8px;box-shadow:0 15px 80px #0003}.modal h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:36px;line-height:1.1;letter-spacing:-.035em;margin:18px 0 14px}.modal>p{font-size:13px;color:#d1c9bd;line-height:1.7;margin-bottom:27px}.modal>small{display:block;text-align:center;font-size:8px;letter-spacing:.15em;color:#b5b9b2;margin-top:24px}.primary{width:100%;border:0;display:flex;align-items:center;justify-content:space-between;padding:15px 17px;background:#e8d8bb;color:#293739;font-size:12px;margin-top:10px}.primary:hover{background:#fff0d5}.primary span{font-size:20px}.pause-row{display:flex;gap:9px;margin-top:12px}.pause-row button{width:50%;font-size:11px;padding:11px}.how{width:494px;padding:30px 35px}.how h2{font-size:29px;max-width:315px}.lesson{display:flex;gap:18px;border-bottom:1px solid var(--line);padding:10px 0}.lesson>b{font-family:ui-monospace,monospace;font-size:9px;font-weight:400;color:#c8b99e;padding-top:5px}.lesson p{margin:0;font-size:11px;line-height:1.9;color:#cec8bb}.lesson strong{font-size:12px;color:#f1e4ce;font-weight:500}.lesson kbd{font-size:8px;padding:3px 4px}.extra-controls{display:flex;justify-content:space-between;font-size:9px;margin:17px 0 19px;color:#c5c2b7}.extra-controls kbd{font-size:8px;margin-right:5px}#smallScreen{display:none;z-index:99;background:#26363b}#smallScreen .modal{text-align:center;max-width:440px}#smallScreen .eyebrow{justify-content:center;margin-top:25px}#smallScreen h2{font-size:34px}#smallScreen svg{color:#d9d9ca}#fatal{z-index:100}#mapPanel{position:fixed;left:50%;bottom:109px;transform:translateX(-50%);width:314px;padding:16px;border-radius:6px;z-index:10}#map{width:280px;height:280px;display:block;margin:12px 0 0}#mapCaption{font-family:Georgia,serif;font-style:italic;font-size:12px;color:#d9cebb;text-align:center;margin:7px 0 15px}.map-foot{border-top:1px solid var(--line);padding-top:11px;display:flex;align-items:center;justify-content:space-between;font-size:10px}.map-foot button{font-size:9px;padding:6px 9px}@media(max-width:1100px){#brand{left:20px;top:20px;min-width:232px;padding:15px 17px}h1{font-size:18px}#location{left:20px;width:255px;bottom:97px}#location h2{font-size:27px}#location p{font-size:10px}#chapterLine{font-size:20px}#chapter{bottom:165px;left:57%}#helpShortcut{left:20px}#topActions{top:20px;right:20px}#rightInfo{right:21px}#compass{width:140px}#bottomControls{left:56%}}@media(max-width:899px){#smallScreen{display:flex}#brand,#location,#chapter,#bottomControls,#topActions,#compass,#helpShortcut,#rightInfo{visibility:hidden}}@media(max-height:650px) and (min-width:900px){#location{bottom:82px;padding:14px 17px}#location h2{font-size:25px;margin:8px 0}#chapter{bottom:125px}#bottomControls{bottom:28px}#brand{top:20px}#helpShortcut{bottom:24px}#rightInfo{bottom:93px}.how{padding:20px 29px}.how h2{font-size:25px}.lesson{padding:7px 0}.how .eyebrow{font-size:8px}}
+
+/* Language Flight additions */
+#languagePanel,#reviewPanel{position:fixed;right:28px;top:78px;width:min(390px,calc(100vw - 56px));z-index:14;border-radius:7px;padding:18px 20px;max-height:calc(100vh - 110px);overflow:auto}
+#languagePanel h2,#reviewPanel h2{font-family:Georgia,serif;font-weight:400;font-size:25px;line-height:1.15;margin:15px 0 8px}
+.lang-note{font-size:10px;line-height:1.55;color:#c8c2b6;margin:0 0 15px}.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lang-grid label{display:block;margin:0;font-size:9px;letter-spacing:.08em;color:#cfc8bb}.lang-grid select{width:100%;margin-top:6px}
+#wordData{width:100%;min-height:120px;resize:vertical;border:1px solid var(--line);background:rgba(14,22,25,.55);color:var(--ink);border-radius:5px;padding:11px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;user-select:text;margin-top:7px}
+.lang-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.lang-actions button{flex:1 1 105px;font-size:10px;padding:10px}.lang-status{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:10px;line-height:1.55;color:#d7d0c4}.lang-status b{color:#fff0d7}.language-chip{font-size:9px!important;letter-spacing:.04em!important}
+#wordCard{position:fixed;top:106px;left:50%;transform:translateX(-50%);z-index:13;min-width:280px;max-width:520px;text-align:center;padding:13px 22px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s}#wordCard.show{opacity:1;transform:translateX(-50%) translateY(5px)}#wordCardLearning{font-size:24px;font-weight:700;letter-spacing:.01em}#wordCardPrimary{font-size:12px;color:#d6c9b6;margin-top:5px}#wordCardMeta{font-size:8px;letter-spacing:.12em;color:var(--amber);margin-top:7px}
+#reviewList{display:flex;flex-direction:column;gap:7px;margin:12px 0}.review-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}.review-row strong{font-size:14px}.review-row small{display:block;color:#bbb5aa;margin-top:3px;font-size:10px}.review-row button{padding:6px 9px;font-size:10px}.review-empty{font-size:11px;color:#bbb5aa;padding:14px 0}.review-actions{display:flex;gap:8px}.review-actions button{flex:1;font-size:10px}
+@media(max-width:1100px){#languagePanel,#reviewPanel{right:16px;top:72px;width:350px}#location{width:260px}}
+
+/* Mobile flight + GoLingo sponsor */
+#mobileControls{display:none;position:fixed;inset:0;z-index:9;pointer-events:none}
+#mobileStick{position:absolute;left:18px;bottom:22px;width:132px;height:132px;border-radius:50%;border:1px solid rgba(255,245,225,.28);background:rgba(18,28,31,.30);backdrop-filter:blur(10px);pointer-events:auto;touch-action:none}
+#mobileStick:before{content:'STEER · CLIMB';position:absolute;top:-20px;left:12px;font-size:8px;letter-spacing:.12em;color:#f1dfc5;white-space:nowrap}
+#mobileKnob{position:absolute;left:42px;top:42px;width:48px;height:48px;border-radius:50%;background:rgba(246,229,199,.82);border:1px solid rgba(255,255,255,.6);box-shadow:0 4px 20px #0004;transform:translate(0,0)}
+#mobileActions{position:absolute;right:16px;bottom:20px;display:grid;grid-template-columns:70px 70px;gap:10px;pointer-events:auto}
+#mobileActions button{height:58px;border-radius:18px;background:rgba(20,29,32,.62);backdrop-filter:blur(10px);font-size:10px;font-weight:700;letter-spacing:.08em;touch-action:none}
+#mobileActions #mobileFlap{height:72px;transform:translateY(-14px);background:rgba(232,216,187,.88);color:#253336}
+#mobileActions #mobileDive{height:72px;transform:translateY(-14px)}
+#sponsor{position:fixed;right:28px;bottom:24px;z-index:7;width:250px;padding:11px 13px;border-radius:6px;font-size:9px;line-height:1.45;color:#d9d0c2}
+#sponsor strong{display:block;color:#fff0d7;font-size:11px;margin-bottom:2px}#sponsor a{color:#f3c894;text-decoration:none}#sponsor button{width:100%;margin-top:8px;padding:8px 10px;font-size:9px;background:rgba(232,216,187,.13)}
+#golingoExportNote{font-size:9px;line-height:1.55;color:#c9c1b5;margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+@media(max-width:899px){
+ html,body{overscroll-behavior:none}#smallScreen{display:none!important}#mobileControls{display:block}
+ #brand{top:10px;left:10px;min-width:0;padding:10px 12px}#brand h1{font-size:14px;margin:6px 0 3px}#brand .eyebrow,#performance{display:none}.subtitle{font-size:7px}
+ #topActions{top:10px;right:10px;gap:5px}#topActions button{height:34px;padding:7px 9px;font-size:9px}#toolsButton,#soundButton{display:none}
+ #compass,#location,#rightInfo,#helpShortcut{display:none}#chapter{bottom:174px}#chapterLine{font-size:17px}#bootHint{display:none}
+ #bottomControls{bottom:164px;height:39px;padding:4px;max-width:94vw}#bottomControls button{height:31px;padding:5px 9px;font-size:9px;gap:5px}#bottomControls .diamond-icon{font-size:19px}#bottomControls kbd{display:none}
+ #sponsor{left:50%;right:auto;transform:translateX(-50%);bottom:8px;width:auto;max-width:46vw;padding:7px 9px;text-align:center;font-size:7px;pointer-events:auto}#sponsor strong{font-size:8px;margin:0}#sponsor span{display:none}#sponsor button{display:none}
+ #languagePanel,#reviewPanel{left:10px;right:10px;top:54px;width:auto;max-height:calc(100% - 66px);padding:14px}#toolsPanel{display:none!important}
+ .overlay{padding:12px}.modal{width:min(94vw,430px);padding:22px}.modal h2{font-size:27px}.how{width:min(94vw,494px)}
+ #wordCard{top:58px;min-width:210px;max-width:76vw;padding:9px 14px}#wordCardLearning{font-size:20px}
+ #mapPanel{left:10px!important;right:10px!important;top:58px!important;bottom:160px!important;width:auto!important;max-height:none!important}
+}
+</style></head><body>
+<canvas id="world" aria-label="Super Flying Man, a third-person mountain flying game" tabindex="0"></canvas>
+<div id="vignette"></div><div id="speedEdges"></div><div id="coldEdges"></div><div id="impact"></div>
+<header id="brand" class="glass"><div class="eyebrow"><span class="tiny-diamond"></span> DUSK · OPEN VALE</div><h1>SUPER FLYING MAN</h1><div class="subtitle">ELYTRA / LANGUAGE FLIGHT</div><div id="performance">Measuring frame time…</div></header>
+<div id="compass" aria-hidden="true"><span id="compassLeft">NW</span><b id="compassMain">N</b><span id="compassRight">NE</span><i></i><small id="bearing">000°</small></div>
+<div id="topActions"><button id="languageButton" class="glass language-chip">◉ Language flight</button><button id="reviewButton" class="glass language-chip">☰ Review <span id="topReviewCount">0</span></button><button id="soundButton" class="glass" aria-label="Enable audio">◌ <span id="soundState">Sound off</span></button><button id="toolsButton" class="glass" aria-expanded="false"><span class="sliders">☷</span> Tools</button></div>
+<div id="aim" aria-hidden="true"><i></i><span></span></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="location" class="glass"><div class="loc-heading"><span id="zoneNumber">01</span><span class="short-rule"></span><span>THE HOLD</span></div><h2 id="zoneName">Embervale</h2><p id="zoneLine">The vale already has a wind.</p><div class="loc-bottom"><span id="climateLabel">APRICOT DUSK</span><span id="windLabel">WIND 04 / SW</span></div></div>
+<div id="rightInfo"><div class="flightstate"><i id="flightDot"></i><span id="flightState">WINGS OPEN</span></div><div class="speed"><span id="speed">18</span><small>m/s</small></div><div class="wing-meter" title="Wing stamina"><span id="staminaBar"></span></div><div id="actionHint">SPACE TO CLIMB</div></div>
+<div id="chapter"><p id="chapterLine">The vale already has a wind</p><div id="bootHint"><kbd>W</kbd> FLY <span>·</span> <kbd>SPACE</kbd> FLAP <span>·</span> <kbd>SHIFT</kbd> DIVE</div></div>
+<nav id="bottomControls" class="glass" aria-label="Flight tools"><button id="markersButton" title="Show the words placed through the vale"><span class="diamond-icon">◉</span><span id="markerCount">0 / 16</span></button><div class="control-sep"></div><button id="altitudeButton" title="Altitude above river datum; clearance above surface"><span class="alt-icon">↥</span><span id="altitude">38 m</span><small>ALT</small></button><div class="control-sep"></div><button id="foldButton" title="Fold wings to descend, land near a surface"><svg viewBox="0 0 30 24" width="26" height="21"><path d="M2 5l10 4v11L2 14M28 5L18 9v11l10-6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg><span id="foldLabel">Fold / land</span><kbd>Z</kbd></button></nav>
+<div id="helpShortcut"><button id="howButton"><kbd>I</kbd> How to fly</button><span>DRAG TO ORBIT · C CAMERA</span></div>
+<div id="mapPanel" class="glass hidden"><div class="panel-head"><span>THE HOLD / FLIGHT NOTES</span><button id="closeMap" aria-label="Close marker map">×</button></div><canvas id="map" width="560" height="560"></canvas><p id="mapCaption">Word circles are your flying lesson. Pass through one to hear and save it.</p><div class="map-foot"><span id="mapTotal">0 / 16 learned</span><button id="clearFlight">New flight</button></div></div>
+<section id="toolsPanel" class="glass hidden" aria-label="Tools"><div class="panel-head"><span>THE SMALL THINGS</span><button id="closeTools" aria-label="Close tools">×</button></div><h2>Make room for the vale.</h2><label>Graphics <select id="quality"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label><label>Fog <input id="fog" type="range" min="0.3" max="1.65" step="0.05" value="1"></label><label>Snow <input id="snow" type="range" min="0" max="1.5" step="0.05" value="1"></label><label>Master volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.5"></label><button id="toolsMute" class="wide">Enable sound</button><button id="toolsReset" class="wide">Reset to Embervale <kbd>R</kbd></button><button id="toolsHelp" class="wide">How to fly <kbd>I</kbd></button><p class="footnote">No race. No score to beat. Just a little more sky.</p></section>
+<div id="pauseOverlay" class="overlay hidden"><section class="modal glass"><div class="eyebrow">SUPER FLYING MAN — HOLDING</div><h2>The wind can wait.</h2><p>Your flight is paused.</p><button id="resumeButton" class="primary">Resume flight <span>↗</span></button><div class="pause-row"><button id="pauseHow">How to fly</button><button id="pauseMute">Enable sound</button></div><label>Quality <select id="pauseQuality"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label><button id="pauseReset" class="wide">Reset to Embervale</button><small>ESC TO RETURN TO THE VALE</small></section></div>
+<div id="howOverlay" class="overlay hidden"><section class="modal glass how"><div class="eyebrow">A LITTLE LIFT / HOW TO FLY</div><h2>The vale is already under you.</h2><div class="lesson"><b>01</b><p><strong>Hold forward.</strong><br><kbd>W / ↑</kbd> surge. <kbd>S / ↓</kbd> flare and slow down.</p></div><div class="lesson"><b>02</b><p><strong>Lean into the wind.</strong><br><kbd>A / D</kbd> bank. Move the mouse to aim; drag or <kbd>Q / E</kbd> to orbit.</p></div><div class="lesson"><b>03</b><p><strong>Give the wings a little work.</strong><br><kbd>SPACE</kbd> flap to climb. <kbd>SHIFT</kbd> tuck and dive. Cruise restores stamina.</p></div><div class="lesson"><b>04</b><p><strong>Let the slope wait.</strong><br><kbd>Z / CTRL</kbd> fold. Brake near snow or stone to stand. <kbd>F</kbd> take off.</p></div><div class="extra-controls"><span><kbd>C</kbd> Camera</span><span><kbd>R</kbd> Reset</span><span><kbd>ESC</kbd> Pause</span></div><button id="closeHow" class="primary">Back to the wind <span>↗</span></button></section></div>
+<div id="smallScreen" class="overlay"><section class="modal glass"><svg viewBox="0 0 90 60" width="90" height="60"><rect x="10" y="7" width="70" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M45 47v8M31 55h28M27 28h36m-30-5l-6 5 6 5m24-10l6 5-6 5" fill="none" stroke="currentColor"/></svg><div class="eyebrow">SUPER FLYING MAN</div><h2>A little more room.</h2><p>On mobile, use the thumb stick to steer and climb. Use FLAP and DIVE on the right. Turn your phone sideways for the widest view.</p><small>TOUCH CONTROLS / MOBILE FLIGHT</small></section></div>
+
+
+<div id="mobileControls" aria-label="Mobile flight controls"><div id="mobileStick" aria-label="Steer and climb"><div id="mobileKnob"></div></div><div id="mobileActions"><button id="mobileFlap" type="button">FLAP<br>↑</button><button id="mobileDive" type="button">DIVE<br>↓</button><button id="mobileLand" type="button">FOLD / LAND</button><button id="mobileCamera" type="button">CAMERA</button></div></div>
+<aside id="sponsor" class="glass"><strong>Sponsored by GoLingoApp.com</strong><span>Collect words in the sky, then export them to GoLingo to practice them in the real world.</span><button id="sponsorExport" type="button">Export words to GoLingo ↗</button></aside>
+
+<div id="wordCard" class="glass" aria-live="polite"><div id="wordCardLearning">cielo</div><div id="wordCardPrimary">sky</div><div id="wordCardMeta">SPANISH · SAVED TO REVIEW</div></div>
+<section id="languagePanel" class="glass hidden" aria-label="Language flight"><div class="panel-head"><span>GOLINGO / LANGUAGE FLIGHT</span><button id="closeLanguage" aria-label="Close language flight">×</button></div><h2>Put the lesson in the sky.</h2><p class="lang-note">Each circle becomes a word. Fly through it to hear the learning-language word and save it to your review list.</p><div class="lang-grid"><label>Primary language<select id="primaryLanguage"></select></label><label>Learning language<select id="learningLanguage"></select></label></div><label style="display:block;margin:15px 0 0;font-size:10px">Paste words / translations<textarea id="wordData" spellcheck="false" placeholder="Learning | Primary&#10;cielo | sky&#10;río | river&#10;&#10;Or paste a JSON array with translations for many languages."></textarea></label><div class="lang-actions"><button id="loadWords">Load words</button><button id="demoWords">Demo 16</button><button id="nextWords">Next words</button></div><div id="languageStatus" class="lang-status"></div><button id="openReview" class="wide">Review saved words <span id="reviewBadge">0</span></button></section>
+<section id="reviewPanel" class="glass hidden" aria-label="Review words"><div class="panel-head"><span>WORDS TO LEARN LATER</span><button id="closeReview" aria-label="Close review list">×</button></div><h2>Your flight basket.</h2><p class="lang-note">Words are added automatically when you fly through their circles. Tap Speak to hear one again.</p><div id="reviewList"></div><div class="review-actions"><button id="copyReview">Copy text</button><button id="downloadReview">Download JSON</button><button id="exportGoLingo">Export to GoLingo</button><button id="clearReview">Clear list</button></div><p id="golingoExportNote"><b>Continue in the real world.</b> Export the words you collected to GoLingo, then use them for real-world speaking and practice. Sponsored by GoLingoApp.com.</p></section>
+<div id="fatal" class="overlay hidden"><section class="modal glass"><h2>The vale could not open.</h2><p id="fatalMessage">A WebGL-capable desktop browser is needed.</p><button onclick="location.reload()" class="primary">Try again</button></section></div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.140.2/build/three.min.js"></script>
+<script>(()=>{
+/* Super Flying Man — original procedural flight toy. No external art or audio. */
+function startGame(T) {
+    if (T.ColorManagement)
+        T.ColorManagement.legacyMode = false;
+    const $ = (id) => document.getElementById(id);
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+    const mix = (a, b, t) => a + (b - a) * t;
+    const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+    const damp = (a, b, rate, dt) => mix(a, b, 1 - Math.exp(-rate * dt));
+    let seed = 482391;
+    const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+    const range = (a, b) => mix(a, b, rand());
+    const hash = (x, z) => { const f = Math.sin(x * 127.1 + z * 311.7) * 43758.5453123; return f - Math.floor(f); };
+    const LANGUAGE_META = {
+        en:{name:'English',speech:'en-US'}, es:{name:'Spanish',speech:'es-ES'}, fr:{name:'French',speech:'fr-FR'}, de:{name:'German',speech:'de-DE'}, it:{name:'Italian',speech:'it-IT'}, pt:{name:'Portuguese',speech:'pt-BR'}, ja:{name:'Japanese',speech:'ja-JP'}, ko:{name:'Korean',speech:'ko-KR'}, zh:{name:'Chinese',speech:'zh-CN'}, ar:{name:'Arabic',speech:'ar-SA'}, hi:{name:'Hindi',speech:'hi-IN'}, ru:{name:'Russian',speech:'ru-RU'}, th:{name:'Thai',speech:'th-TH'}, uk:{name:'Ukrainian',speech:'uk-UA'}
+    };
+    const LANGUAGE_ALIASES = {english:'en',spanish:'es',french:'fr',german:'de',italian:'it',portuguese:'pt',japanese:'ja',korean:'ko',chinese:'zh',mandarin:'zh',arabic:'ar',hindi:'hi',russian:'ru',thai:'th',ukrainian:'uk',en:'en',es:'es',fr:'fr',de:'de',it:'it',pt:'pt',ja:'ja',ko:'ko',zh:'zh',ar:'ar',hi:'hi',ru:'ru',th:'th',uk:'uk'};
+    const DEMO_CONCEPTS = [
+      {id:'sky',en:'sky',es:'cielo',fr:'ciel',de:'Himmel',it:'cielo',pt:'céu',ja:'空',ko:'하늘',zh:'天空',ar:'سماء',hi:'आकाश',ru:'небо',th:'ท้องฟ้า',uk:'небо'},
+      {id:'river',en:'river',es:'río',fr:'rivière',de:'Fluss',it:'fiume',pt:'rio',ja:'川',ko:'강',zh:'河流',ar:'نهر',hi:'नदी',ru:'река',th:'แม่น้ำ',uk:'річка'},
+      {id:'mountain',en:'mountain',es:'montaña',fr:'montagne',de:'Berg',it:'montagna',pt:'montanha',ja:'山',ko:'산',zh:'山',ar:'جبل',hi:'पहाड़',ru:'гора',th:'ภูเขา',uk:'гора'},
+      {id:'tree',en:'tree',es:'árbol',fr:'arbre',de:'Baum',it:'albero',pt:'árvore',ja:'木',ko:'나무',zh:'树',ar:'شجرة',hi:'पेड़',ru:'дерево',th:'ต้นไม้',uk:'дерево'},
+      {id:'snow',en:'snow',es:'nieve',fr:'neige',de:'Schnee',it:'neve',pt:'neve',ja:'雪',ko:'눈',zh:'雪',ar:'ثلج',hi:'बर्फ़',ru:'снег',th:'หิมะ',uk:'сніг'},
+      {id:'road',en:'road',es:'camino',fr:'route',de:'Straße',it:'strada',pt:'estrada',ja:'道',ko:'길',zh:'道路',ar:'طريق',hi:'सड़क',ru:'дорога',th:'ถนน',uk:'дорога'},
+      {id:'stone',en:'stone',es:'piedra',fr:'pierre',de:'Stein',it:'pietra',pt:'pedra',ja:'石',ko:'돌',zh:'石头',ar:'حجر',hi:'पत्थर',ru:'камень',th:'หิน',uk:'камінь'},
+      {id:'wind',en:'wind',es:'viento',fr:'vent',de:'Wind',it:'vento',pt:'vento',ja:'風',ko:'바람',zh:'风',ar:'رياح',hi:'हवा',ru:'ветер',th:'ลม',uk:'вітер'},
+      {id:'wing',en:'wing',es:'ala',fr:'aile',de:'Flügel',it:'ala',pt:'asa',ja:'翼',ko:'날개',zh:'翅膀',ar:'جناح',hi:'पंख',ru:'крыло',th:'ปีก',uk:'крило'},
+      {id:'house',en:'house',es:'casa',fr:'maison',de:'Haus',it:'casa',pt:'casa',ja:'家',ko:'집',zh:'房子',ar:'بيت',hi:'घर',ru:'дом',th:'บ้าน',uk:'будинок'},
+      {id:'water',en:'water',es:'agua',fr:'eau',de:'Wasser',it:'acqua',pt:'água',ja:'水',ko:'물',zh:'水',ar:'ماء',hi:'पानी',ru:'вода',th:'น้ำ',uk:'вода'},
+      {id:'sun',en:'sun',es:'sol',fr:'soleil',de:'Sonne',it:'sole',pt:'sol',ja:'太陽',ko:'태양',zh:'太阳',ar:'شمس',hi:'सूरज',ru:'солнце',th:'ดวงอาทิตย์',uk:'сонце'},
+      {id:'moon',en:'moon',es:'luna',fr:'lune',de:'Mond',it:'luna',pt:'lua',ja:'月',ko:'달',zh:'月亮',ar:'قمر',hi:'चाँद',ru:'луна',th:'ดวงจันทร์',uk:'місяць'},
+      {id:'cloud',en:'cloud',es:'nube',fr:'nuage',de:'Wolke',it:'nuvola',pt:'nuvem',ja:'雲',ko:'구름',zh:'云',ar:'سحابة',hi:'बादल',ru:'облако',th:'เมฆ',uk:'хмара'},
+      {id:'forest',en:'forest',es:'bosque',fr:'forêt',de:'Wald',it:'foresta',pt:'floresta',ja:'森',ko:'숲',zh:'森林',ar:'غابة',hi:'जंगल',ru:'лес',th:'ป่า',uk:'ліс'},
+      {id:'bridge',en:'bridge',es:'puente',fr:'pont',de:'Brücke',it:'ponte',pt:'ponte',ja:'橋',ko:'다리',zh:'桥',ar:'جسر',hi:'पुल',ru:'мост',th:'สะพาน',uk:'міст'}
+    ];
+    const lesson = { primary:'en', learning:'es', concepts:DEMO_CONCEPTS.map(x=>({...x})), offset:0, review:[], cardTimer:0 };
+    function normalizeLang(k){ if(!k) return null; const v=String(k).trim().toLowerCase().replace('_','-'); return LANGUAGE_ALIASES[v] || LANGUAGE_ALIASES[v.split('-')[0]] || null; }
+    function conceptValue(c,lang){ return String(c?.[lang] ?? c?.translations?.[lang] ?? '').trim(); }
+    function normalizeConcept(raw,i){
+        if(typeof raw==='string') return {id:'word-'+i,[lesson.learning]:raw};
+        const c={id:String(raw.id || raw.key || raw.concept || 'word-'+i)};
+        const src=raw.translations && typeof raw.translations==='object' ? {...raw.translations,...raw} : raw;
+        for(const [k,v] of Object.entries(src)){ const code=normalizeLang(k); if(code && typeof v==='string' && v.trim()) c[code]=v.trim(); }
+        if(raw.word && !c[lesson.learning]) c[lesson.learning]=String(raw.word).trim();
+        if(raw.translation && !c[lesson.primary]) c[lesson.primary]=String(raw.translation).trim();
+        return c;
+    }
+    function parseLessonPayload(payload){
+        if(!payload) return null;
+        if(typeof payload==='string'){ try{ payload=JSON.parse(payload); }catch{return null;} }
+        if(Array.isArray(payload)) return {concepts:payload.map(normalizeConcept).filter(Boolean)};
+        const primary=normalizeLang(payload.primaryLanguage || payload.primary || payload.baseLanguage);
+        const learning=normalizeLang(payload.learningLanguage || payload.learning || payload.targetLanguage);
+        const rows=payload.words || payload.concepts || payload.items || payload.data;
+        if(!Array.isArray(rows)) return null;
+        if(primary) lesson.primary=primary; if(learning) lesson.learning=learning;
+        return {primary,learning,concepts:rows.map(normalizeConcept).filter(Boolean)};
+    }
+    function parsePaste(text){
+        const raw=String(text||'').trim(); if(!raw) return null;
+        if(raw[0]==='[' || raw[0]==='{'){ try{return parseLessonPayload(JSON.parse(raw));}catch(e){throw new Error('JSON could not be read.');} }
+        const rows=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+        const concepts=rows.map((line,i)=>{ const parts=line.split(/\t|\s*\|\s*|\s*=>\s*/); const c={id:'pasted-'+i}; c[lesson.learning]=(parts[0]||'').trim(); if(parts[1]) c[lesson.primary]=parts.slice(1).join(' | ').trim(); return c; }).filter(c=>conceptValue(c,lesson.learning));
+        return {concepts};
+    }
+    function loadSavedReview(){ try{ const r=JSON.parse(localStorage.getItem('sfm-language-review')||'[]'); if(Array.isArray(r)) lesson.review=r; }catch{} }
+    function saveReview(){ try{ localStorage.setItem('sfm-language-review',JSON.stringify(lesson.review)); }catch{} }
+    function speakLearningWord(text,lang=lesson.learning){
+        if(!text || !('speechSynthesis' in window)) return;
+        try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=LANGUAGE_META[lang]?.speech || lang; u.rate=.82; u.pitch=1; const voices=speechSynthesis.getVoices(); const exact=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase()) || voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase())); if(exact)u.voice=exact; speechSynthesis.speak(u); }catch{}
+    }
+
+    function noise(x, z) { const ix = Math.floor(x), iz = Math.floor(z), fx = x - ix, fz = z - iz, u = fx * fx * (3 - 2 * fx), v = fz * fz * (3 - 2 * fz); return mix(mix(hash(ix, iz), hash(ix + 1, iz), u), mix(hash(ix, iz + 1), hash(ix + 1, iz + 1), u), v); }
+    const fbm = (x, z) => noise(x, z) * .55 + noise(x * 2.07 + 13, z * 2.07) * .27 + noise(x * 4.13, z * 4.13 + 21) * .12 + noise(x * 8.11, z * 8.11) * .06;
+    const riverX = (z) => -45 + 62 * Math.sin((z + 140) * .010) + 23 * Math.sin(z * .022);
+    const riverY = (z) => 7 + (350 - z) * .009;
+    const riverWidth = (z) => 9.5 + 2.2 * Math.sin(z * .031) + 3.7 * Math.exp(-(((z - 185) / 58) ** 2));
+    const gauss = (x, z, cx, cz, sx, sz) => Math.exp(-(((x - cx) / sx) ** 2) - ((z - cz) / sz) ** 2);
+    function naturalHeight(x, z) {
+        const d = Math.abs(x - riverX(z));
+        const n = fbm(x * .024, z * .024);
+        const shoulder = smooth(13, 36, d) * 6 + smooth(26, 157, d) * 45 + smooth(95, 320, d) * 40;
+        const peaks = gauss(x, z, 140, -216, 87, 129) * 102 + gauss(x, z, -185, -265, 94, 107) * 100 + gauss(x, z, 275, -345, 145, 110) * 91 + gauss(x, z, -300, 100, 110, 110) * 57;
+        return riverY(z) - 2.65 + shoulder + smooth(20, 62, d) * ((n - .45) * 37 + peaks) + Math.sin(z * .051) * smooth(9, 19, d) * 1.4;
+    }
+    const SHELF = { x: 176, z: -214, y: 174, r: 24 };
+    function terrainHeight(x, z) {
+        const d = Math.hypot(x - SHELF.x, z - SHELF.z);
+        const plateau = SHELF.y + (x - SHELF.x) * .018 + (z - SHELF.z) * .045;
+        return mix(plateau, naturalHeight(x, z), smooth(18, 37, d));
+    }
+    const colliders = [];
+    function surfaceHeight(x, z) {
+        let h = terrainHeight(x, z);
+        for (const b of colliders)
+            if (Math.abs(x - b.x) < b.w / 2 + .23 && Math.abs(z - b.z) < b.d / 2 + .23)
+                h = Math.max(h, b.top);
+        return h;
+    }
+    function isWater(x, z) { return Math.abs(x - riverX(z)) < riverWidth(z) * .92 && terrainHeight(x, z) < riverY(z) + .4; }
+    function groundHeight(x, z) { return Math.max(surfaceHeight(x, z), isWater(x, z) ? riverY(z) : -999); }
+    let renderer;
+    try {
+        renderer = new T.WebGLRenderer({ canvas: $('world'), antialias: true, alpha: false, powerPreference: 'high-performance' });
+    }
+    catch (error) {
+        $('fatal').classList.remove('hidden');
+        $('fatalMessage').textContent = 'This browser could not create a WebGL context. Open the game in a desktop browser with graphics acceleration enabled.';
+        return;
+    }
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.info.autoReset = false;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene();
+    scene.fog = new T.FogExp2(0xc09570, .0034);
+    const camera = new T.PerspectiveCamera(66, innerWidth / innerHeight, .25, 1800);
+    const hemi = new T.HemisphereLight(0xf6dcc3, 0x5b6650, 1.28);
+    scene.add(hemi);
+    const fill = new T.AmbientLight(0x8a9b9b, .36);
+    scene.add(fill);
+    const sun = new T.DirectionalLight(0xffcf96, 1.72);
+    sun.position.set(-170, 220, -260);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.camera.left = -80;
+    sun.shadow.camera.right = 80;
+    sun.shadow.camera.top = 80;
+    sun.shadow.camera.bottom = -80;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 700;
+    sun.shadow.bias = -.0007;
+    sun.shadow.normalBias = .7;
+    scene.add(sun, sun.target);
+    const clockUniform = { value: 0 }, coldUniform = { value: 0 }, fogColorUniform = { value: scene.fog.color }, fogDensityUniform = { value: .0034 };
+    function mistMaterial(color, extra = {}) {
+        const m = new T.MeshStandardMaterial({ color, roughness: .96, metalness: 0, ...extra });
+        m.onBeforeCompile = (shader) => {
+            shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vMistWorld;');
+            shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `vec4 mistPosition=vec4(transformed,1.0);
+      #ifdef USE_INSTANCING
+      mistPosition=instanceMatrix*mistPosition;
+      #endif
+      vMistWorld=(modelMatrix*mistPosition).xyz;
+      #include <project_vertex>`);
+            shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vMistWorld;');
+            shader.fragmentShader = shader.fragmentShader.replace('#include <fog_fragment>', `#ifdef USE_FOG
+      float heightMist=exp(-max(vMistWorld.y-9.,0.)*.020);
+      float fogFactor=1.-exp(-fogDensity*fogDensity*vFogDepth*vFogDepth*(.55+heightMist*.8));
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,fogColor,clamp(fogFactor,0.,.985));
+      #endif`);
+        };
+        m.customProgramCacheKey = () => 'hold-height-mist-v1';
+        return m;
+    }
+    const sky = new T.Mesh(new T.SphereGeometry(1350, 32, 16), new T.ShaderMaterial({ side: T.BackSide, depthWrite: false, fog: false, uniforms: { uCold: coldUniform, uTime: clockUniform }, vertexShader: `varying vec3 vDir;void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`, fragmentShader: `
+    varying vec3 vDir;uniform float uCold;uniform float uTime;
+    float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
+    void main(){vec3 d=normalize(vDir);float up=max(d.y,0.);vec3 warm=mix(vec3(.97,.39,.12),vec3(.34,.145,.11),pow(up,.5));
+      warm=mix(warm,vec3(.95,.46,.20),exp(-pow((d.y-.10)*5.,2.))*.44);
+      vec3 cold=mix(vec3(.64,.69,.71),vec3(.34,.43,.50),pow(up,.5));vec3 col=mix(warm,cold,uCold);
+      vec3 sd=normalize(vec3(-.29,.17,-1.));float s=dot(d,sd);float sun=smoothstep(.9987,.9995,s);float halo=pow(max(s,0.),22.)*.27;
+      col+=(vec3(1.,.69,.35)*halo+vec3(1.4,.98,.56)*sun)*(1.-uCold);
+      vec2 uv=d.xz/(abs(d.y)+.19);float cloud=n(uv*2.2+vec2(uTime*.001,0.))*.65+n(uv*5.5)*.35;
+      float c=smoothstep(.56,.82,cloud)*smoothstep(.0,.17,d.y)*.3;col=mix(col,mix(vec3(.67,.53,.41),vec3(.8,.82,.83),uCold),c);
+      gl_FragColor=vec4(col,1.);
+      #include <tonemapping_fragment>
+      #include <encodings_fragment>
+    }` }));
+    scene.add(sky);
+    // One immutable 900-m heightfield. Vertex color encodes rock, meadow, scree and snow.
+    const groundGeo = new T.PlaneGeometry(900, 900, 210, 210);
+    groundGeo.rotateX(-Math.PI / 2);
+    const verts = groundGeo.attributes.position;
+    const colors = new Float32Array(verts.count * 3);
+    const turf = new T.Color(0x626943), rock = new T.Color(0x858276), snowCol = new T.Color(0xd1d8d6), soil = new T.Color(0x777665), c = new T.Color();
+    for (let i = 0; i < verts.count; i++) {
+        const x = verts.getX(i), z = verts.getZ(i), h = terrainHeight(x, z);
+        verts.setY(i, h);
+        const slope = Math.hypot(terrainHeight(x + 2, z) - terrainHeight(x - 2, z), terrainHeight(x, z + 2) - terrainHeight(x, z - 2)) / 4;
+        const n = fbm(x * .061, z * .061);
+        c.copy(turf).lerp(rock, clamp(slope * .82 + smooth(55, 113, h) * .35, 0, 1));
+        if (Math.abs(x - riverX(z)) < 22)
+            c.lerp(soil, .65);
+        const frost = smooth(86 + n * 27, 120 + n * 13, h) * (1 - smooth(1.3, 2.4, slope) * .8);
+        c.lerp(snowCol, frost);
+        c.multiplyScalar(.86 + n * .25);
+        colors.set([c.r, c.g, c.b], i * 3);
+    }
+    groundGeo.setAttribute('color', new T.BufferAttribute(colors, 3));
+    groundGeo.computeVertexNormals();
+    const ground = new T.Mesh(groundGeo, mistMaterial(0xffffff, { vertexColors: true, flatShading: true }));
+    ground.receiveShadow = true;
+    scene.add(ground);
+    const peaksGroup = new T.Group();
+    scene.add(peaksGroup);
+    for (let i = 0; i < 15; i++) {
+        const x = -840 + i * 115 + range(-25, 25), z = -650 + range(-90, 55), h = range(230, 420), r = range(125, 200);
+        const g = new T.ConeGeometry(r, h, 7, 5);
+        const p = g.attributes.position;
+        const co = new Float32Array(p.count * 3);
+        for (let j = 0; j < p.count; j++) {
+            const y = p.getY(j), f = (y + h / 2) / h;
+            const col = new T.Color(0x777d79).lerp(new T.Color(0xcbd2d0), smooth(.43, .78, f + range(-.05, .05)));
+            co.set([col.r, col.g, col.b], j * 3);
+            if (f < .98) {
+                p.setX(j, p.getX(j) * (1 + Math.sin(j * 7.41) * .13));
+                p.setZ(j, p.getZ(j) * (1 + Math.cos(j * 5.21) * .13));
+            }
+        }
+        g.setAttribute('color', new T.BufferAttribute(co, 3));
+        g.computeVertexNormals();
+        const mountain = new T.Mesh(g, mistMaterial(0xffffff, { vertexColors: true, flatShading: true }));
+        mountain.position.set(x, h / 2 - 25, z);
+        peaksGroup.add(mountain);
+    }
+    // The road and the river follow the same valley, but neither constrains flight.
+    const waterPositions = [], waterUvs = [], waterIndices = [];
+    const N = 380, ACROSS = 8;
+    for (let i = 0; i <= N; i++) {
+        const z = mix(449, -449, i / N), rx = riverX(z), w = riverWidth(z);
+        for (let j = 0; j <= ACROSS; j++) {
+            const side = j / ACROSS * 2 - 1;
+            waterPositions.push(rx + side * w, riverY(z) + .02, z);
+            waterUvs.push(side, i / N);
+        }
+    }
+    for (let i = 0; i < N; i++)
+        for (let j = 0; j < ACROSS; j++) {
+            const a = i * (ACROSS + 1) + j, b = a + ACROSS + 1;
+            waterIndices.push(a, a + 1, b, a + 1, b + 1, b);
+        }
+    const waterGeo = new T.BufferGeometry();
+    waterGeo.setAttribute('position', new T.Float32BufferAttribute(waterPositions, 3));
+    waterGeo.setAttribute('uv', new T.Float32BufferAttribute(waterUvs, 2));
+    waterGeo.setIndex(waterIndices);
+    waterGeo.computeVertexNormals();
+    const water = new T.Mesh(waterGeo, new T.ShaderMaterial({ side: T.DoubleSide, uniforms: { uTime: clockUniform, uCold: coldUniform, uFog: fogColorUniform, uDensity: fogDensityUniform }, vertexShader: `varying vec3 vWorld;varying vec2 vUv;varying float vDist;uniform float uTime;void main(){vUv=uv;vec3 p=position;p.y+=sin(p.z*.46+p.x*.24-uTime*2.)*.045;vec4 wp=modelMatrix*vec4(p,1.);vWorld=wp.xyz;vec4 vp=viewMatrix*wp;vDist=-vp.z;gl_Position=projectionMatrix*vp;}`, fragmentShader: `
+    varying vec3 vWorld;varying vec2 vUv;varying float vDist;uniform float uTime;uniform float uCold;uniform vec3 uFog;uniform float uDensity;
+    void main(){float a=sin(vWorld.z*1.4+vWorld.x*.73-uTime*3.4);float b=sin(vWorld.z*.53-vWorld.x*1.62-uTime*2.1);
+      vec3 normal=normalize(vec3(a*.16,1.,b*.2));vec3 eye=normalize(cameraPosition-vWorld);float fres=pow(1.-max(dot(normal,eye),0.),3.);
+      vec3 base=mix(vec3(.21,.25,.25),vec3(.19,.25,.29),uCold);vec3 refl=mix(vec3(.59,.48,.37),vec3(.51,.60,.64),uCold);
+      vec3 col=mix(base,refl,.30+fres*.62);float streak=pow(max(0.,a*b),7.);col+=streak*.027+pow(max(0.,sin(vWorld.z*3.3+sin(vWorld.x*.65)*1.8-uTime*3.6)),24.)*.019;
+      float bank=smoothstep(.80,.99,abs(vUv.x));float foam=bank*(.33+.23*sin(vWorld.z*1.8+uTime));col=mix(col,vec3(.65,.65,.57),foam);
+      float fog=1.-exp(-uDensity*uDensity*vDist*vDist*1.25);col=mix(col,uFog,clamp(fog,0.,.98));gl_FragColor=vec4(col,1.);
+      #include <tonemapping_fragment>
+      #include <encodings_fragment>
+    }` }));
+    scene.add(water);
+    const roadPositions = [], roadColors = [], roadIdx = [];
+    const rc = new T.Color(0x655d48);
+    for (let i = 0; i <= 280; i++) {
+        const z = mix(420, -80, i / 280), rx = riverX(z) + 27 + 6 * Math.sin(z * .019), w = 3.8;
+        for (let j = 0; j < 2; j++) {
+            const x = rx + (j === 0 ? -w : w);
+            roadPositions.push(x, terrainHeight(x, z) + .17, z);
+            const f = .84 + noise(x * .21, z * .21) * .22;
+            roadColors.push(rc.r * f, rc.g * f, rc.b * f);
+        }
+    }
+    for (let i = 0; i < 280; i++) {
+        const a = i * 2;
+        roadIdx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    }
+    const roadGeo = new T.BufferGeometry();
+    roadGeo.setAttribute('position', new T.Float32BufferAttribute(roadPositions, 3));
+    roadGeo.setAttribute('color', new T.Float32BufferAttribute(roadColors, 3));
+    roadGeo.setIndex(roadIdx);
+    roadGeo.computeVertexNormals();
+    const road = new T.Mesh(roadGeo, mistMaterial(0xffffff, { vertexColors: true }));
+    road.receiveShadow = true;
+    scene.add(road);
+    // Pines: instanced trunks and four separate tiers, deterministically interleaved for quality scaling.
+    const MAX_TREES = 4300, treeData = [], treeGrid = new Map();
+    for (let tries = 0; treeData.length < MAX_TREES && tries < 70000; tries++) {
+        const x = range(-422, 422), z = range(-425, 427), h = terrainHeight(x, z), d = Math.abs(x - riverX(z));
+        if (d < riverWidth(z) + 6 || h > 113 || Math.hypot(x - 124, z + 116) < 37 || Math.hypot(x - SHELF.x, z - SHELF.z) < 40)
+            continue;
+        const roadD = Math.abs(x - (riverX(z) + 27 + 6 * Math.sin(z * .019)));
+        if (z > -90 && roadD < 6)
+            continue;
+        if (Math.hypot(x - (riverX(230) - 29), z - 230) < 22)
+            continue;
+        const slope = Math.hypot(terrainHeight(x + 2, z) - terrainHeight(x - 2, z), terrainHeight(x, z + 2) - terrainHeight(x, z - 2)) / 4;
+        if (slope > 1.28 || rand() < smooth(70, 118, h) * .72)
+            continue;
+        const height = range(13, 28) * (1 - smooth(80, 115, h) * .44), radius = height * range(.12, .18), dead = rand() < .13;
+        const t = { x, z, y: h, h: height, r: radius, rotation: range(0, 6.28), lean: range(-.06, .06), dead };
+        treeData.push(t);
+        const key = `${Math.floor(x / 24)},${Math.floor(z / 24)}`;
+        if (!treeGrid.has(key))
+            treeGrid.set(key, []);
+        treeGrid.get(key).push(t);
+    }
+    const trunkMat = mistMaterial(0x70614c), leafMat = mistMaterial(0xffffff, { flatShading: true });
+    const trunks = new T.InstancedMesh(new T.CylinderGeometry(.10, .30, 1, 5), trunkMat, treeData.length);
+    trunks.castShadow = true;
+    trunks.receiveShadow = true;
+    scene.add(trunks);
+    const tiers = [];
+    for (let t = 0; t < 4; t++) {
+        const mesh = new T.InstancedMesh(new T.ConeGeometry(1, 1, 7, 1), leafMat, treeData.length);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        tiers.push(mesh);
+        scene.add(mesh);
+    }
+    const dummy = new T.Object3D();
+    treeData.forEach((tr, i) => {
+        tr.index = i;
+        dummy.position.set(tr.x, tr.y + tr.h * .5, tr.z);
+        dummy.rotation.set(tr.lean, tr.rotation, 0);
+        dummy.scale.set(tr.h * .075, tr.h, tr.h * .075);
+        dummy.updateMatrix();
+        trunks.setMatrixAt(i, dummy.matrix);
+        for (let j = 0; j < 4; j++) {
+            const tierH = tr.h * (.43 - j * .048), tierR = tr.r * (1 - j * .19), center = tr.y + tr.h * (.40 + j * .17);
+            dummy.position.set(tr.x + tr.lean * tr.h * .25, center, tr.z);
+            dummy.rotation.set(tr.lean, tr.rotation + j * .6, 0);
+            dummy.scale.set(tierR, tierH, tierR);
+            dummy.updateMatrix();
+            tiers[j].setMatrixAt(i, dummy.matrix);
+            const leaf = tr.dead ? new T.Color(0x7e7345) : new T.Color().setHSL(range(.19, .28), range(.18, .33), range(.095, .19));
+            leaf.multiplyScalar(1 + j * .025);
+            tiers[j].setColorAt(i, leaf);
+        }
+    });
+    trunks.instanceMatrix.needsUpdate = true;
+    for (const t of tiers) {
+        t.instanceMatrix.needsUpdate = true;
+        t.instanceColor.needsUpdate = true;
+    }
+    const stoneMat = mistMaterial(0x8c897e, { flatShading: true }), darkStone = mistMaterial(0x686d67, { flatShading: true }), woodMat = mistMaterial(0x76604b), roofMat = mistMaterial(0x424d48), darkWood = mistMaterial(0x4b4940), snowMat = mistMaterial(0xd5dddd);
+    function box(w, h, d, x, y, z, mat, parent = scene, collision = false) {
+        const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+        m.position.set(x, y, z);
+        m.castShadow = true;
+        m.receiveShadow = true;
+        parent.add(m);
+        if (collision && parent === scene)
+            colliders.push({ x, z, w, d, bottom: y - h / 2, top: y + h / 2 });
+        return m;
+    }
+    const rockGeo = new T.DodecahedronGeometry(1, 0);
+    const rocks = new T.InstancedMesh(rockGeo, stoneMat, 530);
+    rocks.castShadow = true;
+    rocks.receiveShadow = true;
+    scene.add(rocks);
+    for (let i = 0; i < 530; i++) {
+        let z = range(-416, 420), x = riverX(z) + (rand() < .5 ? -1 : 1) * range(15, 85);
+        if (i > 300)
+            x = range(-400, 400);
+        if (terrainHeight(x, z) > 135)
+            x = riverX(z) + (rand() < .5 ? -1 : 1) * range(16, 30);
+        const size = range(1.0, 4.8);
+        dummy.position.set(x, terrainHeight(x, z) + size * .25, z);
+        dummy.rotation.set(range(0, 1), range(0, 6.28), range(0, 1));
+        dummy.scale.set(size * range(1, 2), size * range(.65, 1.8), size);
+        dummy.updateMatrix();
+        rocks.setMatrixAt(i, dummy.matrix);
+        rocks.setColorAt(i, new T.Color().setHSL(.12, .05, range(.32, .48)));
+    }
+    function buildShack(x, z, scale = 1) {
+        const y = terrainHeight(x, z), g = new T.Group();
+        g.position.set(x, y, z);
+        g.rotation.y = -.18;
+        g.scale.setScalar(scale);
+        scene.add(g);
+        box(12, 1.5, 10, 0, .6, 0, darkStone, g);
+        box(11, 6, 9, 0, 3.9, 0, woodMat, g);
+        for (let i = 0; i < 6; i++)
+            for (const side of [-1, 1])
+                box(11.4, .16, .18, 0, 1.3 + i, side * 4.52, darkWood, g);
+        for (const x2 of [-5.4, 0, 5.4])
+            box(.32, 6.8, 9.4, x2, 4.1, 0, darkWood, g);
+        for (const side of [-1, 1]) {
+            const r = box(7.4, .42, 11, side * 3.4, 8.0, 0, roofMat, g);
+            r.rotation.z = -side * .48;
+        }
+        box(2.0, 3.8, .14, -1.3, 3.1, 4.58, darkWood, g);
+        const windowMat = new T.MeshBasicMaterial({ color: 0xffc788 });
+        box(1.35, 1.4, .17, 2.35, 4.7, 4.64, windowMat, g);
+        box(.13, 1.5, .20, 2.35, 4.7, 4.75, darkWood, g);
+        box(1.5, .13, .20, 2.35, 4.7, 4.75, darkWood, g);
+        box(1.2, 4, 1.4, -3.5, 8.0, -2.3, darkStone, g);
+        colliders.push({ x, z, w: 14 * scale, d: 12 * scale, bottom: y, top: y + 9 * scale });
+        for (let i = 0; i < 4; i++)
+            box(1.3, 1.2, 1.2, x + 8 + i * .5, y + .6, z + 3 + (i % 2) * 1.4, woodMat);
+    }
+    buildShack(riverX(230) - 29, 230, 1);
+    buildShack(riverX(191) - 34, 191, .72);
+    // A working-looking mill wheel, built from timber rather than imported models.
+    const millPos = new T.Vector3(riverX(230) - 21, terrainHeight(riverX(230) - 21, 230) + 3.2, 231);
+    const millWheel = new T.Group();
+    millWheel.position.copy(millPos);
+    scene.add(millWheel);
+    const wheelRim = new T.Mesh(new T.TorusGeometry(2.8, .16, 4, 16), darkWood);
+    wheelRim.rotation.y = Math.PI / 2;
+    millWheel.add(wheelRim);
+    for (let i = 0; i < 12; i++) {
+        const a = i * Math.PI / 6;
+        const paddle = box(1.7, .24, 1.1, 0, Math.sin(a) * 2.6, Math.cos(a) * 2.6, woodMat, millWheel);
+        paddle.rotation.x = -a;
+        const spoke = box(.16, 5.6, .16, 0, 0, 0, darkWood, millWheel);
+        spoke.rotation.x = a;
+    }
+    // Grey Steps: solid, landable terraces connected by real stair treads.
+    const terraceA = { x: 106, z: -101, y: Math.max(terrainHeight(106, -101), terrainHeight(112, -103)) + 7 };
+    const terraceB = { x: 135, z: -127, y: Math.max(terrainHeight(135, -127), terraceA.y + 12) + 5 };
+    box(29, 16, 22, terraceA.x, terraceA.y - 8, terraceA.z, darkStone, scene, true);
+    box(29, 1, 22, terraceA.x, terraceA.y + .5, terraceA.z, stoneMat, scene, true);
+    box(27, 22, 23, terraceB.x, terraceB.y - 11, terraceB.z, darkStone, scene, true);
+    box(28, 1, 24, terraceB.x, terraceB.y + .5, terraceB.z, stoneMat, scene, true);
+    for (let i = 0; i < 17; i++) {
+        const f = i / 16, x = mix(116, 127, f), z = mix(-109, -118, f), top = mix(terraceA.y + 1, terraceB.y + 1, f);
+        box(8, 3.5, 2.1, x, top - 1.75, z, stoneMat, scene, true);
+    }
+    for (const terrace of [terraceA, terraceB]) {
+        const y = terrace.y;
+        for (const side of [-1, 1]) {
+            box(4, 13, 5, terrace.x + side * 9, y + 6.5, terrace.z - 5, stoneMat, scene, true);
+            box(4.7, 1.0, 5.7, terrace.x + side * 9, y + 13.5, terrace.z - 5, darkStone, scene, true);
+            for (let j = 0; j < 3; j++)
+                box(.8, 1.2, 1.1, terrace.x + side * 9 - 1.4 + j * 1.4, y + 14.5, terrace.z - 3, stoneMat);
+        }
+        box(14, 2.0, 4.4, terrace.x, y + 12.4, terrace.z - 5, stoneMat);
+        for (let j = 0; j < 6; j++)
+            box(1.3, 1.6, 1.3, terrace.x - 6 + j * 2.4, y + 14.2, terrace.z - 5, stoneMat);
+    }
+    box(6, 22, 6, 151, terraceB.y + 11, -135, stoneMat, scene, true);
+    for (let i = 0; i < 14; i++) {
+        const x = 91 + i * 4.8, z = -90 + Math.sin(i * .8) * 3, y = terrainHeight(x, z);
+        const h = range(4, 9);
+        box(4.1, h, 2.2, x, y + h / 2, z, stoneMat, scene, true);
+        if (i % 3 !== 0)
+            box(1.3, 1.5, 2.4, x, y + h + .7, z, darkStone);
+    }
+    // Palisade bend, stacks of crates and a narrow wooden bridge.
+    const palZ = 90, palX = riverX(palZ) + 31, palY = terrainHeight(palX, palZ);
+    for (let i = 0; i < 22; i++) {
+        const x = palX + Math.sin(i * .08) * 3, z = palZ - 22 + i * 2.0, y = terrainHeight(x, z);
+        box(1.3, 5.4, 1.3, x, y + 2.7, z, woodMat, scene, true);
+        const tip = new T.Mesh(new T.ConeGeometry(.9, 1, 4), woodMat);
+        tip.position.set(x, y + 5.9, z);
+        tip.rotation.y = Math.PI / 4;
+        tip.castShadow = true;
+        scene.add(tip);
+    }
+    for (const side of [-1, 1])
+        box(.23, .28, 42, palX + side * .6, palY + 2.2, palZ - 1, darkWood);
+    function crate(x, z, h = 0) { const y = terrainHeight(x, z) + h; box(2.2, 2.1, 2.2, x, y + 1.05, z, woodMat, scene, true); for (const side of [-1, 1]) {
+        box(2.3, .17, .14, x, y + .3, z + side * 1.13, darkWood);
+        box(2.3, .17, .14, x, y + 1.8, z + side * 1.13, darkWood);
+        const brace = box(.15, 2.5, .16, x, y + 1.05, z + side * 1.15, darkWood);
+        brace.rotation.z = .72;
+    } }
+    crate(palX + 4, palZ + 5);
+    crate(palX + 6.5, palZ + 5);
+    crate(palX + 4, palZ + 7.5);
+    crate(palX + 5.2, palZ + 5, 2.1);
+    const bridgeZ = 142, bridgeX = riverX(bridgeZ), bridgeY = riverY(bridgeZ) + 5.1;
+    for (let i = 0; i < 29; i++)
+        box(.93, .3, 4, bridgeX - 14 + i, bridgeY, bridgeZ, woodMat);
+    for (const sx of [-1, 1])
+        for (const sz of [-1, 1]) {
+            box(.5, 6, .5, bridgeX + sx * 12, bridgeY - 1.7, bridgeZ + sz * 1.7, darkWood);
+            box(28, .23, .25, bridgeX, bridgeY + 1.7, bridgeZ + sz * 1.7, darkWood);
+        }
+    colliders.push({ x: bridgeX, z: bridgeZ, w: 29, d: 4, bottom: bridgeY - .2, top: bridgeY + .2 });
+    // A winter bush on the landing shelf, and a handful of worn stone slabs.
+    const bushMat = mistMaterial(0x4e5657);
+    for (let i = 0; i < 13; i++) {
+        const base = new T.Vector3(SHELF.x + 9 + range(-.1, .1), terrainHeight(SHELF.x + 9, SHELF.z), SHELF.z + range(-.1, .1));
+        const tip = base.clone().add(new T.Vector3(range(-1.1, 1.1), range(1.2, 2.5), range(-1.0, 1.0))), mid = base.clone().lerp(tip, .5);
+        const twig = box(.034, base.distanceTo(tip), .034, mid.x, mid.y, mid.z, bushMat);
+        twig.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), tip.clone().sub(base).normalize());
+    }
+    for (let i = 0; i < 7; i++) {
+        const x = SHELF.x + range(-15, 15), z = SHELF.z + range(-15, 15);
+        box(range(1.5, 4), .4, range(1.2, 3), x, terrainHeight(x, z) + .05, z, snowMat);
+    }
+    // Labels are drawn locally to small canvas textures. Only large places get lettering.
+    const labels = [];
+    function label(text, x, y, z) {
+        const cv = document.createElement('canvas');
+        cv.width = 1024;
+        cv.height = 128;
+        const ctx = cv.getContext('2d');
+        ctx.font = '32px Georgia';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(248,237,217,.84)';
+        const spaced = text.split('').join(' ');
+        ctx.fillText(spaced, 512, 47);
+        ctx.strokeStyle = 'rgba(247,232,213,.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(445, 93);
+        ctx.lineTo(505, 93);
+        ctx.moveTo(519, 93);
+        ctx.lineTo(579, 93);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(512, 93);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillRect(-2, -2, 4, 4);
+        ctx.restore();
+        const tex = new T.CanvasTexture(cv);
+        tex.encoding = T.sRGBEncoding;
+        const s = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: true, opacity: .68, fog: false }));
+        s.position.set(x, y, z);
+        s.scale.set(69, 8.6, 1);
+        scene.add(s);
+        labels.push(s);
+    }
+    label('EMBERVALE', riverX(50) - 6, 73, 50);
+    label('GREY STEPS', 123, terraceB.y + 32, -118);
+    label('FROSTSPINE', 130, 237, -286);
+    label('THE DIVE', riverX(-225), 112, -225);
+    // Batch the immutable timber and stone by material; keep the mill wheel and Brick animated.
+    scene.updateMatrixWorld(true);
+    const batches = new Map();
+    scene.traverse((object) => {
+        if (!object.isMesh || object.isInstancedMesh || object.geometry?.type !== 'BoxGeometry')
+            return;
+        let a = object;
+        while (a) {
+            if (a === millWheel)
+                return;
+            a = a.parent;
+        }
+        if (!batches.has(object.material))
+            batches.set(object.material, []);
+        batches.get(object.material).push(object);
+    });
+    for (const [material, meshes] of batches) {
+        const positions = [], normals = [], uvs = [];
+        for (const m of meshes) {
+            const g = m.geometry.toNonIndexed();
+            g.applyMatrix4(m.matrixWorld);
+            positions.push(...g.attributes.position.array);
+            normals.push(...g.attributes.normal.array);
+            uvs.push(...g.attributes.uv.array);
+            m.parent.remove(m);
+            m.geometry.dispose();
+            g.dispose();
+        }
+        const g = new T.BufferGeometry();
+        g.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+        g.setAttribute('normal', new T.Float32BufferAttribute(normals, 3));
+        g.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
+        g.computeBoundingSphere();
+        const mesh = new T.Mesh(g, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+    }
+    // Brick: original boxes and two hinged, thin blue membranes. Local +Y is the head.
+    const playerRoot = new T.Group(), yawRoot = new T.Group(), rollRoot = new T.Group(), figure = new T.Group();
+    playerRoot.add(yawRoot);
+    yawRoot.add(rollRoot);
+    rollRoot.add(figure);
+    scene.add(playerRoot);
+    const tunic = new T.MeshStandardMaterial({ color: 0x26aec0, roughness: .88 }), navy = new T.MeshStandardMaterial({ color: 0x204752, roughness: 1 }), skin = new T.MeshStandardMaterial({ color: 0xe8c89b, roughness: 1 }), hair = new T.MeshStandardMaterial({ color: 0x5b4a37, roughness: 1 }), pants = new T.MeshStandardMaterial({ color: 0x62513e, roughness: 1 }), bootMat = new T.MeshStandardMaterial({ color: 0xa6472d, roughness: .95 }), wingMat = new T.MeshStandardMaterial({ color: 0x367fc1, roughness: .56, metalness: .06, side: T.DoubleSide }), wingFrame = new T.MeshStandardMaterial({ color: 0x254f7b, roughness: .67 });
+    box(1.02, 1.18, .52, 0, 0, 0, tunic, figure);
+    box(1.12, .23, .59, 0, .40, 0, tunic, figure);
+    box(1.04, .21, .55, 0, -.64, 0, navy, figure);
+    const head = new T.Group();
+    head.position.y = 1.03;
+    figure.add(head);
+    box(.71, .72, .69, 0, 0, 0, skin, head);
+    box(.735, .19, .715, 0, .31, .008, hair, head);
+    box(.73, .17, .12, 0, .14, .32, hair, head);
+    const faceMat = new T.MeshStandardMaterial({ color: 0x5b5244, roughness: 1 });
+    for (const s of [-1, 1])
+        box(.08, .08, .015, s * .16, .02, -.352, faceMat, head);
+    const legs = [];
+    for (const s of [-1, 1]) {
+        const arm = new T.Group();
+        arm.position.set(s * .70, .31, 0);
+        arm.rotation.z = s * .08;
+        figure.add(arm);
+        box(.30, .57, .36, 0, -.17, 0, tunic, arm);
+        box(.29, .57, .34, 0, -.71, 0, skin, arm);
+        const leg = new T.Group();
+        leg.position.set(s * .27, -.64, 0);
+        figure.add(leg);
+        box(.40, .93, .43, 0, -.5, 0, pants, leg);
+        box(.44, .34, .55, 0, -1.13, -.065, bootMat, leg);
+        legs.push(leg);
+    }
+    box(.40, .65, .16, 0, .02, .36, navy, figure);
+    const wings = [];
+    for (const s of [-1, 1]) {
+        const hinge = new T.Group();
+        hinge.position.set(s * .44, .46, .37);
+        figure.add(hinge);
+        const g = new T.BufferGeometry();
+        const p = [0, 0, 0, s * 3.32, -.35, 0, s * 3.06, -2.21, .035, s * .17, -1.74, 0];
+        g.setAttribute('position', new T.Float32BufferAttribute(p, 3));
+        g.setIndex(s > 0 ? [0, 2, 1, 0, 3, 2] : [0, 1, 2, 0, 2, 3]);
+        g.computeVertexNormals();
+        const membrane = new T.Mesh(g, wingMat);
+        membrane.castShadow = true;
+        membrane.receiveShadow = true;
+        hinge.add(membrane);
+        const points = [new T.Vector3(p[0], p[1], p[2]), new T.Vector3(p[3], p[4], p[5]), new T.Vector3(p[6], p[7], p[8]), new T.Vector3(p[9], p[10], p[11])];
+        for (let k = 0; k < 4; k++) {
+            const a = points[k], b = points[(k + 1) % 4], len = a.distanceTo(b);
+            const spar = new T.Mesh(new T.CylinderGeometry(.023, .023, len, 4), wingFrame);
+            spar.position.copy(a).add(b).multiplyScalar(.5);
+            spar.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+            hinge.add(spar);
+        }
+        const seamMat = new T.LineBasicMaterial({ color: 0x7aaadd, transparent: true, opacity: .24 });
+        for (const f of [.33, .67]) {
+            const a = points[0].clone().lerp(points[1], f), b = points[3].clone().lerp(points[2], f);
+            a.z += .012;
+            b.z += .012;
+            hinge.add(new T.Line(new T.BufferGeometry().setFromPoints([a, b]), seamMat));
+        }
+        wings.push({ hinge, s });
+    }
+    function radialTexture() { const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128; const ct = cv.getContext('2d'), gr = ct.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(20,29,33,.56)'); gr.addColorStop(.36, 'rgba(20,29,33,.35)'); gr.addColorStop(1, 'rgba(20,29,33,0)'); ct.fillStyle = gr; ct.fillRect(0, 0, 128, 128); return new T.CanvasTexture(cv); }
+    const shadow = new T.Mesh(new T.PlaneGeometry(5.5, 4.1), new T.MeshBasicMaterial({ map: radialTexture(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+    shadow.rotation.x = -Math.PI / 2;
+    scene.add(shadow);
+    // Sixteen flight gates become language targets. Each billboard draws a ring with the learning word inside.
+    const route = [
+        { x: riverX(232) + 4, y: 39, z: 232, name: 'The first wind' },
+        { x: riverX(163) + 19, y: 39, z: 163, name: 'The road cut' },
+        { x: riverX(93) + 27, y: 45, z: 93, name: 'Stone Road' },
+        { x: 12, y: 84, z: 13, name: 'First Ridge' },
+        { x: terraceA.x, y: terraceA.y + 4, z: terraceA.z + 3, name: 'Grey Steps / lower' },
+        { x: terraceB.x, y: terraceB.y + 4, z: terraceB.z + 1, name: 'Grey Steps / upper' },
+        { x: 128, y: Math.min(213, terrainHeight(128, -178) + 15), z: -178, name: 'The snow line' },
+        { x: 102, y: Math.min(214, terrainHeight(102, -282) + 13), z: -282, name: 'Frostspine' },
+        { x: SHELF.x, y: SHELF.y + 3.4, z: SHELF.z, name: 'Blizzard Shelf' },
+        { x: 153, y: terrainHeight(153, -238) + 8, z: -238, name: 'The quiet lip' },
+        { x: riverX(-247) + 4, y: 178, z: -247, name: 'Look down' },
+        { x: riverX(-219), y: 53, z: -219, name: 'The Dive' },
+        { x: riverX(-80) + 3, y: 34, z: -80, name: 'Cutwater canyon' },
+        { x: riverX(87) + 16, y: 34, z: 87, name: 'Palisade Bend' },
+        { x: riverX(174) - 1, y: 29, z: 174, name: 'Coming home' },
+        { x: riverX(269) - 4, y: 36, z: 269, name: 'Embervale' }
+    ];
+    function makeWordTexture(word,touched=false){
+        const cv=document.createElement('canvas'); cv.width=768; cv.height=320; const c=cv.getContext('2d');
+        c.clearRect(0,0,cv.width,cv.height); c.translate(384,160);
+        c.shadowColor=touched?'rgba(180,220,190,.25)':'rgba(255,248,222,.78)'; c.shadowBlur=touched?6:22;
+        c.strokeStyle=touched?'rgba(190,215,198,.45)':'#fff8dc'; c.lineWidth=touched?5:9; c.beginPath(); c.ellipse(0,0,350,118,0,0,Math.PI*2); c.stroke();
+        c.shadowBlur=0; c.fillStyle=touched?'rgba(205,220,208,.48)':'#fff8e5';
+        let size=76; c.font=`700 ${size}px Arial,"Noto Sans",sans-serif`; while(c.measureText(word).width>590 && size>38){size-=4;c.font=`700 ${size}px Arial,"Noto Sans",sans-serif`;}
+        c.textAlign='center'; c.textBaseline='middle'; c.fillText(word,0,-2);
+        c.font='600 22px Arial,sans-serif'; c.fillStyle=touched?'rgba(215,225,218,.35)':'rgba(255,239,208,.72)'; c.fillText(touched?'LEARNED':'FLY THROUGH · SPEAK',0,76);
+        const tex=new T.CanvasTexture(cv); tex.encoding=T.sRGBEncoding; tex.minFilter=T.LinearFilter; tex.magFilter=T.LinearFilter; return tex;
+    }
+    let collected = 0, activeTargetCount = 0;
+    const markers = route.map((r,i)=>{ const material=new T.SpriteMaterial({transparent:true,depthWrite:false,fog:false,opacity:.96}); const sprite=new T.Sprite(material); sprite.position.set(r.x,r.y,r.z); sprite.scale.set(13.5,5.65,1); scene.add(sprite); return {...r,index:i,sprite,touched:false,pop:0,position:new T.Vector3(r.x,r.y,r.z),concept:null,learningWord:'',primaryWord:'',active:true}; });
+    function updateMarkerTexture(m){
+        if(m.sprite.material.map) m.sprite.material.map.dispose();
+        m.sprite.material.map=makeWordTexture(m.learningWord || '—',m.touched); m.sprite.material.needsUpdate=true;
+    }
+    function clearTargetProgress(){
+        collected=0;
+        for(const m of markers){m.touched=false;m.pop=0;m.sprite.material.opacity=.96;}
+    }
+    function applyLanguageTargets(resetProgress=true){
+        if(resetProgress) clearTargetProgress();
+        const pool=lesson.concepts.filter(c=>conceptValue(c,lesson.learning));
+        if(lesson.offset>=pool.length) lesson.offset=0;
+        const page=pool.slice(lesson.offset,lesson.offset+route.length);
+        activeTargetCount=page.length;
+        markers.forEach((m,i)=>{
+            const c=page[i]; m.concept=c||null; m.active=!!c; m.sprite.visible=!!c;
+            m.learningWord=c?conceptValue(c,lesson.learning):''; m.primaryWord=c?conceptValue(c,lesson.primary):'';
+            if(c) updateMarkerTexture(m);
+        });
+        $('markerCount').textContent=`${collected} / ${activeTargetCount}`;
+        $('mapTotal').textContent=`${collected} / ${activeTargetCount} learned`;
+        updateLanguageStatus(); drawReviewList();
+    }
+
+    function updateLanguageStatus(){
+        const total=lesson.concepts.filter(c=>conceptValue(c,lesson.learning)).length;
+        const from=total?lesson.offset+1:0, to=Math.min(total,lesson.offset+route.length);
+        $('languageStatus').innerHTML=`<b>${LANGUAGE_META[lesson.learning].name}</b> in the sky · ${LANGUAGE_META[lesson.primary].name} translation<br>${total} words loaded · showing ${from}–${to || 0}`;
+        $('primaryLanguage').value=lesson.primary; $('learningLanguage').value=lesson.learning;
+    }
+    function addToReview(m){
+        if(!m.concept) return;
+        const key=(m.concept.id||m.learningWord)+'|'+lesson.learning+'|'+lesson.primary;
+        const item={key,id:m.concept.id||'',learningLanguage:lesson.learning,primaryLanguage:lesson.primary,learning:m.learningWord,primary:m.primaryWord,translations:{...m.concept},savedAt:new Date().toISOString()};
+        const at=lesson.review.findIndex(x=>x.key===key);
+        if(at>=0) lesson.review[at]=item; else lesson.review.push(item);
+        saveReview(); drawReviewList();
+    }
+    function drawReviewList(){
+        const box=$('reviewList'); if(!box) return;
+        $('reviewBadge').textContent=lesson.review.length; $('topReviewCount').textContent=lesson.review.length;
+        if(!lesson.review.length){box.innerHTML='<div class="review-empty">Fly through a word circle and it will appear here.</div>';return;}
+        box.innerHTML='';
+        lesson.review.slice().reverse().forEach(item=>{const row=document.createElement('div');row.className='review-row';const text=document.createElement('div');const strong=document.createElement('strong');strong.textContent=item.learning;const small=document.createElement('small');small.textContent=`${item.primary || '—'} · ${LANGUAGE_META[item.learningLanguage]?.name || item.learningLanguage}`;text.append(strong,small);const b=document.createElement('button');b.type='button';b.textContent='Speak';b.onclick=()=>speakLearningWord(item.learning,item.learningLanguage);row.append(text,b);box.append(row);});
+    }
+    function showWordCard(m){
+        $('wordCardLearning').textContent=m.learningWord; $('wordCardPrimary').textContent=m.primaryWord || LANGUAGE_META[lesson.primary].name;
+        $('wordCardMeta').textContent=`${LANGUAGE_META[lesson.learning].name.toUpperCase()} · SAVED TO REVIEW`;
+        $('wordCard').classList.add('show'); lesson.cardTimer=performance.now()+3300;
+    }
+    function openLanguage(show=true){
+        $('languagePanel').classList.toggle('hidden',!show); if(show){$('reviewPanel').classList.add('hidden'); showTools(false); state.paused=true;} else state.paused=false;
+    }
+    function openReviewPanel(show=true){
+        $('reviewPanel').classList.toggle('hidden',!show); if(show){$('languagePanel').classList.add('hidden');showTools(false);drawReviewList();state.paused=true;} else state.paused=false;
+    }
+    function importLesson(payload,announce=true){
+        const parsed=parseLessonPayload(payload); if(!parsed || !parsed.concepts?.length){if(announce)toast('No language words found in that data.');return false;}
+        if(parsed.primary) lesson.primary=parsed.primary; if(parsed.learning) lesson.learning=parsed.learning;
+        lesson.concepts=parsed.concepts; lesson.offset=0; applyLanguageTargets(true);
+        if(announce)toast(`${lesson.concepts.length} words loaded for ${LANGUAGE_META[lesson.learning].name}.`);
+        return true;
+    }
+    function readLaunchLesson(){
+        let raw=null;
+        try{const q=new URLSearchParams(location.search);raw=q.get('golingo')||q.get('lesson')||q.get('words'); if(!raw && location.hash.includes('=')){const h=new URLSearchParams(location.hash.slice(1));raw=h.get('golingo')||h.get('lesson')||h.get('words');} if(raw){try{raw=decodeURIComponent(raw)}catch{}; try{raw=atob(raw.replace(/-/g,'+').replace(/_/g,'/'))}catch{}; importLesson(raw,false);}}catch{}
+    }
+    // Windborne snow wraps a box around the camera. Close flakes and long, quiet streaks coexist.
+    const MAX_SNOW = 2400, snowPositions = new Float32Array(MAX_SNOW * 3), snowSpeeds = new Float32Array(MAX_SNOW), snowSizes = new Float32Array(MAX_SNOW);
+    for (let i = 0; i < MAX_SNOW; i++) {
+        snowPositions[i * 3] = range(-55, 55);
+        snowPositions[i * 3 + 1] = range(-34, 38);
+        snowPositions[i * 3 + 2] = range(-55, 55);
+        snowSpeeds[i] = range(.5, 1.5);
+        snowSizes[i] = range(1.4, 4.6);
+    }
+    const snowGeo = new T.BufferGeometry();
+    snowGeo.setAttribute('position', new T.BufferAttribute(snowPositions, 3));
+    snowGeo.setAttribute('aSize', new T.BufferAttribute(snowSizes, 1));
+    const snowParticles = new T.Points(snowGeo, new T.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uCold: coldUniform, uPixelRatio: { value: 1 } }, vertexShader: `attribute float aSize;uniform float uPixelRatio;varying float vAlpha;void main(){vec4 vp=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*vp;gl_PointSize=clamp(aSize*22./max(4.,-vp.z),1.,7.)*uPixelRatio;vAlpha=clamp((-vp.z-1.)*.12,0.,1.);}`, fragmentShader: `uniform float uCold;varying float vAlpha;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float a=(1.-smoothstep(.14,.5,d))*uCold*vAlpha*.74;gl_FragColor=vec4(.89,.94,.97,a);}` }));
+    snowParticles.frustumCulled = false;
+    scene.add(snowParticles);
+    const streakPos = new Float32Array(160 * 6);
+    const streakGeo = new T.BufferGeometry();
+    streakGeo.setAttribute('position', new T.BufferAttribute(streakPos, 3));
+    const snowStreaks = new T.LineSegments(streakGeo, new T.LineBasicMaterial({ color: 0xd6e7ee, transparent: true, opacity: 0, depthWrite: false }));
+    snowStreaks.frustumCulled = false;
+    scene.add(snowStreaks);
+    // Sparse warm shafts are a deliberately cheap high-quality-only accent.
+    const shafts = new T.Group();
+    scene.add(shafts);
+    for (let i = 0; i < 7; i++) {
+        const cv = document.createElement('canvas');
+        cv.width = 64;
+        cv.height = 256;
+        const ct = cv.getContext('2d'), gr = ct.createLinearGradient(0, 0, 64, 0);
+        gr.addColorStop(0, 'rgba(255,218,155,0)');
+        gr.addColorStop(.5, 'rgba(255,218,155,.12)');
+        gr.addColorStop(1, 'rgba(255,218,155,0)');
+        ct.fillStyle = gr;
+        ct.fillRect(0, 0, 64, 256);
+        const tex = new T.CanvasTexture(cv);
+        const m = new T.Mesh(new T.PlaneGeometry(14, 140), new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, opacity: .35 }));
+        m.position.set(riverX(155) + range(-46, 45), 57, range(90, 250));
+        m.rotation.z = -.4;
+        m.rotation.y = .3;
+        shafts.add(m);
+    }
+    const puffCount = 90, puffPositions = new Float32Array(puffCount * 3), puffLife = new Float32Array(puffCount), puffVelocity = [];
+    for (let i = 0; i < puffCount; i++) {
+        puffPositions[i * 3 + 1] = -999;
+        puffVelocity.push(new T.Vector3());
+    }
+    const puffGeo = new T.BufferGeometry();
+    puffGeo.setAttribute('position', new T.BufferAttribute(puffPositions, 3));
+    const puff = new T.Points(puffGeo, new T.PointsMaterial({ color: 0xd4d4c7, size: .23, transparent: true, opacity: .6, depthWrite: false }));
+    puff.frustumCulled = false;
+    scene.add(puff);
+    let puffCursor = 0;
+    function emitPuff(pos, kind = 'dirt') { puff.material.color.set(kind === 'water' ? 0xd9e8e9 : kind === 'snow' ? 0xeaf0f1 : 0xbab098); for (let j = 0; j < 22; j++) {
+        const i = puffCursor++ % puffCount;
+        puffPositions[i * 3] = pos.x + range(-.6, .6);
+        puffPositions[i * 3 + 1] = pos.y - .9 + range(-.2, .5);
+        puffPositions[i * 3 + 2] = pos.z + range(-.6, .6);
+        puffVelocity[i].set(range(-2, 2), range(.4, 3.3), range(-2, 2));
+        puffLife[i] = range(.3, .9);
+    } }
+    // Web Audio synthesis only. Construction is deferred until a trusted gesture.
+    class ValeAudio {
+        constructor() {
+            this.ctx = null;
+            this.master = null;
+            this.wind = null;
+            this.windFilter = null;
+            this.river = null;
+            this.pad = null;
+            this.enabled = false;
+            this.volume = .5;
+            this.noiseBuffer = null;
+            this.lastTick = 0;
+        }
+        ensure() {
+            if (!this.ctx) {
+                const AudioCtor = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtor)
+                    return;
+                try {
+                    this.ctx = new AudioCtor();
+                }
+                catch {
+                    return;
+                }
+                const ctx = this.ctx;
+                this.master = ctx.createGain();
+                this.master.gain.value = 0;
+                this.master.connect(ctx.destination);
+                const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), data = buffer.getChannelData(0);
+                let prev = 0;
+                for (let i = 0; i < data.length; i++) {
+                    prev = (prev + (Math.random() * 2 - 1) * .08) / 1.08;
+                    data[i] = prev * 3;
+                }
+                this.noiseBuffer = buffer;
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                this.windFilter = ctx.createBiquadFilter();
+                this.windFilter.type = 'lowpass';
+                this.windFilter.frequency.value = 700;
+                this.wind = ctx.createGain();
+                this.wind.gain.value = .05;
+                source.connect(this.windFilter);
+                this.windFilter.connect(this.wind);
+                this.wind.connect(this.master);
+                source.start();
+                const riverSource = ctx.createBufferSource();
+                riverSource.buffer = buffer;
+                riverSource.loop = true;
+                const riverFilter = ctx.createBiquadFilter();
+                riverFilter.type = 'bandpass';
+                riverFilter.frequency.value = 420;
+                riverFilter.Q.value = .65;
+                this.river = ctx.createGain();
+                this.river.gain.value = 0;
+                riverSource.connect(riverFilter);
+                riverFilter.connect(this.river);
+                this.river.connect(this.master);
+                riverSource.start(.03);
+                this.pad = ctx.createGain();
+                this.pad.gain.value = .03;
+                this.pad.connect(this.master);
+                for (const [freq, amp] of [[110, .5], [164.8138, .24], [220, .08]]) {
+                    const osc = ctx.createOscillator(), g = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    g.gain.value = amp;
+                    osc.connect(g);
+                    g.connect(this.pad);
+                    osc.start();
+                }
+            }
+            this.enabled = true;
+            this.ctx?.resume().catch(() => { });
+            syncSoundUI();
+        }
+        toggle() { if (!this.ctx || !this.enabled)
+            this.ensure();
+        else {
+            this.enabled = false;
+            syncSoundUI();
+        } }
+        tone(freq, duration, gain, offset = 0) {
+            if (!this.ctx || !this.enabled || !this.master)
+                return;
+            const ctx = this.ctx, t = ctx.currentTime + offset, osc = ctx.createOscillator(), g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            g.gain.setValueAtTime(.0001, t);
+            g.gain.exponentialRampToValueAtTime(gain, t + .009);
+            g.gain.exponentialRampToValueAtTime(.0001, t + duration);
+            osc.connect(g);
+            g.connect(this.master);
+            osc.start(t);
+            osc.stop(t + duration + .02);
