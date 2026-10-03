@@ -1830,12 +1830,22 @@ function startGame(T) {
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('wheel', (e) => { e.preventDefault(); state.zoom = clamp(state.zoom + e.deltaY * .0005, .74, 1.4); }, { passive: false });
     window.addEventListener('resize', () => { keys.clear(); resize(); });
-    window.addEventListener('blur', () => { keys.clear(); state.dragging = false; if (!state.help)
-        pause(true); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) {
+    // Browser focus changes must never interrupt touch steering.
+    // Mobile Safari/Chrome can emit blur/visibility events while browser chrome or
+    // pointer capture changes during a joystick gesture. Clear transient inputs,
+    // but leave the flight running. Pause is intentional via Esc / Pause UI only.
+    window.addEventListener('blur', () => {
         keys.clear();
-        pause(true);
-    } });
+        state.dragging = false;
+        state.mobileDive = false;
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            keys.clear();
+            state.dragging = false;
+            state.mobileDive = false;
+        }
+    });
     canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); pause(true); $('fatal').classList.remove('hidden'); $('fatalMessage').textContent = 'The graphics context was lost. Close other graphics-heavy tabs, then try again.'; });
     // Diagnostic hook is opt-in via ?test=1. It is not a game menu or a second camera mode.
     if (new URLSearchParams(location.search).has('test')) {
