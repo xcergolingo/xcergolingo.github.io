@@ -1894,7 +1894,9 @@ function startGame(T) {
     window.GoLingoBook=window.GoLingoGame;
     if(pendingLessons.length){
         lesson.concepts=[];
-        for(const data of pendingLessons) await importGoLingoWords(data,{append:false});
+        // importGoLingoWords applies synchronously before returning its Promise;
+        // do not use await here because startGame is intentionally synchronous.
+        for(const data of pendingLessons) importGoLingoWords(data,{append:false});
     } else if(!launchLessonLoaded) {
         applyLanguageTargets(true);
     }
