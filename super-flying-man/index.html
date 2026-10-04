@@ -107,18 +107,31 @@ THE SOFTWARE.
 <aside id="sponsor" class="glass"><strong>Sponsored by GoLingoApp.com</strong><span>Collect words in the sky, then export them to GoLingo to practice them in the real world.</span><button id="sponsorExport" type="button">Export words to GoLingo ↗</button></aside>
 
 <div id="wordCard" class="glass" aria-live="polite"><div id="wordCardLearning">cielo</div><div id="wordCardPrimary">sky</div><div id="wordCardMeta">SPANISH · SAVED TO REVIEW</div></div>
-<section id="languagePanel" class="glass hidden" aria-label="Language flight"><div class="panel-head"><span>GOLINGO / LANGUAGE FLIGHT</span><button id="closeLanguage" aria-label="Close language flight">×</button></div><h2>Put the lesson in the sky.</h2><p class="lang-note">Each circle becomes a word. Fly through it to hear the learning-language word and save it to your review list.</p><div class="lang-grid"><label>Primary language<select id="primaryLanguage"></select></label><label>Learning language<select id="learningLanguage"></select></label></div><label style="display:block;margin:15px 0 0;font-size:10px">Paste words / translations<textarea id="wordData" spellcheck="false" placeholder="Learning | Primary&#10;cielo | sky&#10;río | river&#10;&#10;Or paste a JSON array with translations for many languages."></textarea></label><div class="lang-actions"><button id="loadWords">Load words</button><button id="demoWords">Demo 16</button><button id="nextWords">Next words</button></div><div id="languageStatus" class="lang-status"></div><button id="openReview" class="wide">Review saved words <span id="reviewBadge">0</span></button></section>
+<section id="languagePanel" class="glass hidden" aria-label="Language flight"><div class="panel-head"><span>GOLINGO / LANGUAGE FLIGHT</span><button id="closeLanguage" aria-label="Close language flight">×</button></div><h2>Put the lesson in the sky.</h2><p class="lang-note">Each circle becomes a word. Fly through it to hear the learning-language word and save it to your review list.</p><div class="lang-grid"><label>Primary language<select id="primaryLanguage"></select></label><label>Learning language<select id="learningLanguage"></select></label></div><label style="display:block;margin:15px 0 0;font-size:10px">Paste words / translations<textarea id="wordData" spellcheck="false" placeholder="Your imported words appear here.&#10;&#10;Or paste:&#10;水 = water&#10;船 = boat"></textarea></label><div class="lang-actions"><button id="loadWords">Load words</button><button id="demoWords">Demo 16</button><button id="nextWords">Next words</button></div><div id="languageStatus" class="lang-status"></div><button id="openReview" class="wide">Review saved words <span id="reviewBadge">0</span></button></section>
 <section id="reviewPanel" class="glass hidden" aria-label="Review words"><div class="panel-head"><span>WORDS TO LEARN LATER</span><button id="closeReview" aria-label="Close review list">×</button></div><h2>Your flight basket.</h2><p class="lang-note">Words are added automatically when you fly through their circles. Tap Speak to hear one again.</p><div id="reviewList"></div><div class="review-actions"><button id="copyReview">Copy text</button><button id="downloadReview">Download JSON</button><button id="exportGoLingo">Export to GoLingo</button><button id="clearReview">Clear list</button></div><p id="golingoExportNote"><b>Continue in the real world.</b> Export the words you collected to GoLingo, then use them for real-world speaking and practice. Sponsored by GoLingoApp.com.</p></section>
 <div id="fatal" class="overlay hidden"><section class="modal glass"><h2>The vale could not open.</h2><p id="fatalMessage">A WebGL-capable desktop browser is needed.</p><button onclick="location.reload()" class="primary">Try again</button></section></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.140.2/build/three.min.js"></script>
 <script>(()=>{
 // GoLingo native/web bridge: lessons may arrive before Three.js/game initialization.
 window.__SFM_PENDING_LESSONS__=window.__SFM_PENDING_LESSONS__||[];
-window.SuperFlyingManLanguage=window.SuperFlyingManLanguage||{
-  ready:false,
-  load(data){window.__SFM_PENDING_LESSONS__.push(data);return {queued:true};}
-};
-window.addEventListener('message',e=>{const d=e.data;if(d&&(d.type==='golingo.words'||d.type==='super-flying-man.lesson'||d.words||d.concepts)){window.SuperFlyingManLanguage.load(d);}});
+window.__SFM_IMPORT_DIAG__={received:0,last:null,status:'waiting for GoLingo'};
+function queueGoLingoLesson(data){
+  if(!data)return {queued:false};
+  window.__SFM_PENDING_LESSONS__.push(data);
+  window.__SFM_IMPORT_DIAG__.received++;
+  window.__SFM_IMPORT_DIAG__.last=data;
+  window.__SFM_IMPORT_DIAG__.status='queued before game ready';
+  return {queued:true,count:Array.isArray(data?.words)?data.words.length:1};
+}
+window.SuperFlyingManLanguage=window.SuperFlyingManLanguage||{ready:false,load:queueGoLingoLesson};
+// IMPORTANT: expose the same API as Word Folio immediately, before Three.js initializes.
+window.GoLingoGame=window.GoLingoGame||{};
+window.GoLingoGame.ready=false;
+window.GoLingoGame.importWords=async(data)=>queueGoLingoLesson(data);
+window.GoLingoGame.getImportDiagnostic=()=>({...window.__SFM_IMPORT_DIAG__,pending:window.__SFM_PENDING_LESSONS__.length});
+window.GoLingoBook=window.GoLingoGame;
+window.addEventListener('message',e=>{const d=e.data;if(d&&(d.type==='golingo:importWords'||d.type==='GoLingoImportWords'))queueGoLingoLesson(d.payload??d.data??d);else if(d&&(d.type==='golingo.words'||d.type==='super-flying-man.lesson'||d.words||d.concepts||d.word||d.term||d.text))queueGoLingoLesson(d);});
+try{window.webkit?.messageHandlers?.golingo?.postMessage({type:'bridgeReady',game:'super-flying-man',phase:'early'});}catch{}
 /* Super Flying Man — original procedural flight toy. No external art or audio. */
 function startGame(T) {
     if (T.ColorManagement)
@@ -157,31 +170,64 @@ function startGame(T) {
     const lesson = { primary:'en', learning:'es', concepts:DEMO_CONCEPTS.map(x=>({...x})), offset:0, review:[], cardTimer:0 };
     function normalizeLang(k){ if(!k) return null; const v=String(k).trim().toLowerCase().replace('_','-'); return LANGUAGE_ALIASES[v] || LANGUAGE_ALIASES[v.split('-')[0]] || null; }
     function conceptValue(c,lang){ return String(c?.[lang] ?? c?.translations?.[lang] ?? '').trim(); }
-    function normalizeConcept(raw,i){
-        if(typeof raw==='string') return {id:'word-'+i,[lesson.learning]:raw};
+    function normalizeConcept(raw,i,learningLang=lesson.learning,primaryLang=lesson.primary){
+        if(typeof raw==='string') return {id:'word-'+i,[learningLang]:raw};
+        if(!raw || typeof raw!=='object') return null;
         const c={id:String(raw.id || raw.key || raw.concept || 'word-'+i)};
         const src=raw.translations && typeof raw.translations==='object' ? {...raw.translations,...raw} : raw;
         for(const [k,v] of Object.entries(src)){ const code=normalizeLang(k); if(code && typeof v==='string' && v.trim()) c[code]=v.trim(); }
-        if(raw.word && !c[lesson.learning]) c[lesson.learning]=String(raw.word).trim();
-        if(raw.translation && !c[lesson.primary]) c[lesson.primary]=String(raw.translation).trim();
+        const word=raw.word ?? raw.learningWord ?? raw.targetWord ?? raw.term ?? raw.text;
+        const translation=raw.translation ?? raw.primaryWord ?? raw.meaning ?? raw.translatedWord;
+        if(word!=null && String(word).trim()) c[learningLang]=String(word).trim();
+        if(translation!=null && String(translation).trim()) c[primaryLang]=String(translation).trim();
+        if(raw.sentence!=null && String(raw.sentence).trim()) c.sentence=String(raw.sentence).trim();
+        if(raw.sentenceTranslation!=null && String(raw.sentenceTranslation).trim()) c.sentenceTranslation=String(raw.sentenceTranslation).trim();
         return c;
     }
     function parseLessonPayload(payload){
         if(!payload) return null;
-        if(typeof payload==='string'){ try{ payload=JSON.parse(payload); }catch{return null;} }
-        if(Array.isArray(payload)) return {concepts:payload.map(normalizeConcept).filter(Boolean)};
-        const primary=normalizeLang(payload.primaryLanguage || payload.primary || payload.baseLanguage);
-        const learning=normalizeLang(payload.learningLanguage || payload.learning || payload.targetLanguage);
-        const rows=payload.words || payload.concepts || payload.items || payload.data;
-        if(!Array.isArray(rows)) return null;
+        if(typeof payload==='string'){
+            const raw=payload.trim();
+            try{ payload=JSON.parse(raw); }
+            catch{
+                // GoLingo legacy text bridge: one or more "learning=primary" pairs.
+                return parsePaste(raw);
+            }
+        }
+        if(Array.isArray(payload)) return {concepts:payload.map((r,i)=>normalizeConcept(r,i,lesson.learning,lesson.primary)).filter(c=>c&&conceptValue(c,lesson.learning))};
+        if(typeof payload!=='object') return null;
+        const primary=normalizeLang(payload.primaryLanguage || payload.primary || payload.baseLanguage || payload.nativeLanguage);
+        const learning=normalizeLang(payload.learningLanguage || payload.learning || payload.targetLanguage || payload.language);
         if(primary) lesson.primary=primary; if(learning) lesson.learning=learning;
-        return {primary,learning,concepts:rows.map(normalizeConcept).filter(Boolean)};
+        let rows=payload.words || payload.concepts || payload.items || payload.data;
+        // Accept a single GoLingo word object directly, not only {words:[...]}.
+        if(!Array.isArray(rows) && (payload.word!=null || payload.translation!=null || payload.text!=null || payload.term!=null)){
+            rows=[{
+                ...payload,
+                word: payload.word ?? payload.text ?? payload.term,
+                translation: payload.translation ?? payload.meaning ?? payload.primaryWord
+            }];
+        }
+        // Also accept words:"hola=hello" from older app links.
+        if(typeof rows==='string') return parsePaste(rows);
+        if(!Array.isArray(rows)) return null;
+        const resolvedPrimary=primary||lesson.primary, resolvedLearning=learning||lesson.learning;
+        const concepts=rows.map((r,i)=>normalizeConcept(r,i,resolvedLearning,resolvedPrimary)).filter(c=>c&&conceptValue(c,resolvedLearning));
+        return {primary:resolvedPrimary,learning:resolvedLearning,concepts};
     }
     function parsePaste(text){
         const raw=String(text||'').trim(); if(!raw) return null;
         if(raw[0]==='[' || raw[0]==='{'){ try{return parseLessonPayload(JSON.parse(raw));}catch(e){throw new Error('JSON could not be read.');} }
         const rows=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-        const concepts=rows.map((line,i)=>{ const parts=line.split(/\t|\s*\|\s*|\s*=>\s*/); const c={id:'pasted-'+i}; c[lesson.learning]=(parts[0]||'').trim(); if(parts[1]) c[lesson.primary]=parts.slice(1).join(' | ').trim(); return c; }).filter(c=>conceptValue(c,lesson.learning));
+        const concepts=rows.map((line,i)=>{
+            // Backward compatible: word=translation, word|translation, word=>translation, or tab.
+            // Split only on the first separator so translations can contain punctuation.
+            const match=line.match(/^(.+?)\s*(?:=>|\||\t|=)\s*(.+)$/);
+            const c={id:'pasted-'+i};
+            if(match){c[lesson.learning]=match[1].trim();c[lesson.primary]=match[2].trim();}
+            else c[lesson.learning]=line.trim();
+            return c;
+        }).filter(c=>conceptValue(c,lesson.learning));
         return {concepts};
     }
     function loadSavedReview(){ try{ const r=JSON.parse(localStorage.getItem('sfm-language-review')||'[]'); if(Array.isArray(r)) lesson.review=r; }catch{} }
@@ -805,11 +851,24 @@ function startGame(T) {
         updateLanguageStatus(); drawReviewList();
     }
 
+    function syncWordsEditor(){
+        const box=$('wordData'); if(!box) return;
+        box.value=lesson.concepts
+          .filter(c=>conceptValue(c,lesson.learning))
+          .map(c=>{
+              const word=conceptValue(c,lesson.learning);
+              const translation=conceptValue(c,lesson.primary);
+              return translation?`${word} = ${translation}`:word;
+          }).join('\n');
+        $('primaryLanguage').value=lesson.primary;
+        $('learningLanguage').value=lesson.learning;
+    }
     function updateLanguageStatus(){
         const total=lesson.concepts.filter(c=>conceptValue(c,lesson.learning)).length;
         const from=total?lesson.offset+1:0, to=Math.min(total,lesson.offset+route.length);
         $('languageStatus').innerHTML=`<b>${LANGUAGE_META[lesson.learning].name}</b> in the sky · ${LANGUAGE_META[lesson.primary].name} translation<br>${total} words loaded · showing ${from}–${to || 0}`;
         $('primaryLanguage').value=lesson.primary; $('learningLanguage').value=lesson.learning;
+        syncWordsEditor();
     }
     function addToReview(m){
         if(!m.concept) return;
@@ -832,7 +891,7 @@ function startGame(T) {
         $('wordCard').classList.add('show'); lesson.cardTimer=performance.now()+3300;
     }
     function openLanguage(show=true){
-        $('languagePanel').classList.toggle('hidden',!show); if(show){$('reviewPanel').classList.add('hidden'); showTools(false); state.paused=true;} else state.paused=false;
+        $('languagePanel').classList.toggle('hidden',!show); if(show){syncWordsEditor();$('reviewPanel').classList.add('hidden'); showTools(false); state.paused=true;} else state.paused=false;
     }
     function openReviewPanel(show=true){
         $('reviewPanel').classList.toggle('hidden',!show); if(show){$('languagePanel').classList.add('hidden');showTools(false);drawReviewList();state.paused=true;} else state.paused=false;
@@ -841,12 +900,45 @@ function startGame(T) {
         const parsed=parseLessonPayload(payload); if(!parsed || !parsed.concepts?.length){if(announce)toast('No language words found in that data.');return false;}
         if(parsed.primary) lesson.primary=parsed.primary; if(parsed.learning) lesson.learning=parsed.learning;
         lesson.concepts=parsed.concepts; lesson.offset=0; applyLanguageTargets(true);
-        if(announce)toast(`${lesson.concepts.length} words loaded for ${LANGUAGE_META[lesson.learning].name}.`);
+        window.__SFM_IMPORT_DIAG__={received:(window.__SFM_IMPORT_DIAG__?.received||0),last:payload,status:'imported',count:lesson.concepts.length,primaryLanguage:lesson.primary,learningLanguage:lesson.learning};
+        const importAck={type:'wordsImported',game:'super-flying-man',ok:true,count:lesson.concepts.length,primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.concepts.map(c=>conceptValue(c,lesson.learning))};
+        try{window.webkit?.messageHandlers?.superFlyingManImport?.postMessage(importAck);}catch{}
+        try{window.webkit?.messageHandlers?.golingo?.postMessage(importAck);}catch{}
+        if(announce)toast(`${lesson.concepts.length} ${lesson.concepts.length===1?'word':'words'} loaded from GoLingo for ${LANGUAGE_META[lesson.learning].name}. Default words replaced.`);
         return true;
     }
     function readLaunchLesson(){
-        let raw=null;
-        try{const q=new URLSearchParams(location.search);raw=q.get('golingo')||q.get('lesson')||q.get('words'); if(!raw && location.hash.includes('=')){const h=new URLSearchParams(location.hash.slice(1));raw=h.get('golingo')||h.get('lesson')||h.get('words');} if(raw){try{raw=decodeURIComponent(raw)}catch{}; try{raw=atob(raw.replace(/-/g,'+').replace(/_/g,'/'))}catch{}; importLesson(raw,false);}}catch{}
+        try{
+            const q=new URLSearchParams(location.search);
+            const h=location.hash.includes('=')?new URLSearchParams(location.hash.slice(1)):new URLSearchParams();
+            const get=(...names)=>{for(const n of names){const v=q.get(n)??h.get(n);if(v!=null&&v!=='')return v;}return null;};
+            const primary=get('primary','primaryLanguage','baseLanguage','nativeLanguage','from','sourceLanguage');
+            const learning=get('learning','learningLanguage','targetLanguage','language','to','destinationLanguage');
+            // First accept structured/list payloads.
+            let raw=get('golingo','lesson','words','concepts','items','data');
+            if(raw){
+                let decoded=raw;
+                try{decoded=decodeURIComponent(decoded)}catch{}
+                // Only use base64 if it decodes to JSON/text that looks intentional.
+                try{const b=atob(decoded.replace(/-/g,'+').replace(/_/g,'/'));if(b&&(/[\[{=|]/.test(b)))decoded=b;}catch{}
+                if(importLesson(typeof decoded==='string'&&decoded.trim().startsWith('{')?JSON.parse(decoded):decoded,false)) return true;
+            }
+            // GoLingo single-word launch. This is the important one-word path.
+            const word=get('word','learningWord','targetWord','term','text');
+            const translation=get('translation','primaryWord','meaning','translatedWord','definition');
+            if(word){
+                return importLesson({
+                    type:'golingo.words',
+                    primary:primary||lesson.primary,
+                    learning:learning||lesson.learning,
+                    words:[{word,translation:translation||''}]
+                },false);
+            }
+            // Legacy pair can also be supplied as ?pair=hola=hello.
+            const pair=get('pair','wordPair');
+            if(pair) return importLesson({primary:primary||lesson.primary,learning:learning||lesson.learning,words:pair},false);
+        }catch(e){console.warn('GoLingo launch lesson could not be read',e);}
+        return false;
     }
     // Windborne snow wraps a box around the camera. Close flakes and long, quiet streaks coexist.
     const MAX_SNOW = 2400, snowPositions = new Float32Array(MAX_SNOW * 3), snowSpeeds = new Float32Array(MAX_SNOW), snowSizes = new Float32Array(MAX_SNOW);
@@ -1735,17 +1827,107 @@ function startGame(T) {
     window.SuperFlyingManLanguage={
       ready:true,
       load:(data)=>importLesson(data,true),
+      getLesson:()=>({primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.concepts.map(c=>({id:c.id,word:conceptValue(c,lesson.learning),translation:conceptValue(c,lesson.primary),sentence:c.sentence||'',sentenceTranslation:c.sentenceTranslation||''}))}),
       getReview:()=>lesson.review.map(x=>({...x})),
       setLanguages:(primary,learning)=>{const p=normalizeLang(primary),l=normalizeLang(learning);if(p)lesson.primary=p;if(l)lesson.learning=l;lesson.offset=0;applyLanguageTargets(true);return {primary:lesson.primary,learning:lesson.learning};},
       clearReview:()=>{lesson.review=[];saveReview();drawReviewList();},
       exportToGoLingo
     };
-    window.addEventListener('message',e=>{const d=e.data;if(d?.type==='golingo.words'||d?.type==='super-flying-man.lesson'||d?.words||d?.concepts)importLesson(d,true);});
-    readLaunchLesson();
-    applyLanguageTargets(true);
+    // Same bridge contract as the working GoLingo Word Folio / Book game.
+    // GoLingo can use one integration for both games:
+    // window.GoLingoGame.importWords({primaryLanguage,learningLanguage,words:[...]})
+    window.GoLingoGame=window.GoLingoGame||{};
+    window.GoLingoGame.ready=true;
+    window.GoLingoGame.importWords=async(payload,options={})=>{
+        const ok=importLesson(payload,true);
+        const snapshot=window.SuperFlyingManLanguage.getLesson();
+        return {ok,count:ok?snapshot.words.length:0,...snapshot};
+    };
+    window.GoLingoGame.getLesson=()=>window.SuperFlyingManLanguage.getLesson();
+    window.GoLingoGame.getReview=()=>window.SuperFlyingManLanguage.getReview();
+    window.GoLingoGame.getImportDiagnostic=()=>({...window.__SFM_IMPORT_DIAG__,pending:window.__SFM_PENDING_LESSONS__?.length||0});
+    window.GoLingoBook=window.GoLingoGame;
+    window.addEventListener('message',e=>{
+        const d=e.data;
+        if(d?.type==='golingo:importWords'||d?.type==='GoLingoImportWords'){
+            importLesson(d.payload??d.data??d,true);
+            return;
+        }
+        if(d?.type==='golingo.words'||d?.type==='super-flying-man.lesson'||d?.words||d?.concepts||d?.word||d?.term||d?.text)importLesson(d,true);
+    });
+    const launchLessonLoaded=readLaunchLesson();
+    if(!launchLessonLoaded && pendingLessons.length===0) applyLanguageTargets(true);
     pendingLessons.forEach(data=>importLesson(data,true));
+
+    // Canonical GoLingo bridge — same contract as Lagoon / Word Folio.
+    // Default import REPLACES the current lesson. append:true is opt-in only.
+    const golingoSend=(type,data={})=>{
+        const message={type,game:'super-flying-man',...data};
+        try{window.webkit?.messageHandlers?.golingo?.postMessage(message);}catch{}
+        return message;
+    };
+    const normalizeGoLingoPayload=(payload)=>{
+        if(typeof payload==='string'){
+            try{payload=JSON.parse(payload);}catch{return payload;}
+        }
+        return payload;
+    };
+    const importGoLingoWords=async(payload,options={})=>{
+        payload=normalizeGoLingoPayload(payload);
+        const append=!!options.append;
+        const before=append?lesson.concepts.slice():[];
+        const parsed=parseLessonPayload(payload);
+        if(!parsed?.concepts?.length){
+            const result={ok:false,count:0,error:'No words found'};
+            golingoSend('error',result); return result;
+        }
+        if(parsed.primary)lesson.primary=parsed.primary;
+        if(parsed.learning)lesson.learning=parsed.learning;
+        lesson.concepts=append?[...before,...parsed.concepts]:parsed.concepts.slice();
+        lesson.offset=0;
+        applyLanguageTargets(true);
+        const result={
+            ok:true,
+            count:parsed.concepts.length,
+            total:lesson.concepts.length,
+            append,
+            primaryLanguage:lesson.primary,
+            learningLanguage:lesson.learning,
+            words:lesson.concepts.map(c=>({
+                id:c.id,
+                word:conceptValue(c,lesson.learning),
+                translation:conceptValue(c,lesson.primary),
+                sentence:c.sentence||'',
+                sentenceTranslation:c.sentenceTranslation||''
+            }))
+        };
+        window.__SFM_IMPORT_DIAG__={received:(window.__SFM_IMPORT_DIAG__?.received||0)+1,last:payload,status:'imported',...result};
+        golingoSend('wordsImported',result);
+        toast(`${result.total} ${result.total===1?'word':'words'} loaded from GoLingo. Default words replaced.`);
+        return result;
+    };
+    window.GoLingoGame={
+        game:'super-flying-man',
+        version:'1.1.0',
+        useNativeSpeech:false,
+        allowedOrigins:[],
+        importWords:importGoLingoWords,
+        getLesson:()=>({primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.concepts.map(c=>({id:c.id,word:conceptValue(c,lesson.learning),translation:conceptValue(c,lesson.primary),sentence:c.sentence||'',sentenceTranslation:c.sentenceTranslation||''}))}),
+        getReview:()=>lesson.review.map(x=>({...x}))
+    };
+    window.GoLingoBook=window.GoLingoGame;
+    window.addEventListener('message',async e=>{
+        const d=e.data;
+        if(d?.type==='golingo:importWords'||d?.type==='GoLingoImportWords'){
+            const result=await importGoLingoWords(d.payload,d.options||{});
+            try{e.source?.postMessage({type:'golingo:importResult',...result},'*');}catch{}
+        }
+    });
+    golingoSend('ready',{version:'1.1.0',api:'GoLingoGame.importWords'});
+    window.dispatchEvent(new CustomEvent('golingo:ready',{detail:{game:'super-flying-man'}}));
     window.dispatchEvent(new CustomEvent('SuperFlyingManReady'));
-    try{window.webkit?.messageHandlers?.superFlyingManReady?.postMessage({ready:true,version:2});}catch{}
+    try{window.webkit?.messageHandlers?.superFlyingManReady?.postMessage({ready:true,version:3});}catch{}
+    try{window.webkit?.messageHandlers?.golingo?.postMessage({type:'ready',game:'super-flying-man',version:3});}catch{}
     $('soundButton').onclick = () => audio.toggle();
     $('toolsMute').onclick = () => audio.toggle();
     $('pauseMute').onclick = () => audio.toggle();
