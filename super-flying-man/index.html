@@ -1833,31 +1833,7 @@ function startGame(T) {
       clearReview:()=>{lesson.review=[];saveReview();drawReviewList();},
       exportToGoLingo
     };
-    // Same bridge contract as the working GoLingo Word Folio / Book game.
-    // GoLingo can use one integration for both games:
-    // window.GoLingoGame.importWords({primaryLanguage,learningLanguage,words:[...]})
-    window.GoLingoGame=window.GoLingoGame||{};
-    window.GoLingoGame.ready=true;
-    window.GoLingoGame.importWords=async(payload,options={})=>{
-        const ok=importLesson(payload,true);
-        const snapshot=window.SuperFlyingManLanguage.getLesson();
-        return {ok,count:ok?snapshot.words.length:0,...snapshot};
-    };
-    window.GoLingoGame.getLesson=()=>window.SuperFlyingManLanguage.getLesson();
-    window.GoLingoGame.getReview=()=>window.SuperFlyingManLanguage.getReview();
-    window.GoLingoGame.getImportDiagnostic=()=>({...window.__SFM_IMPORT_DIAG__,pending:window.__SFM_PENDING_LESSONS__?.length||0});
-    window.GoLingoBook=window.GoLingoGame;
-    window.addEventListener('message',e=>{
-        const d=e.data;
-        if(d?.type==='golingo:importWords'||d?.type==='GoLingoImportWords'){
-            importLesson(d.payload??d.data??d,true);
-            return;
-        }
-        if(d?.type==='golingo.words'||d?.type==='super-flying-man.lesson'||d?.words||d?.concepts||d?.word||d?.term||d?.text)importLesson(d,true);
-    });
     const launchLessonLoaded=readLaunchLesson();
-    if(!launchLessonLoaded && pendingLessons.length===0) applyLanguageTargets(true);
-    pendingLessons.forEach(data=>importLesson(data,true));
 
     // Canonical GoLingo bridge — same contract as Lagoon / Word Folio.
     // Default import REPLACES the current lesson. append:true is opt-in only.
@@ -1916,11 +1892,19 @@ function startGame(T) {
         getReview:()=>lesson.review.map(x=>({...x}))
     };
     window.GoLingoBook=window.GoLingoGame;
+    if(pendingLessons.length){
+        lesson.concepts=[];
+        for(const data of pendingLessons) await importGoLingoWords(data,{append:false});
+    } else if(!launchLessonLoaded) {
+        applyLanguageTargets(true);
+    }
     window.addEventListener('message',async e=>{
         const d=e.data;
         if(d?.type==='golingo:importWords'||d?.type==='GoLingoImportWords'){
-            const result=await importGoLingoWords(d.payload,d.options||{});
+            const result=await importGoLingoWords(d.payload??d.data??d,d.options||{});
             try{e.source?.postMessage({type:'golingo:importResult',...result},'*');}catch{}
+        } else if(d?.words||d?.word||d?.concepts) {
+            await importGoLingoWords(d,{append:false});
         }
     });
     golingoSend('ready',{version:'1.1.0',api:'GoLingoGame.importWords'});
