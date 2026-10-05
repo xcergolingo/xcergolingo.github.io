@@ -200,8 +200,10 @@
       ],
       "startSeconds": 21.455,
       "duration": 11.958333,
-      "bytes": 250961,
-      "success": true
+      "bytes": 284533,
+      "success": true,
+      "pointerLockVerified": true,
+      "refreshedAt": "2026-10-05T15:00:53.607Z"
     },
     {
       "id": "word-folio",
