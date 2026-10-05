@@ -1,0 +1,36 @@
+name: Verify GoLingo gallery release
+on:
+  push:
+    branches: [main]
+    paths: [games/README.md]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: golingo-gallery-check
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runner
+        run: |
+          npm install --prefix /tmp/golingo-check playwright@1.56.1
+          /tmp/golingo-check/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify live website and all three video previews
+        env:
+          NODE_PATH: /tmp/golingo-check/node_modules
+        run: node tools/check-golingo-gallery.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golingo-gallery-release
+          path: |
+            games/
+            gallery-check/
+          retention-days: 30
