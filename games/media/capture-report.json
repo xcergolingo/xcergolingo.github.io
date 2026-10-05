@@ -200,10 +200,34 @@
       ],
       "startSeconds": 21.455,
       "duration": 11.958333,
-      "bytes": 284533,
+      "bytes": 307253,
       "success": true,
       "pointerLockVerified": true,
-      "refreshedAt": "2026-10-05T15:00:53.607Z"
+      "refreshedAt": "2026-10-05T15:09:26.942Z",
+      "recordingOverlay": {
+        "hiddenId": "menu",
+        "hiddenTag": "DIV",
+        "candidates": [
+          {
+            "tag": "DIV",
+            "id": "",
+            "classes": "actions",
+            "hasCanvas": false
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "classes": "menu-content",
+            "hasCanvas": false
+          },
+          {
+            "tag": "DIV",
+            "id": "menu",
+            "classes": "hidden",
+            "hasCanvas": false
+          }
+        ]
+      }
     },
     {
       "id": "word-folio",
