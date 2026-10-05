@@ -16,7 +16,7 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 | Word Folio | https://xcergolingo.github.io/word-folio/ | media/word-folio.mp4 |
 | Super Flying Man | https://xcergolingo.github.io/super-flying-man/ | media/super-flying-man.mp4 |
 
-The 12-second previews are silent recordings of the actual public games using demonstration vocabulary. They are not concept animations. The recorder uses a software-rendered browser; game performance varies by device. The recording-only Word Folio speech-voice notification is hidden because no speech voice is installed on the recording machine. Game sources are unchanged.
+The 12-second previews are silent recordings of the actual public games using demonstration vocabulary. They are not concept animations. The recorder uses a software-rendered browser; game performance varies by device. The recording-only Word Folio speech-voice notification is hidden because no speech voice is installed on the recording machine. Game sources are unchanged. Lagoon was recorded after verifying actual pointer-lock activation, with the game's Low graphics preset.
 
 ## Visitor journey
 
@@ -35,7 +35,7 @@ No build process, external font, analytics, or third-party video player is requi
 
 Edit the HTML for wording and the JavaScript game map when adding a game. The download destination is embedded in HTML so it works without JavaScript. `media/app.json` can refresh the destination, restricted to approved GoLingo/Apple hosts.
 
-The **GoLingo gallery gameplay previews** workflow records previews and commits only gallery media. Its capture script is `tools/capture-golingo-gallery.cjs`.
+The **GoLingo gallery gameplay previews** workflow commits only gallery media. Its current capture script, `tools/capture-golingo-gallery.cjs`, refreshes Lagoon while preserving the completed Word Folio and Super Flying Man recordings. The original three-game capture script is available in the repository history.
 
 The **Verify GoLingo gallery release** workflow checks the live page, images, App Store buttons, video playback, FAQ behavior, and horizontal layout at 1280, 768, 390, and 320 CSS pixels. A README change or manual workflow run triggers it. The workflow uploads a release archive containing this folder, screenshots, and its test report.
 
