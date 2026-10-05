@@ -6,7 +6,7 @@ A responsive landing page for the three current GoLingo language games.
 
 **Download GoLingo:** https://apps.apple.com/app/id1194977025
 
-The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wang**. The other app named golingo by golingo Ltd is not this app.
+The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wang**. The unrelated golingo Ltd app is not this app.
 
 ## Games
 
@@ -16,27 +16,27 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 | Word Folio | https://xcergolingo.github.io/word-folio/ | media/word-folio.mp4 |
 | Super Flying Man | https://xcergolingo.github.io/super-flying-man/ | media/super-flying-man.mp4 |
 
-The 12-second previews are silent recordings of the actual public games using demonstration vocabulary. They are not concept animations. The recorder uses a software-rendered browser; game performance varies by device. The recording-only Word Folio speech-voice notification is hidden because no speech voice is installed on the recording machine. Game sources are unchanged. Lagoon was recorded after verifying actual pointer-lock activation, with the game's Low graphics preset.
+The approximately 12-second previews are silent recordings of the actual public games using demonstration vocabulary. They are not concept animations. Recording uses software rendering; performance varies by device. Recording-only presentation adjustments hide Word Folio's missing-voice notification and Lagoon's persistent start overlay after its start action succeeds. No deployed game source is modified. Lagoon uses the game's Low graphics preset.
 
 ## Visitor journey
 
-Watch a preview, download GoLingo, choose or create a vocabulary list, and launch a game from the app. Browser demos remain available as a secondary action. App download links and the QR code point directly to the verified App Store ID. No unverified app URL scheme is used.
+Watch a preview, download GoLingo, choose or create a vocabulary list, and launch a game from the app. Browser demos remain available as a secondary action. The download buttons and QR code point directly to the verified App Store ID. No unverified app URL scheme is used.
 
 ## Files
 
 - `index.html`: page content, game cards, guide, FAQ, and accessible video dialog.
 - `style.css`: responsive desktop, tablet, and phone layouts.
-- `app.js`: video controls, reduced-motion/data-saver behavior, and validated download-link metadata.
+- `app.js`: video controls, reduced-motion/data-saver behavior, and validated download metadata.
 - `media/`: locally hosted MP4 previews, posters, official app icon, App Store metadata, and QR code.
 
 No build process, external font, analytics, or third-party video player is required. Serve this folder with a static server. GitHub Pages publishes it under `/games/`.
 
-## Maintenance
+## Maintenance and verification
 
-Edit the HTML for wording and the JavaScript game map when adding a game. The download destination is embedded in HTML so it works without JavaScript. `media/app.json` can refresh the destination, restricted to approved GoLingo/Apple hosts.
+Edit the HTML for wording and the JavaScript game map when adding a game. Download links work without JavaScript. `media/app.json` can refresh their destination, restricted to approved GoLingo/Apple hosts.
 
-The **GoLingo gallery gameplay previews** workflow commits only gallery media. Its current capture script, `tools/capture-golingo-gallery.cjs`, refreshes Lagoon while preserving the completed Word Folio and Super Flying Man recordings. The original three-game capture script is available in the repository history.
+The **GoLingo gallery gameplay previews** workflow commits only gallery media. Its current script, `tools/capture-golingo-gallery.cjs`, refreshes Lagoon while preserving the completed Word Folio and Super Flying Man recordings. The original three-game recorder is available in the repository history.
 
-The **Verify GoLingo gallery release** workflow checks the live page, images, App Store buttons, video playback, FAQ behavior, and horizontal layout at 1280, 768, 390, and 320 CSS pixels. A README change or manual workflow run triggers it. The workflow uploads a release archive containing this folder, screenshots, and its test report.
+The **Verify GoLingo gallery release** workflow checks the live page, images, App Store buttons, MP4 playback, FAQ behavior, and horizontal layout at 1280, 768, 390, and 320 CSS pixels. It uses full Google Chrome when installed on the runner for H.264 support. A README change or manual workflow run triggers it. Its release archive includes this folder, screenshots, and a diagnostic report.
 
 This website does not modify the three games, the root home page, SwiftUI application code, or the App Store binary. It promotes the existing GoLingo game-launch integration.
