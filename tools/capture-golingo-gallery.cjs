@@ -1,5 +1,5 @@
 'use strict';
-// Recording-only presentation adjustments do not modify any deployed game files.
+// Record the existing game; do not change its deployed source.
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path');
 const {execFileSync}=require('node:child_process');
@@ -10,48 +10,31 @@ const OUT=path.resolve('games/media');
  const page=await ctx.newPage();page.setDefaultTimeout(45000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
   const video=page.video();
-  const response=await page.goto('https://xcergolingo.github.io/far-cry-lagoon/',{waitUntil:'domcontentloaded',timeout:90000});
-  if(!response.ok())throw Error(`HTTP ${response.status()}`);
+  const r=await page.goto('https://xcergolingo.github.io/far-cry-lagoon/',{waitUntil:'domcontentloaded',timeout:90000});
+  if(!r.ok())throw Error(`HTTP ${r.status()}`);
   await page.locator('canvas').first().waitFor({state:'visible'});await page.waitForTimeout(4500);
   await page.locator('#settings-open').evaluate(e=>e.click());
   await page.locator('#quality').selectOption('Low');
-  await page.locator('#settings-close').evaluate(e=>e.click());
-  await page.waitForTimeout(1500);await page.bringToFront();
-  const box=await page.locator('#play').boundingBox();
-  if(!box)throw Error('Start button has no hit target');
-  await page.mouse.click(box.x+box.width/2,box.y+box.height/2);await page.waitForTimeout(1600);
+  await page.locator('#settings-close').evaluate(e=>e.click());await page.waitForTimeout(1200);
+  // Establish the pointer position before requesting pointer lock, avoiding a camera jump.
+  const box=await page.locator('#play').boundingBox();if(!box)throw Error('Missing start button');
+  await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+  await page.mouse.down();await page.mouse.up();await page.waitForTimeout(1500);
   if(!await page.evaluate(()=>!!document.pointerLockElement))throw Error('Pointer lock did not activate');
-  const overlay=await page.locator('#play').evaluate(button=>{
-   const candidates=[];
-   for(let el=button.parentElement;el&&el!==document.body;el=el.parentElement){
-    candidates.push({tag:el.tagName,id:el.id,classes:el.className,hasCanvas:!!el.querySelector('canvas')});
-   }
-   // Hide only the start-menu container, after the game's start action succeeded.
-   let menu=button.parentElement;
-   while(menu.parentElement&&menu.parentElement!==document.body&&!menu.parentElement.querySelector('canvas'))menu=menu.parentElement;
-   if(menu.querySelector('canvas'))throw Error('Refusing to hide the game canvas');
-   menu.style.setProperty('display','none','important');
-   return{hiddenId:menu.id,hiddenTag:menu.tagName,candidates};
-  });
-  console.log('RECORDING_OVERLAY',JSON.stringify(overlay));
-  await page.waitForTimeout(3000);
-  await page.keyboard.down('w');await page.waitForTimeout(1800);await page.keyboard.up('w');
-  // Allow buffered capture frames to settle before a long continuous gameplay segment.
-  await page.waitForTimeout(4000);
-  for(let i=0;i<4;i++){
-   await page.mouse.move(490+(i%2?10:-10),295,{steps:4});
-   await page.keyboard.down('w');await page.waitForTimeout(1600);await page.keyboard.up('w');
-   await page.waitForTimeout(1800);
-  }
-  await page.waitForTimeout(1800);
-  const raw=await video.path();await ctx.close();
-  const target=path.join(OUT,'lagoon.mp4');
-  // Use the final 12 seconds, avoiding wall-clock/browser-recording timestamp drift.
+  await page.locator('#menu').evaluate(menu=>menu.style.setProperty('display','none','important'));
+  await page.waitForTimeout(5000);
+  // Keep the authored level camera; pointer-lock deltas from absolute mouse motion
+  // in a headless recorder are not representative of the player's camera control.
+  await page.keyboard.down('w');await page.waitForTimeout(1100);await page.keyboard.up('w');
+  await page.waitForTimeout(4500);
+  await page.keyboard.down('a');await page.waitForTimeout(450);await page.keyboard.up('a');
+  await page.waitForTimeout(9000);
+  const raw=await video.path();await ctx.close();const target=path.join(OUT,'lagoon.mp4');
   execFileSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-sseof','-12','-i',raw,'-t','12','-an','-vf','fps=24,scale=960:600','-c:v','libx264','-preset','medium','-crf','24','-pix_fmt','yuv420p','-movflags','+faststart',target]);
   execFileSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-ss','2','-i',target,'-frames:v','1','-q:v','2',path.join(OUT,'lagoon.jpg')]);
-  const report=JSON.parse(fs.readFileSync(path.join(OUT,'capture-report.json'),'utf8'));
-  const entry=report.games.find(g=>g.id==='lagoon');entry.pointerLockVerified=true;entry.errors=errors;entry.recordingOverlay=overlay;entry.refreshedAt=new Date().toISOString();entry.bytes=fs.statSync(target).size;
-  fs.writeFileSync(path.join(OUT,'capture-report.json'),JSON.stringify(report,null,2));
-  fs.rmSync(path.join(OUT,'.raw'),{recursive:true,force:true});console.log('LAGOON_GAMEPLAY_OK');
+  const report=JSON.parse(fs.readFileSync(path.join(OUT,'capture-report.json'),'utf8')),entry=report.games.find(g=>g.id==='lagoon');
+  Object.assign(entry,{pointerLockVerified:true,errors,recordingOverlay:{hiddenId:'menu',reason:'Recording-only start-overlay cleanup after entering the game'},levelCamera:true,refreshedAt:new Date().toISOString(),bytes:fs.statSync(target).size});
+  fs.writeFileSync(path.join(OUT,'capture-report.json'),JSON.stringify(report,null,2));fs.rmSync(path.join(OUT,'.raw'),{recursive:true,force:true});
+  console.log('LAGOON_GAMEPLAY_OK');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
