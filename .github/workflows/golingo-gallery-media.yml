@@ -1,0 +1,48 @@
+name: GoLingo gallery gameplay previews
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/capture-golingo-gallery.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: golingo-gallery-media
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser recorder
+        run: |
+          mkdir -p /tmp/golingo-recorder
+          npm install --prefix /tmp/golingo-recorder playwright@1.56.1
+          /tmp/golingo-recorder/node_modules/.bin/playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+      - name: Record the three existing games
+        env:
+          NODE_PATH: /tmp/golingo-recorder/node_modules
+        run: node tools/capture-golingo-gallery.cjs
+      - name: Save generated gameplay media only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add games/media
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add recorded GoLingo gameplay previews and verified download metadata'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golingo-gallery-gameplay
+          path: games/media/
+          retention-days: 7
