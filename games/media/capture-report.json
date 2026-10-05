@@ -200,34 +200,15 @@
       ],
       "startSeconds": 21.455,
       "duration": 11.958333,
-      "bytes": 307253,
+      "bytes": 198971,
       "success": true,
       "pointerLockVerified": true,
-      "refreshedAt": "2026-10-05T15:09:26.942Z",
+      "refreshedAt": "2026-10-05T15:13:31.907Z",
       "recordingOverlay": {
         "hiddenId": "menu",
-        "hiddenTag": "DIV",
-        "candidates": [
-          {
-            "tag": "DIV",
-            "id": "",
-            "classes": "actions",
-            "hasCanvas": false
-          },
-          {
-            "tag": "DIV",
-            "id": "",
-            "classes": "menu-content",
-            "hasCanvas": false
-          },
-          {
-            "tag": "DIV",
-            "id": "menu",
-            "classes": "hidden",
-            "hasCanvas": false
-          }
-        ]
-      }
+        "reason": "Recording-only start-overlay cleanup after entering the game"
+      },
+      "levelCamera": true
     },
     {
       "id": "word-folio",
