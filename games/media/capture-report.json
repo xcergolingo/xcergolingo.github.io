@@ -1,0 +1,227 @@
+{
+  "capturedAt": "2026-10-05T14:54:48.771Z",
+  "games": [
+    {
+      "id": "lagoon",
+      "url": "https://xcergolingo.github.io/far-cry-lagoon/",
+      "errors": [],
+      "httpStatus": 200,
+      "selects": [
+        {
+          "id": "time",
+          "value": "Sunset",
+          "options": [
+            {
+              "value": "Morning",
+              "text": "Morning"
+            },
+            {
+              "value": "Noon",
+              "text": "Noon"
+            },
+            {
+              "value": "Sunset",
+              "text": "Sunset"
+            },
+            {
+              "value": "Night",
+              "text": "Night"
+            }
+          ]
+        },
+        {
+          "id": "weather",
+          "value": "Clear",
+          "options": [
+            {
+              "value": "Clear",
+              "text": "Clear"
+            },
+            {
+              "value": "Cloudy",
+              "text": "Cloudy"
+            },
+            {
+              "value": "Rain",
+              "text": "Rain"
+            },
+            {
+              "value": "Storm",
+              "text": "Storm"
+            }
+          ]
+        },
+        {
+          "id": "quality",
+          "value": "High",
+          "options": [
+            {
+              "value": "High",
+              "text": "High"
+            },
+            {
+              "value": "Low",
+              "text": "Low"
+            }
+          ]
+        },
+        {
+          "id": "lh-primary",
+          "value": "en-US",
+          "options": [
+            {
+              "value": "en-US",
+              "text": "English"
+            },
+            {
+              "value": "zh-CN",
+              "text": "Chinese (Mandarin)"
+            },
+            {
+              "value": "ja-JP",
+              "text": "Japanese"
+            },
+            {
+              "value": "es-ES",
+              "text": "Spanish"
+            },
+            {
+              "value": "fr-FR",
+              "text": "French"
+            },
+            {
+              "value": "pt-BR",
+              "text": "Portuguese"
+            },
+            {
+              "value": "de-DE",
+              "text": "German"
+            },
+            {
+              "value": "it-IT",
+              "text": "Italian"
+            },
+            {
+              "value": "ko-KR",
+              "text": "Korean"
+            },
+            {
+              "value": "vi-VN",
+              "text": "Vietnamese"
+            },
+            {
+              "value": "ar-SA",
+              "text": "Arabic"
+            },
+            {
+              "value": "hi-IN",
+              "text": "Hindi"
+            },
+            {
+              "value": "ru-RU",
+              "text": "Russian"
+            },
+            {
+              "value": "nl-NL",
+              "text": "Dutch"
+            },
+            {
+              "value": "sv-SE",
+              "text": "Swedish"
+            }
+          ]
+        },
+        {
+          "id": "lh-learning",
+          "value": "es-ES",
+          "options": [
+            {
+              "value": "en-US",
+              "text": "English"
+            },
+            {
+              "value": "zh-CN",
+              "text": "Chinese (Mandarin)"
+            },
+            {
+              "value": "ja-JP",
+              "text": "Japanese"
+            },
+            {
+              "value": "es-ES",
+              "text": "Spanish"
+            },
+            {
+              "value": "fr-FR",
+              "text": "French"
+            },
+            {
+              "value": "pt-BR",
+              "text": "Portuguese"
+            },
+            {
+              "value": "de-DE",
+              "text": "German"
+            },
+            {
+              "value": "it-IT",
+              "text": "Italian"
+            },
+            {
+              "value": "ko-KR",
+              "text": "Korean"
+            },
+            {
+              "value": "vi-VN",
+              "text": "Vietnamese"
+            },
+            {
+              "value": "ar-SA",
+              "text": "Arabic"
+            },
+            {
+              "value": "hi-IN",
+              "text": "Hindi"
+            },
+            {
+              "value": "ru-RU",
+              "text": "Russian"
+            },
+            {
+              "value": "nl-NL",
+              "text": "Dutch"
+            },
+            {
+              "value": "sv-SE",
+              "text": "Swedish"
+            }
+          ]
+        }
+      ],
+      "startSeconds": 21.455,
+      "duration": 11.958333,
+      "bytes": 250961,
+      "success": true
+    },
+    {
+      "id": "word-folio",
+      "url": "https://xcergolingo.github.io/word-folio/",
+      "errors": [],
+      "httpStatus": 200,
+      "startSeconds": 9.019,
+      "duration": 12,
+      "bytes": 237545,
+      "success": true
+    },
+    {
+      "id": "super-flying-man",
+      "url": "https://xcergolingo.github.io/super-flying-man/",
+      "errors": [],
+      "httpStatus": 200,
+      "startSeconds": 6.926,
+      "duration": 11.958333,
+      "bytes": 476044,
+      "success": true
+    }
+  ]
+}

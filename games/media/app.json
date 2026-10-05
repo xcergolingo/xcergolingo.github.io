@@ -1,0 +1,11 @@
+{
+  "downloadUrl": "https://apps.apple.com/app/id1194977025",
+  "verified": true,
+  "app": {
+    "name": "Learn Lingo With GoLingo & AI",
+    "seller": "xin wang",
+    "id": 1194977025,
+    "minimumOsVersion": "16.0"
+  },
+  "icon": "media/app-icon.png"
+}
