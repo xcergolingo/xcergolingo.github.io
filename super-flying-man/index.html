@@ -1817,6 +1817,20 @@ function startGame(T) {
         hold('mobileFlap',()=>flap()); hold('mobileDive',()=>state.mobileDive=true,()=>state.mobileDive=false);
         $('mobileLand').addEventListener('click',()=>{audio.ensure();fold();}); $('mobileCamera').addEventListener('click',()=>{state.cameraMode=(state.cameraMode+1)%3;toast(['Chase camera','High chase camera','Shoulder camera'][state.cameraMode]);});
     }
+    // iOS/WebKit can still start native text selection on long/drag touches even
+    // with user-select:none. Block selection/callouts only inside game controls.
+    const noSelectZones=[$('mobileControls'),$('bottomControls'),$('topActions')].filter(Boolean);
+    for(const zone of noSelectZones){
+        zone.addEventListener('selectstart',e=>e.preventDefault());
+        zone.addEventListener('contextmenu',e=>e.preventDefault());
+        zone.addEventListener('dragstart',e=>e.preventDefault());
+    }
+    for(const id of ['mobileStick','mobileFlap','mobileDive','mobileLand','mobileCamera']){
+        const el=$(id); if(!el)continue;
+        el.setAttribute('draggable','false');
+        el.addEventListener('touchstart',()=>{try{window.getSelection()?.removeAllRanges();}catch{}},{passive:true});
+        el.addEventListener('pointerdown',()=>{try{window.getSelection()?.removeAllRanges();}catch{}});
+    }
     // UI is native HTML: every button remains clickable on desktop, including while paused.
     // Language-flight controls and native-app bridge.
     for(const [code,meta] of Object.entries(LANGUAGE_META)){
