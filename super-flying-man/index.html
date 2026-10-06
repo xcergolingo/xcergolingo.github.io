@@ -75,6 +75,9 @@ THE SOFTWARE.
   -webkit-touch-callout:default!important;
 }
 
+#wordLoopButton{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:18;width:54px;height:54px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:rgba(20,29,32,.72);backdrop-filter:blur(10px);-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation}
+#wordLoopButton span{font-size:18px;line-height:1;font-weight:700}#wordLoopButton small{font-size:7px;letter-spacing:.1em}#wordLoopButton.paused{opacity:.7}#wordLoopButton.idle{opacity:.42}
+@media(max-width:899px){#wordLoopButton{right:12px;top:43%;width:50px;height:50px}}
 /* Mobile flight + GoLingo sponsor */
 #mobileControls{display:none;position:fixed;inset:0;z-index:9;pointer-events:none}
 #mobileStick{position:absolute;left:18px;bottom:22px;width:132px;height:132px;border-radius:50%;border:1px solid rgba(255,245,225,.28);background:rgba(18,28,31,.30);backdrop-filter:blur(10px);pointer-events:auto;touch-action:none}
@@ -120,6 +123,7 @@ THE SOFTWARE.
 
 
 <div id="mobileControls" aria-label="Mobile flight controls"><div id="mobileStick" aria-label="Steer and climb"><div id="mobileKnob"></div></div><div id="mobileActions"><button id="mobileFlap" type="button">FLAP<br>↑</button><button id="mobileDive" type="button">DIVE<br>↓</button><button id="mobileLand" type="button">FOLD / LAND</button><button id="mobileCamera" type="button">CAMERA</button></div></div>
+<button id="wordLoopButton" type="button" aria-label="Pause repeated word" title="Pause repeated word"><span id="wordLoopIcon">Ⅱ</span><small id="wordLoopLabel">WORD</small></button>
 <aside id="sponsor" class="glass"><strong>Sponsored by GoLingoApp.com</strong><span>Collect words in the sky, then export them to GoLingo to practice them in the real world.</span><button id="sponsorExport" type="button">Export words to GoLingo ↗</button></aside>
 
 <div id="wordCard" class="glass" aria-live="polite"><div id="wordCardLearning">cielo</div><div id="wordCardPrimary">sky</div><div id="wordCardMeta">SPANISH · SAVED TO REVIEW</div></div>
@@ -248,9 +252,50 @@ function startGame(T) {
     }
     function loadSavedReview(){ try{ const r=JSON.parse(localStorage.getItem('sfm-language-review')||'[]'); if(Array.isArray(r)) lesson.review=r; }catch{} }
     function saveReview(){ try{ localStorage.setItem('sfm-language-review',JSON.stringify(lesson.review)); }catch{} }
+    function makeLearningUtterance(text,lang=lesson.learning){
+        const u=new SpeechSynthesisUtterance(text); u.lang=LANGUAGE_META[lang]?.speech || lang; u.rate=.82; u.pitch=1;
+        const voices=speechSynthesis.getVoices(); const exact=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase()) || voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase())); if(exact)u.voice=exact;
+        return u;
+    }
     function speakLearningWord(text,lang=lesson.learning){
         if(!text || !('speechSynthesis' in window)) return;
-        try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=LANGUAGE_META[lang]?.speech || lang; u.rate=.82; u.pitch=1; const voices=speechSynthesis.getVoices(); const exact=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase()) || voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase())); if(exact)u.voice=exact; speechSynthesis.speak(u); }catch{}
+        try{ speechSynthesis.cancel(); speechSynthesis.speak(makeLearningUtterance(text,lang)); }catch{}
+    }
+    const wordLoop={text:'',lang:'',paused:false,timer:0,token:0};
+    function updateWordLoopButton(){
+        const b=$('wordLoopButton'),icon=$('wordLoopIcon'),label=$('wordLoopLabel'); if(!b)return;
+        b.classList.toggle('idle',!wordLoop.text); b.classList.toggle('paused',wordLoop.paused);
+        icon.textContent=wordLoop.paused?'▶':'Ⅱ'; label.textContent=wordLoop.text?(wordLoop.paused?'PLAY':'WORD'):'WORD';
+        b.setAttribute('aria-label',wordLoop.paused?'Resume repeated word':'Pause repeated word');
+    }
+    function stopWordLoop(clear=false){
+        wordLoop.token++; clearTimeout(wordLoop.timer); wordLoop.timer=0;
+        try{speechSynthesis.cancel();}catch{}
+        if(clear){wordLoop.text='';wordLoop.lang='';}
+        updateWordLoopButton();
+    }
+    function scheduleWordLoop(token,delay=650){
+        clearTimeout(wordLoop.timer);
+        wordLoop.timer=setTimeout(()=>playWordLoop(token),delay);
+    }
+    function playWordLoop(token=wordLoop.token){
+        if(token!==wordLoop.token || wordLoop.paused || !wordLoop.text || !('speechSynthesis' in window))return;
+        try{
+            const u=makeLearningUtterance(wordLoop.text,wordLoop.lang);
+            u.onend=()=>{if(token===wordLoop.token&&!wordLoop.paused)scheduleWordLoop(token,700);};
+            u.onerror=()=>{if(token===wordLoop.token&&!wordLoop.paused)scheduleWordLoop(token,1000);};
+            speechSynthesis.cancel(); speechSynthesis.speak(u);
+        }catch{scheduleWordLoop(token,1000);}
+    }
+    function startWordLoop(text,lang=lesson.learning){
+        if(!text)return;
+        stopWordLoop(false); wordLoop.text=text; wordLoop.lang=lang; wordLoop.paused=false; wordLoop.token++;
+        const token=wordLoop.token; updateWordLoopButton(); playWordLoop(token);
+    }
+    function toggleWordLoop(){
+        if(!wordLoop.text)return;
+        if(wordLoop.paused){wordLoop.paused=false;wordLoop.token++;const token=wordLoop.token;updateWordLoopButton();playWordLoop(token);}
+        else{wordLoop.paused=true;stopWordLoop(false);}
     }
 
     function noise(x, z) { const ix = Math.floor(x), iz = Math.floor(z), fx = x - ix, fz = z - iz, u = fx * fx * (3 - 2 * fx), v = fz * fz * (3 - 2 * fz); return mix(mix(hash(ix, iz), hash(ix + 1, iz), u), mix(hash(ix, iz + 1), hash(ix + 1, iz + 1), u), v); }
@@ -1451,7 +1496,7 @@ function startGame(T) {
                 collected++;
                 updateMarkerTexture(m);
                 audio.ping();
-                speakLearningWord(m.learningWord);
+                startWordLoop(m.learningWord,lesson.learning);
                 addToReview(m);
                 showWordCard(m);
                 $('markerCount').textContent = `${collected} / ${activeTargetCount}`;
@@ -1825,7 +1870,7 @@ function startGame(T) {
         zone.addEventListener('contextmenu',e=>e.preventDefault());
         zone.addEventListener('dragstart',e=>e.preventDefault());
     }
-    for(const id of ['mobileStick','mobileFlap','mobileDive','mobileLand','mobileCamera']){
+    for(const id of ['mobileStick','mobileFlap','mobileDive','mobileLand','mobileCamera','wordLoopButton']){
         const el=$(id); if(!el)continue;
         el.setAttribute('draggable','false');
         el.addEventListener('touchstart',()=>{try{window.getSelection()?.removeAllRanges();}catch{}},{passive:true});
@@ -1852,6 +1897,7 @@ function startGame(T) {
     $('copyReview').onclick=()=>{const text=lesson.review.map(x=>`${x.learning}\\t${x.primary||''}`).join('\\n');if(!text){toast('The review list is empty.');return;}const fallback=()=>{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Review list copied.');}catch{toast('Copy is unavailable here.');}ta.remove();};if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>toast('Review list copied.')).catch(fallback);else fallback();};
     $('downloadReview').onclick=()=>{const blob=new Blob([JSON.stringify({primaryLanguage:lesson.primary,learningLanguage:lesson.learning,words:lesson.review},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='super-flying-man-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
     $('exportGoLingo').onclick=exportToGoLingo; $('sponsorExport').onclick=exportToGoLingo; setupMobileFlight();
+    $('wordLoopButton').onclick=()=>toggleWordLoop(); updateWordLoopButton();
     const pendingLessons=(window.__SFM_PENDING_LESSONS__||[]).slice();
     window.__SFM_PENDING_LESSONS__=[];
     window.SuperFlyingManLanguage={
