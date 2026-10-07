@@ -373,29 +373,30 @@ function activateGameAudio(){
  try{audio.start();if(audio.ctx&&audio.ctx.state==='suspended')audio.ctx.resume();gameAudioUnlocked=true}catch(e){}
 }
 function stopWordLoop(){
- wordLoopToken++;clearTimeout(wordLoopTimer);
+ wordLoopToken++;clearTimeout(wordLoopTimer);ttsTarget=null;
  if(wordAudio){try{wordAudio.onended=null;wordAudio.onerror=null;wordAudio.pause();wordAudio.currentTime=0}catch(e){}wordAudio=null}
  try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}
 }
 function bestVoice(lang){
  try{const vs=speechSynthesis.getVoices(),want=String(lang||'').toLowerCase(),base=want.split('-')[0];return vs.find(v=>v.lang.toLowerCase()===want)||vs.find(v=>v.lang.toLowerCase().startsWith(base))||null}catch(e){return null}
 }
-function loopSpeech(text,lang,token){
- if(token!==wordLoopToken||!window.speechSynthesis)return;
- const speak=()=>{
-  if(token!==wordLoopToken)return;
+let ttsTarget=null,ttsPump=0;
+function ensureTTSPump(){
+ if(ttsPump)return;
+ ttsPump=setInterval(()=>{
+  if(!ttsTarget||!window.speechSynthesis||speechSynthesis.speaking||speechSynthesis.pending)return;
+  const q=ttsTarget;if(q.token!==wordLoopToken){ttsTarget=null;return}
   try{
-   const u=new SpeechSynthesisUtterance(text);u.lang=lang||$('learnLang').value;u.rate=.84;u.volume=1;let started=false;
-
+   const u=new SpeechSynthesisUtterance(q.text);u.lang=q.lang||$('learnLang').value;u.rate=.84;u.volume=1;
    const v=bestVoice(u.lang);if(v)u.voice=v;
-   u.onstart=()=>{started=true;$('learnMsg').textContent='Speaking '+text+' · TTS'};
-   u.onend=()=>{if(token===wordLoopToken)wordLoopTimer=setTimeout(speak,1200)};
-   u.onerror=()=>{if(token===wordLoopToken){$('learnMsg').textContent='TTS waiting — tap the word card to hear '+text;wordLoopTimer=setTimeout(speak,1600)}};
-   speechSynthesis.speak(u);setTimeout(()=>{if(token===wordLoopToken&&!started&&!speechSynthesis.speaking){try{speechSynthesis.cancel()}catch(e){}wordLoopTimer=setTimeout(speak,250)}},650);
-  }catch(e){if(token===wordLoopToken)wordLoopTimer=setTimeout(speak,900)}
- };
- speak();
+   u.onstart=()=>{$('learnMsg').textContent='Speaking '+q.text+' · TTS'};
+   u.onend=()=>{if(ttsTarget&&q.token===wordLoopToken){ttsTarget.readyAt=performance.now()+1200}};
+   u.onerror=()=>{if(ttsTarget&&q.token===wordLoopToken)ttsTarget.readyAt=performance.now()+600};
+   if(performance.now()>=(q.readyAt||0))speechSynthesis.speak(u);
+  }catch(e){}
+ },180);
 }
+function loopSpeech(text,lang,token){if(token!==wordLoopToken||!window.speechSynthesis)return;ttsTarget={text,lang:lang||$('learnLang').value,token,readyAt:0};ensureTTSPump()}
 function playWord(text,audioURL='',lang=''){
  if(!text)return;stopWordLoop();const token=wordLoopToken,voiceLang=lang||$('learnLang').value;
  if(audioURL){
@@ -496,6 +497,8 @@ function render(){renderer.render(scene,camera);}
 function startGame(){
  if(gameStarted)return;
  activateGameAudio();
+ ensureTTSPump();
+ try{if(window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('ready');u.lang=$('learnLang').value;u.volume=.02;u.rate=1.2;const v=bestVoice(u.lang);if(v)u.voice=v;speechSynthesis.speak(u)}}catch(e){}
  gameStarted=true;
  $('audioGate').classList.add('hidden');
  last=performance.now();
