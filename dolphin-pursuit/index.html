@@ -357,7 +357,13 @@ function updateProjectiles(dt){for(let i=bolts.length-1;i>=0;i--){const b=bolts[
 function checkpoint(){state.gatePassed=true;state.gateMissed=false;state.gateCount++;state.power=100;state.torpedoes=CFG.tubes;state.ammo=CFG.magazine;state.reload=0;state.criticalRadio=false;state.pulseCd=0;gateScanMat.uniforms.uDone.value=1;banner('CHECKPOINT — POWER RESTORED',3,5);radio('Resupply gate ahead. Torpedoes and power restored.');audio.gate();burst(craft.root.position,'#b4ffdf',75,8);}
 function finish(){state.finished=true;state.lock=null;mouse.down=false;keys.clear();$('endScore').textContent=String(state.score).padStart(6,'0');$('endDisabled').textContent=`${state.disabled} / 5`;$('endTime').textContent=formatTime(state.time);$('endTitle').textContent=state.disabled===5?'HARBOR SECURED':'PURSUIT COMPLETE';$('endMessage').textContent=state.disabled===5?'The channel is quiet again.':'Pelagic One has reached the harbor mouth.';$('endNote').textContent=`${5-state.disabled} CONTACT${5-state.disabled===1?'':'S'} GOT THROUGH  ·  ${Math.round(state.power)}% POWER REMAINING`;$('endOverlay').classList.remove('hidden');$('againBtn').focus({preventScroll:true});audio.gate();}
 function setPause(v,focus=true,source='system'){if(state.finished)return;if(v&&source!=='button'&&source!=='escape'&&source!=='test')return;state.paused=v;keys.clear();mouse.down=false;mouse.x=mouse.y=0;mouse.active=false;$('pauseOverlay').classList.toggle('hidden',!v);if(v&&focus)$('resumeBtn').focus({preventScroll:true});if(!v)try{worldCanvas.focus({preventScroll:true})}catch(_){worldCanvas.focus()};}
-function resetRun(){stopWordLoop();clearProjectiles();Object.assign(state,{s:CFG.start,x:0,y:5.3,vx:0,vy:0,speed:52,power:100,ammo:30,torpedoes:3,score:0,streak:0,disabled:0,firstDisabled:0,time:0,reload:0,shotCd:0,torpedoCd:0,pulseCd:0,shieldTime:0,hitCd:0,damageFlash:0,boost:false,boostKick:0,gatePassed:false,gateMissed:false,gateWarned:false,zone:0,finished:false,paused:false,lock:null,firstLock:false,incomingRadio:false,criticalRadio:false,dolly:11.2,camBank:0,eventTimer:0,toastTimer:0,radioTimer:0,shotCount:0,shotsHit:0,escapes:0,gateCount:0,pulseClears:0,enemyFireEnabled:true});keys.clear();mouse.x=mouse.y=0;mouse.down=mouse.active=false;shield.visible=false;gateScanMat.uniforms.uDone.value=0;eventHistory.length=0;currentRadio='';eventPriority=0;
+function resetLearningWords(){
+ stopWordLoop();learned=[];
+ $('learnWord').textContent='Ready';$('learnTranslation').textContent='Fly through a word ring';$('learnCount').textContent='0 learned';
+ for(const r of wordRings){r.hit=false;r.g.visible=true}
+ $('learnMsg').textContent=learnWords.length+' word rings ready.';
+}
+function resetRun(){resetLearningWords();clearProjectiles();Object.assign(state,{s:CFG.start,x:0,y:5.3,vx:0,vy:0,speed:52,power:100,ammo:30,torpedoes:3,score:0,streak:0,disabled:0,firstDisabled:0,time:0,reload:0,shotCd:0,torpedoCd:0,pulseCd:0,shieldTime:0,hitCd:0,damageFlash:0,boost:false,boostKick:0,gatePassed:false,gateMissed:false,gateWarned:false,zone:0,finished:false,paused:false,lock:null,firstLock:false,incomingRadio:false,criticalRadio:false,dolly:11.2,camBank:0,eventTimer:0,toastTimer:0,radioTimer:0,shotCount:0,shotsHit:0,escapes:0,gateCount:0,pulseClears:0,enemyFireEnabled:true});keys.clear();mouse.x=mouse.y=0;mouse.down=mouse.active=false;shield.visible=false;gateScanMat.uniforms.uDone.value=0;eventHistory.length=0;currentRadio='';eventPriority=0;
  for(let i=0;i<FX_MAX;i++){fxSlots[i].life=0;fxS[i]=fxA[i]=0;}for(const e of enemies){e.s=CFG.start+42+e.index*18;e.off=0;e.y=5.8;e.hp=3;e.active=e.index<3;e.disabled=e.escaped=false;e.fireCd=.38+e.index*.42;e.group.visible=e.active;e.label.style.display='none';e.group.position.copy(point(e.s,e.index%2?3:-2,5.8));}
  craft.root.position.copy(point(state.s,0,state.y));craft.root.rotation.set(0,headingAt(state.s),0);craft.visual.rotation.set(0,0,0);camera.position.copy(point(state.s-11.2,0,state.y+3.9));camera.lookAt(point(state.s+25,0,state.y+.4));camera.fov=62;camera.updateProjectionMatrix();for(const id of ['pauseOverlay','endOverlay'])$(id).classList.add('hidden');$('event').classList.remove('visible');$('locationToast').classList.remove('visible');radio('Three contacts ahead. Aim, fire, and keep moving.');warmUniform.value=0;updateEnvironment(0);updateHud();}
 function formatTime(seconds){return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${Math.floor(seconds%60).toString().padStart(2,'0')}`;}
@@ -379,14 +385,14 @@ function loopSpeech(text,lang,token){
  const speak=()=>{
   if(token!==wordLoopToken)return;
   try{
-   speechSynthesis.cancel();
-   const u=new SpeechSynthesisUtterance(text);u.lang=lang||$('learnLang').value;u.rate=.84;u.volume=1;
+   const u=new SpeechSynthesisUtterance(text);u.lang=lang||$('learnLang').value;u.rate=.84;u.volume=1;let started=false;
+
    const v=bestVoice(u.lang);if(v)u.voice=v;
-   u.onstart=()=>{$('learnMsg').textContent='Speaking '+text+' · TTS'};
+   u.onstart=()=>{started=true;$('learnMsg').textContent='Speaking '+text+' · TTS'};
    u.onend=()=>{if(token===wordLoopToken)wordLoopTimer=setTimeout(speak,1200)};
    u.onerror=()=>{if(token===wordLoopToken){$('learnMsg').textContent='TTS waiting — tap the word card to hear '+text;wordLoopTimer=setTimeout(speak,1600)}};
-   speechSynthesis.speak(u);
-  }catch(e){if(token===wordLoopToken)wordLoopTimer=setTimeout(speak,1600)}
+   speechSynthesis.speak(u);setTimeout(()=>{if(token===wordLoopToken&&!started&&!speechSynthesis.speaking){try{speechSynthesis.cancel()}catch(e){}wordLoopTimer=setTimeout(speak,250)}},650);
+  }catch(e){if(token===wordLoopToken)wordLoopTimer=setTimeout(speak,900)}
  };
  speak();
 }
@@ -395,7 +401,7 @@ function playWord(text,audioURL='',lang=''){
  if(audioURL){
   try{
    const el=new Audio(audioURL);wordAudio=el;el.preload='auto';el.playsInline=true;el.loop=false;
-   const replay=()=>{if(token!==wordLoopToken)return;try{el.currentTime=0;const p=el.play();if(p?.catch)p.catch(()=>fallback())}catch(e){fallback()}};
+   let playRetries=0;const replay=()=>{if(token!==wordLoopToken)return;try{el.currentTime=0;const p=el.play();if(p?.catch)p.catch(()=>{if(token!==wordLoopToken)return;if(playRetries++<2)wordLoopTimer=setTimeout(replay,350);else fallback()})}catch(e){if(playRetries++<2)wordLoopTimer=setTimeout(replay,350);else fallback()}};
    const fallback=()=>{if(token!==wordLoopToken)return;try{el.pause()}catch(e){};if(wordAudio===el)wordAudio=null;loopSpeech(text,voiceLang,token)};
    el.onplaying=()=>{$('learnMsg').textContent='Playing '+text+' · GoLingo audio'};
    el.onended=()=>{if(token===wordLoopToken)wordLoopTimer=setTimeout(replay,1200)};
