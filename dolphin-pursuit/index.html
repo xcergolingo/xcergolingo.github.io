@@ -486,6 +486,15 @@ $('pauseBtn').onclick=e=>{e.preventDefault();e.stopPropagation();setPause(true,t
 worldCanvas.addEventListener('webglcontextlost',e=>{e.preventDefault();$('errorText').textContent='The graphics context was lost. Close other GPU-heavy tabs and reload this page.';$('errorOverlay').classList.remove('hidden');});
 let last=performance.now(),manual=TEST,frames=0,frameTimeEMA=16.7;
 function render(){renderer.render(scene,camera);}
+function startGame(){
+ if(gameStarted)return;
+ activateGameAudio();
+ gameStarted=true;
+ $('audioGate').classList.add('hidden');
+ last=performance.now();
+ updateHud();render();
+}
+$('audioStart').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();startGame()});
 function loop(now){const elapsed=(now-last)/1000;last=now;const dt=Math.min(.05,Math.max(0,elapsed));frameTimeEMA=frameTimeEMA*.95+elapsed*1000*.05;if(manual){requestAnimationFrame(loop);return;}if(gameStarted){update(dt);if(++frames%2===0)updateHud();audio.update(state.speed,state.boost,state.paused||state.finished);render();}requestAnimationFrame(loop);}
 applyQuality((matchMedia && matchMedia('(pointer:coarse)').matches)||innerWidth<900?0:1);resetRun();gameStarted=false;updateEnvironment(0);render();requestAnimationFrame(loop);
 const snapshot=()=>({s:+state.s.toFixed(3),x:+state.x.toFixed(3),y:+state.y.toFixed(3),speed:+state.speed.toFixed(2),power:+state.power.toFixed(2),ammo:state.ammo,torpedoes:state.torpedoes,score:state.score,streak:state.streak,disabled:state.disabled,firstDisabled:state.firstDisabled,reload:+state.reload.toFixed(3),pulseCd:+state.pulseCd.toFixed(3),pulseClears:state.pulseClears,gatePassed:state.gatePassed,gateMissed:state.gateMissed,zone:state.zone,finished:state.finished,paused:state.paused,time:+state.time.toFixed(3),lock:state.lock?state.lock.index:null,enemyBolts:enemyBolts.length,incomingDistance:enemyBolts.length?+Math.min(...enemyBolts.map(b=>b.mesh.position.distanceTo(craft.root.position))).toFixed(2):null,bolts:bolts.length,torps:torps.length,quality:state.quality,fish:fish.count,particles:snowGeo.drawRange.count,causticResolution:causticUniform.value.image.width,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,frameMs:+frameTimeEMA.toFixed(1),audioEnabled:audio.enabled,audioMuted:audio.muted,objective:objective(),event:$('eventText').textContent,enemies:enemies.map(e=>({index:e.index,s:+e.s.toFixed(2),hp:e.hp,active:e.active,disabled:e.disabled,escaped:e.escaped}))});
