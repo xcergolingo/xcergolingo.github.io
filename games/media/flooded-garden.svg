@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+<title id="title">The Flooded Garden</title><desc id="desc">A garden illustration with a stone bridge, dark cypress trees, pink blossoms, and a golden-canopied rowboat on reflective turquoise water.</desc>
+<defs>
+<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#8baeb1"/><stop offset="1" stop-color="#eee0bd"/></linearGradient>
+<linearGradient id="water" x2=".18" y2="1"><stop stop-color="#83b9aa"/><stop offset=".5" stop-color="#3c8f88"/><stop offset="1" stop-color="#286762"/></linearGradient>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#d8ceaf"/><stop offset="1" stop-color="#8c9e8c"/></linearGradient>
+<linearGradient id="canvas" x2="0" y2="1"><stop stop-color="#f6d17e"/><stop offset="1" stop-color="#ce8e3c"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+<filter id="haze"><feGaussianBlur stdDeviation="14"/></filter>
+<g id="cypress"><path d="M0 0C-25-8-26-37-21-60-28-88-15-113-13-132-14-166-5-190 0-210 5-178 15-160 13-133 25-110 16-91 21-68 32-38 22-8 0 0Z" fill="#244b3c"/><path d="M0-193V7" stroke="#56634b" stroke-width="4"/></g>
+<g id="bridge"><path d="M135 330Q450 125 780 330L780 363Q450 198 135 363Z" fill="url(#stone)" stroke="#8c9b86" stroke-width="2"/><path d="M135 326Q450 120 780 326" stroke="#e1d5b7" stroke-width="13" fill="none"/><path d="M136 344Q450 158 780 344" stroke="#e6dcc0" stroke-width="2" opacity=".45" fill="none"/><g stroke="#7c8d7b" stroke-width="2" opacity=".55"><path d="m185 301 7 30m49-60 9 29m48-54 9 32m46-48 7 31m46-40 4 31m46-35v32m47-28-4 32m45-18-7 31m46-8-9 29m48 3-10 29m51 15-9 27m49 23-8 26"/></g><g fill="#c3bea3" stroke="#8e9c84" stroke-width="1.5"><path d="m174 304-3-27 9-5 5 25zm73-40-4-27 9-4 6 26zm75-31-2-28 10-3 4 27zm77-20v-28l10-1 2 27zm80 0 2-29 10 2v29zm80 15 5-28 10 3-4 29zm79 28 7-27 10 4-6 29zm76 36 9-26 9 6-8 26z"/></g><path d="M165 277Q450 107 739 282" fill="none" stroke="#d9d0af" stroke-width="7"/></g>
+<g id="sakura"><path d="m0 3 8-101 24-55m-24 56-42-35m46 10 58-30m-59 15-18-52m-24 69-27-45" stroke="#655747" stroke-width="7" fill="none"/><g fill="#eebcc5"><ellipse cx="-47" cy="-156" rx="43" ry="24"/><ellipse cx="2" cy="-190" rx="49" ry="29"/><ellipse cx="58" cy="-170" rx="49" ry="29"/><ellipse cx="15" cy="-143" rx="57" ry="29"/><ellipse cx="-27" cy="-126" rx="37" ry="23"/></g><g fill="#f8d1cc"><ellipse cx="-45" cy="-167" rx="27" ry="14"/><ellipse cx="2" cy="-198" rx="34" ry="17"/><ellipse cx="58" cy="-177" rx="31" ry="17"/><ellipse cx="17" cy="-149" rx="31" ry="17"/></g></g>
+</defs>
+<path fill="url(#sky)" d="M0 0h960v600H0z"/>
+<path d="m0 233 90-99 55 43 87-113 87 96 60-41 99 98 87-137 69 62 71-107 136 168 70-82 49 102v130H0Z" fill="#7f9e98" opacity=".6"/>
+<path d="m0 264 91-74 52 30 90-68 86 105 93-31 85 38 70-115 72 42 95-61 127 117 99-69v182H0Z" fill="#6f9388" opacity=".56"/>
+<ellipse cx="448" cy="252" rx="570" ry="40" fill="#d4dfc8" opacity=".58" filter="url(#haze)"/>
+<path d="M0 330Q477 291 960 326v274H0Z" fill="url(#water)"/>
+<g opacity=".23" transform="translate(0 698) scale(1 -1)" filter="url(#soft)"><use href="#bridge"/><use href="#cypress" transform="translate(117 328) scale(1.12)"/><use href="#cypress" transform="translate(850 330) scale(1.28)"/><use href="#sakura" transform="translate(775 342) scale(1.35)"/></g>
+<path d="M0 314q71-25 154 20l-2 25Q61 363 0 384Zm960-7q-102-11-168 38l11 23q96-4 157 19Z" fill="#627d55"/>
+<use href="#cypress" transform="translate(65 337) scale(1.2)"/><use href="#cypress" transform="translate(115 329) scale(1.08)"/><use href="#cypress" transform="translate(882 335) scale(1.3)"/><use href="#cypress" transform="translate(919 335) scale(.88)"/>
+<use href="#bridge"/><use href="#sakura" transform="translate(154 345) scale(1.35)"/><use href="#sakura" transform="translate(781 351) scale(1.42)"/>
+<g fill="none" stroke="#c8e0c5" opacity=".27"><path d="M55 390h105m80-15h161m90 20h138m88-12h123M125 423h108m64-10h121m213 13h160M55 469h183m79-23h108m183 13h102m104 27h93M245 528h177m143-20h177m-172 47h139"/></g>
+<ellipse cx="488" cy="490" rx="122" ry="22" fill="#153f3b" opacity=".24" filter="url(#soft)"/>
+<g transform="translate(376 404) rotate(-8 110 40)"><path d="M-4 37q104 49 226 0-18 65-111 52Q28 91-4 37Z" fill="#795337"/><path d="M8 40q104 32 198 0" stroke="#d3ac78" stroke-width="5" fill="none"/><path d="M38 47V-9m146 57V-9" stroke="#624c34" stroke-width="5"/><path d="M22-6q85-79 176 0v12H22Z" fill="url(#canvas)" stroke="#f2d69c" stroke-width="3"/><path d="M60-7q51-55 103 0m-76-8q25-39 50 0" fill="none" stroke="#f8d999" stroke-width="6" opacity=".55"/><path d="m18 64-47 33m222-33 37 23" stroke="#ac885b" stroke-width="5"/><path d="m-28 97-22 11m280-21 17 8" stroke="#ba9867" stroke-width="10" stroke-linecap="round"/></g>
+<g fill="#68966a" stroke="#8fb683" stroke-width="1"><ellipse cx="116" cy="494" rx="22" ry="7"/><ellipse cx="155" cy="511" rx="15" ry="5"/><ellipse cx="766" cy="476" rx="24" ry="8"/><ellipse cx="805" cy="498" rx="18" ry="6"/><ellipse cx="733" cy="505" rx="15" ry="5"/></g><g fill="#f4c2c8"><path d="m110 485 6-9 6 9-6 5Z"/><path d="m759 468 7-11 7 11-7 4Z"/><ellipse cx="250" cy="458" rx="4" ry="2"/><ellipse cx="672" cy="416" rx="4" ry="2"/><ellipse cx="691" cy="473" rx="3" ry="2"/><ellipse cx="210" cy="394" rx="3" ry="2"/></g>
+<g transform="translate(590 364)"><ellipse cx="0" cy="19" rx="40" ry="6" fill="none" stroke="#ead49b" stroke-width="2" opacity=".65"/><rect x="-43" y="-19" width="86" height="32" rx="10" fill="#1c5148" stroke="#dec58c"/><text x="0" y="2" text-anchor="middle" fill="#f3e1ba" font-family="sans-serif" font-size="18">agua</text></g>
+<path d="m470 135 7-3 7 3m77-15 6-3 6 3" fill="none" stroke="#637c71" stroke-width="2"/>
+</svg>

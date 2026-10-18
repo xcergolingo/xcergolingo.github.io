@@ -9,3 +9,6 @@
 /* Dolphin Pursuit card */
 .dolphin-cover{background:linear-gradient(180deg,#0a5368 0%,#073a52 42%,#082c40 100%);position:relative;color:white}.dolphin-scene{position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 15%,#62d6df55 0,transparent 42%),linear-gradient(155deg,transparent 55%,#b0538b55 56%,#572f6855 72%,transparent 73%)}.dolphin-scene:before,.dolphin-scene:after{content:'';position:absolute;bottom:-15%;width:42%;height:58%;border-radius:50% 50% 0 0;background:linear-gradient(145deg,#714c79,#264d5d);opacity:.78}.dolphin-scene:before{left:-8%;transform:rotate(18deg)}.dolphin-scene:after{right:-8%;transform:rotate(-18deg)}.dolphin{position:absolute;left:50%;top:45%;font-size:74px;line-height:1;transform:translate(-50%,-50%) rotate(-8deg);filter:drop-shadow(0 12px 14px #001a25aa)}.reef{position:absolute;bottom:13%;font-size:34px;color:#e18cc0;text-shadow:0 0 15px #f79ad7}.reef-a{left:17%}.reef-b{right:16%;color:#b58bdb}.bubbles{position:absolute;top:18%;right:20%;font-size:20px;color:#baf5f6;letter-spacing:6px}.dolphin-dot{background:#38a9b9}
 @media(min-width:821px){.game-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:980px;margin-left:auto;margin-right:auto}.game-cover{aspect-ratio:1.6}}
+
+/* The Flooded Garden card */
+.garden-cover{background:#447e74}.garden-dot{background:#c99b57}
