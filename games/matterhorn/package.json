@@ -1,0 +1,16 @@
+{
+  "name": "matterhorn-neon-stream",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node --check src/main.js && node tests/physics.test.mjs && node tests/lessons.test.mjs && node tests/lesson-speech.test.mjs && node tests/learning-ui.test.mjs && node tests/challenges.test.mjs && node tests/scene-check.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.11"
+  }
+}

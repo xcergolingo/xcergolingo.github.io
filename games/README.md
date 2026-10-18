@@ -1,6 +1,6 @@
 # GoLingo Games
 
-A responsive landing page for the three current GoLingo language games.
+A responsive gallery for six GoLingo language games, with category filters and shared lesson data.
 
 **Website:** https://xcergolingo.github.io/games/
 
@@ -15,8 +15,17 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 | Lagoon | https://xcergolingo.github.io/far-cry-lagoon/ | media/lagoon.mp4 |
 | Word Folio | https://xcergolingo.github.io/word-folio/ | media/word-folio.mp4 |
 | Super Flying Man | https://xcergolingo.github.io/super-flying-man/ | media/super-flying-man.mp4 |
+| Dolphin Pursuit | https://xcergolingo.github.io/dolphin-pursuit/ | Playable demo |
+| The Flooded Garden | https://xcergolingo.github.io/flooded-garden/ | Illustrated card + playable demo |
+| Matterhorn — Ski & Speak | https://xcergolingo.github.io/games/matterhorn/ | Illustrated card + playable game |
 
 The approximately 12-second previews are silent recordings of the actual public games using demonstration vocabulary. They are not concept animations. Recording uses software rendering; performance varies by device. Recording-only presentation adjustments hide Word Folio's missing-voice notification and Lagoon's persistent start overlay after its start action succeeds. No deployed game source is modified. Lagoon uses the game's Low graphics preset.
+
+## Sports and shared lessons
+
+The Sports filter includes Matterhorn — Ski & Speak. Cards may have multiple tags; the count reflects the current filter. The ski game supports the gallery's `#golingoLesson=` launch payload for word, phrase and sentence lessons, including the `learningLanguage` / `primaryLanguage` GoLingo schema. Saving a lesson does not upload it; it remains in tab storage and is passed through a URL hash on explicit launch. Clearing a lesson removes stale launch data from links.
+
+The complete ski source lives in `matterhorn/`. Its built `index.html` is self-contained, with no CDN dependency. See its README for building and checks.
 
 ## Visitor journey
 
@@ -39,4 +48,4 @@ The **GoLingo gallery gameplay previews** workflow commits only gallery media. I
 
 The **Verify GoLingo gallery release** workflow checks the live page, images, App Store buttons, MP4 playback, FAQ behavior, and horizontal layout at 1280, 768, 390, and 320 CSS pixels. It uses full Google Chrome when installed on the runner for H.264 support. A README change or manual workflow run triggers it. Its release archive includes this folder, screenshots, and a diagnostic report.
 
-This website does not modify the three games, the root home page, SwiftUI application code, or the App Store binary. It promotes the existing GoLingo game-launch integration.
+The gallery links five existing browser games and hosts Matterhorn in `matterhorn/`. This update does not modify the root home page, SwiftUI application code, or the App Store binary.

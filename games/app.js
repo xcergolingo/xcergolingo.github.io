@@ -15,8 +15,8 @@
   function validateLesson(raw) {
     const value = JSON.parse(raw);
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('Use a JSON object.');
-    const list = value.words || value.sentences;
-    if (!Array.isArray(list) || list.length === 0) throw Error('Include a nonempty words or sentences array.');
+    const list = value.words || value.sentences || value.phrases || value.items || value.entries;
+    if (!Array.isArray(list) || list.length === 0) throw Error('Include a nonempty words, sentences, phrases or items array.');
     if (list.length > 500) throw Error('Limit a lesson to 500 entries.');
     if (raw.length > 100000) throw Error('Lesson is too large.');
     return value;
@@ -26,7 +26,7 @@
     sessionStorage.setItem(lessonKey, JSON.stringify(parsed));
     activeLesson = parsed;
     lessonInput.value = JSON.stringify(parsed, null, 2);
-    lessonStatus.textContent = 'Lesson saved · ' + ((parsed.words?.length || 0) + (parsed.sentences?.length || 0)) + ' items';
+    lessonStatus.textContent = 'Lesson saved · ' + (parsed.words || parsed.sentences || parsed.phrases || parsed.items || parsed.entries).length + ' items';
   }
   try {
     const params = new URLSearchParams(location.search);
@@ -47,15 +47,16 @@
     lessonStatus.textContent = 'No lesson loaded';
   });
   // Send the payload only on explicit launch. A URL hash is not sent to servers.
-  document.querySelectorAll('.game-card .demo-link, #dolphin-pursuit .game-cover').forEach(link => {
+  document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover').forEach(link => {
     link.addEventListener('click', () => {
-      if (!activeLesson) return;
       const url = new URL(link.href);
-      url.hash = 'golingoLesson=' + encodeURIComponent(JSON.stringify(activeLesson));
+      if (activeLesson) url.hash = 'golingoLesson=' + encodeURIComponent(JSON.stringify(activeLesson));
+      else if (url.hash.startsWith('#golingoLesson=')) url.hash = '';
       link.href = url.toString();
     });
   });
   const cards = [...document.querySelectorAll('.game-card')];
+  document.getElementById('hub-count').textContent = cards.length + ' games';
   document.querySelectorAll('[data-filter]').forEach(chip => chip.addEventListener('click', () => {
     const tag = chip.dataset.filter;
     let count = 0;
@@ -151,3 +152,4 @@
   video.addEventListener('error', () => { if (video.getAttribute('src')) document.getElementById('video-error').hidden = false; });
   document.querySelectorAll('img').forEach(image => image.addEventListener('error', () => image.classList.add('image-unavailable')));
 })();
+

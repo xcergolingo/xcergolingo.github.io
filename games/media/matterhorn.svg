@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Blue-hour ski course illustration">
+ <defs>
+  <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#081c36"/><stop offset="1" stop-color="#46778b"/></linearGradient>
+  <linearGradient id="snow" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#91afc2"/><stop offset="1" stop-color="#142e4b"/></linearGradient>
+  <linearGradient id="warm" x2="1" y2="1"><stop stop-color="#eeb180"/><stop offset="1" stop-color="#6f7489"/></linearGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+ </defs>
+ <path fill="url(#sky)" d="M0 0h960v600H0z"/>
+ <path fill="#56798f" d="m0 265 73-52 63 29 86-45 59 34 54-26 61 30 86-142 17-23 24 52 40 59 56 72 65-41 66 35 73-20 82 37v224H0z"/>
+ <path fill="#1b3652" d="m375 261 107-168 17-23 14 34 26 43 24 34 56 72-76-21-48-65-22 66z"/>
+ <path fill="url(#warm)" d="m482 93 17-23 14 34 26 43 24 34 56 72-39-17-42-48-25-52-10-24-18 30-37 43z"/>
+ <path fill="#7d98ad" d="m0 316 119-54 108 30 149-31 101 24 80-25 141 43 126-55 136 28v324H0z"/>
+ <path fill="url(#snow)" d="M0 360q148-89 292-23 140 58 188-12 83 103 208 13 114-50 272-21v283H0z"/>
+ <path fill="#a38d8b" opacity=".6" d="m702 277 122-29 136 28v100q-105-31-258-99z"/>
+ <path d="M-30 484Q105 389 282 412T469 348" fill="none" stroke="#48eee8" stroke-width="9" opacity=".7" filter="url(#glow)"/>
+ <path d="M990 485Q803 401 654 414T491 348" fill="none" stroke="#ed65da" stroke-width="9" opacity=".7" filter="url(#glow)"/>
+ <path d="M-30 484Q105 389 282 412T469 348" fill="none" stroke="#6af3eb" stroke-width="3"/>
+ <path d="M990 485Q803 401 654 414T491 348" fill="none" stroke="#f07bdd" stroke-width="3"/>
+ <path d="M410 600Q423 477 480 366M428 600Q439 477 482 366" fill="none" stroke="#d0e7ed" stroke-width="1.8" opacity=".7"/>
+ <circle cx="481" cy="355" r="49" fill="#132a40" fill-opacity=".35" stroke="#72f3ed" stroke-width="10" opacity=".55" filter="url(#glow)"/>
+ <circle cx="481" cy="355" r="49" fill="none" stroke="#8ef8ef" stroke-width="3"/>
+ <text x="481" y="361" font-family="Arial,sans-serif" font-size="18" fill="#effaff" text-anchor="middle">esquiar</text>
+ <path fill="#112335" stroke="#45606f" d="m365 600 22-103q10-16 20-3l-10 106zm111 0-10-106q7-16 17-5l21 111z"/>
+ <path fill="#ef9b38" d="m383 514 4-17q10-16 20-3l-2 20zm85-2-2-18q7-16 17-5l4 23z"/>
+ <path d="m119 416-4-21 15-2 4 18m615 7 4-25 15 3-4 24" fill="#db72cb"/>
+</svg>

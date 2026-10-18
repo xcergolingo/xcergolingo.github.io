@@ -1,0 +1,18 @@
+Matterhorn — Neon Stream
+
+THREE.JS r170
+Copyright © 2010-2024 Three.js authors.
+MIT license: see THREE-LICENSE.txt. https://threejs.org/
+
+REAL ELEVATION DATA
+Mapzen / Tilezen Terrarium terrain tiles, using public open elevation sources.
+Tile service: https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png
+Encoding: height meters = red * 256 + green + blue / 256 - 32768.
+Documentation: https://github.com/tilezen/joerd/blob/master/docs/formats.md
+Underlying source attribution: https://github.com/tilezen/joerd/blob/master/docs/attribution.md
+AWS public dataset: https://registry.opendata.aws/terrain-tiles/
+Source region, coordinates and sampled limits: assets/terrain-provenance.json
+
+The foreground piste and chalets are designed and are not an official mapped run.
+The referenced screenshot served as art direction; it is not included or used as
+an in-game texture. All in-game props, interface art and textures are procedural.

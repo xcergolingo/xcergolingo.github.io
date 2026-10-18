@@ -1,0 +1,19 @@
+{
+  "type": "phrases",
+  "language": "es-ES",
+  "translationLanguage": "en-US",
+  "items": [
+    {
+      "text": "hola",
+      "translation": "hello"
+    },
+    {
+      "text": "buenos días",
+      "translation": "good morning"
+    },
+    {
+      "text": "muchas gracias",
+      "translation": "thank you very much"
+    }
+  ]
+}

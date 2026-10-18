@@ -1,0 +1,29 @@
+{
+  "type": "sentences",
+  "language": "es-ES",
+  "translationLanguage": "en-US",
+  "items": [
+    {
+      "text": "Me gusta esquiar.",
+      "translation": "I like skiing.",
+      "words": [
+        {
+          "text": "Me",
+          "translation": "I / me"
+        },
+        {
+          "text": "gusta",
+          "translation": "like"
+        },
+        {
+          "text": "esquiar",
+          "translation": "to ski"
+        }
+      ]
+    },
+    {
+      "text": "La montaña es hermosa.",
+      "translation": "The mountain is beautiful."
+    }
+  ]
+}

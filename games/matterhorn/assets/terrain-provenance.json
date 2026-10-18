@@ -1,0 +1,89 @@
+{
+  "source": "Mapzen / Tilezen public Terrarium elevation tiles",
+  "format": "uint16-le, quarter meters, row-major; row 0 is world zMin",
+  "width": 361,
+  "height": 281,
+  "xMin": -9000,
+  "xMax": 9000,
+  "zMin": -18000,
+  "zMax": -4000,
+  "peak": {
+    "lat": 45.9763,
+    "lon": 7.6586,
+    "elevation": 4478,
+    "worldX": 350,
+    "worldZ": -8500
+  },
+  "zoom": 12,
+  "tileCount": 12,
+  "downloaded": "2026-10-17",
+  "tiles": [
+    [
+      12,
+      2133,
+      1456
+    ],
+    [
+      12,
+      2133,
+      1457
+    ],
+    [
+      12,
+      2133,
+      1458
+    ],
+    [
+      12,
+      2134,
+      1456
+    ],
+    [
+      12,
+      2134,
+      1457
+    ],
+    [
+      12,
+      2134,
+      1458
+    ],
+    [
+      12,
+      2135,
+      1456
+    ],
+    [
+      12,
+      2135,
+      1457
+    ],
+    [
+      12,
+      2135,
+      1458
+    ],
+    [
+      12,
+      2136,
+      1456
+    ],
+    [
+      12,
+      2136,
+      1457
+    ],
+    [
+      12,
+      2136,
+      1458
+    ]
+  ],
+  "urlTemplate": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+  "documentation": "https://github.com/tilezen/joerd/blob/master/docs/formats.md",
+  "attribution": "Mapzen / Tilezen; underlying SRTM and open elevation contributors. https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+  "note": "The distant massif uses real sampled elevation without vertical exaggeration. The foreground ski line and village are designed, not a navigable real piste. DEM sampling smooths the true summit.",
+  "minimumMeters": 1588.6957873635151,
+  "maximumMeters": 4350.76185724506,
+  "rendererUpdate": "Flow Update 02: original DEM samples retained; summit restored locally to 4478 m in the renderer (145 m Gaussian), plus heightfield-derived ridge cast shading. Foreground remains a designed course."
+}

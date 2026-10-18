@@ -1,0 +1,6 @@
+sentences
+language: es-ES
+translationLanguage: en-US
+Me gusta esquiar. | I like skiing.
+La montaña es hermosa. | The mountain is beautiful.
+Quiero aprender algo nuevo. | I want to learn something new.
