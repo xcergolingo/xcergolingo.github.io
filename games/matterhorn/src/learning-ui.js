@@ -1,6 +1,7 @@
 import {parseLesson,DEMO_TEXT,PHRASE_DEMO,SENTENCE_EXAMPLE,PHRASE_EXAMPLE,lessonRunCount,lessonJSON,lessonRun,lessonFromURL} from './lessons.js';
 import {makeLessonRun} from './lesson-run.js';
 import {LessonSpeech} from './lesson-speech.js';
+import {bindGameTap} from './game-interaction.js';
 const $=id=>document.getElementById(id),read=(k,d=null)=>{try{return localStorage.getItem('neon-stream:'+k)??d;}catch{return d;}},write=(k,v)=>{try{localStorage.setItem('neon-stream:'+k,v);}catch{}};
 export class LearningUI{
  constructor(callbacks){
@@ -82,7 +83,7 @@ export class LearningUI{
   $('load-sentence-sample').addEventListener('click',()=>this.importText(DEMO_TEXT));$('load-phrase-sample').addEventListener('click',()=>this.importText(PHRASE_DEMO));
   $('import-lesson').addEventListener('click',()=>$('lesson-file').click());$('lesson-file').addEventListener('change',async()=>{const f=$('lesson-file').files?.[0];if(!f)return;if(f.size>2000000){$('lesson-error').textContent='Use a JSON or text file smaller than 2 MB.';return;}try{this.importText(await f.text());}catch{$('lesson-error').textContent='This file could not be read.';}$('lesson-file').value='';});
   $('example-json').addEventListener('click',()=>this.download(this.formMode==='sentences'?SENTENCE_EXAMPLE:PHRASE_EXAMPLE,`GoLingo-Ski-${this.formMode}.json`));$('export-lesson').addEventListener('click',()=>{this.preview();if(this.formLesson)this.download(lessonJSON(this.formLesson),'GoLingo-Ski-Lesson.json');});
-  $('voice-pause').addEventListener('click',()=>this.toggleRepeat());
+  bindGameTap($('voice-pause'),()=>this.toggleRepeat(),{canTap:()=>this.cb.canControl?.()??true});
   $('finish-hear').addEventListener('click',()=>{if(!this.run)return;this.speech.suspended=false;this.speech.preview(this.run.mode==='sentences'?this.run.text:this.run.units.map(u=>u.text).join('. '),this.run.language);});
   $('finish-hear-translation').addEventListener('click',()=>{if(!this.run?.translation)return;this.speech.suspended=false;this.speech.preview(this.run.translation,this.run.translationLanguage);});
   const resize=()=>document.documentElement.style.setProperty('--editor-height',(globalThis.visualViewport?.height||innerHeight)+'px');globalThis.visualViewport?.addEventListener('resize',resize);resize();

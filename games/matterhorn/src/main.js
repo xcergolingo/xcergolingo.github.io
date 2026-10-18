@@ -18,6 +18,7 @@ import {MountainAudio} from './audio.js';
 import {LearningUI} from './learning-ui.js';
 import {makeChallenge,crossChallenge,nextDanger} from './challenges.js';
 import {buildObstacles} from './obstacles.js';
+import {bindGameTap,bindRunLifecycle} from './game-interaction.js';
 
 const $=id=>document.getElementById(id),storage={get(k){try{return localStorage.getItem('neon-stream:'+k);}catch{return null;}},set(k,v){try{localStorage.setItem('neon-stream:'+k,v);}catch{}}};
 const ui={speed:$('speed'),alt:$('altitude'),air:$('airtime'),timer:$('timer'),gates:$('gates-made'),section:$('section'),stream:$('stream'),progress:$('progress'),score:$('score'),toast:$('toast'),airTag:$('air-tag')};
@@ -34,7 +35,11 @@ let difficulty=storage.get('challenge')==='expert'?'expert':'alpine',challenge={
 let obstacleClears=0,obstacleHits=0,daring=0;
 const map=$('map'),mctx=map.getContext('2d');
 function setMode(next){mode=next;document.body.dataset.mode=next;clearInput();$('menu').hidden=next!=='menu';$('pause-menu').hidden=next!=='paused';$('finish-menu').hidden=next!=='finish';$('pause').ariaLabel=next==='paused'?'Resume skiing':'Pause skiing';}
-function clearInput(){keys.clear();touch.steer=0;touch.brake=touch.hop=false;drag.active=false;buttonSteer.clear();input.steer=0;input.hop=false;}
+function clearInput(){
+ const pointer=drag.id;drag.active=false;drag.id=null;keys.clear();touch.steer=0;touch.brake=touch.hop=false;buttonSteer.clear();input.steer=0;input.brake=input.tuck=input.hop=false;
+ if(pointer!=null)try{renderer?.domElement.releasePointerCapture(pointer);}catch{}
+ $('steer-knob').style.transform='';for(const id of ['left','right','brake','hop'])$(id).classList.remove('held');
+}
 function toast(text,tone='cyan',seconds=1.6){ui.toast.textContent=text;ui.toast.dataset.tone=tone;ui.toast.classList.add('show');toastUntil=visualTime+seconds;}
 function reset(){
  const run=learning?.prepare();
@@ -159,16 +164,17 @@ function applyGlow(){
  document.querySelectorAll('[data-glow]').forEach(e=>e.value=Math.round(glow*100));document.querySelectorAll('[data-glow-value]').forEach(e=>e.textContent=Math.round(glow*100)+'%');
 }
 function bindControls(){
- $('start').addEventListener('click',startRun);$('again').addEventListener('click',()=>{learning?.next();startRun();});$('repeat-run').addEventListener('click',startRun);$('restart').addEventListener('click',startRun);$('resume').addEventListener('click',pause);$('pause').addEventListener('click',pause);
+ $('start').addEventListener('click',startRun);$('again').addEventListener('click',()=>{learning?.next();startRun();});$('repeat-run').addEventListener('click',startRun);$('restart').addEventListener('click',startRun);$('resume').addEventListener('click',pause);
+ bindGameTap($('pause'),pause,{canTap:()=>!drag.active});
  $('quit').addEventListener('click',()=>{reset();learning?.stop();setMode('menu');});
  $('free-ski').addEventListener('click',()=>{learning.setEnabled(!learning.enabled);startRun();});
  document.querySelectorAll('[data-glow]').forEach(e=>e.addEventListener('input',()=>{glow=clamp(Number(e.value)/100,.15,1);storage.set('glow',glow);applyGlow();}));
- $('sound').addEventListener('click',()=>{audio.toggle();storage.set('audio',audio.enabled?'1':'0');updateSettings();});
+ bindGameTap($('sound'),()=>{audio.toggle();storage.set('audio',audio.enabled?'1':'0');updateSettings();},{canTap:()=>!drag.active});
  $('motion').addEventListener('click',()=>{reduced=!reduced;storage.set('motion',reduced?'1':'0');updateSettings();});
  document.querySelectorAll('[data-quality]').forEach(b=>b.addEventListener('click',()=>setQuality(b.dataset.quality)));
  document.querySelectorAll('[data-ride]').forEach(b=>b.addEventListener('click',()=>{rideAssist=b.dataset.ride==='flow';storage.set('ride',rideAssist?'flow':'sport');updateSettings();}));
  document.querySelectorAll('[data-challenge]').forEach(b=>b.addEventListener('click',()=>{difficulty=b.dataset.challenge;storage.set('challenge',difficulty);updateSettings();}));
- $('fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else toast('Use landscape for a wider view');}catch{toast('Use landscape for a wider view');}});
+ bindGameTap($('fullscreen'),async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else toast('Use landscape for a wider view');}catch{toast('Use landscape for a wider view');}},{canTap:()=>!drag.active});
  const gameplayKeys=['KeyA','KeyD','ArrowLeft','ArrowRight','ArrowDown','ArrowUp','Space','KeyW','KeyS','KeyJ','ShiftLeft'];
  addEventListener('keydown',e=>{
   if(learning?.editorOpen||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName||'')){if(e.code==='Escape'&&learning?.editorOpen)learning.close();return;}
@@ -178,15 +184,15 @@ function bindControls(){
   if(!e.repeat&&e.code==='KeyR'&&mode!=='menu')startRun();
   if(!e.repeat&&e.code==='KeyV'&&mode==='playing'&&learning?.run)learning.toggleRepeat();
  });addEventListener('keyup',e=>keys.delete(e.code));
- renderer.domElement.addEventListener('pointerdown',e=>{if(mode!=='playing')return;e.preventDefault();drag.active=true;drag.x=e.clientX;drag.id=e.pointerId;renderer.domElement.setPointerCapture(e.pointerId);});
+ renderer.domElement.addEventListener('pointerdown',e=>{if(mode!=='playing'||drag.active||(e.button!=null&&e.button!==0))return;e.preventDefault();learning?.speech.gesture();drag.active=true;drag.x=e.clientX;drag.id=e.pointerId;renderer.domElement.setPointerCapture(e.pointerId);});
  renderer.domElement.addEventListener('pointermove',e=>{if(drag.active&&e.pointerId===drag.id){touch.steer=clamp((e.clientX-drag.x)/Math.min(150,innerWidth*.25),-1,1);$('steer-knob').style.transform=`translateX(${touch.steer*35}px)`;}});
- const endDrag=e=>{if(e.pointerId===drag.id){drag.active=false;touch.steer=0;$('steer-knob').style.transform='';}};
+ const endDrag=e=>{if(e.pointerId===drag.id){drag.active=false;drag.id=null;touch.steer=0;$('steer-knob').style.transform='';if(e.type==='pointerup')learning?.speech.gesture();}};
  renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);renderer.domElement.addEventListener('lostpointercapture',endDrag);
  for(const id of ['left','right','brake','hop']){
   const b=$(id);b.addEventListener('pointerdown',e=>{if(mode!=='playing')return;e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('held');if(id==='left'||id==='right')buttonSteer.set(e.pointerId,id==='left'?-1:1);else touch[id]=true;});
-  const up=e=>{buttonSteer.delete(e.pointerId);if(id==='brake'||id==='hop')touch[id]=false;b.classList.remove('held');};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up);
+  const up=e=>{buttonSteer.delete(e.pointerId);if(id==='brake'||id==='hop')touch[id]=false;b.classList.remove('held');if(e.type==='pointerup')learning?.speech.gesture();};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up);
  }
- addEventListener('blur',()=>{if(mode==='playing')pause();clearInput();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause();});addEventListener('resize',resize);
+ bindRunLifecycle({isPlaying:()=>mode==='playing',clearInput,suspendSpeech:()=>learning?.suspend(true),resumeSpeech:()=>learning?.suspend(false),recoverSpeech:()=>learning?.speech.recover()});addEventListener('resize',resize);
  renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();if(mode==='playing')pause();$('error').hidden=false;$('error-text').textContent='The graphics context was interrupted. Reload this page to return to the mountain.';});
 }
 function updateSettings(){
@@ -227,9 +233,9 @@ async function init(){
  c*=1.-edge*.15;c+=mix(vec3(.01,.18,.22),vec3(.14,.01,.12),vUv.x)*edge*edge*uBoost*.16;
  c+=vec3(.14,.62,.67)*uFlash;float grain=fract(sin(dot(vUv*uResolution+uTime,vec2(12.9898,78.233)))*43758.5453)-.5;c+=grain*.0024;gl_FragColor=vec4(c,1.);}
 `});composer.addPass(cinematic);composer.addPass(new OutputPass());
-  learning=new LearningUI({mode:()=>mode,pause,apply:startRun});setQuality(quality);bindControls();updateSettings();updateCamera(1);updateHUD();ready=true;setMode('menu');$('loader').hidden=true;$('start').disabled=false;
+  learning=new LearningUI({mode:()=>mode,pause,apply:startRun,canControl:()=>!drag.active});setQuality(quality);bindControls();updateSettings();updateCamera(1);updateHUD();ready=true;setMode('menu');$('loader').hidden=true;$('start').disabled=false;
   // The source is fully inspectable; this read-only summary helps integrations.
-  window.NeonStream={version:'5.0.0',getState:()=>({mode,section:sectionAt(skier.s).name,speedKmh:skier.speed*3.6,altitude:skier.y,distance:skier.s,gates:hits,totalGates:gates.length,stream,score,difficulty,obstacleClears,obstacleHits,repeatPaused:learning?.speech.userPaused})};
+  window.NeonStream={version:'6.0.0',getState:()=>({mode,section:sectionAt(skier.s).name,speedKmh:skier.speed*3.6,altitude:skier.y,distance:skier.s,gates:hits,totalGates:gates.length,stream,score,difficulty,obstacleClears,obstacleHits,repeatPaused:learning?.speech.userPaused,pronunciation:learning?.speech.status})};
   window.GoLingoSki={loadLesson(data){learning.importText(typeof data==='string'?data:JSON.stringify(data,null,2));learning.open();}};
   requestAnimationFrame(animate);
  }catch(e){$('loader').hidden=true;$('error').hidden=false;$('error-text').textContent=`The mountain could not start: ${e.message}. Use a current browser with WebGL 2 enabled.`;console.error(e);}

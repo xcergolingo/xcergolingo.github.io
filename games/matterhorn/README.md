@@ -4,10 +4,26 @@ A complete first-person Three.js r170 ski and language-learning prototype. Learn
 your own sentences, words and phrases beneath the Matterhorn, or choose Free Ski
 for 42 neon gates on a 2.8 km descent to a Schwarzsee-inspired village.
 
-## Ski & Speak / 05 — Finish the sentence
+## Ski & Speak / 06 — Keep carving, keep repeating
 
 Public game: https://xcergolingo.github.io/games/matterhorn/
 Games gallery: https://xcergolingo.github.io/games/ — choose **Sports**.
+
+Touch steering no longer opens the pause menu when a notification or browser
+chrome briefly takes focus. A blur only releases held controls; hiding the page
+freezes rendering and suspends speech, then returning restores the current word
+without opening a menu. An explicit game or Repeat pause stays paused.
+Pause, pronunciation and top-bar controls require
+a deliberate tap, so swiping across a control does not activate it. A second
+finger cannot take over an active steering drag.
+
+Pronunciation now preserves a healthy loop when passing the first word's ring,
+lets native cancellation settle before switching words, and retries lost native
+completion events even when the engine is stuck reporting `speaking`. Normal
+steering touches can recover blocked pronunciation without opening a menu or
+overriding **Pause Repeat**. Repetition continues until the next word, an explicit
+pause, leaving the page or the sentence finish. The finish still shows and
+speaks the whole sentence.
 
 Words appear only inside the course rings. There is no word card over the ski
 view. Pronunciation repeats from the start of a lesson and switches to the word
@@ -178,6 +194,7 @@ The build writes `dist/index.html`, a new single-file offline game. The root
 `index.html` is a ready-to-play copy of that build.
 
 - `src/main.js`: application entry point, input, HUD, fixed-step loop, composer.
+- `src/game-interaction.js`: swipe-safe controls and visible-page focus handling.
 - `src/course.js`: ski line, heights, banks, section names, gates and kickers.
 - `src/physics.js`: gravity, edge grip, drag, braking, boosts, ballistic jumps, rings and Flow Assist.
 - `src/terrain.js`: real DEM mesh, designed foreground, procedural snow shading and baked ridge shade.
@@ -197,6 +214,7 @@ The build writes `dist/index.html`, a new single-file offline game. The root
 - `tests/scene-check.mjs`: CPU geometry, POV framing, word sprites and restart cleanup.
 - `tests/lessons.test.mjs`: input formats, Unicode, batching and complete lesson runs.
 - `tests/lesson-speech.test.mjs`: mocked speech repeat, cancellation, pause and finish checks.
+- `tests/game-interaction.test.mjs`: swipe, multitouch, focus and repeating-speech lifecycle regressions.
 - `tests/learning-ui.test.mjs`: controller checks for card-free repetition and pause across rings.
 - `tests/challenges.test.mjs`: obstacles, collisions, jumps, bonuses and full recoverable descents.
 

@@ -24,8 +24,8 @@ try{
  ui.pass(r.gates[1]);assert.equal(queue.length,count,'next word does not override manual pause');assert.equal(ui.speech.active.text,r.units[1].text);
  ui.toggleRepeat();assert.equal(queue.at(-1).text,r.units[1].text,'resume repeats the latest word');assert.equal(ui.speech.active.loop,true);
  ui.suspend(true);assert(ui.speech.suspended);ui.suspend(false);assert.equal(queue.at(-1).text,r.units[1].text);
- ui.pass(r.gates[2]);assert.equal(queue.at(-1).text,r.units[2].text,'next ring replaces the looping word');
- mode='finish';ui.finish();assert.equal(ui.speech.active.text,r.text);assert.equal(ui.speech.active.loop,false,'whole sentence is spoken once');
+ ui.pass(r.gates[2]);await new Promise(resolve=>setTimeout(resolve,110));assert.equal(queue.at(-1).text,r.units[2].text,'next ring replaces the looping word after native cancel settles');
+ mode='finish';ui.finish();await new Promise(resolve=>setTimeout(resolve,110));assert.equal(ui.speech.active.text,r.text);assert.equal(queue.at(-1).text,r.text);assert.equal(ui.speech.active.loop,false,'whole sentence is spoken once');
  assert.equal(nodes.get('finish-source').textContent,r.text);
  assert.deepEqual(nodes.get('finish-source').focusOptions,{preventScroll:true});assert.equal(nodes.get('finish-menu').querySelector().scrollTop,0,'sentence stays visible at the top on narrow screens');
 }finally{ui.stop();}
