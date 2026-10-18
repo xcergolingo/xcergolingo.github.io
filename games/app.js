@@ -6,6 +6,69 @@
     'word-folio': { name: 'Word Folio', description: 'Open your pop-up word book. Hear a word, reveal its meaning, and turn the page.', demo: 'https://xcergolingo.github.io/word-folio/' },
     'super-flying-man': { name: 'Super Flying Man', description: 'Fly through word circles and revisit what you learn in your flight basket.', demo: 'https://xcergolingo.github.io/super-flying-man/' }
   };
+
+  // Shared lesson hub. Session storage is tab-scoped; nothing is uploaded.
+  const lessonInput = document.getElementById('lesson-input');
+  const lessonStatus = document.getElementById('lesson-status');
+  const lessonKey = 'golingo:active-lesson:v1';
+  let activeLesson = null;
+  function validateLesson(raw) {
+    const value = JSON.parse(raw);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('Use a JSON object.');
+    const list = value.words || value.sentences;
+    if (!Array.isArray(list) || list.length === 0) throw Error('Include a nonempty words or sentences array.');
+    if (list.length > 500) throw Error('Limit a lesson to 500 entries.');
+    if (raw.length > 100000) throw Error('Lesson is too large.');
+    return value;
+  }
+  function saveLesson(raw) {
+    const parsed = validateLesson(raw);
+    sessionStorage.setItem(lessonKey, JSON.stringify(parsed));
+    activeLesson = parsed;
+    lessonInput.value = JSON.stringify(parsed, null, 2);
+    lessonStatus.textContent = 'Lesson saved · ' + ((parsed.words?.length || 0) + (parsed.sentences?.length || 0)) + ' items';
+  }
+  try {
+    const params = new URLSearchParams(location.search);
+    const incoming = params.get('lesson');
+    if (incoming) {
+      saveLesson(incoming);
+      history.replaceState(null, '', location.pathname + location.hash);
+    } else {
+      const saved = sessionStorage.getItem(lessonKey);
+      if (saved) saveLesson(saved);
+    }
+  } catch (error) { lessonStatus.textContent = 'Lesson error: ' + error.message; }
+  document.getElementById('lesson-save').addEventListener('click', () => {
+    try { saveLesson(lessonInput.value); } catch (error) { lessonStatus.textContent = error.message; }
+  });
+  document.getElementById('lesson-clear').addEventListener('click', () => {
+    sessionStorage.removeItem(lessonKey); activeLesson = null; lessonInput.value = '';
+    lessonStatus.textContent = 'No lesson loaded';
+  });
+  // Send the payload only on explicit launch. A URL hash is not sent to servers.
+  document.querySelectorAll('.game-card .demo-link, #dolphin-pursuit .game-cover').forEach(link => {
+    link.addEventListener('click', () => {
+      if (!activeLesson) return;
+      const url = new URL(link.href);
+      url.hash = 'golingoLesson=' + encodeURIComponent(JSON.stringify(activeLesson));
+      link.href = url.toString();
+    });
+  });
+  const cards = [...document.querySelectorAll('.game-card')];
+  document.querySelectorAll('[data-filter]').forEach(chip => chip.addEventListener('click', () => {
+    const tag = chip.dataset.filter;
+    let count = 0;
+    cards.forEach(card => {
+      const show = tag === 'all' || (card.dataset.tags || '').split(' ').includes(tag);
+      card.hidden = !show; if (show) count++;
+    });
+    document.querySelectorAll('[data-filter]').forEach(other => {
+      const on = other === chip; other.classList.toggle('active', on); other.setAttribute('aria-pressed', String(on));
+    });
+    document.getElementById('hub-count').textContent = count + (count === 1 ? ' game' : ' games');
+  }));
+
   const dialog = document.getElementById('preview-dialog');
   const video = document.getElementById('preview-video');
   const hero = document.getElementById('hero-video');
