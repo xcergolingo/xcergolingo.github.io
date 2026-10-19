@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+<title id="title">Skybreaker — Language Flight</title><desc id="desc">Illustration of a silver twin-boom arcade aircraft firing golden bullets over a teal ocean toward enemy planes.</desc>
+<defs>
+ <linearGradient id="ocean" x2=".5" y2="1"><stop stop-color="#0d5665"/><stop offset="1" stop-color="#071f34"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#ffe6a2" stop-opacity=".7"/><stop offset="1" stop-color="#ffc772" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x2="1" y2="1"><stop stop-color="#eff6e9"/><stop offset=".5" stop-color="#a6c4bd"/><stop offset="1" stop-color="#57848a"/></linearGradient>
+ <pattern id="waves" width="150" height="90" patternUnits="userSpaceOnUse"><path d="M-40 35Q10 15 60 35T160 35M35 75Q65 65 95 75" fill="none" stroke="#86d5d0" stroke-opacity=".09" stroke-width="3"/></pattern>
+ <g id="enemy"><path d="m0-45 8 31 58 19v12L10 7 7 28l23 10v7L0 39l-30 6v-7l23-10-3-21-56 10V5l58-19Z" fill="#d39473" stroke="#5d3938" stroke-width="3"/><path d="m-4-23 8 0 3 18H-7Z" fill="#273b44"/><path d="M-34 3v9M34 3v9" stroke="#f5d5a8" stroke-width="5"/></g>
+</defs>
+<path fill="url(#ocean)" d="M0 0h960v600H0z"/><path fill="url(#waves)" d="M0 0h960v600H0z"/>
+<path d="M-50 50 80 35l112 56 15 80-67 75-109-9-61-75Z" fill="#397c70"/><path d="M-50 50 80 35l112 56 15 80-67 75-109-9-61-75Z" fill="none" stroke="#a6c699" stroke-width="10" opacity=".6"/>
+<path d="M880 427 1005 392l65 183-132 72-109-95Z" fill="#315f61" stroke="#78ad91" stroke-width="11"/>
+<g opacity=".25" stroke="#8bc2bd" fill="none"><path d="m280 610 25-130m340 125-28-125M350 610l13-92m218 98-12-96" stroke-width="5"/></g>
+<g opacity=".7"><use href="#enemy" transform="translate(270 195) rotate(170) scale(.7)"/><use href="#enemy" transform="translate(688 179) rotate(190) scale(.7)"/></g>
+<use href="#enemy" transform="translate(481 139) rotate(180) scale(.92)"/>
+<g stroke="#ffb67c" stroke-linecap="round" stroke-width="8"><path d="M305 283v10m335-20v10m-230-30v10m140-20v10"/></g>
+<circle cx="476" cy="320" r="125" fill="url(#glow)"/>
+<g transform="translate(480 435) rotate(-8)">
+ <ellipse cx="15" cy="30" rx="121" ry="58" fill="#031623" opacity=".3"/>
+ <path d="m-10-104 20 0 12 68 114 39v21L21 8l-8 65-26 0-8-65-115 16V3l114-39Z" fill="url(#metal)" stroke="#1b424c" stroke-width="4"/>
+ <path d="m-66-72 15 0 5 155-28 0Z m117 0 15 0 8 155-28 0Z" fill="#b9d0c5" stroke="#244a53" stroke-width="4"/>
+ <path d="M-72 67H74v14H-72Z" fill="#9bbeb4" stroke="#244a53" stroke-width="3"/>
+ <path d="M-9-70H9l5 39h-28Z" fill="#193d50" stroke="#e0dcb1" stroke-width="3"/>
+ <path d="M-87-67h57M30-67h57" stroke="#c1e2d8" stroke-width="4"/>
+ <path d="M-80-24v20M80-24v20M-8 27H8" stroke="#f5c96a" stroke-width="8"/>
+</g>
+<g stroke="#ffe8a0" stroke-linecap="round" stroke-width="7"><path d="M417 305v-24m112 12v-24m-112-19v-22m112 12v-22"/></g>
+<g fill="#daf4e7" opacity=".6"><circle cx="110" cy="350" r="2"/><circle cx="840" cy="150" r="2"/><circle cx="775" cy="330" r="3"/></g>
+<text x="480" y="549" fill="#ffe0a1" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="43" letter-spacing="6">SKYBREAKER</text>
+<text x="480" y="579" fill="#b0d2d0" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" letter-spacing="5">SHOOT · LISTEN · LEARN</text>
+</svg>
