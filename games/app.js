@@ -53,6 +53,7 @@
       if (activeLesson) url.hash = 'golingoLesson=' + encodeURIComponent(JSON.stringify(activeLesson));
       else if (url.hash.startsWith('#golingoLesson=')) url.hash = '';
       link.href = url.toString();
+      link.target = '_self'; // WKWebView: reuse the existing page, never create an unhandled new tab.
     });
   });
   const cards = [...document.querySelectorAll('.game-card')];
@@ -126,6 +127,7 @@
     document.getElementById('preview-title').textContent = game.name;
     document.getElementById('preview-description').textContent = game.description;
     document.getElementById('dialog-demo').href = game.demo;
+    document.getElementById('dialog-demo').target = '_self';
     document.getElementById('video-error').hidden = true;
     video.poster = `media/${id}.jpg`; video.src = `media/${id}.mp4`;
     video.setAttribute('aria-label', `${game.name} silent gameplay preview`);
