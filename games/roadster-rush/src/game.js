@@ -3,7 +3,7 @@ import {createTeslaRoadsterRocket,mergeStaticMeshes} from './model-integration.j
 import {setupRoadsterEnvironment} from './lighting-environment.js';
 import {createCaliforniaPalm} from './palm-replacement.js';
 import {createLearningApp} from './learning-app.js';
-import {createSteeringWheel} from './steering-wheel.js';
+import {createSteeringWheel,createSwipeControl} from './steering-wheel.js';
 
 /***************************************************************************
      * 1. WEB AUDIO API SOUND SYNTHESIZER (5,500 PSI Cold-Gas Thrusters & SFX)
@@ -817,7 +817,8 @@ import {createSteeringWheel} from './steering-wheel.js';
     let rollAngle = 0;
     let rollDir = 1;
     let completedRolls = 0;
-    let wheelAirLatch = 0;
+    let queuedAirRoll = 0;
+    const gestureThrust = {wheel:{held:false,boost:0},road:{held:false,boost:0}};
     let debugTrafficDisabled = false;
     let cameraShake = 0;
 
@@ -869,31 +870,29 @@ import {createSteeringWheel} from './steering-wheel.js';
       }
     }
 
-    function updateWheelSteering(dt) {
-      const value = steeringWheel.getValue();
-      const magnitude = Math.abs(value);
-      const airborne = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
-      steeringWheel.setMode(airborne);
-      // A small dead zone prevents drift. The wheel controls lateral speed,
-      // so centering it holds the chosen road position instead of snapping lanes.
-      const input = magnitude > .1 ? Math.sign(value) * (magnitude - .1) / .9 : 0;
-      if (input) {
-        targetX = THREE.MathUtils.clamp(targetX + input * (airborne ? 8.5 : 10.5) * dt, LANES[0], LANES[LANES.length - 1]);
-        currentLane = THREE.MathUtils.clamp(Math.round((targetX - LANES[0]) / (LANES[1] - LANES[0])), 0, LANES.length - 1);
-      }
-      // One full flip for each deliberate turn. Recenter, release, or turn
-      // the other way to request another; holding never restarts a roll.
-      if (!airborne || magnitude <= .14) wheelAirLatch = 0;
-      if (airborne && magnitude >= .34) {
-        const direction = Math.sign(value);
-        if (direction !== wheelAirLatch && triggerKickflipRoll(direction, true)) wheelAirLatch = direction;
-      }
-      return input;
+    function setGestureThrust(source,active,{cancelled=false}={}) {
+      const input=gestureThrust[source];
+      input.held=active;
+      // A quick upward flick must still launch, even if released between frames.
+      if(active)input.boost=Math.max(input.boost,.55);
+      else if(cancelled)input.boost=0;
+      syncThrustInput();
+    }
+
+    function updateGestureControls(dt) {
+      for(const input of Object.values(gestureThrust))input.boost=Math.max(0,input.boost-dt);
+      syncThrustInput();
+      steeringWheel.setMode(playerCar.position.y>GROUND_CLEARANCE_Y+.25);
     }
 
     function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
-      if (gameState !== 'PLAYING' || app?.hasDialog() || isRolling) return false;
+      if (gameState !== 'PLAYING' || app?.hasDialog()) return false;
       if (fromAirSteer && playerCar.position.y <= GROUND_CLEARANCE_Y + .25) return false;
+      if (isRolling) {
+        // Finish the current full roll before honoring a rapid opposite swipe.
+        if(fromAirSteer)queuedAirRoll=Math.sign(dir)||1;
+        return false;
+      }
 
       // Give a low-altitude flip enough lift to clear the road.
       if (playerCar.position.y < 1.55 && tankPsi > 8) {
@@ -955,37 +954,45 @@ import {createSteeringWheel} from './steering-wheel.js';
     });
 
     // Each control owns its own pointer, allowing wheel + thrust together.
-    let swipePointer=null,swipePointerType=null,swipeX=0,thrustPointer=null,thrustPointerType=null;
+    let thrustPointer=null,thrustPointerType=null;
     const isContactPointer=type=>type==='touch'||type==='pen';
+    const btnFly=document.getElementById('btn-fly');
     const steeringWheel=createSteeringWheel({
       element:document.getElementById('steering-wheel'),
       isEnabled:()=>gameState==='PLAYING'&&!app?.hasDialog(),
-      onChange:value=>{if(Math.abs(value)<=.14)wheelAirLatch=0;}
+      onLaneChange:changeLane,
+      onThrustChange:(active,detail)=>setGestureThrust('wheel',active,detail)
+    });
+    const roadSwipes=createSwipeControl({
+      element:container,
+      isEnabled:()=>gameState==='PLAYING'&&!garageMode&&!app?.hasDialog(),
+      onLaneChange:changeLane,
+      onThrustChange:(active,detail)=>setGestureThrust('road',active,detail)
     });
     const orbitPointers=new Map();let pinchDistance=0;
     container.addEventListener('pointerdown',e=>{
+      if(!garageMode)return;
+      e.preventDefault();
       container.setPointerCapture(e.pointerId);
-      if(garageMode){orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:e.pointerType||'mouse'});if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}return;}
-      if(gameState==='PLAYING'&&swipePointer===null){swipePointer=e.pointerId;swipePointerType=e.pointerType||'mouse';swipeX=e.clientX;}
+      orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:e.pointerType||'mouse'});
+      if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
     });
     container.addEventListener('pointermove',e=>{
       if(garageMode&&orbitPointers.has(e.pointerId)){
         const old=orbitPointers.get(e.pointerId);orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:old.pointerType});
         if(orbitPointers.size===1){garageYaw-=(e.clientX-old.x)*.008;garageElevation=THREE.MathUtils.clamp(garageElevation+(e.clientY-old.y)*.004,.06,.85);}
         else if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);garageRadius=THREE.MathUtils.clamp(garageRadius+(pinchDistance-distance)*.025,5,24);pinchDistance=distance;}
-      }else if(e.pointerId===swipePointer&&gameState==='PLAYING'){const dx=e.clientX-swipeX;if(Math.abs(dx)>38){changeLane(dx>0?1:-1);swipeX=e.clientX;}}
+      }
     });
     function releaseWorldPointer(pointerId){
       orbitPointers.delete(pointerId);
-      if(pointerId===swipePointer){swipePointer=null;swipePointerType=null;}
       if(container.hasPointerCapture?.(pointerId)){try{container.releasePointerCapture(pointerId);}catch{}}
     }
-    const releaseWorld=e=>releaseWorldPointer(e.pointerId);
+    const releaseWorld=e=>{if(orbitPointers.has(e.pointerId))releaseWorldPointer(e.pointerId);};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])container.addEventListener(type,releaseWorld);
     container.addEventListener('wheel',e=>{if(garageMode){e.preventDefault();garageRadius=THREE.MathUtils.clamp(garageRadius+e.deltaY*.008,5,24);}},{passive:false});
-    const btnFly=document.getElementById('btn-fly');
     function syncThrustInput(){
-      isThrusting=gameState==='PLAYING'&&!app?.hasDialog()&&(heldFlightKeys.size>0||thrustPointer!==null);
+      isThrusting=gameState==='PLAYING'&&!app?.hasDialog()&&(heldFlightKeys.size>0||thrustPointer!==null||Object.values(gestureThrust).some(input=>input.held||input.boost>0));
       btnFly.classList.toggle('pressed',thrustPointer!==null);
     }
     function releaseThrustPointer(){
@@ -999,10 +1006,10 @@ import {createSteeringWheel} from './steering-wheel.js';
     for(const type of ['pointerup','pointercancel'])window.addEventListener(type,releaseThrust);
     document.getElementById('btn-roll').onclick=()=>triggerKickflipRoll(1);
     function releaseInputs(){
+      for(const input of Object.values(gestureThrust)){input.held=false;input.boost=0;}
       heldFlightKeys.clear();releaseThrustPointer();
-      const worldPointers=new Set(orbitPointers.keys());if(swipePointer!==null)worldPointers.add(swipePointer);
-      worldPointers.forEach(releaseWorldPointer);
-      steeringWheel.reset();wheelAirLatch=0;sfx.setThruster(false);
+      [...orbitPointers.keys()].forEach(releaseWorldPointer);
+      steeringWheel.reset();roadSwipes.reset();queuedAirRoll=0;sfx.setThruster(false);
     }
     function pauseForBackground(){
       releaseInputs();
@@ -1014,7 +1021,6 @@ import {createSteeringWheel} from './steering-wheel.js';
       // mouse releases may be lost, but an owned touch must keep controlling.
       heldFlightKeys.clear();
       if(thrustPointer!==null&&!isContactPointer(thrustPointerType))releaseThrustPointer();
-      if(swipePointer!==null&&!isContactPointer(swipePointerType))releaseWorldPointer(swipePointer);
       for(const [id,pointer] of orbitPointers)if(!isContactPointer(pointer.pointerType))releaseWorldPointer(id);
       syncThrustInput();
     });
@@ -1197,14 +1203,14 @@ import {createSteeringWheel} from './steering-wheel.js';
           }
         }
 
-        const wheelInput = updateWheelSteering(dt);
-        // Smooth steering, including keyboard lane targets and analog wheel input.
+        updateGestureControls(dt);
+        // Match the original fixed-lane movement: each side swipe chooses one lane.
         const dx = targetX - playerCar.position.x;
         playerCar.position.x += dx * Math.min(1, dt * 12);
 
         // Spin the Concave Turbine Wheels proportionally to highway velocity
         playerCar.userData.roll(step);
-        playerCar.userData.setSteering(THREE.MathUtils.clamp(wheelInput ? wheelInput*.35 : dx*.08,-.35,.35));
+        playerCar.userData.setSteering(THREE.MathUtils.clamp(dx*.08,-.35,.35));
 
         // Update Altitude-Reactive Soft Ambient-Occlusion Contact Shadow on the Asphalt
         const altAboveRoad = Math.max(0, playerCar.position.y - GROUND_CLEARANCE_Y);
@@ -1267,6 +1273,8 @@ import {createSteeringWheel} from './steering-wheel.js';
             rollAngle = Math.PI * 2;
             completedRolls++;
             playerCar.userData.bodyGroup.rotation.z = 0;
+            const nextRoll=queuedAirRoll;queuedAirRoll=0;
+            if(nextRoll&&playerCar.position.y>GROUND_CLEARANCE_Y+.25)triggerKickflipRoll(nextRoll,true);
           }
         }
 
@@ -1479,10 +1487,10 @@ import {createSteeringWheel} from './steering-wheel.js';
     document.getElementById('garage-back').onclick=()=>{garageMode=false;document.body.classList.remove('garage-state');document.getElementById('start-modal').classList.remove('hidden');document.getElementById('garage-panel').classList.add('hidden');};
     document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{garageYaw={front:Math.PI,rear:0,side:Math.PI/2}[button.dataset.view];garageElevation=button.dataset.view==='side'?.38:.27;garageRadius=isPortrait()?16:8.4;});
     window.RoadsterRush={getState:()=>({
-      gameState,lane:currentLane,thrusting:isThrusting,speed,
+      gameState,lane:currentLane,targetX,lanes:[...LANES],thrusting:isThrusting,speed,
       position:{x:playerCar.position.x,y:playerCar.position.y,z:playerCar.position.z},
-      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,
-      steering:steeringWheel.getState(),graphics:lowGraphics?'low':'standard',
+      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,queuedAirRoll,
+      steering:steeringWheel.getState(),roadSwipe:roadSwipes.getState(),gestureThrust:{wheel:{...gestureThrust.wheel},road:{...gestureThrust.road}},graphics:lowGraphics?'low':'standard',
       car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},
       ...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}
     })};

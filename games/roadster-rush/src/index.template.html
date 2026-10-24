@@ -24,7 +24,7 @@
     <footer class="bottom-controls">
       <div class="drive-controls">
         <div class="steering-control">
-          <button id="steering-wheel" type="button" aria-label="Steering wheel: drag to steer on the road. You can also use the arrow keys." aria-keyshortcuts="ArrowLeft ArrowRight" aria-describedby="steering-help">
+          <button id="steering-wheel" type="button" aria-label="Swipe left or right to move one lane. Swipe up to thrust and fly." aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp" aria-describedby="steering-help">
             <svg data-wheel-rotor viewBox="0 0 160 160" aria-hidden="true" focusable="false">
               <defs><linearGradient id="wheel-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bdc9cb"/><stop offset=".35" stop-color="#46545e"/><stop offset=".65" stop-color="#1c252f"/><stop offset="1" stop-color="#8e9b9e"/></linearGradient><radialGradient id="wheel-hub"><stop stop-color="#37434b"/><stop offset="1" stop-color="#131b25"/></radialGradient></defs>
               <circle cx="80" cy="80" r="73" fill="rgba(13,20,28,.5)" stroke="rgba(201,221,223,.18)"/>
@@ -37,17 +37,18 @@
               <path d="M72 88V72H82Q91 72 87 79Q85 82 79 81L87 89M72 81H79" fill="none" stroke="#d8e6e4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="80" cy="114" r="2" fill="currentColor"/>
             </svg>
+            <span class="wheel-swipe-arrow wheel-swipe-up" aria-hidden="true">↑</span><span class="wheel-swipe-arrow wheel-swipe-left" aria-hidden="true">‹</span><span class="wheel-swipe-arrow wheel-swipe-right" aria-hidden="true">›</span>
           </button>
-          <span id="steering-mode" class="steering-mode">STEER</span>
-          <span id="steering-help" class="steering-help">Road: steer · Air: flip</span>
+          <span id="steering-mode" class="steering-mode">SWIPE LANES</span>
+          <span id="steering-help" class="steering-help">← / → lane · ↑ fly</span>
         </div>
-        <div class="desktop-controls glass"><span><kbd>A / D</kbd> Steer / air flip</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>P</kbd> Pause</span></div>
+        <div class="desktop-controls glass"><span><kbd>A / D</kbd> Lane / air flip</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>P</kbd> Pause</span></div>
         <div class="touch-controls"><button id="btn-fly" class="glass thrust-button" aria-label="Hold to fly">↑<span>THRUST</span></button><button id="btn-roll" class="glass roll-button" aria-label="Barrel roll">↻<span>FLIP</span></button></div>
       </div>
       <a href="https://golingoapp.com" target="_blank" rel="noopener noreferrer" class="sponsor">Learn with <b>GoLingo</b> ↗</a>
     </footer>
   </div>
-  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Turn the wheel to steer through word gates. In the air, turn left or right to flip. Listen, repeat, and collect your lesson as you drive.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>WHEEL / A / D</b> Steer &amp; air flip</span><span><b>SPACE</b> Fly</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
+  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Swipe left or right to change one lane. Swipe up to thrust and fly. In the air, a sideways swipe changes lanes and flips the car. Drive through word gates to learn.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>SWIPE / A / D</b> Lane &amp; air flip</span><span><b>SPACE</b> Fly</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
   <div id="garage-panel" class="garage-panel glass hidden"><div><span class="eyebrow">SCULPTED ROADSTER</span><p>Drag to orbit · scroll or pinch to zoom</p></div><div class="garage-views"><button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="side">Side</button><button id="garage-back" class="primary-button">Back to drive</button></div></div>
   <div id="gameover-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-title"><section class="dialog compact-dialog glass"><span class="eyebrow">RUSH RUN COMPLETE</span><h2 id="gameover-title">One more drive?</h2><p class="field-note">Your collected words stay in your basket.</p><div class="run-stats"><div><span>Score</span><b id="go-score">0</b></div><div><span>Distance</span><b id="go-dist">0 m</b></div><div><span>Bolts</span><b id="go-bolts">0</b></div><div><span>Best combo</span><b id="go-combo">1×</b></div></div><button id="retry-btn" class="primary-button">RETRY RUN</button></section></div>
   <script id="roadster-game-script">/* INLINE_JS */</script>

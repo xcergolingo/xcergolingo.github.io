@@ -10,7 +10,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#25212b;color:var(--ink);overscroll-behavior:none}body{user-select:none;-webkit-user-select:none}button,input,select,textarea{font:inherit}button,a{touch-action:manipulation}button{color:inherit;cursor:pointer;border:0;background:none}button:focus-visible,a:focus-visible{outline:2px solid var(--aqua);outline-offset:3px}button:active{transform:translateY(1px)}button:disabled{opacity:.5;cursor:default}a{color:inherit;text-decoration:none}textarea,input{user-select:text;-webkit-user-select:text}.hidden,[hidden]{display:none!important}#canvas-container{position:absolute;inset:0;touch-action:none;z-index:1}canvas{display:block;width:100%;height:100%;touch-action:none}.glass{background:rgba(22,23,30,.87);border:1px solid var(--line);box-shadow:0 12px 40px rgba(6,6,12,.2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.eyebrow{font-size:9px;font-weight:800;letter-spacing:2px;color:var(--muted)}
 #hud{position:absolute;inset:0;padding:calc(16px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));z-index:5;pointer-events:none}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.score-card{border-radius:14px;padding:12px 15px;min-width:172px}.score-line{display:flex;gap:22px;align-items:baseline;margin:3px 0 7px}.score-line strong{font-size:28px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}.score-line>span{font-size:11px;color:var(--gold)}.score-meta{display:flex;justify-content:space-between;font-size:9px;letter-spacing:1px;border-top:1px solid var(--line);padding-top:7px;color:var(--muted)}.score-meta b{color:#fff}.hud-actions{display:flex;gap:7px;pointer-events:auto}.small-button,.icon-button{height:38px;border-radius:11px;font-size:12px;font-weight:650;padding:0 13px}.icon-button{width:38px;padding:0;font-size:19px;display:inline-grid;place-items:center}.flight-gauge{position:absolute;right:20px;top:calc(67px + env(safe-area-inset-top));width:172px;display:grid;grid-template-columns:1fr auto;border-radius:10px;padding:10px 11px;gap:7px;font-size:8px;letter-spacing:1px;color:#cad2dd}.flight-gauge b{color:var(--aqua);font-size:9px}.flight-gauge>div{grid-column:1/-1;height:3px;background:#444751;border-radius:4px;overflow:hidden}.flight-gauge i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#37b3c3,#acfff0)}#combo-badge{position:absolute;top:150px;left:25px;padding:8px 12px;border-radius:30px;font-size:12px;color:var(--gold)}#callout-container{position:absolute;inset:29% 0 auto;display:grid;place-items:center;pointer-events:none}.callout-popup{position:absolute;font-size:20px;letter-spacing:2px;font-weight:900;white-space:nowrap;color:#fff;text-shadow:0 2px 10px #111;animation:popupFloat 1.2s ease both}.text-amber-300,.text-orange-300{color:#ffd084}.text-sky-300{color:#8fe4ef}.text-pink-300{color:#ffc0e0}@keyframes popupFloat{0%{opacity:0;transform:translateY(16px) scale(.9)}15%{opacity:1;transform:translateY(0) scale(1)}75%{opacity:1}100%{opacity:0;transform:translateY(-26px)}}
 .bottom-controls{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(20px + env(safe-area-inset-left));right:calc(20px + env(safe-area-inset-right));display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}.drive-controls{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;width:100%;pointer-events:none}.sponsor{pointer-events:auto;font-size:9px;color:#f4e5d3;letter-spacing:.5px;text-shadow:0 2px 8px #211d20;white-space:nowrap}.sponsor b{font-size:11px}.desktop-controls{display:flex;gap:20px;align-items:center;padding:10px 15px;border-radius:12px;font-size:10px;color:#bcc3cf;margin-bottom:14px}kbd{font-size:10px;font-weight:750;color:#fff;margin-right:4px}.touch-controls{display:flex;pointer-events:auto;gap:9px;margin-bottom:26px}.touch-controls button{height:68px;width:72px;border-radius:16px;font-size:25px;touch-action:none;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}.touch-controls button span{font-size:8px;font-weight:800;letter-spacing:1px}.thrust-button{color:var(--aqua);border-color:rgba(137,231,220,.4)}.roll-button{color:var(--gold);border-color:rgba(255,199,121,.4)}.touch-controls button.pressed{background:#417a79;transform:translateY(1px)}
-.steering-control{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;pointer-events:auto;width:146px}.steering-control #steering-wheel{display:block;width:146px;height:146px;padding:0;position:relative;flex:none;border:0;border-radius:50%;background:transparent;color:var(--aqua);cursor:grab;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 8px 12px rgba(5,10,18,.38));transition:filter .15s}.steering-control #steering-wheel:active{transform:none}.steering-control #steering-wheel.is-active{cursor:grabbing;filter:drop-shadow(0 0 9px rgba(137,231,220,.22))}.steering-control #steering-wheel.is-airborne{color:var(--gold)}#steering-wheel [data-wheel-rotor]{display:block;width:100%;height:100%;pointer-events:none;transform:rotate(0deg);transform-origin:50% 50%;transition:transform .24s cubic-bezier(.2,.8,.2,1)}#steering-wheel.is-active [data-wheel-rotor]{transition:none}.steering-mode{font-size:9px;font-weight:850;letter-spacing:1.7px;line-height:14px;color:var(--aqua);text-shadow:0 2px 8px #111b25}#steering-wheel.is-airborne+.steering-mode{color:var(--gold)}.steering-help{font-size:8px;letter-spacing:.15px;line-height:12px;color:#d3d8df;text-shadow:0 2px 8px #111b25;white-space:nowrap}
+.steering-control{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;pointer-events:auto;width:146px}.steering-control #steering-wheel{display:block;width:146px;height:146px;padding:0;position:relative;flex:none;border:0;border-radius:50%;background:transparent;color:var(--aqua);cursor:grab;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 8px 12px rgba(5,10,18,.38));transition:filter .15s}.steering-control #steering-wheel:active{transform:none}.steering-control #steering-wheel.is-active{cursor:grabbing;filter:drop-shadow(0 0 9px rgba(137,231,220,.22))}.steering-control #steering-wheel.is-airborne{color:var(--gold)}#steering-wheel [data-wheel-rotor]{display:block;width:100%;height:100%;pointer-events:none;transform:rotate(0deg);transform-origin:50% 50%;transition:transform .2s cubic-bezier(.2,.8,.2,1)}#steering-wheel.is-active [data-wheel-rotor]{transition:transform .12s ease-out}.steering-mode{font-size:9px;font-weight:850;letter-spacing:1.7px;line-height:14px;color:var(--aqua);text-shadow:0 2px 8px #111b25}#steering-wheel.is-airborne+.steering-mode{color:var(--gold)}.steering-help{font-size:8px;letter-spacing:.15px;line-height:12px;color:#d3d8df;text-shadow:0 2px 8px #111b25;white-space:nowrap}
 .start-overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:flex-end;padding:32px 5vw;pointer-events:none;background:linear-gradient(90deg,transparent 25%,rgba(19,20,27,.15) 65%,rgba(19,20,27,.4))}.start-card{width:390px;padding:31px;border-radius:24px;pointer-events:auto;max-height:calc(100dvh - 48px);overflow:auto}.overline{display:flex;align-items:center;gap:8px;font-size:9px;font-weight:800;letter-spacing:1.8px;color:var(--aqua)}.tiny-dot{width:5px;height:5px;border-radius:50%;background:var(--aqua);box-shadow:0 0 12px var(--aqua)}h1{font-size:58px;font-weight:850;line-height:.97;letter-spacing:-2.4px;margin:23px 0 18px}h1 em{font-style:normal;color:var(--gold)}.start-intro{font-size:16px;line-height:1.5;color:#f1e8df;margin:0 0 13px}.start-description{font-size:12px;line-height:1.8;color:#bcb9c1;margin:0 0 21px}.lesson-preview{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;font-size:12px;border-block:1px solid var(--line);padding:14px 0;margin-bottom:18px}.lesson-preview b{font-size:11px;color:var(--aqua)}.text-button{font-size:11px;color:var(--aqua);padding:4px 0}.text-button:hover{text-decoration:underline}.lesson-preview .text-button{flex-basis:100%;text-align:left}.start-actions{display:grid;gap:9px}.primary-button{background:var(--gold);color:#252029;font-size:12px;font-weight:850;letter-spacing:.3px;min-height:44px;border-radius:12px;padding:13px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}.secondary-button{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:12px;min-height:42px;font-size:11px;font-weight:700;padding:11px 17px}.start-controls{display:flex;gap:19px;font-size:9px;color:var(--muted);margin-top:20px}.start-controls b{color:#e8e0d8;margin-right:3px;font-size:9px}.concept-note{font-size:8px;color:#8e929e;margin:17px 0 0}body.menu-state #hud .topbar,body.menu-state #hud .flight-gauge,body.menu-state #hud .bottom-controls{display:none}.garage-panel{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:25;display:flex;gap:45px;align-items:center;border-radius:18px;padding:20px 23px;max-width:95vw}.garage-panel p{font-size:12px;color:var(--muted);margin:5px 0 0}.garage-views{display:flex;align-items:center;gap:7px;white-space:nowrap}.garage-views button{border-radius:8px;padding:10px;font-size:12px}.garage-views button:not(.primary-button){border:1px solid var(--line)}
 #pause-notice{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);border-radius:20px;padding:23px;display:grid;gap:12px;min-width:250px;pointer-events:auto;text-align:center}#pause-notice strong{font-size:24px;margin:0 0 5px}.modal-backdrop{position:absolute;inset:0;z-index:40;background:rgba(9,12,20,.72);display:flex;align-items:center;justify-content:center;padding:24px}.dialog{max-width:640px;width:100%;border-radius:24px;overflow:auto;max-height:92dvh}.compact-dialog{max-width:380px;padding:28px}.compact-dialog h2{font-size:30px;letter-spacing:-1px;margin:12px 0}.field-note{font-size:12px;line-height:1.65;color:var(--muted)}.run-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.run-stats div{padding:15px;border:1px solid var(--line);border-radius:12px;display:grid;gap:8px}.run-stats span{font-size:10px;color:var(--muted)}.run-stats b{font-size:20px}.compact-dialog>.primary-button{width:100%;justify-content:center}
 #boot-status{position:absolute;inset:0;display:grid;place-items:center;z-index:500;padding:25px;background:radial-gradient(ellipse at 30% 20%,#493541,#26222d 50%,#181b24);overflow:auto}.boot-card{width:min(460px,100%);padding:28px;border-radius:22px}.boot-card h2{font-size:26px;line-height:1.2;letter-spacing:-.8px;margin:14px 0}#boot-detail{font-size:14px;line-height:1.65;color:#e0d4d8;margin:0}#boot-phase{font-size:12px;color:var(--aqua);min-height:20px;margin:18px 0 0}#boot-actions{display:grid;gap:10px;margin-top:20px}#boot-diagnostics{margin-top:20px;color:#b9b8c6;font-size:12px}#boot-diagnostics summary{padding:6px 0;cursor:pointer}#boot-error{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.5;max-height:160px;overflow:auto}
@@ -22,7 +22,15 @@
 #basket-count{color:var(--aqua);font-variant-numeric:tabular-nums;margin-left:3px}
 
 @media(max-width:380px){.steering-control{width:120px}.steering-control #steering-wheel{width:120px;height:120px}.touch-controls button{width:56px;height:62px}.drive-controls{gap:12px}.steering-help{font-size:7.5px}}
-@media(prefers-reduced-motion:reduce){#steering-wheel [data-wheel-rotor]{transition:none}}
+@media(prefers-reduced-motion:reduce){#steering-wheel [data-wheel-rotor],#steering-wheel.is-active [data-wheel-rotor]{transition:none}}
+
+.wheel-swipe-arrow{position:absolute;display:grid;place-items:center;pointer-events:none;color:#b4d8d5;font-weight:800;font-size:20px;line-height:1;text-shadow:0 2px 5px #111b25;opacity:.9}
+.wheel-swipe-up{left:calc(50% - 8px);top:20%;width:16px}
+.wheel-swipe-left{left:12%;top:calc(50% - 11px);height:22px}
+.wheel-swipe-right{right:12%;top:calc(50% - 11px);height:22px}
+#steering-wheel[data-gesture="left"] .wheel-swipe-left,#steering-wheel[data-gesture="right"] .wheel-swipe-right,#steering-wheel.is-thrusting .wheel-swipe-up{color:#fff;opacity:1;text-shadow:0 0 10px var(--aqua)}
+#steering-wheel.is-thrusting{color:var(--aqua);filter:drop-shadow(0 -3px 12px rgba(137,231,220,.4))}
+#steering-wheel.is-thrusting+.steering-mode{color:var(--aqua)}
 
 /* GoLingo learning interface, scoped independently of the driving HUD. */
 .gl-card{color:#f6f4ed;background:rgba(21,24,32,.91);border:1px solid rgba(219,226,235,.16);box-shadow:0 12px 36px rgba(6,10,18,.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -87,7 +95,7 @@
     <footer class="bottom-controls">
       <div class="drive-controls">
         <div class="steering-control">
-          <button id="steering-wheel" type="button" aria-label="Steering wheel: drag to steer on the road. You can also use the arrow keys." aria-keyshortcuts="ArrowLeft ArrowRight" aria-describedby="steering-help">
+          <button id="steering-wheel" type="button" aria-label="Swipe left or right to move one lane. Swipe up to thrust and fly." aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp" aria-describedby="steering-help">
             <svg data-wheel-rotor viewBox="0 0 160 160" aria-hidden="true" focusable="false">
               <defs><linearGradient id="wheel-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bdc9cb"/><stop offset=".35" stop-color="#46545e"/><stop offset=".65" stop-color="#1c252f"/><stop offset="1" stop-color="#8e9b9e"/></linearGradient><radialGradient id="wheel-hub"><stop stop-color="#37434b"/><stop offset="1" stop-color="#131b25"/></radialGradient></defs>
               <circle cx="80" cy="80" r="73" fill="rgba(13,20,28,.5)" stroke="rgba(201,221,223,.18)"/>
@@ -100,17 +108,18 @@
               <path d="M72 88V72H82Q91 72 87 79Q85 82 79 81L87 89M72 81H79" fill="none" stroke="#d8e6e4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="80" cy="114" r="2" fill="currentColor"/>
             </svg>
+            <span class="wheel-swipe-arrow wheel-swipe-up" aria-hidden="true">↑</span><span class="wheel-swipe-arrow wheel-swipe-left" aria-hidden="true">‹</span><span class="wheel-swipe-arrow wheel-swipe-right" aria-hidden="true">›</span>
           </button>
-          <span id="steering-mode" class="steering-mode">STEER</span>
-          <span id="steering-help" class="steering-help">Road: steer · Air: flip</span>
+          <span id="steering-mode" class="steering-mode">SWIPE LANES</span>
+          <span id="steering-help" class="steering-help">← / → lane · ↑ fly</span>
         </div>
-        <div class="desktop-controls glass"><span><kbd>A / D</kbd> Steer / air flip</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>P</kbd> Pause</span></div>
+        <div class="desktop-controls glass"><span><kbd>A / D</kbd> Lane / air flip</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>P</kbd> Pause</span></div>
         <div class="touch-controls"><button id="btn-fly" class="glass thrust-button" aria-label="Hold to fly">↑<span>THRUST</span></button><button id="btn-roll" class="glass roll-button" aria-label="Barrel roll">↻<span>FLIP</span></button></div>
       </div>
       <a href="https://golingoapp.com" target="_blank" rel="noopener noreferrer" class="sponsor">Learn with <b>GoLingo</b> ↗</a>
     </footer>
   </div>
-  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Turn the wheel to steer through word gates. In the air, turn left or right to flip. Listen, repeat, and collect your lesson as you drive.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>WHEEL / A / D</b> Steer &amp; air flip</span><span><b>SPACE</b> Fly</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
+  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Swipe left or right to change one lane. Swipe up to thrust and fly. In the air, a sideways swipe changes lanes and flips the car. Drive through word gates to learn.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>SWIPE / A / D</b> Lane &amp; air flip</span><span><b>SPACE</b> Fly</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
   <div id="garage-panel" class="garage-panel glass hidden"><div><span class="eyebrow">SCULPTED ROADSTER</span><p>Drag to orbit · scroll or pinch to zoom</p></div><div class="garage-views"><button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="side">Side</button><button id="garage-back" class="primary-button">Back to drive</button></div></div>
   <div id="gameover-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-title"><section class="dialog compact-dialog glass"><span class="eyebrow">RUSH RUN COMPLETE</span><h2 id="gameover-title">One more drive?</h2><p class="field-note">Your collected words stay in your basket.</p><div class="run-stats"><div><span>Score</span><b id="go-score">0</b></div><div><span>Distance</span><b id="go-dist">0 m</b></div><div><span>Bolts</span><b id="go-bolts">0</b></div><div><span>Best combo</span><b id="go-combo">1×</b></div></div><button id="retry-btn" class="primary-button">RETRY RUN</button></section></div>
   <script id="roadster-game-script">(async()=>{'use strict';try{await window.RoadsterBoot.next('Opening the game');
@@ -55876,146 +55885,153 @@ function createLearningApp({THREE,scene,lanes,getGameState,getPlayer,getSpeed,ge
 
 return {createLearningApp};})();
 
-const {createSteeringWheel}=(()=>{
-/** Pointer-based wheel. Clockwise is positive; release immediately removes input. */
-function createSteeringWheel({ element, isEnabled = () => true, onChange = () => {} } = {}) {
-  if (!element) throw new Error('The steering wheel control is missing.');
-  const view = element.ownerDocument.defaultView;
-  const rotor = element.querySelector('[data-wheel-rotor]');
-  const modeLabel = element.ownerDocument.getElementById('steering-mode');
-  const maxAngle = 110;
-  let pointerId = null, pointerType = null, angle = 0, value = 0, airborne = false, disposed = false;
-  let centerX = 0, centerY = 0, radius = 1, previousPointerAngle = 0;
-  let horizontalDrag = false, startX = 0, throughCenter = false;
+const {createSteeringWheel,createSwipeControl}=(()=>{
+/** Cardinal swipe input shared by the wheel and unobstructed playfield. */
+function createSwipeControl({
+  element, isEnabled = () => true, onLaneChange = () => {},
+  onThrustChange = () => {}, onStateChange = () => {}
+} = {}) {
+  if (!element) throw new Error('The swipe control element is missing.');
+  const doc = element.ownerDocument, view = doc.defaultView;
+  const threshold = 36, neutralRadius = 12, dominance = 1.15;
   const listeners = [];
+  let pointerId = null, pointerType = null, startX = 0, startY = 0;
+  let anchorX = 0, anchorY = 0, dx = 0, dy = 0;
+  let gesture = null, lastAction = null, thrusting = false, disposed = false;
 
+  function state() {
+    const value = gesture === 'left' ? -1 : gesture === 'right' ? 1 : 0;
+    return { active: pointerId !== null, pointerId, pointerType, gesture,
+      value, angle: value * 32, maxAngle: 32, thrusting, dx, dy, threshold };
+  }
+  function publish() { onStateChange(state()); }
   function listen(target, type, handler, options) {
     target.addEventListener(type, handler, options);
     listeners.push(() => target.removeEventListener(type, handler, options));
   }
-
-  function setAngle(next) {
-    const previous = value;
-    angle = Math.max(-maxAngle, Math.min(maxAngle, next));
-    value = angle / maxAngle;
-    if (rotor) rotor.style.transform = `rotate(${angle}deg)`;
-    element.dataset.value = value.toFixed(3);
-    if (value !== previous) onChange(value, { active: pointerId !== null, pointerId, angle });
-  }
-
-  function reset() {
-    const releasedId = pointerId;
-    pointerId = null;
-    pointerType = null;
-    throughCenter = false;
-    element.classList.remove('is-active');
-    element.dataset.active = 'false';
-    setAngle(0);
-    // Clear the owner before releasing capture: lostpointercapture may fire now.
-    if (releasedId !== null) {
-      try {
-        if (element.hasPointerCapture?.(releasedId)) element.releasePointerCapture(releasedId);
-      } catch { /* A cancelled pointer may already have lost capture. */ }
-    }
-  }
-
   function consume(event) {
     if (event.cancelable) event.preventDefault();
     event.stopPropagation();
   }
+  function setThrust(next, cancelled = false) {
+    const changed = thrusting !== next;
+    thrusting = next;
+    // Cancellation must also clear a launch burst that outlives normal release.
+    if (changed || cancelled) onThrustChange(next, { cancelled });
+  }
+  function reset({ cancelled = true } = {}) {
+    const releasedId = pointerId;
+    // Clear the owner first: releasePointerCapture may dispatch lostcapture now.
+    pointerId = null;
+    pointerType = null;
+    gesture = lastAction = null;
+    dx = dy = 0;
+    setThrust(false, cancelled);
+    publish();
+    if (releasedId !== null) {
+      try {
+        if (element.hasPointerCapture?.(releasedId)) element.releasePointerCapture(releasedId);
+      } catch { /* The browser may already have cancelled pointer capture. */ }
+    }
+  }
+  function update(clientX, clientY) {
+    dx = clientX - startX;
+    dy = clientY - startY;
+    if (Math.hypot(dx, dy) <= neutralRadius) {
+      gesture = lastAction = null;
+      anchorX = startX;
+      anchorY = startY;
+      setThrust(false);
+      publish();
+      return;
+    }
 
+    // After a stroke, its tip becomes the origin for a change of direction.
+    // This permits up -> side without requiring the player to lift their finger.
+    const sx = clientX - anchorX, sy = clientY - anchorY;
+    const ax = Math.abs(sx), ay = Math.abs(sy);
+    let next = null;
+    if (ax >= threshold && ax >= ay * dominance) next = sx < 0 ? 'left' : 'right';
+    else if (sy <= -threshold && ay >= ax * dominance) next = 'up';
+    else if (sy >= threshold && ay >= ax * dominance) next = 'down';
+    if (!next) {
+      // Follow an existing stroke's tip without repeating its action. Retain
+      // ambiguous diagonals so horizontal steering cannot accidentally thrust.
+      const extendsStroke =
+        (lastAction === 'left' && sx < 0 && ax >= ay * dominance) ||
+        (lastAction === 'right' && sx > 0 && ax >= ay * dominance) ||
+        (lastAction === 'up' && sy < 0 && ay >= ax * dominance) ||
+        (lastAction === 'down' && sy > 0 && ay >= ax * dominance);
+      if (extendsStroke) { anchorX = clientX; anchorY = clientY; }
+      publish();
+      return;
+    }
+    const changed = next !== lastAction;
+    gesture = next === 'down' ? null : next;
+    lastAction = next;
+    anchorX = clientX;
+    anchorY = clientY;
+    setThrust(next === 'up');
+    publish();
+    if (changed && (next === 'left' || next === 'right')) onLaneChange(next === 'left' ? -1 : 1);
+  }
   function press(event) {
-    consume(event);
+    // A disabled canvas belongs to garage orbit, and another finger belongs to
+    // its own control. Neither event should be prevented or captured here.
     if (disposed || pointerId !== null || !isEnabled()) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const bounds = element.getBoundingClientRect();
-    centerX = bounds.left + bounds.width / 2;
-    centerY = bounds.top + bounds.height / 2;
-    radius = Math.max(1, Math.min(bounds.width, bounds.height) / 2);
-    const x = event.clientX - centerX, y = event.clientY - centerY;
-    horizontalDrag = Math.hypot(x, y) < radius * .28;
-    previousPointerAngle = Math.atan2(y, x);
-    startX = event.clientX;
-    throughCenter = false;
+    consume(event);
     pointerId = event.pointerId;
     pointerType = event.pointerType || 'mouse';
-    element.classList.add('is-active');
-    element.dataset.active = 'true';
-    // Grabbing any part of the rim starts at center, with no steering jump.
-    setAngle(0);
-    try { element.setPointerCapture(pointerId); } catch { /* Window handlers are the fallback. */ }
+    startX = anchorX = event.clientX;
+    startY = anchorY = event.clientY;
+    dx = dy = 0;
+    gesture = lastAction = null;
+    publish();
+    try { element.setPointerCapture(pointerId); } catch { /* Window listeners cover refused capture. */ }
   }
-
   function move(event) {
-    if (event.pointerId !== pointerId || pointerId === null) return;
+    if (pointerId === null || event.pointerId !== pointerId) return;
     consume(event);
     if (!isEnabled()) { reset(); return; }
-    if (horizontalDrag) {
-      setAngle((event.clientX - startX) / (radius * .9) * maxAngle);
-      return;
-    }
-    const x = event.clientX - centerX, y = event.clientY - centerY;
-    // Crossing the hub must not produce a sudden 180-degree steering reversal.
-    if (Math.hypot(x, y) < radius * .22) { throughCenter = true; return; }
-    const nextPointerAngle = Math.atan2(y, x);
-    if (throughCenter) {
-      previousPointerAngle = nextPointerAngle;
-      throughCenter = false;
-      return;
-    }
-    let delta = nextPointerAngle - previousPointerAngle;
-    if (delta > Math.PI) delta -= Math.PI * 2;
-    if (delta < -Math.PI) delta += Math.PI * 2;
-    previousPointerAngle = nextPointerAngle;
-    setAngle(angle + delta * 180 / Math.PI);
+    update(event.clientX, event.clientY);
   }
-
   function release(event) {
-    if (event.pointerId !== pointerId || pointerId === null) return;
+    if (pointerId === null || event.pointerId !== pointerId) return;
+    consume(event);
+    const enabled = isEnabled();
+    // A quick flick may arrive at pointerup without an intermediate move event.
+    if (enabled) update(event.clientX, event.clientY);
+    reset({ cancelled: !enabled });
+  }
+  function cancel(event) {
+    if (pointerId === null || event.pointerId !== pointerId) return;
     consume(event);
     reset();
   }
-
-  function setMode(nextAirborne) {
-    const next = Boolean(nextAirborne);
-    if (next === airborne && element.dataset.mode) return;
-    airborne = next;
-    element.dataset.mode = airborne ? 'air' : 'road';
-    element.classList.toggle('is-airborne', airborne);
-    if (modeLabel) modeLabel.textContent = airborne ? 'AIR FLIP' : 'STEER';
-    element.setAttribute('aria-label', airborne
-      ? 'Steering wheel: turn left or right to flip in the air. You can also use the arrow keys.'
-      : 'Steering wheel: drag to steer on the road. You can also use the arrow keys.');
-  }
+  function consumeIfEnabled(event) { if (!disposed && isEnabled()) consume(event); }
 
   listen(element, 'pointerdown', press, { passive: false });
-  // Window listeners also cover browsers that refuse capture after a cancelled gesture.
   listen(view, 'pointermove', move, { passive: false });
   listen(view, 'pointerup', release, { passive: false });
-  listen(view, 'pointercancel', release, { passive: false });
-  listen(element, 'lostpointercapture', release);
-  listen(element, 'click', consume);
-  listen(element, 'contextmenu', consume);
-  listen(element, 'dragstart', consume);
-  // Embedded mobile browsers can blur while the game stays visible. Keep the
-  // owning touch/pen alive; only a hidden page or lost mouse focus releases it.
+  listen(view, 'pointercancel', cancel, { passive: false });
+  listen(element, 'lostpointercapture', cancel);
+  listen(element, 'click', consumeIfEnabled);
+  listen(element, 'contextmenu', consumeIfEnabled);
+  listen(element, 'dragstart', consumeIfEnabled);
+  // Embedded mobile browsers can blur while visible. Keep touch/pen ownership
+  // in that case; actual backgrounding and lost mouse focus cancel the gesture.
   listen(view, 'blur', () => {
-    if (element.ownerDocument.hidden || (pointerId !== null && pointerType !== 'touch' && pointerType !== 'pen')) reset();
+    if (doc.hidden || (pointerId !== null && pointerType !== 'touch' && pointerType !== 'pen')) reset();
   });
-  listen(view, 'pagehide', reset);
-  listen(view, 'resize', reset);
-  listen(element.ownerDocument, 'visibilitychange', () => {
-    if (element.ownerDocument.hidden) reset();
-  });
-  element.dataset.active = 'false';
-  setAngle(0);
-  setMode(false);
+  listen(view, 'pagehide', () => reset());
+  listen(view, 'resize', () => { if (pointerId !== null) reset(); });
+  listen(doc, 'visibilitychange', () => { if (doc.hidden) reset(); });
 
   return {
-    getValue: () => value,
-    getState: () => ({ value, active: pointerId !== null, pointerId, pointerType, angle, maxAngle, airborne }),
+    getState: state,
+    getValue: () => state().value,
     reset,
-    setMode,
     dispose() {
       if (disposed) return;
       reset();
@@ -56025,7 +56041,45 @@ function createSteeringWheel({ element, isEnabled = () => true, onChange = () =>
   };
 }
 
-return {createSteeringWheel};})();
+/** A wheel-shaped swipe pad. Tilt is feedback, never continuous steering. */
+function createSteeringWheel(options = {}) {
+  const { element, onStateChange = () => {} } = options;
+  if (!element) throw new Error('The steering wheel control is missing.');
+  const rotor = element.querySelector('[data-wheel-rotor]');
+  const modeLabel = element.ownerDocument.getElementById('steering-mode');
+  let airborne = false;
+  function render(state) {
+    element.dataset.active = String(state.active);
+    element.dataset.value = String(state.value);
+    element.dataset.gesture = state.gesture || 'none';
+    element.dataset.mode = airborne ? 'air' : 'road';
+    element.classList.toggle('is-active', state.active);
+    element.classList.toggle('is-airborne', airborne);
+    element.classList.toggle('is-thrusting', state.thrusting);
+    if (rotor) rotor.style.transform = `rotate(${state.angle}deg)`;
+    if (modeLabel) modeLabel.textContent = state.thrusting ? 'THRUST' : airborne ? 'LANE + FLIP' : 'SWIPE LANES';
+    element.setAttribute('aria-label', airborne
+      ? 'Swipe left or right for one lane change and a flip. Swipe up to thrust; hold up to keep flying.'
+      : 'Swipe left or right to move one lane. Swipe up to thrust; hold up to keep flying.');
+    onStateChange({ ...state, airborne });
+  }
+  const control = createSwipeControl({ ...options, onStateChange: render });
+  // Rendering has no gameplay callbacks, so construction is safe before the
+  // game has initialized its input state. The generic canvas stays untouched.
+  render(control.getState());
+  return {
+    ...control,
+    getState: () => ({ ...control.getState(), airborne }),
+    setMode(nextAirborne) {
+      const next = Boolean(nextAirborne);
+      if (next === airborne) return;
+      airborne = next;
+      render(control.getState());
+    }
+  };
+}
+
+return {createSteeringWheel,createSwipeControl};})();
 
 
 
@@ -56844,7 +56898,8 @@ return {createSteeringWheel};})();
     let rollAngle = 0;
     let rollDir = 1;
     let completedRolls = 0;
-    let wheelAirLatch = 0;
+    let queuedAirRoll = 0;
+    const gestureThrust = {wheel:{held:false,boost:0},road:{held:false,boost:0}};
     let debugTrafficDisabled = false;
     let cameraShake = 0;
 
@@ -56896,31 +56951,29 @@ return {createSteeringWheel};})();
       }
     }
 
-    function updateWheelSteering(dt) {
-      const value = steeringWheel.getValue();
-      const magnitude = Math.abs(value);
-      const airborne = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
-      steeringWheel.setMode(airborne);
-      // A small dead zone prevents drift. The wheel controls lateral speed,
-      // so centering it holds the chosen road position instead of snapping lanes.
-      const input = magnitude > .1 ? Math.sign(value) * (magnitude - .1) / .9 : 0;
-      if (input) {
-        targetX = THREE.MathUtils.clamp(targetX + input * (airborne ? 8.5 : 10.5) * dt, LANES[0], LANES[LANES.length - 1]);
-        currentLane = THREE.MathUtils.clamp(Math.round((targetX - LANES[0]) / (LANES[1] - LANES[0])), 0, LANES.length - 1);
-      }
-      // One full flip for each deliberate turn. Recenter, release, or turn
-      // the other way to request another; holding never restarts a roll.
-      if (!airborne || magnitude <= .14) wheelAirLatch = 0;
-      if (airborne && magnitude >= .34) {
-        const direction = Math.sign(value);
-        if (direction !== wheelAirLatch && triggerKickflipRoll(direction, true)) wheelAirLatch = direction;
-      }
-      return input;
+    function setGestureThrust(source,active,{cancelled=false}={}) {
+      const input=gestureThrust[source];
+      input.held=active;
+      // A quick upward flick must still launch, even if released between frames.
+      if(active)input.boost=Math.max(input.boost,.55);
+      else if(cancelled)input.boost=0;
+      syncThrustInput();
+    }
+
+    function updateGestureControls(dt) {
+      for(const input of Object.values(gestureThrust))input.boost=Math.max(0,input.boost-dt);
+      syncThrustInput();
+      steeringWheel.setMode(playerCar.position.y>GROUND_CLEARANCE_Y+.25);
     }
 
     function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
-      if (gameState !== 'PLAYING' || app?.hasDialog() || isRolling) return false;
+      if (gameState !== 'PLAYING' || app?.hasDialog()) return false;
       if (fromAirSteer && playerCar.position.y <= GROUND_CLEARANCE_Y + .25) return false;
+      if (isRolling) {
+        // Finish the current full roll before honoring a rapid opposite swipe.
+        if(fromAirSteer)queuedAirRoll=Math.sign(dir)||1;
+        return false;
+      }
 
       // Give a low-altitude flip enough lift to clear the road.
       if (playerCar.position.y < 1.55 && tankPsi > 8) {
@@ -56982,37 +57035,45 @@ return {createSteeringWheel};})();
     });
 
     // Each control owns its own pointer, allowing wheel + thrust together.
-    let swipePointer=null,swipePointerType=null,swipeX=0,thrustPointer=null,thrustPointerType=null;
+    let thrustPointer=null,thrustPointerType=null;
     const isContactPointer=type=>type==='touch'||type==='pen';
+    const btnFly=document.getElementById('btn-fly');
     const steeringWheel=createSteeringWheel({
       element:document.getElementById('steering-wheel'),
       isEnabled:()=>gameState==='PLAYING'&&!app?.hasDialog(),
-      onChange:value=>{if(Math.abs(value)<=.14)wheelAirLatch=0;}
+      onLaneChange:changeLane,
+      onThrustChange:(active,detail)=>setGestureThrust('wheel',active,detail)
+    });
+    const roadSwipes=createSwipeControl({
+      element:container,
+      isEnabled:()=>gameState==='PLAYING'&&!garageMode&&!app?.hasDialog(),
+      onLaneChange:changeLane,
+      onThrustChange:(active,detail)=>setGestureThrust('road',active,detail)
     });
     const orbitPointers=new Map();let pinchDistance=0;
     container.addEventListener('pointerdown',e=>{
+      if(!garageMode)return;
+      e.preventDefault();
       container.setPointerCapture(e.pointerId);
-      if(garageMode){orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:e.pointerType||'mouse'});if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}return;}
-      if(gameState==='PLAYING'&&swipePointer===null){swipePointer=e.pointerId;swipePointerType=e.pointerType||'mouse';swipeX=e.clientX;}
+      orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:e.pointerType||'mouse'});
+      if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
     });
     container.addEventListener('pointermove',e=>{
       if(garageMode&&orbitPointers.has(e.pointerId)){
         const old=orbitPointers.get(e.pointerId);orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:old.pointerType});
         if(orbitPointers.size===1){garageYaw-=(e.clientX-old.x)*.008;garageElevation=THREE.MathUtils.clamp(garageElevation+(e.clientY-old.y)*.004,.06,.85);}
         else if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);garageRadius=THREE.MathUtils.clamp(garageRadius+(pinchDistance-distance)*.025,5,24);pinchDistance=distance;}
-      }else if(e.pointerId===swipePointer&&gameState==='PLAYING'){const dx=e.clientX-swipeX;if(Math.abs(dx)>38){changeLane(dx>0?1:-1);swipeX=e.clientX;}}
+      }
     });
     function releaseWorldPointer(pointerId){
       orbitPointers.delete(pointerId);
-      if(pointerId===swipePointer){swipePointer=null;swipePointerType=null;}
       if(container.hasPointerCapture?.(pointerId)){try{container.releasePointerCapture(pointerId);}catch{}}
     }
-    const releaseWorld=e=>releaseWorldPointer(e.pointerId);
+    const releaseWorld=e=>{if(orbitPointers.has(e.pointerId))releaseWorldPointer(e.pointerId);};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])container.addEventListener(type,releaseWorld);
     container.addEventListener('wheel',e=>{if(garageMode){e.preventDefault();garageRadius=THREE.MathUtils.clamp(garageRadius+e.deltaY*.008,5,24);}},{passive:false});
-    const btnFly=document.getElementById('btn-fly');
     function syncThrustInput(){
-      isThrusting=gameState==='PLAYING'&&!app?.hasDialog()&&(heldFlightKeys.size>0||thrustPointer!==null);
+      isThrusting=gameState==='PLAYING'&&!app?.hasDialog()&&(heldFlightKeys.size>0||thrustPointer!==null||Object.values(gestureThrust).some(input=>input.held||input.boost>0));
       btnFly.classList.toggle('pressed',thrustPointer!==null);
     }
     function releaseThrustPointer(){
@@ -57026,10 +57087,10 @@ return {createSteeringWheel};})();
     for(const type of ['pointerup','pointercancel'])window.addEventListener(type,releaseThrust);
     document.getElementById('btn-roll').onclick=()=>triggerKickflipRoll(1);
     function releaseInputs(){
+      for(const input of Object.values(gestureThrust)){input.held=false;input.boost=0;}
       heldFlightKeys.clear();releaseThrustPointer();
-      const worldPointers=new Set(orbitPointers.keys());if(swipePointer!==null)worldPointers.add(swipePointer);
-      worldPointers.forEach(releaseWorldPointer);
-      steeringWheel.reset();wheelAirLatch=0;sfx.setThruster(false);
+      [...orbitPointers.keys()].forEach(releaseWorldPointer);
+      steeringWheel.reset();roadSwipes.reset();queuedAirRoll=0;sfx.setThruster(false);
     }
     function pauseForBackground(){
       releaseInputs();
@@ -57041,7 +57102,6 @@ return {createSteeringWheel};})();
       // mouse releases may be lost, but an owned touch must keep controlling.
       heldFlightKeys.clear();
       if(thrustPointer!==null&&!isContactPointer(thrustPointerType))releaseThrustPointer();
-      if(swipePointer!==null&&!isContactPointer(swipePointerType))releaseWorldPointer(swipePointer);
       for(const [id,pointer] of orbitPointers)if(!isContactPointer(pointer.pointerType))releaseWorldPointer(id);
       syncThrustInput();
     });
@@ -57224,14 +57284,14 @@ return {createSteeringWheel};})();
           }
         }
 
-        const wheelInput = updateWheelSteering(dt);
-        // Smooth steering, including keyboard lane targets and analog wheel input.
+        updateGestureControls(dt);
+        // Match the original fixed-lane movement: each side swipe chooses one lane.
         const dx = targetX - playerCar.position.x;
         playerCar.position.x += dx * Math.min(1, dt * 12);
 
         // Spin the Concave Turbine Wheels proportionally to highway velocity
         playerCar.userData.roll(step);
-        playerCar.userData.setSteering(THREE.MathUtils.clamp(wheelInput ? wheelInput*.35 : dx*.08,-.35,.35));
+        playerCar.userData.setSteering(THREE.MathUtils.clamp(dx*.08,-.35,.35));
 
         // Update Altitude-Reactive Soft Ambient-Occlusion Contact Shadow on the Asphalt
         const altAboveRoad = Math.max(0, playerCar.position.y - GROUND_CLEARANCE_Y);
@@ -57294,6 +57354,8 @@ return {createSteeringWheel};})();
             rollAngle = Math.PI * 2;
             completedRolls++;
             playerCar.userData.bodyGroup.rotation.z = 0;
+            const nextRoll=queuedAirRoll;queuedAirRoll=0;
+            if(nextRoll&&playerCar.position.y>GROUND_CLEARANCE_Y+.25)triggerKickflipRoll(nextRoll,true);
           }
         }
 
@@ -57506,10 +57568,10 @@ return {createSteeringWheel};})();
     document.getElementById('garage-back').onclick=()=>{garageMode=false;document.body.classList.remove('garage-state');document.getElementById('start-modal').classList.remove('hidden');document.getElementById('garage-panel').classList.add('hidden');};
     document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{garageYaw={front:Math.PI,rear:0,side:Math.PI/2}[button.dataset.view];garageElevation=button.dataset.view==='side'?.38:.27;garageRadius=isPortrait()?16:8.4;});
     window.RoadsterRush={getState:()=>({
-      gameState,lane:currentLane,thrusting:isThrusting,speed,
+      gameState,lane:currentLane,targetX,lanes:[...LANES],thrusting:isThrusting,speed,
       position:{x:playerCar.position.x,y:playerCar.position.y,z:playerCar.position.z},
-      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,
-      steering:steeringWheel.getState(),graphics:lowGraphics?'low':'standard',
+      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,queuedAirRoll,
+      steering:steeringWheel.getState(),roadSwipe:roadSwipes.getState(),gestureThrust:{wheel:{...gestureThrust.wheel},road:{...gestureThrust.road}},graphics:lowGraphics?'low':'standard',
       car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},
       ...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}
     })};
