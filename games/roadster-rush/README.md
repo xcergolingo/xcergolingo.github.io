@@ -20,13 +20,20 @@ to zoom, or choose Front, Rear or Side.
 
 | Action | Desktop | Touch |
 | --- | --- | --- |
-| Steer | A / D or arrow keys | Arrow buttons or swipe the road |
+| Steer on the road | Turn the wheel, or A / D / arrow keys | Turn the steering wheel |
+| Flip in the air | Turn the wheel, or A / D / arrow keys | Turn the wheel left or right |
 | Fly | Hold Space, W or Up | Hold THRUST |
 | Barrel roll | Shift or R | FLIP |
 | Pause driving | P or pause button | Pause button |
 | Pause word repetition | Voice button | Voice button |
 | Hear a word again | Click the current word | Tap the current word |
 | Review vocabulary | Basket | Basket |
+
+Turn the steering wheel to move smoothly left or right across the road. Release
+it to center the wheel and hold your chosen road position. While airborne, a
+deliberate left or right turn triggers a full flip in that direction. Holding
+the wheel does not restart the flip; center or release it before turning again.
+You can hold THRUST with one finger while turning the wheel with another.
 
 Practice mode uses forgiving traffic and gentler acceleration. Rush mode uses
 faster traffic and ends a run on impact. Both modes keep ramps, flight, flips,
@@ -152,6 +159,7 @@ readable; the built file embeds them in a classic script for offline loading.
 - `src/lighting-environment.js`: procedural sunset and reflection environment.
 - `src/palm-replacement.js`: connected curved palms.
 - `src/game.js`: original road game with the integrated model and input fixes.
+- `src/steering-wheel.js`: mouse/touch wheel, pointer ownership and input reset.
 - `src/lesson-engine.js`: lesson data, speech lifecycle and review state.
 - `src/word-gates.js`, `src/learning-app.js`: gates and language interface.
 - `src/boot-bridge.js`, `src/game-bridge.js`: early and active app handoff.

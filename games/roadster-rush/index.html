@@ -9,16 +9,20 @@
   <style>:root{--ink:#f7f2eb;--muted:#acb3be;--gold:#ffc779;--aqua:#89e7dc;--line:rgba(255,255,255,.13);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#25212b;color:var(--ink);overscroll-behavior:none}body{user-select:none;-webkit-user-select:none}button,input,select,textarea{font:inherit}button,a{touch-action:manipulation}button{color:inherit;cursor:pointer;border:0;background:none}button:focus-visible,a:focus-visible{outline:2px solid var(--aqua);outline-offset:3px}button:active{transform:translateY(1px)}button:disabled{opacity:.5;cursor:default}a{color:inherit;text-decoration:none}textarea,input{user-select:text;-webkit-user-select:text}.hidden,[hidden]{display:none!important}#canvas-container{position:absolute;inset:0;touch-action:none;z-index:1}canvas{display:block;width:100%;height:100%;touch-action:none}.glass{background:rgba(22,23,30,.87);border:1px solid var(--line);box-shadow:0 12px 40px rgba(6,6,12,.2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.eyebrow{font-size:9px;font-weight:800;letter-spacing:2px;color:var(--muted)}
 #hud{position:absolute;inset:0;padding:calc(16px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));z-index:5;pointer-events:none}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.score-card{border-radius:14px;padding:12px 15px;min-width:172px}.score-line{display:flex;gap:22px;align-items:baseline;margin:3px 0 7px}.score-line strong{font-size:28px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}.score-line>span{font-size:11px;color:var(--gold)}.score-meta{display:flex;justify-content:space-between;font-size:9px;letter-spacing:1px;border-top:1px solid var(--line);padding-top:7px;color:var(--muted)}.score-meta b{color:#fff}.hud-actions{display:flex;gap:7px;pointer-events:auto}.small-button,.icon-button{height:38px;border-radius:11px;font-size:12px;font-weight:650;padding:0 13px}.icon-button{width:38px;padding:0;font-size:19px;display:inline-grid;place-items:center}.flight-gauge{position:absolute;right:20px;top:calc(67px + env(safe-area-inset-top));width:172px;display:grid;grid-template-columns:1fr auto;border-radius:10px;padding:10px 11px;gap:7px;font-size:8px;letter-spacing:1px;color:#cad2dd}.flight-gauge b{color:var(--aqua);font-size:9px}.flight-gauge>div{grid-column:1/-1;height:3px;background:#444751;border-radius:4px;overflow:hidden}.flight-gauge i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#37b3c3,#acfff0)}#combo-badge{position:absolute;top:150px;left:25px;padding:8px 12px;border-radius:30px;font-size:12px;color:var(--gold)}#callout-container{position:absolute;inset:29% 0 auto;display:grid;place-items:center;pointer-events:none}.callout-popup{position:absolute;font-size:20px;letter-spacing:2px;font-weight:900;white-space:nowrap;color:#fff;text-shadow:0 2px 10px #111;animation:popupFloat 1.2s ease both}.text-amber-300,.text-orange-300{color:#ffd084}.text-sky-300{color:#8fe4ef}.text-pink-300{color:#ffc0e0}@keyframes popupFloat{0%{opacity:0;transform:translateY(16px) scale(.9)}15%{opacity:1;transform:translateY(0) scale(1)}75%{opacity:1}100%{opacity:0;transform:translateY(-26px)}}
-.bottom-controls{position:absolute;bottom:calc(15px + env(safe-area-inset-bottom));left:20px;right:20px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}.sponsor{pointer-events:auto;font-size:10px;color:#f4e5d3;letter-spacing:.5px;text-shadow:0 2px 8px #211d20;white-space:nowrap}.sponsor b{font-size:13px}.desktop-controls{display:flex;gap:20px;align-items:center;padding:10px 15px;border-radius:12px;font-size:10px;color:#bcc3cf}kbd{font-size:10px;font-weight:750;color:#fff;margin-right:4px}.touch-controls{display:none;pointer-events:auto;gap:8px}.touch-controls button{height:58px;width:68px;border-radius:14px;font-size:23px;touch-action:none;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column}.touch-controls button span{font-size:8px;font-weight:800;letter-spacing:1px}.thrust-button{color:var(--aqua);border-color:rgba(137,231,220,.4)}.roll-button{color:var(--gold);border-color:rgba(255,199,121,.4)}.touch-controls button.pressed{background:#417a79;transform:translateY(1px)}
+.bottom-controls{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom));left:calc(20px + env(safe-area-inset-left));right:calc(20px + env(safe-area-inset-right));display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}.drive-controls{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;width:100%;pointer-events:none}.sponsor{pointer-events:auto;font-size:9px;color:#f4e5d3;letter-spacing:.5px;text-shadow:0 2px 8px #211d20;white-space:nowrap}.sponsor b{font-size:11px}.desktop-controls{display:flex;gap:20px;align-items:center;padding:10px 15px;border-radius:12px;font-size:10px;color:#bcc3cf;margin-bottom:14px}kbd{font-size:10px;font-weight:750;color:#fff;margin-right:4px}.touch-controls{display:flex;pointer-events:auto;gap:9px;margin-bottom:26px}.touch-controls button{height:68px;width:72px;border-radius:16px;font-size:25px;touch-action:none;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}.touch-controls button span{font-size:8px;font-weight:800;letter-spacing:1px}.thrust-button{color:var(--aqua);border-color:rgba(137,231,220,.4)}.roll-button{color:var(--gold);border-color:rgba(255,199,121,.4)}.touch-controls button.pressed{background:#417a79;transform:translateY(1px)}
+.steering-control{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;pointer-events:auto;width:146px}.steering-control #steering-wheel{display:block;width:146px;height:146px;padding:0;position:relative;flex:none;border:0;border-radius:50%;background:transparent;color:var(--aqua);cursor:grab;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 8px 12px rgba(5,10,18,.38));transition:filter .15s}.steering-control #steering-wheel:active{transform:none}.steering-control #steering-wheel.is-active{cursor:grabbing;filter:drop-shadow(0 0 9px rgba(137,231,220,.22))}.steering-control #steering-wheel.is-airborne{color:var(--gold)}#steering-wheel [data-wheel-rotor]{display:block;width:100%;height:100%;pointer-events:none;transform:rotate(0deg);transform-origin:50% 50%;transition:transform .24s cubic-bezier(.2,.8,.2,1)}#steering-wheel.is-active [data-wheel-rotor]{transition:none}.steering-mode{font-size:9px;font-weight:850;letter-spacing:1.7px;line-height:14px;color:var(--aqua);text-shadow:0 2px 8px #111b25}#steering-wheel.is-airborne+.steering-mode{color:var(--gold)}.steering-help{font-size:8px;letter-spacing:.15px;line-height:12px;color:#d3d8df;text-shadow:0 2px 8px #111b25;white-space:nowrap}
 .start-overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:flex-end;padding:32px 5vw;pointer-events:none;background:linear-gradient(90deg,transparent 25%,rgba(19,20,27,.15) 65%,rgba(19,20,27,.4))}.start-card{width:390px;padding:31px;border-radius:24px;pointer-events:auto;max-height:calc(100dvh - 48px);overflow:auto}.overline{display:flex;align-items:center;gap:8px;font-size:9px;font-weight:800;letter-spacing:1.8px;color:var(--aqua)}.tiny-dot{width:5px;height:5px;border-radius:50%;background:var(--aqua);box-shadow:0 0 12px var(--aqua)}h1{font-size:58px;font-weight:850;line-height:.97;letter-spacing:-2.4px;margin:23px 0 18px}h1 em{font-style:normal;color:var(--gold)}.start-intro{font-size:16px;line-height:1.5;color:#f1e8df;margin:0 0 13px}.start-description{font-size:12px;line-height:1.8;color:#bcb9c1;margin:0 0 21px}.lesson-preview{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;font-size:12px;border-block:1px solid var(--line);padding:14px 0;margin-bottom:18px}.lesson-preview b{font-size:11px;color:var(--aqua)}.text-button{font-size:11px;color:var(--aqua);padding:4px 0}.text-button:hover{text-decoration:underline}.lesson-preview .text-button{flex-basis:100%;text-align:left}.start-actions{display:grid;gap:9px}.primary-button{background:var(--gold);color:#252029;font-size:12px;font-weight:850;letter-spacing:.3px;min-height:44px;border-radius:12px;padding:13px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}.secondary-button{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:12px;min-height:42px;font-size:11px;font-weight:700;padding:11px 17px}.start-controls{display:flex;gap:19px;font-size:9px;color:var(--muted);margin-top:20px}.start-controls b{color:#e8e0d8;margin-right:3px;font-size:9px}.concept-note{font-size:8px;color:#8e929e;margin:17px 0 0}body.menu-state #hud .topbar,body.menu-state #hud .flight-gauge,body.menu-state #hud .bottom-controls{display:none}.garage-panel{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:25;display:flex;gap:45px;align-items:center;border-radius:18px;padding:20px 23px;max-width:95vw}.garage-panel p{font-size:12px;color:var(--muted);margin:5px 0 0}.garage-views{display:flex;align-items:center;gap:7px;white-space:nowrap}.garage-views button{border-radius:8px;padding:10px;font-size:12px}.garage-views button:not(.primary-button){border:1px solid var(--line)}
 #pause-notice{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);border-radius:20px;padding:23px;display:grid;gap:12px;min-width:250px;pointer-events:auto;text-align:center}#pause-notice strong{font-size:24px;margin:0 0 5px}.modal-backdrop{position:absolute;inset:0;z-index:40;background:rgba(9,12,20,.72);display:flex;align-items:center;justify-content:center;padding:24px}.dialog{max-width:640px;width:100%;border-radius:24px;overflow:auto;max-height:92dvh}.compact-dialog{max-width:380px;padding:28px}.compact-dialog h2{font-size:30px;letter-spacing:-1px;margin:12px 0}.field-note{font-size:12px;line-height:1.65;color:var(--muted)}.run-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.run-stats div{padding:15px;border:1px solid var(--line);border-radius:12px;display:grid;gap:8px}.run-stats span{font-size:10px;color:var(--muted)}.run-stats b{font-size:20px}.compact-dialog>.primary-button{width:100%;justify-content:center}
 #boot-status{position:absolute;inset:0;display:grid;place-items:center;z-index:500;padding:25px;background:radial-gradient(ellipse at 30% 20%,#493541,#26222d 50%,#181b24);overflow:auto}.boot-card{width:min(460px,100%);padding:28px;border-radius:22px}.boot-card h2{font-size:26px;line-height:1.2;letter-spacing:-.8px;margin:14px 0}#boot-detail{font-size:14px;line-height:1.65;color:#e0d4d8;margin:0}#boot-phase{font-size:12px;color:var(--aqua);min-height:20px;margin:18px 0 0}#boot-actions{display:grid;gap:10px;margin-top:20px}#boot-diagnostics{margin-top:20px;color:#b9b8c6;font-size:12px}#boot-diagnostics summary{padding:6px 0;cursor:pointer}#boot-error{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.5;max-height:160px;overflow:auto}
 @media(hover:none),(pointer:coarse){.touch-controls{display:flex}.desktop-controls{display:none}}
 @media(max-width:1150px){.start-card{width:350px;padding:25px}.start-overlay{padding:25px 3vw}h1{font-size:52px}}
-@media(max-width:650px){#hud{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.score-card{min-width:120px;padding:8px 10px;border-radius:11px}.score-card .eyebrow{font-size:7px;letter-spacing:1.1px}.score-line{gap:10px;margin-bottom:4px}.score-line strong{font-size:22px}.score-line>span{font-size:9px}.score-meta{font-size:7px;padding-top:5px}.hud-actions{gap:5px}.small-button{height:32px;font-size:10px;padding:0 10px;border-radius:9px}.icon-button{height:32px;width:32px;font-size:17px;border-radius:9px}#mute-btn{position:absolute;right:150px;top:calc(50px + env(safe-area-inset-top))}.flight-gauge{right:10px;top:calc(50px + env(safe-area-inset-top));width:134px;padding:7px 9px;font-size:7px;gap:5px}.flight-gauge b{font-size:8px}#combo-badge{top:225px;left:12px;font-size:9px;padding:6px 9px}.callout-popup{font-size:14px}.bottom-controls{bottom:calc(10px + env(safe-area-inset-bottom));left:10px;right:10px;display:flex;flex-direction:column;align-items:center;gap:7px}.sponsor{font-size:8px}.sponsor b{font-size:10px}.touch-controls{display:flex;width:100%;gap:7px}.touch-controls button{flex:1;width:auto;height:55px;border-radius:12px}.desktop-controls{display:none}.start-overlay{align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(17,18,24,.5),transparent 80%)}.start-card{width:100%;padding:19px 21px;max-height:57dvh;border-radius:20px}.overline{font-size:8px;letter-spacing:1.3px}h1{font-size:clamp(25px,8vw,33px);line-height:1;letter-spacing:-1.5px;margin:12px 0 9px}h1 br{display:none}h1 em{margin-left:9px}.start-intro{font-size:13px;margin-bottom:8px}.start-intro br{display:none}.start-description{font-size:10px;margin:0 0 10px;line-height:1.6}.lesson-preview{padding:9px 0;margin-bottom:11px;font-size:11px}.lesson-preview b{font-size:10px}.start-actions{grid-template-columns:1.45fr 1fr;gap:8px}.start-actions .primary-button,.start-actions .secondary-button{font-size:10px;padding:11px 8px;min-height:41px}.start-actions .primary-button>span{display:none}.start-controls{display:none}.concept-note{font-size:7px;margin-top:10px}.garage-panel{width:calc(100% - 24px);flex-direction:column;gap:10px;align-items:stretch;padding:15px}.garage-panel p{font-size:10px}.garage-views{justify-content:space-between}.garage-views button{font-size:10px;padding:8px}.boot-card{padding:23px}.boot-card h2{font-size:24px}}
-@media(max-height:560px) and (min-width:651px){.start-card{padding:18px 23px;width:330px;max-height:calc(100dvh - 28px)}h1{font-size:40px;margin:12px 0}.start-intro{font-size:14px}.start-description{font-size:10px;margin-bottom:12px}.lesson-preview{padding:9px 0;margin-bottom:10px}.start-controls,.concept-note{display:none}.bottom-controls{bottom:10px}.touch-controls button{height:46px;width:58px}.garage-panel{bottom:10px;padding:10px 16px}.garage-panel p{display:none}}
+@media(max-width:650px){#hud{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.score-card{min-width:120px;padding:8px 10px;border-radius:11px}.score-card .eyebrow{font-size:7px;letter-spacing:1.1px}.score-line{gap:10px;margin-bottom:4px}.score-line strong{font-size:22px}.score-line>span{font-size:9px}.score-meta{font-size:7px;padding-top:5px}.hud-actions{gap:5px}.small-button{height:32px;font-size:10px;padding:0 10px;border-radius:9px}.icon-button{height:32px;width:32px;font-size:17px;border-radius:9px}#mute-btn{position:absolute;right:150px;top:calc(50px + env(safe-area-inset-top))}.flight-gauge{right:10px;top:calc(50px + env(safe-area-inset-top));width:134px;padding:7px 9px;font-size:7px;gap:5px}.flight-gauge b{font-size:8px}#combo-badge{top:225px;left:12px;font-size:9px;padding:6px 9px}.callout-popup{font-size:14px}.bottom-controls{bottom:calc(10px + env(safe-area-inset-bottom));left:calc(10px + env(safe-area-inset-left));right:calc(10px + env(safe-area-inset-right));display:flex;flex-direction:column;align-items:center;gap:7px}.sponsor{font-size:8px}.sponsor b{font-size:10px}.touch-controls{width:auto;gap:8px;margin-bottom:26px}.touch-controls button{flex:0 0 auto;width:62px;height:66px;border-radius:14px}.steering-control{width:130px}.steering-control #steering-wheel{width:130px;height:130px}.desktop-controls{display:none}.start-overlay{align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(17,18,24,.5),transparent 80%)}.start-card{width:100%;padding:19px 21px;max-height:57dvh;border-radius:20px}.overline{font-size:8px;letter-spacing:1.3px}h1{font-size:clamp(25px,8vw,33px);line-height:1;letter-spacing:-1.5px;margin:12px 0 9px}h1 br{display:none}h1 em{margin-left:9px}.start-intro{font-size:13px;margin-bottom:8px}.start-intro br{display:none}.start-description{font-size:10px;margin:0 0 10px;line-height:1.6}.lesson-preview{padding:9px 0;margin-bottom:11px;font-size:11px}.lesson-preview b{font-size:10px}.start-actions{grid-template-columns:1.45fr 1fr;gap:8px}.start-actions .primary-button,.start-actions .secondary-button{font-size:10px;padding:11px 8px;min-height:41px}.start-actions .primary-button>span{display:none}.start-controls{display:none}.concept-note{font-size:7px;margin-top:10px}.garage-panel{width:calc(100% - 24px);flex-direction:column;gap:10px;align-items:stretch;padding:15px}.garage-panel p{font-size:10px}.garage-views{justify-content:space-between}.garage-views button{font-size:10px;padding:8px}.boot-card{padding:23px}.boot-card h2{font-size:24px}}
+@media(max-height:560px) and (min-width:651px){.start-card{padding:18px 23px;width:330px;max-height:calc(100dvh - 28px)}h1{font-size:40px;margin:12px 0}.start-intro{font-size:14px}.start-description{font-size:10px;margin-bottom:12px}.lesson-preview{padding:9px 0;margin-bottom:10px}.start-controls,.concept-note{display:none}.bottom-controls{bottom:calc(10px + env(safe-area-inset-bottom))}.touch-controls{margin-bottom:22px}.touch-controls button{height:58px;width:62px}.steering-control{width:108px}.steering-control #steering-wheel{width:108px;height:108px}.steering-mode{font-size:8px;line-height:12px}.steering-help{font-size:7px;line-height:10px}.garage-panel{bottom:10px;padding:10px 16px}.garage-panel p{display:none}}
 
 #basket-count{color:var(--aqua);font-variant-numeric:tabular-nums;margin-left:3px}
+
+@media(max-width:380px){.steering-control{width:120px}.steering-control #steering-wheel{width:120px;height:120px}.touch-controls button{width:56px;height:62px}.drive-controls{gap:12px}.steering-help{font-size:7.5px}}
+@media(prefers-reduced-motion:reduce){#steering-wheel [data-wheel-rotor]{transition:none}}
 
 /* GoLingo learning interface, scoped independently of the driving HUD. */
 .gl-card{color:#f6f4ed;background:rgba(21,24,32,.91);border:1px solid rgba(219,226,235,.16);box-shadow:0 12px 36px rgba(6,10,18,.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -80,9 +84,33 @@
     <aside class="flight-gauge glass"><span>FLIGHT CHARGE</span><b id="hud-psi">100%</b><div><i id="hud-fuel-bar"></i></div></aside>
     <div id="combo-badge" class="glass hidden">COMBO ×2</div><div id="callout-container" aria-live="polite"></div>
     <div id="pause-notice" class="glass hidden"><strong>Drive paused</strong><button id="resume-btn" class="primary-button">Resume drive</button><button id="restart-btn" class="secondary-button">Restart run</button></div>
-    <footer class="bottom-controls"><a href="https://golingoapp.com" target="_blank" rel="noopener noreferrer" class="sponsor">Learn with <b>GoLingo</b> ↗</a><div class="desktop-controls glass"><span><kbd>A / D</kbd> Steer</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>SHIFT</kbd> Flip</span><span><kbd>P</kbd> Pause</span></div><div class="touch-controls"><button id="btn-left" class="glass" aria-label="Steer left">◀</button><button id="btn-right" class="glass" aria-label="Steer right">▶</button><button id="btn-fly" class="glass thrust-button" aria-label="Hold to fly">↑<span>THRUST</span></button><button id="btn-roll" class="glass roll-button" aria-label="Barrel roll">↻<span>FLIP</span></button></div></footer>
+    <footer class="bottom-controls">
+      <div class="drive-controls">
+        <div class="steering-control">
+          <button id="steering-wheel" type="button" aria-label="Steering wheel: drag to steer on the road. You can also use the arrow keys." aria-keyshortcuts="ArrowLeft ArrowRight" aria-describedby="steering-help">
+            <svg data-wheel-rotor viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+              <defs><linearGradient id="wheel-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bdc9cb"/><stop offset=".35" stop-color="#46545e"/><stop offset=".65" stop-color="#1c252f"/><stop offset="1" stop-color="#8e9b9e"/></linearGradient><radialGradient id="wheel-hub"><stop stop-color="#37434b"/><stop offset="1" stop-color="#131b25"/></radialGradient></defs>
+              <circle cx="80" cy="80" r="73" fill="rgba(13,20,28,.5)" stroke="rgba(201,221,223,.18)"/>
+              <path d="M60 72 22 63 19 78 59 91ZM100 72 138 63 141 78 101 91ZM69 97 65 140 95 140 91 97Z" fill="url(#wheel-metal)" stroke="#6c7c85" stroke-width="1.2"/>
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#111b25" stroke-width="17"/>
+              <circle cx="80" cy="80" r="63" fill="none" stroke="url(#wheel-metal)" stroke-width="9"/>
+              <path d="M26 48A63 63 0 0 1 134 48" fill="none" stroke="#d1e1df" stroke-width="1.2" opacity=".65"/>
+              <path class="wheel-marker" d="M75 17H85" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+              <circle cx="80" cy="80" r="24" fill="url(#wheel-hub)" stroke="#839294" stroke-width="1.4"/>
+              <path d="M72 88V72H82Q91 72 87 79Q85 82 79 81L87 89M72 81H79" fill="none" stroke="#d8e6e4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="80" cy="114" r="2" fill="currentColor"/>
+            </svg>
+          </button>
+          <span id="steering-mode" class="steering-mode">STEER</span>
+          <span id="steering-help" class="steering-help">Road: steer · Air: flip</span>
+        </div>
+        <div class="desktop-controls glass"><span><kbd>A / D</kbd> Steer / air flip</span><span><kbd>SPACE</kbd> Hold to fly</span><span><kbd>P</kbd> Pause</span></div>
+        <div class="touch-controls"><button id="btn-fly" class="glass thrust-button" aria-label="Hold to fly">↑<span>THRUST</span></button><button id="btn-roll" class="glass roll-button" aria-label="Barrel roll">↻<span>FLIP</span></button></div>
+      </div>
+      <a href="https://golingoapp.com" target="_blank" rel="noopener noreferrer" class="sponsor">Learn with <b>GoLingo</b> ↗</a>
+    </footer>
   </div>
-  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Steer through word gates. Listen, repeat, and collect your lesson while you drive, fly, and flip above the traffic.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>A / D</b> Steer</span><span><b>SPACE</b> Fly</span><span><b>SHIFT</b> Flip</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
+  <div id="start-modal" class="start-overlay"><section class="start-card glass"><div class="overline"><span class="tiny-dot"></span> GOLINGO · LEARNING DRIVE</div><h1>ROADSTER<br><em>RUSH.</em></h1><p class="start-intro">A sculpted Roadster.<br> A sunset highway. Your next language.</p><p class="start-description">Turn the wheel to steer through word gates. In the air, turn left or right to flip. Listen, repeat, and collect your lesson as you drive.</p><div class="lesson-preview"><span id="start-lesson-label">Spanish → English</span><b id="start-lesson-count">6 words</b><button id="edit-lesson-btn" class="text-button">Change lesson ↗</button></div><div class="start-actions"><button id="start-btn" class="primary-button">START LEARNING DRIVE <span>↗</span></button><button id="inspect-btn" class="secondary-button">Inspect the Roadster</button></div><div class="start-controls"><span><b>WHEEL / A / D</b> Steer &amp; air flip</span><span><b>SPACE</b> Fly</span></div><p class="concept-note">Independent Roadster concept · GoLingo learning drive</p></section></div>
   <div id="garage-panel" class="garage-panel glass hidden"><div><span class="eyebrow">SCULPTED ROADSTER</span><p>Drag to orbit · scroll or pinch to zoom</p></div><div class="garage-views"><button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="side">Side</button><button id="garage-back" class="primary-button">Back to drive</button></div></div>
   <div id="gameover-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-title"><section class="dialog compact-dialog glass"><span class="eyebrow">RUSH RUN COMPLETE</span><h2 id="gameover-title">One more drive?</h2><p class="field-note">Your collected words stay in your basket.</p><div class="run-stats"><div><span>Score</span><b id="go-score">0</b></div><div><span>Distance</span><b id="go-dist">0 m</b></div><div><span>Bolts</span><b id="go-bolts">0</b></div><div><span>Best combo</span><b id="go-combo">1×</b></div></div><button id="retry-btn" class="primary-button">RETRY RUN</button></section></div>
   <script id="roadster-game-script">(async()=>{'use strict';try{await window.RoadsterBoot.next('Opening the game');
@@ -55848,6 +55876,151 @@ function createLearningApp({THREE,scene,lanes,getGameState,getPlayer,getSpeed,ge
 
 return {createLearningApp};})();
 
+const {createSteeringWheel}=(()=>{
+/** Pointer-based wheel. Clockwise is positive; release immediately removes input. */
+function createSteeringWheel({ element, isEnabled = () => true, onChange = () => {} } = {}) {
+  if (!element) throw new Error('The steering wheel control is missing.');
+  const view = element.ownerDocument.defaultView;
+  const rotor = element.querySelector('[data-wheel-rotor]');
+  const modeLabel = element.ownerDocument.getElementById('steering-mode');
+  const maxAngle = 110;
+  let pointerId = null, angle = 0, value = 0, airborne = false, disposed = false;
+  let centerX = 0, centerY = 0, radius = 1, previousPointerAngle = 0;
+  let horizontalDrag = false, startX = 0, throughCenter = false;
+  const listeners = [];
+
+  function listen(target, type, handler, options) {
+    target.addEventListener(type, handler, options);
+    listeners.push(() => target.removeEventListener(type, handler, options));
+  }
+
+  function setAngle(next) {
+    const previous = value;
+    angle = Math.max(-maxAngle, Math.min(maxAngle, next));
+    value = angle / maxAngle;
+    if (rotor) rotor.style.transform = `rotate(${angle}deg)`;
+    element.dataset.value = value.toFixed(3);
+    if (value !== previous) onChange(value, { active: pointerId !== null, pointerId, angle });
+  }
+
+  function reset() {
+    const releasedId = pointerId;
+    pointerId = null;
+    throughCenter = false;
+    element.classList.remove('is-active');
+    element.dataset.active = 'false';
+    setAngle(0);
+    // Clear the owner before releasing capture: lostpointercapture may fire now.
+    if (releasedId !== null) {
+      try {
+        if (element.hasPointerCapture?.(releasedId)) element.releasePointerCapture(releasedId);
+      } catch { /* A cancelled pointer may already have lost capture. */ }
+    }
+  }
+
+  function consume(event) {
+    if (event.cancelable) event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function press(event) {
+    consume(event);
+    if (disposed || pointerId !== null || !isEnabled()) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const bounds = element.getBoundingClientRect();
+    centerX = bounds.left + bounds.width / 2;
+    centerY = bounds.top + bounds.height / 2;
+    radius = Math.max(1, Math.min(bounds.width, bounds.height) / 2);
+    const x = event.clientX - centerX, y = event.clientY - centerY;
+    horizontalDrag = Math.hypot(x, y) < radius * .28;
+    previousPointerAngle = Math.atan2(y, x);
+    startX = event.clientX;
+    throughCenter = false;
+    pointerId = event.pointerId;
+    element.classList.add('is-active');
+    element.dataset.active = 'true';
+    // Grabbing any part of the rim starts at center, with no steering jump.
+    setAngle(0);
+    try { element.setPointerCapture(pointerId); } catch { /* Window handlers are the fallback. */ }
+  }
+
+  function move(event) {
+    if (event.pointerId !== pointerId || pointerId === null) return;
+    consume(event);
+    if (!isEnabled()) { reset(); return; }
+    if (horizontalDrag) {
+      setAngle((event.clientX - startX) / (radius * .9) * maxAngle);
+      return;
+    }
+    const x = event.clientX - centerX, y = event.clientY - centerY;
+    // Crossing the hub must not produce a sudden 180-degree steering reversal.
+    if (Math.hypot(x, y) < radius * .22) { throughCenter = true; return; }
+    const nextPointerAngle = Math.atan2(y, x);
+    if (throughCenter) {
+      previousPointerAngle = nextPointerAngle;
+      throughCenter = false;
+      return;
+    }
+    let delta = nextPointerAngle - previousPointerAngle;
+    if (delta > Math.PI) delta -= Math.PI * 2;
+    if (delta < -Math.PI) delta += Math.PI * 2;
+    previousPointerAngle = nextPointerAngle;
+    setAngle(angle + delta * 180 / Math.PI);
+  }
+
+  function release(event) {
+    if (event.pointerId !== pointerId || pointerId === null) return;
+    consume(event);
+    reset();
+  }
+
+  function setMode(nextAirborne) {
+    const next = Boolean(nextAirborne);
+    if (next === airborne && element.dataset.mode) return;
+    airborne = next;
+    element.dataset.mode = airborne ? 'air' : 'road';
+    element.classList.toggle('is-airborne', airborne);
+    if (modeLabel) modeLabel.textContent = airborne ? 'AIR FLIP' : 'STEER';
+    element.setAttribute('aria-label', airborne
+      ? 'Steering wheel: turn left or right to flip in the air. You can also use the arrow keys.'
+      : 'Steering wheel: drag to steer on the road. You can also use the arrow keys.');
+  }
+
+  listen(element, 'pointerdown', press, { passive: false });
+  // Window listeners also cover browsers that refuse capture after a cancelled gesture.
+  listen(view, 'pointermove', move, { passive: false });
+  listen(view, 'pointerup', release, { passive: false });
+  listen(view, 'pointercancel', release, { passive: false });
+  listen(element, 'lostpointercapture', release);
+  listen(element, 'click', consume);
+  listen(element, 'contextmenu', consume);
+  listen(element, 'dragstart', consume);
+  listen(view, 'blur', reset);
+  listen(view, 'resize', reset);
+  listen(element.ownerDocument, 'visibilitychange', () => {
+    if (element.ownerDocument.hidden) reset();
+  });
+  element.dataset.active = 'false';
+  setAngle(0);
+  setMode(false);
+
+  return {
+    getValue: () => value,
+    getState: () => ({ value, active: pointerId !== null, pointerId, angle, maxAngle, airborne }),
+    reset,
+    setMode,
+    dispose() {
+      if (disposed) return;
+      reset();
+      disposed = true;
+      listeners.forEach(remove => remove());
+    }
+  };
+}
+
+return {createSteeringWheel};})();
+
+
 
 
 
@@ -56663,6 +56836,9 @@ return {createLearningApp};})();
     let isRolling = false;
     let rollAngle = 0;
     let rollDir = 1;
+    let completedRolls = 0;
+    let wheelAirLatch = 0;
+    let debugTrafficDisabled = false;
     let cameraShake = 0;
 
     let trafficSpawnTimer = 1.1;
@@ -56698,34 +56874,55 @@ return {createLearningApp};})();
     }
 
     function changeLane(dir) {
-      if (gameState !== 'PLAYING') return;
+      if (gameState !== 'PLAYING' || app?.hasDialog()) return;
       const next = Math.max(0, Math.min(LANES.length - 1, currentLane + dir));
-      const isAirborneNow = playerCar.position.y > 1.05;
+      const isAirborneNow = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
 
       if (next !== currentLane) {
         currentLane = next;
         targetX = LANES[currentLane];
       }
 
-      // Automatic 360-degree aerial flip / barrel roll whenever moving left or right in the air!
+      // Keyboard and road swipes share the wheel's directional aerial flip.
       if (isAirborneNow) {
         triggerKickflipRoll(dir, true);
       }
     }
 
-    function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
-      if (gameState !== 'PLAYING') return;
-      // Allow chaining / re-triggering flips if the player keeps steering left or right in the air
-      if (isRolling && (!fromAirSteer || rollAngle < Math.PI * 0.55)) return;
+    function updateWheelSteering(dt) {
+      const value = steeringWheel.getValue();
+      const magnitude = Math.abs(value);
+      const airborne = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
+      steeringWheel.setMode(airborne);
+      // A small dead zone prevents drift. The wheel controls lateral speed,
+      // so centering it holds the chosen road position instead of snapping lanes.
+      const input = magnitude > .1 ? Math.sign(value) * (magnitude - .1) / .9 : 0;
+      if (input) {
+        targetX = THREE.MathUtils.clamp(targetX + input * (airborne ? 8.5 : 10.5) * dt, LANES[0], LANES[LANES.length - 1]);
+        currentLane = THREE.MathUtils.clamp(Math.round((targetX - LANES[0]) / (LANES[1] - LANES[0])), 0, LANES.length - 1);
+      }
+      // One full flip for each deliberate turn. Recenter, release, or turn
+      // the other way to request another; holding never restarts a roll.
+      if (!airborne || magnitude <= .14) wheelAirLatch = 0;
+      if (airborne && magnitude >= .34) {
+        const direction = Math.sign(value);
+        if (direction !== wheelAirLatch && triggerKickflipRoll(direction, true)) wheelAirLatch = direction;
+      }
+      return input;
+    }
 
-      // Fire corner cold-gas thrusters to hop if close to the road
+    function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
+      if (gameState !== 'PLAYING' || app?.hasDialog() || isRolling) return false;
+      if (fromAirSteer && playerCar.position.y <= GROUND_CLEARANCE_Y + .25) return false;
+
+      // Give a low-altitude flip enough lift to clear the road.
       if (playerCar.position.y < 1.55 && tankPsi > 8) {
         velY = Math.max(velY, 9.8);
         tankPsi = Math.max(0, tankPsi - 8);
       }
       isRolling = true;
       rollAngle = 0;
-      rollDir = dir;
+      rollDir = Math.sign(dir) || 1;
       cameraShake = 0.18;
       sfx.playKickflip();
 
@@ -56739,6 +56936,7 @@ return {createLearningApp};})();
         0.95
       );
       addBonus(160, fromAirSteer ? 'AIR FLIP' : 'BARREL ROLL', 'text-pink-300');
+      return true;
     }
 
     window.addEventListener('keydown', (e) => {
@@ -56772,8 +56970,13 @@ return {createLearningApp};})();
       }
     });
 
-    // A held thrust pointer is independent from steering taps with another finger.
+    // Each control owns its own pointer, allowing wheel + thrust together.
     let swipePointer=null,swipeX=0,thrustPointer=null;
+    const steeringWheel=createSteeringWheel({
+      element:document.getElementById('steering-wheel'),
+      isEnabled:()=>gameState==='PLAYING'&&!app?.hasDialog(),
+      onChange:value=>{if(Math.abs(value)<=.14)wheelAirLatch=0;}
+    });
     const orbitPointers=new Map();let pinchDistance=0;
     container.addEventListener('pointerdown',e=>{
       container.setPointerCapture(e.pointerId);
@@ -56790,14 +56993,18 @@ return {createLearningApp};})();
     const releaseWorld=e=>{orbitPointers.delete(e.pointerId);if(e.pointerId===swipePointer)swipePointer=null;};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])container.addEventListener(type,releaseWorld);
     container.addEventListener('wheel',e=>{if(garageMode){e.preventDefault();garageRadius=THREE.MathUtils.clamp(garageRadius+e.deltaY*.008,5,24);}},{passive:false});
-    document.getElementById('btn-left').onclick=()=>changeLane(-1);
-    document.getElementById('btn-right').onclick=()=>changeLane(1);
     const btnFly=document.getElementById('btn-fly');
     btnFly.addEventListener('pointerdown',e=>{e.preventDefault();if(gameState!=='PLAYING'||thrustPointer!==null)return;thrustPointer=e.pointerId;btnFly.setPointerCapture(e.pointerId);isThrusting=true;btnFly.classList.add('pressed');});
     const releaseThrust=e=>{if(e.pointerId!==thrustPointer)return;thrustPointer=null;isThrusting=false;btnFly.classList.remove('pressed');};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])btnFly.addEventListener(type,releaseThrust);
     document.getElementById('btn-roll').onclick=()=>triggerKickflipRoll(1);
-    function releaseInputs(){isThrusting=false;thrustPointer=null;swipePointer=null;orbitPointers.clear();btnFly.classList.remove('pressed');sfx.setThruster(false);}
+    function releaseInputs(){
+      isThrusting=false;
+      const heldThrust=thrustPointer;thrustPointer=null;
+      if(heldThrust!==null&&btnFly.hasPointerCapture?.(heldThrust)){try{btnFly.releasePointerCapture(heldThrust);}catch{}}
+      swipePointer=null;orbitPointers.clear();steeringWheel.reset();wheelAirLatch=0;
+      btnFly.classList.remove('pressed');sfx.setThruster(false);
+    }
     window.addEventListener('blur',()=>{releaseInputs();if(gameState==='PLAYING')togglePause();});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseInputs();if(gameState==='PLAYING')togglePause();}});
 
@@ -56828,6 +57035,7 @@ return {createLearningApp};})();
      * 8. PROCEDURAL SPAWNERS (Traffic, Chevron Ramps & Lightning Bolts)
      ***************************************************************************/
     function spawnTrafficWave() {
+      if(debugTrafficDisabled)return;
       const availableLanes = [0,1,2,3].filter(i=>i!==app?.reserveLane());
       const count = Math.random() < 0.58 ? 2 : 1;
       for (let i = 0; i < count; i++) {
@@ -56849,6 +57057,7 @@ return {createLearningApp};})();
     }
 
     function spawnJumpRamp() {
+      if(debugTrafficDisabled)return;
       const ramp = rampPool.find(r => !r.userData.active);
       if (!ramp) return;
       const lIdx = Math.floor(Math.random() * LANES.length);
@@ -56883,7 +57092,8 @@ return {createLearningApp};})();
       document.getElementById('garage-panel').classList.add('hidden');
       document.getElementById('pause-notice').classList.add('hidden');
       document.getElementById('pause-btn').textContent='Ⅱ';
-      trafficSpawnTimer=2.5;rampSpawnTimer=6;boltSpawnTimer=1.5;rollAngle=0;cameraShake=0;
+      trafficSpawnTimer=2.5;rampSpawnTimer=6;boltSpawnTimer=1.5;rollAngle=0;completedRolls=0;cameraShake=0;
+      steeringWheel.setMode(false);
       playerCar.userData.resetVisuals();
       particlePool.forEach(p=>{p.userData.active=false;p.visible=false;});
       score = 0;
@@ -56974,13 +57184,14 @@ return {createLearningApp};})();
           }
         }
 
-        // Smooth Lane Tweening
+        const wheelInput = updateWheelSteering(dt);
+        // Smooth steering, including keyboard lane targets and analog wheel input.
         const dx = targetX - playerCar.position.x;
         playerCar.position.x += dx * Math.min(1, dt * 12);
 
         // Spin the Concave Turbine Wheels proportionally to highway velocity
         playerCar.userData.roll(step);
-        playerCar.userData.setSteering(THREE.MathUtils.clamp(dx*.08,-.35,.35));
+        playerCar.userData.setSteering(THREE.MathUtils.clamp(wheelInput ? wheelInput*.35 : dx*.08,-.35,.35));
 
         // Update Altitude-Reactive Soft Ambient-Occlusion Contact Shadow on the Asphalt
         const altAboveRoad = Math.max(0, playerCar.position.y - GROUND_CLEARANCE_Y);
@@ -57040,6 +57251,8 @@ return {createLearningApp};})();
           playerCar.userData.bodyGroup.rotation.z = -rollDir * rollAngle;
           if (rollAngle >= Math.PI * 2) {
             isRolling = false;
+            rollAngle = Math.PI * 2;
+            completedRolls++;
             playerCar.userData.bodyGroup.rotation.z = 0;
           }
         }
@@ -57252,8 +57465,27 @@ return {createLearningApp};})();
     document.getElementById('inspect-btn').onclick=()=>{garageMode=true;garageYaw=2.45;garageElevation=.27;garageRadius=isPortrait()?16:8.4;document.body.classList.add('garage-state');document.getElementById('start-modal').classList.add('hidden');document.getElementById('garage-panel').classList.remove('hidden');};
     document.getElementById('garage-back').onclick=()=>{garageMode=false;document.body.classList.remove('garage-state');document.getElementById('start-modal').classList.remove('hidden');document.getElementById('garage-panel').classList.add('hidden');};
     document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{garageYaw={front:Math.PI,rear:0,side:Math.PI/2}[button.dataset.view];garageElevation=button.dataset.view==='side'?.38:.27;garageRadius=isPortrait()?16:8.4;});
-    window.RoadsterRush={getState:()=>({gameState,lane:currentLane,thrusting:isThrusting,speed,graphics:lowGraphics?'low':'standard',car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}})};
-    if(new URLSearchParams(location.search).get('debug')==='1')window.RoadsterRush.debug={...app.debug,carScreenBounds(){const dimensions=playerCar.userData.dimensions,points=[];playerCar.updateMatrixWorld(true);camera.updateMatrixWorld(true);for(const x of [-dimensions.x/2,dimensions.x/2])for(const y of [-GROUND_CLEARANCE_Y+.025,dimensions.y-GROUND_CLEARANCE_Y+.025])for(const z of [-dimensions.z/2,dimensions.z/2]){const p=new THREE.Vector3(x,y,z).applyMatrix4(playerCar.matrixWorld).project(camera);points.push({x:(p.x+1)*innerWidth/2,y:(1-p.y)*innerHeight/2});}return {left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))};}};
+    window.RoadsterRush={getState:()=>({
+      gameState,lane:currentLane,thrusting:isThrusting,speed,
+      position:{x:playerCar.position.x,y:playerCar.position.y,z:playerCar.position.z},
+      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,
+      steering:steeringWheel.getState(),graphics:lowGraphics?'low':'standard',
+      car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},
+      ...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}
+    })};
+    if(new URLSearchParams(location.search).get('debug')==='1')window.RoadsterRush.debug={
+      ...app.debug,
+      setFlightState({height,velocity}={}){
+        if(Number.isFinite(height))playerCar.position.y=THREE.MathUtils.clamp(height,GROUND_CLEARANCE_Y,MAX_ALTITUDE_Y);
+        if(Number.isFinite(velocity))velY=THREE.MathUtils.clamp(velocity,-25,25);
+        return window.RoadsterRush.getState();
+      },
+      disableTraffic(){
+        debugTrafficDisabled=true;
+        [...trafficPool,...rampPool].forEach(item=>{item.userData.active=false;item.visible=false;});
+      },
+      carScreenBounds(){const dimensions=playerCar.userData.dimensions,points=[];playerCar.updateMatrixWorld(true);camera.updateMatrixWorld(true);for(const x of [-dimensions.x/2,dimensions.x/2])for(const y of [-GROUND_CLEARANCE_Y+.025,dimensions.y-GROUND_CLEARANCE_Y+.025])for(const z of [-dimensions.z/2,dimensions.z/2]){const p=new THREE.Vector3(x,y,z).applyMatrix4(playerCar.matrixWorld).project(camera);points.push({x:(p.x+1)*innerWidth/2,y:(1-p.y)*innerHeight/2});}return {left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))};}
+    };
     await boot.next('Opening the road');
     animate();
     if(renderer.getContext().isContextLost())throw new Error('The 3D view could not open. Try lighter graphics.');

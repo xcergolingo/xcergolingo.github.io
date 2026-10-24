@@ -3,6 +3,7 @@ import {createTeslaRoadsterRocket,mergeStaticMeshes} from './model-integration.j
 import {setupRoadsterEnvironment} from './lighting-environment.js';
 import {createCaliforniaPalm} from './palm-replacement.js';
 import {createLearningApp} from './learning-app.js';
+import {createSteeringWheel} from './steering-wheel.js';
 
 /***************************************************************************
      * 1. WEB AUDIO API SOUND SYNTHESIZER (5,500 PSI Cold-Gas Thrusters & SFX)
@@ -815,6 +816,9 @@ import {createLearningApp} from './learning-app.js';
     let isRolling = false;
     let rollAngle = 0;
     let rollDir = 1;
+    let completedRolls = 0;
+    let wheelAirLatch = 0;
+    let debugTrafficDisabled = false;
     let cameraShake = 0;
 
     let trafficSpawnTimer = 1.1;
@@ -850,34 +854,55 @@ import {createLearningApp} from './learning-app.js';
     }
 
     function changeLane(dir) {
-      if (gameState !== 'PLAYING') return;
+      if (gameState !== 'PLAYING' || app?.hasDialog()) return;
       const next = Math.max(0, Math.min(LANES.length - 1, currentLane + dir));
-      const isAirborneNow = playerCar.position.y > 1.05;
+      const isAirborneNow = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
 
       if (next !== currentLane) {
         currentLane = next;
         targetX = LANES[currentLane];
       }
 
-      // Automatic 360-degree aerial flip / barrel roll whenever moving left or right in the air!
+      // Keyboard and road swipes share the wheel's directional aerial flip.
       if (isAirborneNow) {
         triggerKickflipRoll(dir, true);
       }
     }
 
-    function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
-      if (gameState !== 'PLAYING') return;
-      // Allow chaining / re-triggering flips if the player keeps steering left or right in the air
-      if (isRolling && (!fromAirSteer || rollAngle < Math.PI * 0.55)) return;
+    function updateWheelSteering(dt) {
+      const value = steeringWheel.getValue();
+      const magnitude = Math.abs(value);
+      const airborne = playerCar.position.y > GROUND_CLEARANCE_Y + .25;
+      steeringWheel.setMode(airborne);
+      // A small dead zone prevents drift. The wheel controls lateral speed,
+      // so centering it holds the chosen road position instead of snapping lanes.
+      const input = magnitude > .1 ? Math.sign(value) * (magnitude - .1) / .9 : 0;
+      if (input) {
+        targetX = THREE.MathUtils.clamp(targetX + input * (airborne ? 8.5 : 10.5) * dt, LANES[0], LANES[LANES.length - 1]);
+        currentLane = THREE.MathUtils.clamp(Math.round((targetX - LANES[0]) / (LANES[1] - LANES[0])), 0, LANES.length - 1);
+      }
+      // One full flip for each deliberate turn. Recenter, release, or turn
+      // the other way to request another; holding never restarts a roll.
+      if (!airborne || magnitude <= .14) wheelAirLatch = 0;
+      if (airborne && magnitude >= .34) {
+        const direction = Math.sign(value);
+        if (direction !== wheelAirLatch && triggerKickflipRoll(direction, true)) wheelAirLatch = direction;
+      }
+      return input;
+    }
 
-      // Fire corner cold-gas thrusters to hop if close to the road
+    function triggerKickflipRoll(dir = 1, fromAirSteer = false) {
+      if (gameState !== 'PLAYING' || app?.hasDialog() || isRolling) return false;
+      if (fromAirSteer && playerCar.position.y <= GROUND_CLEARANCE_Y + .25) return false;
+
+      // Give a low-altitude flip enough lift to clear the road.
       if (playerCar.position.y < 1.55 && tankPsi > 8) {
         velY = Math.max(velY, 9.8);
         tankPsi = Math.max(0, tankPsi - 8);
       }
       isRolling = true;
       rollAngle = 0;
-      rollDir = dir;
+      rollDir = Math.sign(dir) || 1;
       cameraShake = 0.18;
       sfx.playKickflip();
 
@@ -891,6 +916,7 @@ import {createLearningApp} from './learning-app.js';
         0.95
       );
       addBonus(160, fromAirSteer ? 'AIR FLIP' : 'BARREL ROLL', 'text-pink-300');
+      return true;
     }
 
     window.addEventListener('keydown', (e) => {
@@ -924,8 +950,13 @@ import {createLearningApp} from './learning-app.js';
       }
     });
 
-    // A held thrust pointer is independent from steering taps with another finger.
+    // Each control owns its own pointer, allowing wheel + thrust together.
     let swipePointer=null,swipeX=0,thrustPointer=null;
+    const steeringWheel=createSteeringWheel({
+      element:document.getElementById('steering-wheel'),
+      isEnabled:()=>gameState==='PLAYING'&&!app?.hasDialog(),
+      onChange:value=>{if(Math.abs(value)<=.14)wheelAirLatch=0;}
+    });
     const orbitPointers=new Map();let pinchDistance=0;
     container.addEventListener('pointerdown',e=>{
       container.setPointerCapture(e.pointerId);
@@ -942,14 +973,18 @@ import {createLearningApp} from './learning-app.js';
     const releaseWorld=e=>{orbitPointers.delete(e.pointerId);if(e.pointerId===swipePointer)swipePointer=null;};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])container.addEventListener(type,releaseWorld);
     container.addEventListener('wheel',e=>{if(garageMode){e.preventDefault();garageRadius=THREE.MathUtils.clamp(garageRadius+e.deltaY*.008,5,24);}},{passive:false});
-    document.getElementById('btn-left').onclick=()=>changeLane(-1);
-    document.getElementById('btn-right').onclick=()=>changeLane(1);
     const btnFly=document.getElementById('btn-fly');
     btnFly.addEventListener('pointerdown',e=>{e.preventDefault();if(gameState!=='PLAYING'||thrustPointer!==null)return;thrustPointer=e.pointerId;btnFly.setPointerCapture(e.pointerId);isThrusting=true;btnFly.classList.add('pressed');});
     const releaseThrust=e=>{if(e.pointerId!==thrustPointer)return;thrustPointer=null;isThrusting=false;btnFly.classList.remove('pressed');};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])btnFly.addEventListener(type,releaseThrust);
     document.getElementById('btn-roll').onclick=()=>triggerKickflipRoll(1);
-    function releaseInputs(){isThrusting=false;thrustPointer=null;swipePointer=null;orbitPointers.clear();btnFly.classList.remove('pressed');sfx.setThruster(false);}
+    function releaseInputs(){
+      isThrusting=false;
+      const heldThrust=thrustPointer;thrustPointer=null;
+      if(heldThrust!==null&&btnFly.hasPointerCapture?.(heldThrust)){try{btnFly.releasePointerCapture(heldThrust);}catch{}}
+      swipePointer=null;orbitPointers.clear();steeringWheel.reset();wheelAirLatch=0;
+      btnFly.classList.remove('pressed');sfx.setThruster(false);
+    }
     window.addEventListener('blur',()=>{releaseInputs();if(gameState==='PLAYING')togglePause();});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseInputs();if(gameState==='PLAYING')togglePause();}});
 
@@ -980,6 +1015,7 @@ import {createLearningApp} from './learning-app.js';
      * 8. PROCEDURAL SPAWNERS (Traffic, Chevron Ramps & Lightning Bolts)
      ***************************************************************************/
     function spawnTrafficWave() {
+      if(debugTrafficDisabled)return;
       const availableLanes = [0,1,2,3].filter(i=>i!==app?.reserveLane());
       const count = Math.random() < 0.58 ? 2 : 1;
       for (let i = 0; i < count; i++) {
@@ -1001,6 +1037,7 @@ import {createLearningApp} from './learning-app.js';
     }
 
     function spawnJumpRamp() {
+      if(debugTrafficDisabled)return;
       const ramp = rampPool.find(r => !r.userData.active);
       if (!ramp) return;
       const lIdx = Math.floor(Math.random() * LANES.length);
@@ -1035,7 +1072,8 @@ import {createLearningApp} from './learning-app.js';
       document.getElementById('garage-panel').classList.add('hidden');
       document.getElementById('pause-notice').classList.add('hidden');
       document.getElementById('pause-btn').textContent='Ⅱ';
-      trafficSpawnTimer=2.5;rampSpawnTimer=6;boltSpawnTimer=1.5;rollAngle=0;cameraShake=0;
+      trafficSpawnTimer=2.5;rampSpawnTimer=6;boltSpawnTimer=1.5;rollAngle=0;completedRolls=0;cameraShake=0;
+      steeringWheel.setMode(false);
       playerCar.userData.resetVisuals();
       particlePool.forEach(p=>{p.userData.active=false;p.visible=false;});
       score = 0;
@@ -1126,13 +1164,14 @@ import {createLearningApp} from './learning-app.js';
           }
         }
 
-        // Smooth Lane Tweening
+        const wheelInput = updateWheelSteering(dt);
+        // Smooth steering, including keyboard lane targets and analog wheel input.
         const dx = targetX - playerCar.position.x;
         playerCar.position.x += dx * Math.min(1, dt * 12);
 
         // Spin the Concave Turbine Wheels proportionally to highway velocity
         playerCar.userData.roll(step);
-        playerCar.userData.setSteering(THREE.MathUtils.clamp(dx*.08,-.35,.35));
+        playerCar.userData.setSteering(THREE.MathUtils.clamp(wheelInput ? wheelInput*.35 : dx*.08,-.35,.35));
 
         // Update Altitude-Reactive Soft Ambient-Occlusion Contact Shadow on the Asphalt
         const altAboveRoad = Math.max(0, playerCar.position.y - GROUND_CLEARANCE_Y);
@@ -1192,6 +1231,8 @@ import {createLearningApp} from './learning-app.js';
           playerCar.userData.bodyGroup.rotation.z = -rollDir * rollAngle;
           if (rollAngle >= Math.PI * 2) {
             isRolling = false;
+            rollAngle = Math.PI * 2;
+            completedRolls++;
             playerCar.userData.bodyGroup.rotation.z = 0;
           }
         }
@@ -1404,8 +1445,27 @@ import {createLearningApp} from './learning-app.js';
     document.getElementById('inspect-btn').onclick=()=>{garageMode=true;garageYaw=2.45;garageElevation=.27;garageRadius=isPortrait()?16:8.4;document.body.classList.add('garage-state');document.getElementById('start-modal').classList.add('hidden');document.getElementById('garage-panel').classList.remove('hidden');};
     document.getElementById('garage-back').onclick=()=>{garageMode=false;document.body.classList.remove('garage-state');document.getElementById('start-modal').classList.remove('hidden');document.getElementById('garage-panel').classList.add('hidden');};
     document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{garageYaw={front:Math.PI,rear:0,side:Math.PI/2}[button.dataset.view];garageElevation=button.dataset.view==='side'?.38:.27;garageRadius=isPortrait()?16:8.4;});
-    window.RoadsterRush={getState:()=>({gameState,lane:currentLane,thrusting:isThrusting,speed,graphics:lowGraphics?'low':'standard',car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}})};
-    if(new URLSearchParams(location.search).get('debug')==='1')window.RoadsterRush.debug={...app.debug,carScreenBounds(){const dimensions=playerCar.userData.dimensions,points=[];playerCar.updateMatrixWorld(true);camera.updateMatrixWorld(true);for(const x of [-dimensions.x/2,dimensions.x/2])for(const y of [-GROUND_CLEARANCE_Y+.025,dimensions.y-GROUND_CLEARANCE_Y+.025])for(const z of [-dimensions.z/2,dimensions.z/2]){const p=new THREE.Vector3(x,y,z).applyMatrix4(playerCar.matrixWorld).project(camera);points.push({x:(p.x+1)*innerWidth/2,y:(1-p.y)*innerHeight/2});}return {left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))};}};
+    window.RoadsterRush={getState:()=>({
+      gameState,lane:currentLane,thrusting:isThrusting,speed,
+      position:{x:playerCar.position.x,y:playerCar.position.y,z:playerCar.position.z},
+      airborne:playerCar.position.y>GROUND_CLEARANCE_Y+.25,isRolling,rollDir,rollAngle,completedRolls,
+      steering:steeringWheel.getState(),graphics:lowGraphics?'low':'standard',
+      car:{dimensions:playerCar.userData.dimensions,optimization:playerCar.userData.optimization},
+      ...app.getState(),renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}
+    })};
+    if(new URLSearchParams(location.search).get('debug')==='1')window.RoadsterRush.debug={
+      ...app.debug,
+      setFlightState({height,velocity}={}){
+        if(Number.isFinite(height))playerCar.position.y=THREE.MathUtils.clamp(height,GROUND_CLEARANCE_Y,MAX_ALTITUDE_Y);
+        if(Number.isFinite(velocity))velY=THREE.MathUtils.clamp(velocity,-25,25);
+        return window.RoadsterRush.getState();
+      },
+      disableTraffic(){
+        debugTrafficDisabled=true;
+        [...trafficPool,...rampPool].forEach(item=>{item.userData.active=false;item.visible=false;});
+      },
+      carScreenBounds(){const dimensions=playerCar.userData.dimensions,points=[];playerCar.updateMatrixWorld(true);camera.updateMatrixWorld(true);for(const x of [-dimensions.x/2,dimensions.x/2])for(const y of [-GROUND_CLEARANCE_Y+.025,dimensions.y-GROUND_CLEARANCE_Y+.025])for(const z of [-dimensions.z/2,dimensions.z/2]){const p=new THREE.Vector3(x,y,z).applyMatrix4(playerCar.matrixWorld).project(camera);points.push({x:(p.x+1)*innerWidth/2,y:(1-p.y)*innerHeight/2});}return {left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))};}
+    };
     await boot.next('Opening the road');
     animate();
     if(renderer.getContext().isContextLost())throw new Error('The 3D view could not open. Try lighter graphics.');
