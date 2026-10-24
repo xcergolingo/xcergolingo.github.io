@@ -20,7 +20,7 @@
   var scene = new T.Scene(), camera = new T.PerspectiveCamera(60, 1, .25, 42000), world = F16Visuals.createWorld(T, scene), jet = F16Visuals.createJet(T, {});
   scene.add(jet, camera); renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.04;
   var state = { phase: 'hangar', mode: 'learn', paused: false, time: 0, score: 0, kills: 0, gates: 0, missed: 0, damage: 0, throttle: .5, speed: 185, yaw: 0, pitch: 0, roll: 0, pos: new T.Vector3(-700, 300, -300), prev: new T.Vector3(), autopilot: false, boost: false, grace: 6, missileCd: 0, gunCd: 0, flareCd: 0, flareT: 0, missiles: 24, cannon: 800, flares: 6, lock: null, hitT: 0, totalTime: 0 };
-  var keys = Object.create(null), steer = { x: 0, y: 0 }, drag = null, stickPointer = null, action = { boost: false, fire: false, gun: false }, activeModal = null, modalFocus = null, clearArmed = false;
+  var keys = Object.create(null), steer = { x: 0, y: 0 }, drag = null, stickPointer = null, action = { boost: false, fire: false, gun: false }, actionPointers = Object.create(null), activeModal = null, modalFocus = null, clearArmed = false;
   var currentWord = null, currentWordLanguage = lesson.learningLanguage, practiced = new Set(), route = [], retryWords = [], cursor = 0, routeS = 700, courseSequence = 0;
   var enemies = [], projectiles = [], effects = [], flakes = [], fadeGates = [], spawnTimer = 0, hudTimer = 0, lastTs = 0, simTime = 0, toastTimer = 0, camReset = true;
   var vec = new T.Vector3(), vec2 = new T.Vector3(), fwd = new T.Vector3(), prevProjectile = new T.Vector3(), up = new T.Vector3(0, 1, 0), axisZ = new T.Vector3(0, 0, 1), axisY = new T.Vector3(0, 1, 0);
@@ -70,7 +70,7 @@
     route.forEach(updateGateLabel); onVoiceStatus(speech.getState());
   }
   function persistSettings() { saveStored('settings', settings); }
-  function releaseInputs() { keys = Object.create(null); steer.x = steer.y = 0; drag = null; stickPointer = null; action.boost = action.fire = action.gun = false; $('stick').style.transform = ''; }
+  function releaseInputs() { keys = Object.create(null); steer.x = steer.y = 0; drag = null; stickPointer = null; action.boost = action.fire = action.gun = false; actionPointers = Object.create(null); $('stick').style.transform = ''; }
   function setAuto(value, quiet) { state.autopilot = !!value && state.mode !== 'free'; $('autoBtn').classList.toggle('active', state.autopilot); $('autoBtn').setAttribute('aria-pressed', String(state.autopilot)); $('autoBtn').textContent = state.autopilot ? 'Autopilot on' : 'Autopilot'; if (!quiet) toast(state.autopilot ? 'Autopilot engaged. Move the stick to take control.' : 'You have control.'); }
   function setMode(mode) { state.mode = ['learn', 'combat', 'free'].indexOf(mode) >= 0 ? mode : 'learn'; document.querySelectorAll('[data-mode]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode)); }); }
 
@@ -375,13 +375,19 @@
     $('wordsBtn').addEventListener('click', function () { settings.showWords = !settings.showWords; persistSettings(); updateWordStrip(); updateHUD(); });
     $('wordStrip').addEventListener('click', function () { if (currentWord) { speech.unlock(); speech.play(currentWord, { once: true }); } }); $('wordStrip').addEventListener('keydown', function (e) { if (e.key === 'Enter' && currentWord) { e.preventDefault(); speech.unlock(); speech.play(currentWord, { once: true }); } });
     $('throttle').addEventListener('input', function () { state.throttle = Number(this.value) / 100; });
-    function hold(id, key, initial) { var el = $(id); el.addEventListener('pointerdown', function (e) { if (state.phase !== 'flight' || state.paused) return; e.preventDefault(); action[key] = true; el.setPointerCapture(e.pointerId); if (initial) initial(); }); function release() { action[key] = false; } el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release); el.addEventListener('lostpointercapture', release); }
+    function hold(id, key, initial) {
+      var el = $(id);
+      el.addEventListener('pointerdown', function (e) { if (state.phase !== 'flight' || state.paused || e.button !== 0 || actionPointers[key] != null) return; e.preventDefault(); actionPointers[key] = e.pointerId; action[key] = true; el.setPointerCapture(e.pointerId); if (initial) initial(); });
+      function release(e) { if (actionPointers[key] !== e.pointerId) return; delete actionPointers[key]; action[key] = false; }
+      el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release); el.addEventListener('lostpointercapture', release);
+    }
     hold('boostBtn', 'boost'); hold('fireBtn', 'fire', fireMissile); hold('gunBtn', 'gun', fireCannon); $('flareBtn').addEventListener('click', flare);
-    var canvas = $('view'); canvas.addEventListener('pointerdown', function (e) { if (state.phase !== 'flight' || state.paused || e.button !== 0) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); e.preventDefault(); });
-    canvas.addEventListener('pointermove', function (e) { if (!drag || drag.id !== e.pointerId || state.paused) return; var scale = Math.min(innerWidth, innerHeight) * .2; steer.x = clamp((e.clientX - drag.x) / scale, -1, 1); steer.y = clamp((e.clientY - drag.y) / scale, -1, 1); });
+    // One finger owns steering until it ends; a second finger can still use throttle or boost.
+    var canvas = $('view'); canvas.addEventListener('pointerdown', function (e) { if (state.phase !== 'flight' || state.paused || e.button !== 0 || drag || stickPointer != null) return; e.preventDefault(); drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', function (e) { if (!drag || drag.id !== e.pointerId || state.paused) return; var scale = Math.min(innerWidth, innerHeight) * .2; steer.x = clamp((e.clientX - drag.x) / scale, -1, 1); steer.y = clamp((e.clientY - drag.y) / scale, -1, 1); e.preventDefault(); });
     function endDrag(e) { if (drag && drag.id === e.pointerId) { drag = null; steer.x = steer.y = 0; } } canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag); canvas.addEventListener('lostpointercapture', endDrag);
-    var stick = $('joystick'); function moveStick(e) { if (stickPointer !== e.pointerId) return; var r = stick.getBoundingClientRect(), x = (e.clientX - r.left - r.width / 2) / (r.width * .33), y = (e.clientY - r.top - r.height / 2) / (r.height * .33), length = Math.hypot(x, y); if (length > 1) { x /= length; y /= length; } steer.x = x; steer.y = y; $('stick').style.transform = 'translate(' + x * r.width * .33 + 'px,' + y * r.height * .33 + 'px)'; e.preventDefault(); }
-    stick.addEventListener('pointerdown', function (e) { if (state.paused) return; stickPointer = e.pointerId; stick.setPointerCapture(e.pointerId); moveStick(e); }); stick.addEventListener('pointermove', moveStick);
+    var stick = $('joystick'); function moveStick(e) { if (stickPointer !== e.pointerId || state.paused) return; var r = stick.getBoundingClientRect(), x = (e.clientX - r.left - r.width / 2) / (r.width * .33), y = (e.clientY - r.top - r.height / 2) / (r.height * .33), length = Math.hypot(x, y); if (length > 1) { x /= length; y /= length; } steer.x = x; steer.y = y; $('stick').style.transform = 'translate(' + x * r.width * .33 + 'px,' + y * r.height * .33 + 'px)'; e.preventDefault(); }
+    stick.addEventListener('pointerdown', function (e) { if (state.phase !== 'flight' || state.paused || e.button !== 0 || stickPointer != null || drag) return; e.preventDefault(); stickPointer = e.pointerId; stick.setPointerCapture(e.pointerId); moveStick(e); }); stick.addEventListener('pointermove', moveStick);
     function releaseStick(e) { if (e.pointerId === stickPointer) { stickPointer = null; steer.x = steer.y = 0; $('stick').style.transform = ''; } } stick.addEventListener('pointerup', releaseStick); stick.addEventListener('pointercancel', releaseStick); stick.addEventListener('lostpointercapture', releaseStick);
     ['view', 'flightUI', 'joystick'].forEach(function (id) { $(id).addEventListener('contextmenu', function (e) { e.preventDefault(); }); });
     window.addEventListener('keydown', function (e) {
@@ -391,8 +397,13 @@
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.code) >= 0) e.preventDefault();
       if (!e.repeat && (e.code === 'KeyP' || e.code === 'Escape')) { openModal('pauseModal'); return; } if (!e.repeat && e.code === 'KeyM') { toggleVoice(); return; } if (!e.repeat && e.code === 'KeyV') { nextCamera(); return; } keys[e.code] = true;
     }); window.addEventListener('keyup', function (e) { delete keys[e.code]; });
-    window.addEventListener('blur', function () { releaseInputs(); if (state.phase === 'flight' && !activeModal) openModal('pauseModal'); });
-    document.addEventListener('visibilitychange', function () { releaseInputs(); if (document.hidden) { previewSpeech.setSuspended(true); speech.setSuspended(true); if (state.phase === 'flight' && !activeModal) openModal('pauseModal'); } });
+    function pauseForBackground() { releaseInputs(); previewSpeech.setSuspended(true); speech.setSuspended(true); sound.update(0, false, false, true); if (state.phase === 'flight' && !activeModal) openModal('pauseModal'); }
+    // Focus can change while a mobile browser still displays the game. Never turn that
+    // into a pause menu or cancel an owned touch gesture. Visibility tells us when
+    // the player actually leaves; pointerup/cancel/lostcapture release touch controls.
+    window.addEventListener('blur', function () { keys = Object.create(null); if (document.hidden) pauseForBackground(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) pauseForBackground(); });
+    window.addEventListener('pagehide', pauseForBackground);
     $('lessonInput').addEventListener('input', function () { updateEditorCount(true); }); $('learningLanguage').addEventListener('change', populateVoices);
     $('loadFileBtn').addEventListener('click', function () { $('lessonFile').click(); }); $('lessonFile').addEventListener('change', function () { var file = this.files && this.files[0]; if (!file) return; if (file.size > 1024 * 1024) { $('lessonError').hidden = false; $('lessonError').textContent = 'This file is too large. Use a lesson smaller than 1 MB.'; this.value = ''; return; } var reader = new FileReader(); reader.onload = function () { $('lessonInput').value = reader.result; updateEditorCount(true); }; reader.onerror = function () { $('lessonError').hidden = false; $('lessonError').textContent = 'This file could not be read. Paste its words instead.'; }; reader.readAsText(file); this.value = ''; });
     $('sampleBtn').addEventListener('click', function () { var p = L.defaultLesson(); $('learningLanguage').value = p.learningLanguage; $('primaryLanguage').value = p.primaryLanguage; $('lessonInput').value = p.words.map(function (w) { return [w.word, w.translation, w.sentence, w.sentenceTranslation].join(' | '); }).join('\n'); updateEditorCount(false); populateVoices(); });
@@ -408,7 +419,7 @@
   function setupBridge() {
     var queued = window.__goLingoQueue || []; window.__goLingoQueue = [];
     window.GoLingoGame = {
-      version: '2.0.0',
+      version: '2.0.1',
       importWords: function (payload, opts) { return commitLesson(payload, opts); },
       getLesson: function () { return cleanPayload(lesson); },
       getReview: function () { return cleanPayload(review); },
@@ -425,7 +436,7 @@
     });
     queued.forEach(function (args) { try { commitLesson(args[0], args[1]); } catch (e) { toast('Lesson import: ' + e.message, 5000); } });
     nativeEvent('ready', { capabilities: ['importWords', 'getLesson', 'getReview', 'exportWords', 'postMessage', 'recordedAudio', 'speechLoop'], wordCount: lesson.words.length });
-    window.dispatchEvent(new CustomEvent('golingo:ready', { detail: { game: 'f16-afterburner', version: '2.0.0' } }));
+    window.dispatchEvent(new CustomEvent('golingo:ready', { detail: { game: 'f16-afterburner', version: '2.0.1' } }));
   }
 
   function createCockpit() {

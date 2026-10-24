@@ -39,7 +39,7 @@ Missed words return to the route for another attempt. Completing a lesson keeps 
 | Pause / resume repeating speech | M or Pause voice |
 | Missile / cannon / flares | Space / C / F, in combat mode |
 
-On touch devices, drag the flight stick, adjust the throttle slider, and use the action buttons. **Autopilot** is available in both word-gate modes. Steering manually disengages it. Opening a menu or switching away from the game pauses the flight; use **Resume flight** to continue.
+On touch devices, drag the flight stick, adjust the throttle slider, and use the action buttons. One finger controls steering while another can hold the afterburner or adjust throttle. Releasing or cancelling a touch centers the stick. **Autopilot** is available in both word-gate modes. Steering manually disengages it. Temporary browser focus changes leave flight and touch steering running. Opening a menu or switching away from the game pauses the flight; use **Resume flight** to continue.
 
 ## Add your lesson
 
