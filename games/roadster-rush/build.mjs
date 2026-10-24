@@ -1,0 +1,21 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {dirname,resolve,join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=dirname(fileURLToPath(import.meta.url)),source=join(root,'src'),destination=resolve(process.argv[2]||join(root,'dist'));
+await mkdir(destination,{recursive:true});
+let three=await readFile(join(source,'vendor/three.module.js'),'utf8');
+const exp=three.match(/export\s*\{([^}]+)\};?\s*$/s);if(!exp)throw new Error('Pinned engine export table missing.');
+const table=exp[1].split(',').map(x=>x.trim()).filter(Boolean).map(x=>{const p=x.split(/\s+as\s+/);return p.length===2?`${p[1]}:${p[0]}`:x;}).join(',');
+let code=`const THREE=(()=>{\n${three.slice(0,exp.index)}\nreturn {${table}};})();\n`;
+const modules=[['createRoadster.js',['createRoadster']],['model-integration.js',['createTeslaRoadsterRocket','mergeStaticMeshes']],['lighting-environment.js',['setupRoadsterEnvironment']],['palm-replacement.js',['createCaliforniaPalm']],['lesson-engine.js',['normalizeLesson','parseLessonText','createLearningController']],['word-gates.js',['createWordGate']],['game-bridge.js',['installGoLingoBridge']],['learning-app.js',['createLearningApp']]];
+const strip=body=>body.replace(/^\s*import\s+[\s\S]*?\s+from\s+['"][^'"]+['"];?\s*$/gm,'').replace(/^export\s+(?=(?:function|class|const|let|var)\b)/gm,'');
+for(const [file,names] of modules){const body=strip(await readFile(join(source,file),'utf8'));code+=`\nconst {${names.join(',')}}=(()=>{\n${body}\nreturn {${names.join(',')}};})();\n`;}
+code+=strip(await readFile(join(source,'game.js'),'utf8'));
+code=`(async()=>{'use strict';try{await window.RoadsterBoot.next('Opening the game');\n${code}\n}catch(error){console.error(error);window.RoadsterBoot.fail(error);}})();`;
+const safe=body=>body.replace(/<\/script/gi,'<\\/script');
+let html=await readFile(join(source,'index.template.html'),'utf8');
+const css=await readFile(join(source,'style.css'),'utf8')+'\n'+await readFile(join(root,'learning.css'),'utf8');
+const boot=await readFile(join(source,'boot.js'),'utf8'),bridge=await readFile(join(source,'boot-bridge.js'),'utf8');
+html=html.replace('/* INLINE_CSS */',()=>css).replace('/* INLINE_BOOT */',()=>safe(boot)).replace('/* INLINE_BRIDGE */',()=>safe(bridge)).replace('/* INLINE_JS */',()=>safe(code));
+for(const file of ['roadster_rush_game.html','index.html'])await writeFile(join(destination,file),html);
+console.log(`Built offline Roadster Rush (${Buffer.byteLength(html).toLocaleString()} bytes) in ${destination}`);

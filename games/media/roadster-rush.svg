@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">Roadster Rush</title>
+  <desc id="desc">A red sports car on a sunset highway, with palms and a turquoise vocabulary gate.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#645572"/><stop offset=".6" stop-color="#ed9b87"/><stop offset="1" stop-color="#ffd6a1"/></linearGradient>
+    <linearGradient id="road" x2="0" y2="1"><stop stop-color="#675775"/><stop offset="1" stop-color="#252d48"/></linearGradient>
+    <linearGradient id="paint" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#ff8a80"/><stop offset=".35" stop-color="#ee464e"/><stop offset="1" stop-color="#a21d3b"/></linearGradient>
+    <linearGradient id="glass" x2=".6" y2="1"><stop stop-color="#82a0b9"/><stop offset=".5" stop-color="#3a4764"/><stop offset="1" stop-color="#212b47"/></linearGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h960v600H0z"/>
+  <circle cx="563" cy="203" r="77" fill="#ffe5ac"/>
+  <path fill="#9e7693" d="m0 260 107-57 95 41 133-68 119 79 105-23 116-57 171 72 114-43v120H0z"/>
+  <path fill="#715f80" d="m0 291 115-37 142 35 180-36 125 29 127-40 135 45 136-31v344H0z"/>
+  <path fill="url(#road)" d="M397 282h173L895 600H65z"/>
+  <path stroke="#fbd1ac" stroke-width="5" fill="none" d="M397 282 65 600M570 282l325 318"/>
+  <g fill="#ffdfb4" opacity=".85"><path d="m453 301 6-19h4l-3 19zM435 350l10-28h7l-7 28zM398 444l20-49h11l-14 49zM336 600l37-91h22l-27 91z"/><path d="m514 302-3-20h4l6 20zM523 350l-5-28h7l10 28zM541 444l-10-49h11l18 49zM569 600l-17-91h21l33 91z"/></g>
+  <g fill="none" stroke="#4e526f" stroke-linecap="round"><path stroke-width="12" d="M158 396q24-108 6-223M803 387q-28-113-6-224"/><path stroke-width="8" d="M284 322q11-61 2-118M689 324q-10-61-1-111"/></g>
+  <g fill="#46566c"><path d="M165 182q-51-65-109-25 63-5 105 36-87-21-114 40 52-38 112-31-36 24-28 80 16-51 44-78 10 17 16 61 21-50-6-75 46-25 87-2-37-56-96-17 17-53 58-63-56-7-69 74Z"/><path d="M797 173q-43-58-92-23 48-2 84 33-72-17-95 35 45-30 89-25-28 22-23 65 15-43 37-66 14 28 17 54 17-42-8-65 43-22 76-1-25-46-71-27 9-43 41-56-42-2-55 76Z"/><path d="M287 209q-28-36-55-12 30-2 48 22-48-8-57 27 29-23 56-17-14 17-10 42l21-44q14 13 16 32 10-29-10-38 28-17 49-1-15-30-49-15l23-36q-30 7-32 40Z"/><path d="M688 219q-27-34-52-11l44 20q-41-8-52 24l51-16-9 36 22-39 18 26q6-23-14-33l39-9q-21-19-41-2l9-29q-20 12-15 33Z"/></g>
+  <g fill="none" stroke="#7ce0da"><path stroke-width="7" d="M414 332v-72q0-19 19-19h88q19 0 19 19v72"/><path opacity=".22" stroke-width="20" d="M414 332v-72q0-19 19-19h88q19 0 19 19v72"/></g>
+  <rect x="440" y="252" width="75" height="30" rx="15" fill="#294b60"/><text x="477" y="273" fill="#d3fff2" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" font-weight="600">hola</text>
+  <ellipse cx="499" cy="493" rx="222" ry="31" fill="#151f39" opacity=".6"/>
+  <g stroke="#151c30" stroke-width="4"><ellipse cx="344" cy="445" rx="35" ry="49" fill="#172235"/><ellipse cx="648" cy="444" rx="36" ry="47" fill="#172235"/></g>
+  <path fill="url(#paint)" stroke="#af354b" stroke-width="2" d="M291 411q11-27 65-47l59-46q20-16 66-15l75 5q34 2 59 25l47 47q45 17 46 48l-13 47q-91 45-221 33l-130-19q-44-11-53-34Z"/>
+  <path fill="url(#glass)" stroke="#a8a1b5" stroke-width="2" d="m365 369 59-45q14-11 55-10l71 5q27 3 47 20l44 42q-82-25-276-12Z"/>
+  <path fill="#fca09a" opacity=".8" d="M315 402q88-29 180-21l157 19-143-9q-103-6-194 11Z"/>
+  <path fill="#aa2540" d="M299 434q78 37 197 39l203-34-6 30q-111 40-210 28l-146-16q-28-12-38-24Z"/>
+  <path fill="#222a41" d="m352 465 130 16 131-12-20 17-103 10-119-14Z"/>
+  <path stroke="#ffe4c9" stroke-width="7" stroke-linecap="round" fill="none" d="m316 425 87 18 35-1m143-9 86-19"/>
+  <path stroke="#fc9b92" stroke-width="2" fill="none" d="M458 390 438 442M558 391l23 42"/>
+  <path fill="#202b42" d="m347 365-24-2-7 12 39 6m286-1 23-5 9 12-28 6"/>
+  <path fill="#fcc2b1" opacity=".6" d="m436 320 67 1 57 8-80-2-65 33Z"/>
+  <g fill="#a7bec6"><circle cx="344" cy="468" r="13"/><circle cx="648" cy="467" r="13"/></g>
+</svg>

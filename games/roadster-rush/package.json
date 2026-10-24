@@ -1,0 +1,14 @@
+{
+  "name": "roadster-rush-golingo",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline Roadster Rush with the supplied sculpted Roadster model and GoLingo language lessons",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node test-model.mjs && node --unhandled-rejections=strict test-learning.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

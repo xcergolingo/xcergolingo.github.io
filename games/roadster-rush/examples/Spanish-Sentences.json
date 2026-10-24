@@ -1,0 +1,30 @@
+{
+  "primaryLanguage": "en",
+  "learningLanguage": "es",
+  "mode": "sentences",
+  "sentences": [
+    {
+      "id": "s1",
+      "sentence": "El coche es blanco.",
+      "sentenceTranslation": "The car is white.",
+      "words": [
+        {
+          "word": "El",
+          "translation": "The"
+        },
+        {
+          "word": "coche",
+          "translation": "car"
+        },
+        {
+          "word": "es",
+          "translation": "is"
+        },
+        {
+          "word": "blanco",
+          "translation": "white"
+        }
+      ]
+    }
+  ]
+}
