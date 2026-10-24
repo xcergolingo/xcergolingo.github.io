@@ -34,6 +34,10 @@ it to center the wheel and hold your chosen road position. While airborne, a
 deliberate left or right turn triggers a full flip in that direction. Holding
 the wheel does not restart the flip; center or release it before turning again.
 You can hold THRUST with one finger while turning the wheel with another.
+Visible browser focus changes keep the drive and active touch controls running.
+Switching away from or hiding the page pauses and releases the controls; use
+Resume drive when you return. The Pause button and lesson dialogs still pause
+intentionally.
 
 Practice mode uses forgiving traffic and gentler acceleration. Rush mode uses
 faster traffic and ends a run on impact. Both modes keep ramps, flight, flips,

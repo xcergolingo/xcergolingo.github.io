@@ -919,6 +919,8 @@ import {createSteeringWheel} from './steering-wheel.js';
       return true;
     }
 
+    const flightKeys = new Set(['Space','ArrowUp','KeyW']);
+    const heldFlightKeys = new Set();
     window.addEventListener('keydown', (e) => {
       if(e.target.closest?.('input,textarea,select,[contenteditable=true]')||app?.hasDialog())return;
       if(['Space','ArrowUp','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
@@ -935,9 +937,10 @@ import {createSteeringWheel} from './steering-wheel.js';
 
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') changeLane(-1);
       else if (e.code === 'ArrowRight' || e.code === 'KeyD') changeLane(1);
-      else if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+      else if (flightKeys.has(e.code)) {
         e.preventDefault();
-        isThrusting = true;
+        heldFlightKeys.add(e.code);
+        syncThrustInput();
       } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyR') {
         e.preventDefault();
         triggerKickflipRoll(currentLane < 2 ? 1 : -1);
@@ -945,13 +948,15 @@ import {createSteeringWheel} from './steering-wheel.js';
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-        isThrusting = false;
+      if (flightKeys.has(e.code)) {
+        heldFlightKeys.delete(e.code);
+        syncThrustInput();
       }
     });
 
     // Each control owns its own pointer, allowing wheel + thrust together.
-    let swipePointer=null,swipeX=0,thrustPointer=null;
+    let swipePointer=null,swipePointerType=null,swipeX=0,thrustPointer=null,thrustPointerType=null;
+    const isContactPointer=type=>type==='touch'||type==='pen';
     const steeringWheel=createSteeringWheel({
       element:document.getElementById('steering-wheel'),
       isEnabled:()=>gameState==='PLAYING'&&!app?.hasDialog(),
@@ -960,33 +965,61 @@ import {createSteeringWheel} from './steering-wheel.js';
     const orbitPointers=new Map();let pinchDistance=0;
     container.addEventListener('pointerdown',e=>{
       container.setPointerCapture(e.pointerId);
-      if(garageMode){orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}return;}
-      if(gameState==='PLAYING'&&swipePointer===null){swipePointer=e.pointerId;swipeX=e.clientX;}
+      if(garageMode){orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:e.pointerType||'mouse'});if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}return;}
+      if(gameState==='PLAYING'&&swipePointer===null){swipePointer=e.pointerId;swipePointerType=e.pointerType||'mouse';swipeX=e.clientX;}
     });
     container.addEventListener('pointermove',e=>{
       if(garageMode&&orbitPointers.has(e.pointerId)){
-        const old=orbitPointers.get(e.pointerId);orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        const old=orbitPointers.get(e.pointerId);orbitPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pointerType:old.pointerType});
         if(orbitPointers.size===1){garageYaw-=(e.clientX-old.x)*.008;garageElevation=THREE.MathUtils.clamp(garageElevation+(e.clientY-old.y)*.004,.06,.85);}
         else if(orbitPointers.size===2){const [a,b]=[...orbitPointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);garageRadius=THREE.MathUtils.clamp(garageRadius+(pinchDistance-distance)*.025,5,24);pinchDistance=distance;}
       }else if(e.pointerId===swipePointer&&gameState==='PLAYING'){const dx=e.clientX-swipeX;if(Math.abs(dx)>38){changeLane(dx>0?1:-1);swipeX=e.clientX;}}
     });
-    const releaseWorld=e=>{orbitPointers.delete(e.pointerId);if(e.pointerId===swipePointer)swipePointer=null;};
+    function releaseWorldPointer(pointerId){
+      orbitPointers.delete(pointerId);
+      if(pointerId===swipePointer){swipePointer=null;swipePointerType=null;}
+      if(container.hasPointerCapture?.(pointerId)){try{container.releasePointerCapture(pointerId);}catch{}}
+    }
+    const releaseWorld=e=>releaseWorldPointer(e.pointerId);
     for(const type of ['pointerup','pointercancel','lostpointercapture'])container.addEventListener(type,releaseWorld);
     container.addEventListener('wheel',e=>{if(garageMode){e.preventDefault();garageRadius=THREE.MathUtils.clamp(garageRadius+e.deltaY*.008,5,24);}},{passive:false});
     const btnFly=document.getElementById('btn-fly');
-    btnFly.addEventListener('pointerdown',e=>{e.preventDefault();if(gameState!=='PLAYING'||thrustPointer!==null)return;thrustPointer=e.pointerId;btnFly.setPointerCapture(e.pointerId);isThrusting=true;btnFly.classList.add('pressed');});
-    const releaseThrust=e=>{if(e.pointerId!==thrustPointer)return;thrustPointer=null;isThrusting=false;btnFly.classList.remove('pressed');};
+    function syncThrustInput(){
+      isThrusting=gameState==='PLAYING'&&!app?.hasDialog()&&(heldFlightKeys.size>0||thrustPointer!==null);
+      btnFly.classList.toggle('pressed',thrustPointer!==null);
+    }
+    function releaseThrustPointer(){
+      const held=thrustPointer;thrustPointer=null;thrustPointerType=null;
+      if(held!==null&&btnFly.hasPointerCapture?.(held)){try{btnFly.releasePointerCapture(held);}catch{}}
+      syncThrustInput();
+    }
+    btnFly.addEventListener('pointerdown',e=>{e.preventDefault();if(gameState!=='PLAYING'||app?.hasDialog()||thrustPointer!==null)return;if(e.pointerType==='mouse'&&e.button!==0)return;thrustPointer=e.pointerId;thrustPointerType=e.pointerType||'mouse';try{btnFly.setPointerCapture(e.pointerId);}catch{}syncThrustInput();});
+    const releaseThrust=e=>{if(e.pointerId===thrustPointer)releaseThrustPointer();};
     for(const type of ['pointerup','pointercancel','lostpointercapture'])btnFly.addEventListener(type,releaseThrust);
+    for(const type of ['pointerup','pointercancel'])window.addEventListener(type,releaseThrust);
     document.getElementById('btn-roll').onclick=()=>triggerKickflipRoll(1);
     function releaseInputs(){
-      isThrusting=false;
-      const heldThrust=thrustPointer;thrustPointer=null;
-      if(heldThrust!==null&&btnFly.hasPointerCapture?.(heldThrust)){try{btnFly.releasePointerCapture(heldThrust);}catch{}}
-      swipePointer=null;orbitPointers.clear();steeringWheel.reset();wheelAirLatch=0;
-      btnFly.classList.remove('pressed');sfx.setThruster(false);
+      heldFlightKeys.clear();releaseThrustPointer();
+      const worldPointers=new Set(orbitPointers.keys());if(swipePointer!==null)worldPointers.add(swipePointer);
+      worldPointers.forEach(releaseWorldPointer);
+      steeringWheel.reset();wheelAirLatch=0;sfx.setThruster(false);
     }
-    window.addEventListener('blur',()=>{releaseInputs();if(gameState==='PLAYING')togglePause();});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseInputs();if(gameState==='PLAYING')togglePause();}});
+    function pauseForBackground(){
+      releaseInputs();
+      if(gameState==='PLAYING')togglePause();
+    }
+    window.addEventListener('blur',()=>{
+      if(document.hidden){pauseForBackground();return;}
+      // A visible browser focus change is not a request to pause. Keyboard and
+      // mouse releases may be lost, but an owned touch must keep controlling.
+      heldFlightKeys.clear();
+      if(thrustPointer!==null&&!isContactPointer(thrustPointerType))releaseThrustPointer();
+      if(swipePointer!==null&&!isContactPointer(swipePointerType))releaseWorldPointer(swipePointer);
+      for(const [id,pointer] of orbitPointers)if(!isContactPointer(pointer.pointerType))releaseWorldPointer(id);
+      syncThrustInput();
+    });
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseForBackground();});
+    window.addEventListener('pagehide',pauseForBackground);
 
     function togglePause() {
       if (gameState === 'PLAYING') {

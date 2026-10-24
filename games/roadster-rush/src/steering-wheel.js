@@ -5,7 +5,7 @@ export function createSteeringWheel({ element, isEnabled = () => true, onChange 
   const rotor = element.querySelector('[data-wheel-rotor]');
   const modeLabel = element.ownerDocument.getElementById('steering-mode');
   const maxAngle = 110;
-  let pointerId = null, angle = 0, value = 0, airborne = false, disposed = false;
+  let pointerId = null, pointerType = null, angle = 0, value = 0, airborne = false, disposed = false;
   let centerX = 0, centerY = 0, radius = 1, previousPointerAngle = 0;
   let horizontalDrag = false, startX = 0, throughCenter = false;
   const listeners = [];
@@ -27,6 +27,7 @@ export function createSteeringWheel({ element, isEnabled = () => true, onChange 
   function reset() {
     const releasedId = pointerId;
     pointerId = null;
+    pointerType = null;
     throughCenter = false;
     element.classList.remove('is-active');
     element.dataset.active = 'false';
@@ -58,6 +59,7 @@ export function createSteeringWheel({ element, isEnabled = () => true, onChange 
     startX = event.clientX;
     throughCenter = false;
     pointerId = event.pointerId;
+    pointerType = event.pointerType || 'mouse';
     element.classList.add('is-active');
     element.dataset.active = 'true';
     // Grabbing any part of the rim starts at center, with no steering jump.
@@ -116,7 +118,12 @@ export function createSteeringWheel({ element, isEnabled = () => true, onChange 
   listen(element, 'click', consume);
   listen(element, 'contextmenu', consume);
   listen(element, 'dragstart', consume);
-  listen(view, 'blur', reset);
+  // Embedded mobile browsers can blur while the game stays visible. Keep the
+  // owning touch/pen alive; only a hidden page or lost mouse focus releases it.
+  listen(view, 'blur', () => {
+    if (element.ownerDocument.hidden || (pointerId !== null && pointerType !== 'touch' && pointerType !== 'pen')) reset();
+  });
+  listen(view, 'pagehide', reset);
   listen(view, 'resize', reset);
   listen(element.ownerDocument, 'visibilitychange', () => {
     if (element.ownerDocument.hidden) reset();
@@ -127,7 +134,7 @@ export function createSteeringWheel({ element, isEnabled = () => true, onChange 
 
   return {
     getValue: () => value,
-    getState: () => ({ value, active: pointerId !== null, pointerId, angle, maxAngle, airborne }),
+    getState: () => ({ value, active: pointerId !== null, pointerId, pointerType, angle, maxAngle, airborne }),
     reset,
     setMode,
     dispose() {
