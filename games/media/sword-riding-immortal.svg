@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Illustration of celestial palaces and a sword-riding immortal">
+<defs>
+ <linearGradient id="sky" x2="0.8" y2="1"><stop stop-color="#7daec4"/><stop offset=".55" stop-color="#d4dcd6"/><stop offset="1" stop-color="#f6ddba"/></linearGradient>
+ <linearGradient id="stone" x2="0.3" y2="1"><stop stop-color="#f6f4e6"/><stop offset="1" stop-color="#8aafbf"/></linearGradient>
+ <linearGradient id="silk"><stop stop-color="#eff9f5"/><stop offset="1" stop-color="#a8daea"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff7d7" stop-opacity=".95"/><stop offset="1" stop-color="#fff2ce" stop-opacity="0"/></radialGradient>
+ <filter id="glow" x="-.6" y="-1" width="2.2" height="3"><feGaussianBlur stdDeviation="6"/></filter>
+ <g id="palace"><path d="M-105 5H105L70 86 27 112 5 175-18 99-70 79Z" fill="url(#stone)"/><path d="M-110 0H110V12H-110Z" fill="#faf4df"/><path d="M-78-88H78V0H-78Z" fill="#e8f0e9"/><path d="M-23-57H23V0H-23Z" fill="#528598" stroke="#e7c16c" stroke-width="4"/><path d="M-93-83H93M-62-86V0M62-86V0" stroke="#c5a65f" stroke-width="6"/><path d="M-120-111Q-89-84 0-160Q89-84 120-111L98-79H-98Z" fill="#286dae" stroke="#eccb78" stroke-width="5"/><path d="M-53-152H53V-196H-53Z" fill="#eaf2e9"/><path d="M-77-209Q-52-187 0-244Q52-187 77-209L62-187H-62Z" fill="#357bc2" stroke="#eccb78" stroke-width="5"/><path d="M0-246V-260" stroke="#e9c36b" stroke-width="5"/><circle cy="-262" r="6" fill="#f2d58a"/><path d="M-36-195V-156M36-195V-156" stroke="#d8b774" stroke-width="5"/><path d="M-92 12H92M-77 21H77M-63 30H63" stroke="#fff9e9" stroke-width="5"/></g>
+</defs>
+<path fill="url(#sky)" d="M0 0h960v600H0z"/>
+<circle cx="749" cy="126" r="260" fill="url(#sun)"/>
+<path d="M70 430 203 149 244 265 355 109 422 333 533 194 639 423Z" fill="#94b7c5" opacity=".45"/>
+<path d="m302 212 53-103 43 139-41-40-21 35Z" fill="#f3f6ee" opacity=".8"/>
+<g opacity=".42" fill="#fff9e8"><ellipse cx="180" cy="377" rx="264" ry="52"/><ellipse cx="794" cy="387" rx="267" ry="69"/><ellipse cx="482" cy="429" rx="273" ry="54"/></g>
+<g opacity=".56"><use href="#palace" transform="translate(837 292) scale(.48)"/><use href="#palace" transform="translate(616 257) scale(.35)"/></g>
+<path d="M256 320Q438 355 619 274L625 287Q436 374 256 335Z" fill="#eef2e4"/>
+<path d="M257 308Q440 342 618 263M257 322Q440 356 618 277" fill="none" stroke="#c2a56a" stroke-width="3"/>
+<path d="M306 317V335M355 323V341M405 325V343M456 321V339M509 311V329M560 292V310M603 275V293" stroke="#dbe6df" stroke-width="5"/>
+<use href="#palace" transform="translate(214 348) scale(.95)"/>
+<use href="#palace" transform="translate(815 426) scale(.6)"/>
+<g fill="#f4f5e9" opacity=".85"><ellipse cx="83" cy="537" rx="202" ry="72"/><ellipse cx="304" cy="580" rx="240" ry="73"/><ellipse cx="704" cy="576" rx="265" ry="64"/><ellipse cx="962" cy="518" rx="171" ry="85"/></g>
+<path d="M375 481Q487 442 670 388" stroke="#43d7ff" stroke-width="22" fill="none" filter="url(#glow)"/>
+<path d="M365 486Q501 432 685 387L664 400Q498 454 365 486Z" fill="#a6f4ff"/><path d="m575 411 17 31m-6-20 24-7" stroke="#d4b575" stroke-width="5" stroke-linecap="round"/>
+<g stroke-linejoin="round"><path d="M538 275Q589 248 653 307Q610 287 579 309Q555 303 543 292" fill="#253746"/><path d="M547 276Q590 288 659 328Q602 313 566 303" fill="#2e4254"/><path d="M516 308Q530 287 551 302L564 344 603 409Q558 432 511 426L525 344Z" fill="url(#silk)" stroke="#f4db9d" stroke-width="2"/><path d="M530 313 486 339 466 381Q508 373 530 347M551 313 577 334 614 325 636 351Q606 369 574 351" fill="url(#silk)" stroke="#efdbab" stroke-width="2"/><path d="m525 341 37 3-10 12-26-5Z" fill="#78bcd7"/><path d="M548 347Q604 368 669 351Q651 386 583 373Q622 405 646 436Q593 426 550 373" fill="#b4dfec" opacity=".9" stroke="#f5e7bd" stroke-width="2"/><path d="M531 351 522 418 545 424 547 352" fill="#93c9de"/><ellipse cx="536" cy="282" rx="15" ry="21" fill="#f4d8bf"/><path d="M521 284Q508 255 533 251Q560 248 559 278L544 269 531 266Z" fill="#263946"/><path d="m548 259 15-16m-14 12 18 3" stroke="#e7c472" stroke-width="3"/><circle cx="557" cy="251" r="5" fill="#f3dc99"/><path d="m524 280 5 1" stroke="#38434d" stroke-width="2"/></g>
+<path d="M375 490Q413 518 499 477M397 508Q313 515 286 545" fill="none" stroke="#a1ebf8" stroke-width="3" opacity=".8"/>
+<g fill="none" stroke="#ffffec" stroke-width="3" stroke-linecap="round"><path d="m665 127 12 4 10-7m24 20 11 5 9-7m-57 18 9 4 9-7"/></g>
+<g fill="#fdf6d8"><circle cx="431" cy="450" r="2"/><circle cx="468" cy="480" r="3"/><circle cx="629" cy="414" r="2"/><circle cx="707" cy="369" r="2"/></g>
+</svg>

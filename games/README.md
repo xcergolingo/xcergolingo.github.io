@@ -1,6 +1,6 @@
 # GoLingo Games
 
-A responsive gallery for six GoLingo language games, with category filters and shared lesson data.
+A responsive gallery for GoLingo language games, with category filters and shared lesson data.
 
 **Website:** https://xcergolingo.github.io/games/
 
@@ -12,6 +12,7 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 
 | Game | Browser demo | Preview |
 | --- | --- | --- |
+| 御剑飞仙 — Sword Riding Immortal | https://xcergolingo.github.io/games/sword-riding-immortal/ | Illustrated card + playable game |
 | Lagoon | https://xcergolingo.github.io/far-cry-lagoon/ | media/lagoon.mp4 |
 | Word Folio | https://xcergolingo.github.io/word-folio/ | media/word-folio.mp4 |
 | Super Flying Man | https://xcergolingo.github.io/super-flying-man/ | media/super-flying-man.mp4 |
@@ -49,3 +50,8 @@ The **GoLingo gallery gameplay previews** workflow commits only gallery media. I
 The **Verify GoLingo gallery release** workflow checks the live page, images, App Store buttons, MP4 playback, FAQ behavior, and horizontal layout at 1280, 768, 390, and 320 CSS pixels. It uses full Google Chrome when installed on the runner for H.264 support. A README change or manual workflow run triggers it. Its release archive includes this folder, screenshots, and a diagnostic report.
 
 The gallery links five existing browser games and hosts Matterhorn in `matterhorn/`. This update does not modify the root home page, SwiftUI application code, or the App Store binary.
+
+
+## Sword Riding Immortal
+
+The new sword-flight game and its editable source are in `sword-riding-immortal/`. Its illustrated card appears in Flying, Scenery, Explore, Avatar, Language Learning, Words, and Sentences filters. Both card links pass the shared lesson using the existing `#golingoLesson=` launch handler.
