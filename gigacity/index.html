@@ -45,11 +45,11 @@ function chunk(cx,cz){
    for(let face of faces){
     let along=face.axis==='z'?w:dep;
     let count=Math.max(3,Math.floor(along/4.6)),step=along/count;
-    for(let k=1;k<levels;k++){
+    for(let k=1;k<levels;k+=3){
       let yy=y0+k*8;
       if(face.axis==='z')box(g,w+.35,.35,.5,u,yy,v+face.side*(dep/2+.15),trimMat);
       else box(g,.5,.35,dep+.35,u+face.side*(w/2+.15),yy,v,trimMat);
-      for(let q=0;q<count;q++){
+      for(let q=0;q<count;q+=2){
        let lit=hash(cx*101+i*13+a*3+q,cz*101+j*13+b*3+k,face.side+(face.axis==='x'?5:0))>.29;
        let material=lit?glowPalette[Math.floor(hash(q+k,cx+cz+i+j,7)*glowPalette.length)]:darkWindow;
        let t=(q+.5-count/2)*step;
@@ -74,7 +74,7 @@ function chunk(cx,cz){
  obstacles.set(cx+','+cz,bounds);
  return g;
 }
-function stream(){let cx=Math.round(car.position.x/510),cz=Math.round(car.position.z/510);for(let x=cx-2;x<=cx+2;x++)for(let z=cz-2;z<=cz+2;z++){let id=x+','+z;if(!blocks.has(id)){let b=chunk(x,z);scene.add(b);blocks.set(id,b)}}for(let [id,g] of blocks){let [x,z]=id.split(',').map(Number);if(Math.abs(x-cx)>2||Math.abs(z-cz)>2){scene.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose()});blocks.delete(id);obstacles.delete(id)}}}
+function stream(){let cx=Math.round(car.position.x/510),cz=Math.round(car.position.z/510);for(let x=cx-1;x<=cx+1;x++)for(let z=cz-1;z<=cz+1;z++){let id=x+','+z;if(!blocks.has(id)){let b=chunk(x,z);scene.add(b);blocks.set(id,b)}}for(let [id,g] of blocks){let [x,z]=id.split(',').map(Number);if(Math.abs(x-cx)>1||Math.abs(z-cz)>1){scene.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose()});blocks.delete(id);obstacles.delete(id)}}}
 let items=[],index=0,basket=[],voicePaused=false,muted=false,keys={},speed=48,alt=75,elapsed=0,ringObjects=[],speakTimer=0,lastSpoken=-1;
 function parse(raw){try{let obj=JSON.parse(raw);if(Array.isArray(obj))return obj.map((v,i)=>typeof v==='string'?{word:v,translation:''}:{...v,word:v.word||v.sentence||v.phrase||'',translation:v.translation||v.sentenceTranslation||''});if(obj.words)return parse(JSON.stringify(obj.words));if(obj.sentences)return parse(JSON.stringify(obj.sentences));}catch{}return raw.split('\n').map(s=>s.trim()).filter(Boolean).map(s=>{let p=s.split(/\s*[|\t]\s*/);return {word:p[0],translation:p.slice(1).join(' | ')}})}
 const ringMat=new THREE.MeshBasicMaterial({color:0x5af8f0}),ringNext=new THREE.MeshBasicMaterial({color:0xffb86c});const ringGeo=new THREE.TorusGeometry(13,.8,10,44);
