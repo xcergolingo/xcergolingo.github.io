@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#195c59">
+  <meta name="description" content="A peaceful pond. A new language. Guide your koi, collect words, listen, and grow in GoLingo Koi Garden.">
+  <title>Koi Garden · GoLingo</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="stylesheet" href="./styles.css?v=1.1.1">
+</head>
+<body>
+  <canvas id="pond" tabindex="0" aria-label="Koi pond. Tap or drag to guide your koi to a word pearl. You can also use arrow keys or the Find a word button.">Your browser needs canvas support to show this pond.</canvas>
+  <div class="edge-shade" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" id="homeBtn" aria-label="Koi Garden home">
+      <svg class="brand-mark" viewBox="0 0 52 52" fill="none" aria-hidden="true"><path d="M30 6C13 7 8 20 16 31c4 5 9 7 13 7-7-4-11-9-9-16 2-7 8-8 10-16Z" fill="currentColor"/><path d="M30 33c13-7 12-16 7-22 9 4 13 18 1 27-5 4-10 7-10 11-4-6-3-11 2-16Z" fill="currentColor" opacity=".66"/><circle cx="25" cy="13" r="1.5" fill="#2c7770"/><path d="M13 29 5 31l7 6M37 18l8-2-7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span><strong>Koi Garden</strong><small>by GoLingo</small></span>
+    </a>
+    <div class="top-actions">
+      <button id="languageBtn" class="pill light-pill" aria-label="Choose languages"><span data-icon="globe"></span><span id="languageLabel">日本語 <i>· EN</i></span><span data-icon="chevron" class="tiny-icon"></span></button>
+      <button id="musicBtn" class="music-button is-on" aria-label="Turn off zen background music" aria-pressed="true" title="Zen music starts when you enter the pond"><span data-icon="music"></span><span>Zen music</span></button>
+      <button id="soundBtn" class="icon-button glass-button" aria-label="Mute pronunciation" title="Pronunciation on"><span data-icon="volume"></span></button>
+      <button id="pauseBtn" class="icon-button glass-button" aria-label="Pause game" title="Pause"><span data-icon="pause"></span></button>
+    </div>
+  </header>
+
+  <main id="gameUI">
+    <div class="pond-caption" aria-hidden="true"><span class="live-dot"></span><span id="pondName">THE LOTUS POND</span><span class="caption-line"></span><span id="pondTime">A moment of calm</span></div>
+    <div class="mode-switch" id="modeSwitch" aria-label="Game mode" hidden>
+      <button id="exploreBtn" class="active" aria-pressed="true"><span data-icon="leaf"></span>Explore</button>
+      <button id="practiceBtn" aria-pressed="false"><span data-icon="sparkles"></span>Practice</button>
+    </div>
+    <div id="growthPill" class="growth-pill" hidden><span data-icon="lotus"></span><div><span id="growthTitle">A little koi, a new beginning</span><div class="growth-track"><span id="growthFill"></span></div></div><b id="growthNumber">0 / 12</b></div>
+
+    <section id="welcome" class="welcome-card">
+      <div class="eyebrow"><span class="small-star">✧</span> A QUIET PLACE TO LEARN</div>
+      <h2>Let your<br>language <em>flow.</em></h2>
+      <p>Follow your curiosity through a living pond.<br>Every word helps your koi grow.</p>
+      <div class="welcome-choice"><label for="welcomeLanguage">I’m learning</label><select id="welcomeLanguage" aria-label="Learning language"></select></div>
+      <button id="startBtn" class="primary-button">Enter the pond <span data-icon="arrow"></span></button>
+      <div class="welcome-foot"><span data-icon="hand"></span>Tap to begin. Let the music carry you.</div>
+    </section>
+
+    <section id="wordCard" class="word-card" hidden aria-live="polite" aria-atomic="true">
+      <div class="word-header"><span class="eyebrow" id="wordEyebrow">YOUR NEXT DISCOVERY</span><span id="wordBadge" class="word-badge">01</span></div>
+      <div class="word-main"><div class="word-copy"><h2 id="currentWord">水</h2><span id="romanization">mizu</span><p id="translation">water</p></div><button class="word-listen" id="listenBtn" aria-label="Listen to word" title="Listen to word"><span data-icon="volume"></span></button></div>
+      <div id="sentenceBlock" class="sentence-block" hidden><p id="sentenceText"></p><p id="sentenceTranslation"></p></div>
+      <div class="word-footer"><button id="sentenceBtn"><span data-icon="chat"></span><span>Example</span></button><button id="repeatBtn" class="selected" aria-pressed="true"><span data-icon="repeat"></span><span>Repeat on</span></button><button id="translationBtn" class="selected" aria-label="Hide translations" title="Hide translations" aria-pressed="true"><span data-icon="eye"></span></button></div>
+    </section>
+
+    <section id="practiceCard" class="practice-card" hidden aria-live="polite"><div class="eyebrow">SWIM TO THE MATCHING WORD</div><div><span id="practiceMeaning">water</span><button id="practiceListen" class="icon-button" aria-label="Listen to the word"><span data-icon="volume"></span></button></div><p id="practiceFeedback">Three pearls. One meaning. No rush.</p></section>
+    <div id="instruction" class="instruction" hidden><span data-icon="hand"></span><span>Tap a word pearl to swim toward it</span></div>
+
+    <div class="bottom-controls">
+      <button id="guideBtn" class="guide-button" hidden><span data-icon="compass"></span><span>Find a word</span></button>
+      <nav class="dock" aria-label="Garden tools">
+        <button id="basketBtn"><span data-icon="book"></span><span>Words</span><b id="basketCount">0</b></button>
+        <span class="dock-divider"></span>
+        <button id="koiBtn"><span data-icon="fish"></span><span>My koi</span></button>
+        <button id="gardenBtn"><span data-icon="lotus"></span><span>Pond</span></button>
+        <button id="settingsBtn"><span data-icon="settings"></span><span>Settings</span></button>
+      </nav>
+    </div>
+    <a class="sponsor" href="https://www.golingoapp.com" target="_blank" rel="noopener">GoLingo<span>Learn your way</span><span data-icon="external"></span></a>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="pausedOverlay" class="paused-overlay" hidden><div><span data-icon="lotus"></span><h2>A quiet pause.</h2><p>Your pond will be here.</p><button id="resumeBtn" class="primary-button">Keep swimming <span data-icon="arrow"></span></button></div></div>
+
+  <dialog id="panel" aria-labelledby="panelTitle">
+    <div class="panel-heading"><div><div class="eyebrow" id="panelEyebrow">YOUR GARDEN</div><h2 id="panelTitle">Words collected</h2></div><button id="closePanel" class="icon-button panel-close" aria-label="Close panel"><span data-icon="close"></span></button></div>
+    <div id="panelContent"></div>
+  </dialog>
+  <div id="fatalError" class="fatal-error" hidden><h2>The pond needs a refresh</h2><p id="fatalMessage"></p><button onclick="location.reload()" class="primary-button">Reload the pond</button></div>
+  <script>window.addEventListener('error',function(e){if(e.target&&e.target.tagName==='SCRIPT'){document.getElementById('fatalMessage').textContent='A game file could not load. Please reload this page.';document.getElementById('fatalError').hidden=false;}},true);</script>
+  <script type="module">import('./app.js?v=1.1.1').catch(error=>{console.error(error);document.getElementById('fatalMessage').textContent='The game could not finish loading. Please reload the pond.';document.getElementById('fatalError').hidden=false;});</script>
+</body>
+</html>
