@@ -2,7 +2,10 @@ name: Verify GoLingo gallery release
 on:
   push:
     branches: [main]
-    paths: [games/README.md]
+    paths:
+      - games/README.md
+      - .github/workflows/golingo-gallery-check.yml
+      - tools/check-golingo-gallery.cjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4

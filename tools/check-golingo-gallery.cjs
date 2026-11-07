@@ -2,15 +2,27 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const BASE='https://xcergolingo.github.io/games/',OUT='gallery-check';fs.mkdirSync(OUT,{recursive:true});
-const report={checkedAt:new Date().toISOString(),url:BASE,checks:[],errors:[],failures:[]};
+const countCards=html=>(html.match(/<article\b[^>]*\bclass=["'][^"']*\bgame-card\b[^"']*["']/gi)||[]).length;
+const expectedCards=countCards(fs.readFileSync('games/index.html','utf8'));
+assert(expectedCards>0,'The checked-out gallery must contain game cards');
+const release=process.env.GITHUB_SHA||'local-'+Date.now();
+const releaseUrl=(path='',attempt)=>{const url=new URL(path,BASE);url.searchParams.set('release-check',release);if(attempt!==undefined)url.searchParams.set('attempt',String(attempt));return url.href;};
+const report={checkedAt:new Date().toISOString(),url:BASE,release,expectedCards,checks:[],errors:[],failures:[]};
 const assets=['','style.css','app.js','media/app-icon.png','media/download-qr.svg','media/lagoon.jpg','media/lagoon.mp4','media/word-folio.jpg','media/word-folio.mp4','media/super-flying-man.jpg','media/super-flying-man.mp4','media/flooded-garden.svg','media/matterhorn.svg','matterhorn/index.html'];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
  for(let attempt=0;attempt<24;attempt++){
-  report.assets=await Promise.all(assets.map(async p=>{try{const r=await fetch(BASE+p+'?release=5',{method:'HEAD',signal:AbortSignal.timeout(15000)});return[p,r.status,r.headers.get('content-type')];}catch(e){return[p,e.message];}}));
-  if(report.assets.every(a=>a[1]===200))break;await sleep(10000);
+  const [assetStates,live]=await Promise.all([
+   Promise.all(assets.map(async p=>{try{const r=await fetch(releaseUrl(p,attempt),{method:'HEAD',cache:'no-store',signal:AbortSignal.timeout(15000)});return[p,r.status,r.headers.get('content-type')];}catch(e){return[p,e.message];}})),
+   (async()=>{try{const r=await fetch(releaseUrl('',attempt),{cache:'no-store',signal:AbortSignal.timeout(15000)});return {status:r.status,cards:countCards(await r.text())};}catch(e){return {error:e.message,cards:0};}})()
+  ]);
+  report.assets=assetStates;report.live=live;
+  if(report.assets.every(a=>a[1]===200)&&live.status===200&&live.cards===expectedCards)break;
+  if(attempt<23)await sleep(10000);
  }
  assert(report.assets.every(a=>a[1]===200),'A published website asset is unavailable');
+ assert.equal(report.live.status,200,'The live gallery is unavailable');
+ assert.equal(report.live.cards,expectedCards,'The live gallery has not reached the checked-out card count');
  const executablePath=['/usr/bin/google-chrome','/usr/bin/google-chrome-stable'].find(p=>fs.existsSync(p));
  report.browser=executablePath||'playwright chromium';
  const browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{}),args:['--no-sandbox','--autoplay-policy=no-user-gesture-required']});
@@ -21,11 +33,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    page.on('pageerror',e=>report.errors.push({width,message:e.message}));
    page.on('requestfailed',r=>check.requests.push({url:r.url(),error:r.failure()}));
    page.on('response',r=>{if(r.url().includes('.mp4'))check.requests.push({url:r.url(),status:r.status(),headers:r.headers()});});
-   const response=await page.goto(BASE+'?release-check=5',{waitUntil:'networkidle',timeout:60000});assert.equal(response.status(),200);
+   const response=await page.goto(releaseUrl(),{waitUntil:'networkidle',timeout:60000});assert.equal(response.status(),200);
    for(const selector of ['.game-card','#download'])for(const node of await page.locator(selector).all())await node.scrollIntoViewIfNeeded();
    await page.waitForTimeout(900);
    check.structure=await page.evaluate(()=>({title:document.title,cards:document.querySelectorAll('.game-card').length,width:innerWidth,scrollWidth:document.documentElement.scrollWidth,downloads:[...document.querySelectorAll('.download-link')].map(a=>a.href),images:[...document.images].map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalWidth>0}))}));
-   assert.equal(check.structure.cards,6);assert(check.structure.scrollWidth<=width+1,'Horizontal overflow at '+width);
+   assert.equal(check.structure.cards,expectedCards);assert(check.structure.scrollWidth<=width+1,'Horizontal overflow at '+width);
    assert(check.structure.downloads.length>=8&&check.structure.downloads.every(u=>u==='https://apps.apple.com/app/id1194977025'));
    assert(check.structure.images.every(i=>i.ok),'Missing image');
    await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(300);await page.screenshot({path:`${OUT}/website-${width}.png`,fullPage:true});
