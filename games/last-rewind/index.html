@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111517">
+  <meta name="description" content="Learn languages in a late-night video-store survival game. Discover a word with every enemy, hear each sentence after a wave, and bring your own GoLingo lesson.">
+  <title>Last Rewind — GoLingo Language Survival</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./learning.css">
+</head>
+<body>
+  <main id="game" aria-label="Last Rewind survival game">
+    <canvas id="scene" aria-label="First-person video rental store. Use WASD to move and your mouse to look."></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div id="damage-flash" aria-hidden="true"></div>
+    <div id="hud" class="hidden">
+      <header class="hud-top">
+        <div class="wave-block"><span class="eyebrow"><i class="live-dot"></i> NIGHT SHIFT</span><div class="wave-title">WAVE <b id="wave-number">01</b><span id="wave-total"> / 05</span></div><div id="enemies-left">STORE SECURED</div></div>
+        <div class="brand-mini"><span>GOLINGO / LAST REWIND</span></div>
+        <div class="score-block"><span class="eyebrow">SCORE</span><b id="score">000000</b><div class="top-actions"><button id="sound-button" class="icon-button" aria-label="Mute sound" title="Sound on/off">♪</button><button id="pause-button" class="icon-button" aria-label="Pause game" title="Pause (Esc)">Ⅱ</button></div></div>
+      </header>
+      <section id="learning-hud" class="learning-hud" aria-label="Language learning">
+        <div class="learn-heading"><span id="learning-round">GOLINGO · LISTEN &amp; LEARN</span><button id="learning-open-hud" title="Lesson and review basket" aria-label="Open lesson and review basket">LESSON <b id="basket-count">0</b></button></div>
+        <button id="learning-replay" class="learning-replay" aria-label="Replay pronunciation"><span id="learning-word">Ready to learn</span><span id="learning-translation">Defeat an enemy to discover a word.</span></button>
+        <div class="learn-controls"><button id="learning-text-mode" aria-label="Change learning text display">WORD</button><button id="learning-meaning" aria-pressed="true">MEANING ON</button><button id="learning-repeat" aria-pressed="true">REPEAT ON</button><span id="learning-progress">0 collected</span></div>
+        <span id="learning-audio-status" class="learning-audio-status" role="status"></span>
+      </section>
+      <div id="wave-banner" class="wave-banner hidden"><span id="banner-label">A MOMENT TO BREATHE</span><h2 id="banner-title">NEXT WAVE IN <b>08</b>s</h2><p id="banner-detail">Reload. Restock. Keep the lights on.</p></div>
+      <div id="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i><em></em></div>
+      <div id="hitmarker" aria-hidden="true">×</div>
+      <div id="kill-note" aria-live="polite"></div>
+      <div id="interaction" class="hidden"><kbd>E</kbd><span>RESTOCK &amp; PATCH UP</span><button id="interact-touch" aria-label="Use supplies">USE</button></div>
+      <div id="toast" role="status"></div>
+      <footer class="hud-bottom">
+        <div class="vitals"><div class="stat"><span class="eyebrow"><span class="stat-icon">▰</span> STORE INTEGRITY</span><div class="stat-line"><b id="integrity">100</b><span>%</span><div class="meter"><i id="integrity-meter"></i></div></div></div><div class="stat health-stat"><span class="eyebrow"><span class="stat-icon">✚</span> HEALTH</span><div class="stat-line"><b id="health">40</b><span>/ 40</span><div class="meter"><i id="health-meter"></i></div></div></div></div>
+        <div class="desktop-hints"><span><kbd>W A S D</kbd> MOVE</span><span><kbd>R</kbd> RELOAD</span><span><kbd>SHIFT</kbd> RUN</span></div>
+        <div class="ammo"><span class="eyebrow" id="weapon-label">12 GAUGE · PUMP ACTION</span><div class="ammo-numbers"><b id="shells">6</b><span>/ 6</span></div><div class="shell-row" id="shell-row"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ammo-reserve"><span id="reload-label">SHELLS</span> <span><b id="reserve">30</b> IN RESERVE</span></div></div>
+      </footer>
+      <div id="touch-controls">
+        <div id="move-pad" aria-label="Movement joystick"><div class="joystick-ring"><div id="move-knob"></div></div><span>MOVE</span></div>
+        <div id="look-pad" aria-label="Drag to aim"></div>
+        <div class="touch-buttons"><button id="touch-reload" aria-label="Reload shotgun">↻<small>RELOAD</small></button><button id="touch-fire" aria-label="Fire shotgun"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="12"/><path d="M24 4v12m0 16v12M4 24h12m16 0h12"/><circle cx="24" cy="24" r="3"/></svg></button></div>
+        <span class="look-hint">DRAG RIGHT SIDE TO AIM</span>
+      </div>
+    </div>
+    <section id="menu" class="overlay menu">
+      <div class="menu-shade"></div>
+      <div class="menu-top"><a class="store-brand" href="#" aria-label="Last Rewind home"><span class="brand-mark">◀◀</span> REWIND VIDEO<span class="brand-sub">YOUR FRIDAY NIGHT. SINCE 1986.</span></a><div class="recording"><i class="live-dot"></i> CAM 01 <span>·</span> 23:58:09</div></div>
+      <div class="menu-content"><div class="edition"><span>GOLINGO · LANGUAGE SURVIVAL</span><i></i></div><h1>LAST<br><span>REWIND</span><sup>®</sup></h1><div class="title-rule"></div><p class="tagline">A new word with every encounter.</p><p class="description">Defend the store. Hear a word. Make it yours.<br>Clear a wave to unlock the whole sentence.</p><div class="start-row"><button id="start-button" class="primary" disabled><span id="start-label">PREPARING THE STORE</span><span class="button-arrow">↗</span></button><button id="learning-open-menu" class="secondary" aria-label="Choose lesson and languages">YOUR LESSON <span>+</span></button><button id="how-button" class="secondary" aria-label="How to play">HOW TO PLAY</button></div><p id="loading-detail" class="small-note">Stocking shelves &amp; checking the security cameras…</p><div class="menu-specs"><span id="lesson-summary">SPANISH → ENGLISH · 5 LESSONS</span><i></i><span id="learning-mode-summary">RELAXED PRACTICE</span></div></div>
+      <div class="menu-bottom"><a href="https://www.golingoapp.com/" target="_self">GoLingoApp.com <b>↗</b></a><span class="tape-label">LISTEN / SURVIVE / LEARN <span>VHS</span></span><a class="controls-note" href="https://xcergolingo.github.io/games/" target="_self">MORE GOLINGO GAMES ↗</a></div>
+    </section>
+    <section id="help" class="overlay modal hidden" aria-label="How to play"><div class="modal-card"><span class="eyebrow red">EMPLOYEE HANDBOOK · PAGE 13</span><h2>Closing procedures.</h2><p>Survive five waves. If your health or store integrity reaches zero, the night is over.</p><div class="control-grid"><span>Move</span><b>W A S D / ARROWS</b><span>Look / shoot</span><b>MOUSE / LEFT CLICK</b><span>Reload one shell at a time</span><b>R</b><span>Run / focus aim</span><b>SHIFT / RIGHT CLICK</b><span>Use counter supplies</span><b>E</b><span>Pause</span><b>ESC / P</b></div><p class="touch-help"><b>On your phone:</b> left stick to move, drag the right side to aim, tap the large target to fire. Use landscape for the clearest view.</p><div class="handbook-note">Shots spread. Get close, aim high, and use the aisles for cover. You can interrupt a reload to fire. Between waves, use the glowing supply box at the counter to restore health, shells, and store integrity.</div><button id="close-help" class="primary">GOT IT <span>↗</span></button></div></section>
+    <section id="pause" class="overlay modal hidden" aria-label="Game paused"><div class="modal-card pause-card"><span class="eyebrow red">TAKE A BREATHER</span><h2>On a break.</h2><p>The store is safe while you pause.</p><button id="resume-button" class="primary">BACK TO THE SHIFT <span>↗</span></button><button id="learning-open-pause" class="secondary">LESSON &amp; REVIEW BASKET</button><button id="restart-button" class="secondary">START A NEW SHIFT</button><label class="setting">LOOK SENSITIVITY <input id="sensitivity" type="range" min="0.35" max="2.5" step="0.05" value="1" aria-label="Look sensitivity"></label><label class="setting">RENDER QUALITY <select id="quality" aria-label="Render quality"><option value="auto">Auto</option><option value="low">Performance</option><option value="high">High</option></select></label><p class="small-note">Desktop: mouse + WASD · Mobile: move left, aim right</p></div></section>
+    <section id="result" class="overlay modal hidden" aria-label="Shift result"><div class="modal-card result-card"><span id="result-kicker" class="eyebrow red">SHIFT REPORT</span><h2 id="result-title">End of the tape.</h2><p id="result-message">The store has seen better nights.</p><div class="result-stats"><div><span>SCORE</span><b id="result-score">0</b></div><div><span>WAVES CLEARED</span><b id="result-wave">0 / 5</b></div><div><span>ELIMINATED</span><b id="result-kills">0</b></div></div><p id="best-score" class="small-note"></p><p id="result-learned" class="small-note"></p><button id="retry-button" class="primary">ONE MORE SHIFT <span>↗</span></button><button id="learning-open-result" class="secondary">REVIEW &amp; EXPORT WORDS</button><button id="endless-button" class="secondary hidden">KEEP GOING · ENDLESS MODE</button></div></section>
+    <section id="learning-panel" class="overlay modal hidden" aria-label="GoLingo lesson and review basket">
+      <div class="modal-card lesson-card">
+        <div class="lesson-title"><div><span class="eyebrow red">GOLINGO · YOUR WORDS. YOUR SHIFT.</span><h2>Your lesson.</h2></div><button id="learning-close" class="icon-button" aria-label="Close lesson">×</button></div>
+        <p>Defeat enemies to hear words. Clear each wave to hear its sentence. Tap any collected word to practice again.</p>
+        <div class="lesson-options">
+          <label>LEARNING LANGUAGE<select id="learning-language" aria-label="Learning language"></select></label>
+          <label>TRANSLATION LANGUAGE<select id="primary-language" aria-label="Translation language"></select></label>
+          <label>PACE<select id="learning-difficulty" aria-label="Game difficulty"><option value="practice">Relaxed practice</option><option value="survival">Original survival</option></select></label>
+          <label>VOICE SPEED<select id="learning-rate" aria-label="Pronunciation speed"><option value="0.65">Slow · 0.65×</option><option value="0.85" selected>Clear · 0.85×</option><option value="1">Normal · 1×</option><option value="1.15">Quick · 1.15×</option></select></label>
+          <label>LEARNING TEXT<select id="learning-display" aria-label="Learning text display"><option value="word">Show current word</option><option value="sentence">Show sentence</option><option value="hidden">Hide text · listen only</option></select></label>
+        </div>
+        <div class="lesson-tools"><button id="learning-samples" class="secondary">LOAD SAMPLE LESSON</button><label class="lesson-check"><input id="learning-auto-reload" type="checkbox" checked> Auto reload</label><label class="lesson-check"><input id="learning-shuffle" type="checkbox" checked> Shuffle each shift</label><label class="lesson-check"><input id="learning-show-meaning" type="checkbox" checked> Show translation</label><label class="lesson-check"><input id="learning-loop-word" type="checkbox" checked> Repeat until next word</label></div>
+        <label class="lesson-input-label" for="learning-input">PASTE WORDS, SENTENCES, OR GOLINGO JSON</label>
+        <textarea id="learning-input" rows="4" spellcheck="false" placeholder="agua | water&#10;La tienda está abierta. | The store is open."></textarea>
+        <div class="lesson-import-actions"><button id="learning-apply" class="primary">USE THIS LESSON <span>↗</span></button><label class="file-button">IMPORT JSON FILE<input id="learning-file" type="file" accept="application/json,.json,.txt,text/plain"></label></div>
+        <p id="learning-notice" class="small-note" role="status">Sample lesson ready. Your own translations are preserved as supplied.</p>
+        <p class="lesson-apply-hint small-note">Using a lesson starts a new shift. Your review basket is kept for each language pair.</p>
+        <div class="review-heading"><h3>Review basket <span id="review-count">0</span></h3><div><button id="learning-export" class="secondary">EXPORT JSON</button><button id="learning-clear" class="secondary">CLEAR</button></div></div>
+        <div id="learning-review" class="review-list"><p>Words you discover will appear here.</p></div>
+        <textarea id="learning-export-text" class="hidden" rows="3" readonly aria-label="Exported GoLingo JSON"></textarea>
+        <div class="lesson-foot"><button id="learning-done" class="primary">BACK TO THE GAME <span>↗</span></button><a href="https://www.golingoapp.com/" target="_self">Download GoLingo ↗</a></div>
+      </div>
+    </section>
+    <div id="fatal-error" class="overlay modal hidden" role="alert"><div class="modal-card"><span class="eyebrow red">PROJECTOR OFFLINE</span><h2>Unable to start.</h2><p id="error-message">This game needs a browser with WebGL enabled.</p><button onclick="location.reload()" class="primary">TRY AGAIN ↗</button></div></div>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

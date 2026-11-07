@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+<title id="title">Last Rewind — a night shift of words</title>
+<desc id="desc">Original illustration of a late-night video rental store. Red neon, teal fluorescent lights and rows of VHS tapes surround a vocabulary card reading agua, water.</desc>
+<defs>
+  <linearGradient id="room" x2=".8" y2="1"><stop stop-color="#253e3e"/><stop offset=".55" stop-color="#13272d"/><stop offset="1" stop-color="#080e17"/></linearGradient>
+  <linearGradient id="floor" y2="1" x2="0"><stop stop-color="#263d3e"/><stop offset="1" stop-color="#0c1922"/></linearGradient>
+  <linearGradient id="bottom" y2="1" x2="0"><stop stop-color="#0a1019" stop-opacity="0"/><stop offset=".62" stop-color="#0a1019" stop-opacity=".75"/><stop offset="1" stop-color="#080e15"/></linearGradient>
+  <linearGradient id="gun" x2="1" y2=".4"><stop stop-color="#70928e"/><stop offset=".2" stop-color="#384c4e"/><stop offset=".48" stop-color="#15252a"/><stop offset="1" stop-color="#0a161b"/></linearGradient>
+  <radialGradient id="red"><stop stop-color="#e36251" stop-opacity=".42"/><stop offset="1" stop-color="#b52d37" stop-opacity="0"/></radialGradient>
+  <radialGradient id="teal"><stop stop-color="#97dbcf" stop-opacity=".28"/><stop offset="1" stop-color="#4ba6a1" stop-opacity="0"/></radialGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="4"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  <pattern id="vhs" width="59" height="67" patternUnits="userSpaceOnUse"><rect width="59" height="67" fill="#17272e"/><rect x="2" y="4" width="10" height="55" rx="1" fill="#a77759"/><rect x="15" y="6" width="9" height="53" rx="1" fill="#405f69"/><rect x="27" y="2" width="12" height="57" rx="1" fill="#8b474d"/><rect x="42" y="5" width="14" height="54" rx="1" fill="#8d916a"/><path d="M4 14h6m7 27h5m12-33v29m11-24h8M4 49h5m8 3h4m23-7h9" stroke="#ead9b5" stroke-width="2" opacity=".65"/><rect y="60" width="59" height="7" fill="#637169"/><path d="M0 62h59" stroke="#b1b299" opacity=".55"/></pattern>
+  <pattern id="tapes-small" width="39" height="53" patternUnits="userSpaceOnUse"><rect width="39" height="53" fill="#17272e"/><rect x="2" y="2" width="9" height="45" fill="#697d79"/><rect x="13" y="4" width="11" height="43" fill="#a76352"/><rect x="27" y="1" width="10" height="46" fill="#a49c73"/><path d="M5 8v24m12-19h4m9-5v18" stroke="#e1d9ba" stroke-width="1.5" opacity=".7"/><rect y="48" width="39" height="5" fill="#75827a"/></pattern>
+  <clipPath id="left-shelves"><path d="M0 107 278 191 278 377 0 494Z"/></clipPath>
+  <clipPath id="right-shelves"><path d="m694 192 266-80v373L694 379Z"/></clipPath>
+  <clipPath id="left-inner"><path d="m248 247 101-37v151l-101 86Z"/></clipPath>
+  <clipPath id="right-inner"><path d="m606 213 106 36v197l-106-84Z"/></clipPath>
+</defs>
+<rect width="960" height="600" fill="url(#room)"/>
+<!-- The perspective remains intentionally illustrative, not a gameplay still. -->
+<path d="M0 0h960L650 181H311Z" fill="#283b3a"/><path d="M0 600h960L652 276H310Z" fill="url(#floor)"/>
+<path d="M0 0 311 181v100L0 600Z" fill="#233c3d"/><path d="m960 0-310 181v100l310 319Z" fill="#363b3b"/>
+<g stroke="#6a8279" stroke-width="2" opacity=".3"><path d="M0 48h877M117 0l242 181M390 0l32 181M659 0l-105 181M0 103h774"/><path d="M480 280 0 600m480-320L155 600m325-320L385 600m95-320 142 320m-142-320 420 320M199 384h557M109 480h756"/></g>
+<path d="m155 55 138 27 78 42-97-20Z" fill="#b8e6d6" opacity=".18" filter="url(#glow)"/><path d="m151 51 144 29 76 42-103-22Z" fill="#a8d1c5"/>
+<path d="m661 53 147-30-114 73-109 25Z" fill="#c6e2d1" opacity=".8"/><path d="m657 55 154-33-116 76-112 26Z" fill="#8ac7bd" opacity=".18" filter="url(#glow)"/>
+<ellipse cx="220" cy="270" rx="270" ry="270" fill="url(#teal)"/><ellipse cx="716" cy="255" rx="270" ry="245" fill="url(#red)"/>
+<!-- Open entrance and distant street. -->
+<rect x="311" y="178" width="340" height="143" fill="#08131c" stroke="#7c9188" stroke-width="6"/>
+<path d="M321 270h319M420 180v138M544 180v138" stroke="#728981" stroke-width="4"/>
+<path d="M325 238h35v-36h40v61h41v-58h20v57h43v-28h25v43h37v-70h43v58h26" fill="#182932"/>
+<g fill="#b8bc8d" opacity=".6"><path d="M368 211h5v5h-5zm13 0h5v5h-5zm-13 14h5v5h-5zm85-12h5v5h-5zm-11 18h5v5h-5zm155-12h5v5h-5zm13 0h5v5h-5z"/></g>
+<path d="m333 289 38-16h54l25 13 22 3v18H322v-14Z" fill="#344a4f"/><path d="m373 278h47l17 10h-77Z" fill="#14232d"/><circle cx="347" cy="306" r="11" fill="#0a1118"/><circle cx="445" cy="306" r="11" fill="#0a1118"/><path d="M328 292h17m112 0h9" stroke="#d5bc79" stroke-width="3"/>
+<rect x="444" y="187" width="89" height="37" rx="3" fill="#351c27" stroke="#cc7365" stroke-opacity=".4"/>
+<text x="488" y="213" text-anchor="middle" fill="#ff7361" font-size="28" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3" filter="url(#glow)">OPEN</text>
+<text x="488" y="213" text-anchor="middle" fill="#ffa38b" font-size="28" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3">OPEN</text>
+<path d="m428 181-18 9v128l18-13zm109 0 18 10v128l-18-14Z" fill="#6d9290" opacity=".4" stroke="#a3bbb1" stroke-width="2"/>
+<!-- VHS shelving, built from original vector patterns. -->
+<path d="M0 100 286 187v199L0 504Z" fill="#112329" stroke="#74817a" stroke-width="5"/>
+<g clip-path="url(#left-shelves)"><rect x="0" y="108" width="290" height="392" fill="url(#vhs)"/><path d="M0 170 280 225M0 260l280 21M0 352l280-17M0 446l280-66" stroke="#152b2e" stroke-width="12"/><path d="M10 100v412m136-370v307m127-270v213" stroke="#92a08b" stroke-width="6"/><path d="M0 108 280 192v190L0 504" fill="#102b2e" opacity=".1"/></g>
+<path d="m685 187 275-85v400L685 386Z" fill="#17272b" stroke="#76867c" stroke-width="5"/>
+<g clip-path="url(#right-shelves)"><rect x="685" y="106" width="275" height="392" fill="url(#vhs)"/><path d="m688 224 272-58m-272 112 272-20m-272 77 272 21m-272 28 272 68" stroke="#172b2c" stroke-width="12"/><path d="M700 186v208m125-245v299m126-332v391" stroke="#8b8b72" stroke-width="6"/><path d="m694 192 266-80v373L694 379Z" fill="#8b3039" opacity=".12"/></g>
+<!-- Low island racks leave a clear central aisle. -->
+<path d="m246 243 109-40v163l-109 90Z" fill="#233d3b" stroke="#758f7f" stroke-width="4"/><g clip-path="url(#left-inner)"><rect x="244" y="203" width="115" height="258" fill="url(#tapes-small)"/><path d="m244 290 109-52m-109 109 109-65m-109 119 109-81" stroke="#19322e" stroke-width="8"/></g>
+<path d="m603 204 111 39v214l-111-91Z" fill="#203432" stroke="#849278" stroke-width="4"/><g clip-path="url(#right-inner)"><rect x="601" y="202" width="117" height="259" fill="url(#tapes-small)"/><path d="m602 240 114 50m-114-5 114 64m-114-25 114 76" stroke="#20372f" stroke-width="8"/></g>
+<rect x="234" y="218" width="122" height="28" rx="2" fill="#a49467"/><text x="295" y="237" text-anchor="middle" fill="#192b28" font-size="17" font-family="Arial,sans-serif" font-weight="800" letter-spacing="2">ACTION</text>
+<rect x="603" y="219" width="123" height="28" rx="2" fill="#873c40"/><text x="664" y="238" text-anchor="middle" fill="#e9c8b0" font-size="17" font-family="Arial,sans-serif" font-weight="800" letter-spacing="2">HORROR</text>
+<path d="m69 105 139 43v25L69 133Z" fill="#335b54"/><text x="87" y="134" transform="rotate(17 87 134)" fill="#d9d3af" font-size="14" font-family="Arial,sans-serif" font-weight="700" letter-spacing="1.6">NEW RELEASES</text>
+<!-- Movie-poster graphics and the unmistakable rental-store wordmark. -->
+<rect x="344" y="91" width="274" height="54" rx="3" fill="#0e282c" stroke="#639d92" stroke-width="2"/>
+<text x="481" y="125" text-anchor="middle" fill="#b8d5bc" font-size="27" font-family="Arial,sans-serif" font-weight="800" letter-spacing="3">MIDNIGHT VIDEO</text>
+<path d="m785 87 83-26v67l-83 28Z" fill="#412b35" stroke="#a26f60" stroke-width="2"/><path d="m805 118 18-41 24 29-12 23Z" fill="#be7c64"/><circle cx="831" cy="85" r="8" fill="#dda482"/>
+<g opacity=".65"><path d="m470 284 15-38 18 2 17 41-6 36h-12l-8-26-8 25h-11Z" fill="#121b24"/><ellipse cx="494" cy="238" rx="12" ry="15" fill="#7b9182"/><path d="m481 234 3-12h17l7 15-11-7-10 6Z" fill="#15242a"/><path d="m482 258-18 17-5-8 20-22m24 1 17 24-6 8-18-19" fill="#4a5f55"/></g>
+<!-- Floating learning card, exactly the vocabulary illustrated by the gallery. -->
+<rect x="369" y="322" width="286" height="93" rx="10" fill="#020c12" opacity=".8" filter="url(#soft)"/>
+<rect x="362" y="304" width="286" height="93" rx="8" fill="#102e31" stroke="#9ac9b7" stroke-width="1.5"/>
+<path d="M379 323h18" stroke="#a6d2b8" stroke-width="2"/><path d="m383 319 4 4-4 4m8-8 4 4-4 4" fill="none" stroke="#a6d2b8" stroke-width="1.4"/>
+<text x="405" y="327" fill="#a8ccb9" font-size="11" font-family="Arial,sans-serif" font-weight="700" letter-spacing="2.3">NEW WORD DISCOVERED</text>
+<text x="382" y="368" fill="#e1e5cb" font-size="36" font-family="Arial,sans-serif" font-weight="700">agua<tspan fill="#d58a71" font-weight="400"> → </tspan><tspan fill="#a6c8bd" font-size="29" font-weight="400">water</tspan></text>
+<circle cx="625" cy="322" r="5" fill="#b1d4ae"/>
+<!-- A stylized first-person shotgun in the foreground, without violent imagery. -->
+<g transform="rotate(-29 707 510)"><path d="m651 572 15-93h62l21 90-33 31Z" fill="#493c32"/><path d="M672 480V363q0-10 10-10h18q10 0 10 10v118Z" fill="url(#gun)" stroke="#647c77" stroke-width="2"/><path d="M697 480V377q0-7 7-7h8q6 0 6 7v103" fill="#1c3337" stroke="#697e76" stroke-width="2"/><path d="M668 478h51v51h-51Z" fill="#2d4547"/><rect x="667" y="413" width="49" height="49" rx="7" fill="#3d352e" stroke="#82705c" stroke-width="2"/><path d="M671 422h42m-42 8h42m-42 8h42m-42 8h42" stroke="#b19772" stroke-width="3" opacity=".5"/><path d="m725 515 40 40-14 33-51-37Z" fill="#424d46"/></g>
+<rect y="394" width="960" height="206" fill="url(#bottom)"/>
+<path d="M56 453h45" stroke="#d57b68" stroke-width="3"/>
+<text x="114" y="458" fill="#bc947a" font-size="13" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3.4">GOLINGO · NIGHT SHIFT</text>
+<text x="52" y="517" fill="#f0e3c7" font-size="58" font-family="Arial,sans-serif" font-weight="900" letter-spacing="1.6">LAST REWIND</text>
+<text x="57" y="552" fill="#a0bdb3" font-size="15" font-family="Arial,sans-serif" font-weight="500" letter-spacing="3.2">SURVIVE. LISTEN. REMEMBER.</text>
+<path d="M56 572h848" stroke="#79988d" stroke-opacity=".25"/>
+<text x="902" y="550" text-anchor="end" fill="#b39077" font-size="11" font-family="Arial,sans-serif" letter-spacing="2">WORDS / WAVES / SURVIVAL</text>
+<rect x="1" y="1" width="958" height="598" fill="none" stroke="#749082" stroke-opacity=".2" stroke-width="2"/>
+</svg>
