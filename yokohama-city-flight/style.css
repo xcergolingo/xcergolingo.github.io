@@ -29,3 +29,61 @@
 .word-caption .word-copy .word-sentence{display:block;min-height:0;padding:0;text-align:start;line-height:1.45;font-size:10px;font-family:inherit}.word-caption .word-copy .word-sentence:empty{display:none}.word-copy .word-sentence:not(:empty)::after{content:" ▷";font-size:11px;color:#efbc78}.word-copy .word-sentence:hover{color:#f6c78b}
 @media(max-height:650px) and (orientation:landscape){.word-caption .word-copy .word-sentence{font-size:9px}}
 @media(max-height:430px) and (orientation:landscape){.word-caption .word-copy .word-sentence{font-size:8px}}
+
+/* Independent flight path and pilot choices; keep departure within reach. */
+.briefing{--preflight-space:200px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.flight-card{min-width:0;max-height:calc(100dvh - var(--preflight-space));overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#78939460 transparent}
+.preflight-options{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:11px}
+.preflight-options label{min-width:0}
+.preflight-options select{min-width:0;text-overflow:ellipsis}
+.flight-plan-summary{margin:10px 0 0;font-size:10px;line-height:1.5;color:#b8cecf}
+.preflight-details{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:13px 0}
+.preflight-details .lesson-source{max-width:47%;margin:0;line-height:1.5;overflow-wrap:anywhere}
+.preflight-details .inline-toggle{margin:0;gap:9px;flex-shrink:0}
+.preflight-details .inline-toggle b{font-size:10px}
+.preflight-details .inline-toggle small{display:none}
+.preflight-details .switch{flex-shrink:0}
+.flight-card .quick-controls{margin:0 0 13px;padding-top:11px}
+.flight-launch{position:sticky;bottom:0;z-index:1;padding-top:8px;background:linear-gradient(180deg,#172832f5,#132029)}
+.modal p.autopilot-help{margin:11px 0 4px;padding:9px 11px;border-left:2px solid #81b5a778;background:#0e202b66;border-radius:0 5px 5px 0}
+.setting-row>span{min-width:0}
+.setting-row select{flex-shrink:0}
+.flight-toolbar #autoBtn{white-space:nowrap}
+.map-title #mapTitle{color:inherit;letter-spacing:inherit}
+@media(max-height:650px) and (orientation:landscape){
+ .briefing{--preflight-space:118px}
+ .preflight-options{row-gap:8px}
+ .flight-plan-summary{margin-top:7px;font-size:9px;line-height:1.45}
+ .preflight-details{margin:10px 0;gap:8px}
+ .preflight-details .inline-toggle b{font-size:9px}
+ .flight-launch{padding-top:5px}
+}
+@media(max-height:430px) and (orientation:landscape){
+ .briefing{--preflight-space:91px;align-items:start}
+ .preflight-options{row-gap:7px}
+ .flight-plan-summary{font-size:8px}
+ .preflight-details{margin:8px 0}
+ .preflight-details .inline-toggle b{font-size:8px}
+ .flight-card .start-options{margin-top:8px}
+ .flight-card .start-option{padding:7px}
+ .flight-card .start-flight{padding:9px 12px}
+}
+@media(orientation:portrait){
+ .briefing{justify-content:flex-start;gap:16px;padding-top:90px;padding-bottom:max(24px,env(safe-area-inset-bottom))}
+ .briefing>.intro,.briefing>.flight-card,.briefing>.briefing-footer{flex-shrink:0}
+ .flight-card{max-height:none;overflow:visible}
+ .flight-launch{position:static;background:none;padding-top:0}
+ .briefing-footer{position:static;margin-top:0;gap:12px}
+ .intro h1{font-size:46px;margin:12px 0}
+ .intro-copy{font-size:11px}
+ .preflight-options{row-gap:10px}
+ .preflight-details{gap:9px;margin:12px 0}
+ .preflight-details .inline-toggle b{font-size:9px}
+ .flight-plan-summary{font-size:9px}
+}
+@media(orientation:portrait) and (max-height:760px){
+ .briefing{padding-top:83px;gap:12px}
+ .intro h1{font-size:36px;margin:9px 0 2px}
+ .preflight-options{row-gap:8px}
+ .preflight-details{margin:10px 0}
+}

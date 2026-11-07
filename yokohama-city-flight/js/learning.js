@@ -67,10 +67,11 @@ function safeAudioUrl(value) {
 }
 
 class LearningGates {
-  constructor(THREE, scene, { route = [], onWord = () => {}, onToast = () => {} } = {}) {
+  constructor(THREE, scene, { route = [], heightAt = () => 0, onWord = () => {}, onToast = () => {} } = {}) {
     this.THREE = THREE;
     this.scene = scene;
     this.route = route.filter(p => p && [p.x, p.y, p.z].every(Number.isFinite));
+    this._heightAt = typeof heightAt === 'function' ? heightAt : () => 0;
     this.onWord = onWord;
     this.onToast = onToast;
     this._enabled = false;
@@ -78,6 +79,7 @@ class LearningGates {
     this._disposed = false;
     this._language = 'ja';
     this._mode = 'gates';
+    this._pathMode = 'course';
     this._listenRemaining = LISTEN_SECONDS;
     this.primaryLanguage = 'en';
     this._words = defaultsFor('ja');
@@ -87,6 +89,8 @@ class LearningGates {
     this._courseStart = 0;
     this._entryPoint = null;
     this._entryStart = null;
+    this._freePoint = null;
+    this._freeStart = null;
     this._passed = 0;
     this._collected = [];
     this._collectedKeys = new Set();
@@ -130,8 +134,11 @@ class LearningGates {
   get language() { return this._language; }
   set language(value) { this.setLanguage(value); }
   get mode() { return this._mode; }
+  get pathMode() { return this._pathMode; }
   get target() {
     if (!this._enabled || this._mode !== 'gates' || !this._group) return null;
+    if (this._pathMode === 'free' && !this._freePoint) return null;
+    if (this._pathMode === 'course' && !this.route.length) return null;
     const p = this._gatePosition, n = this._gateNormal;
     return { x: p.x, y: p.y, z: p.z, normal: { x: n.x, y: n.y, z: n.z } };
   }
@@ -222,6 +229,22 @@ class LearningGates {
     return this._mode;
   }
 
+  setPathMode(mode) {
+    if (!['course', 'free'].includes(mode)) throw new Error('Choose course or free flight.');
+    if (this._disposed || mode === this._pathMode) return this._pathMode;
+    this._pathMode = mode;
+    this._hasPreviousPosition = false;
+    this._cooldown = 0;
+    // The caller supplies the current aircraft pose through beginFlight.
+    if (mode === 'free') this._freePoint = this._freeStart = null;
+    if (this._enabled) {
+      this._buildGate();
+      this._placeGate();
+    }
+    this._emit();
+    return this._pathMode;
+  }
+
   beginFlight(position, quaternion, { grounded = false } = {}) {
     if (Array.isArray(position)) this._flightPosition.fromArray(position);
     else this._flightPosition.copy(position);
@@ -235,12 +258,34 @@ class LearningGates {
     this._forward.normalize();
     this._entryPoint = this._entryStart.clone().addScaledVector(this._forward, grounded ? 1300 : 900);
     this._entryPoint.y = grounded ? 180 : Math.max(340, this._flightPosition.y);
+    if (this._pathMode === 'free') {
+      this._freeStart = this._entryStart.clone();
+      this._freePoint = this._entryPoint.clone();
+      this._clearFreeGateTerrain();
+    }
     this._courseStep = 0;
     this._courseStart = grounded ? 2 : 1;
     this._hasPreviousPosition = false;
     this._cooldown = 0;
     this._placeGate();
     this._emit();
+  }
+
+  _clearFreeGateTerrain() {
+    const point = this._freePoint;
+    const height = this._heightAt(point.x, point.z);
+    if (Number.isFinite(height)) point.y = Math.max(point.y, height + 100);
+  }
+
+  _planNextFreeGate() {
+    this._freeStart = this._flightPosition.clone();
+    this._forward.set(0, 0, -1).applyQuaternion(this._flightQuaternion);
+    this._forward.y = 0;
+    if (this._forward.lengthSq() < .001) this._forward.set(0, 0, -1);
+    this._forward.normalize();
+    this._freePoint = this._freeStart.clone().addScaledVector(this._forward, 1100);
+    this._freePoint.y = Math.max(340, this._flightPosition.y);
+    this._clearFreeGateTerrain();
   }
 
   reviewItems() {
@@ -351,7 +396,7 @@ class LearningGates {
       this._listenRemaining -= dt;
       if (this._listenRemaining <= 0.000001) { this.advance(); return; }
     }
-    if (this._mode === 'gates' && this._group && position) {
+    if (this._mode === 'gates' && this._group && position && (this._pathMode === 'free' ? this._freePoint : this.route.length)) {
       this._halo.material.opacity = 0.055 + 0.025 * (1 + Math.sin(this._clock * 1.7));
       this._ring.material.opacity = 0.78 + 0.12 * Math.sin(this._clock * 1.2);
       if (Array.isArray(position)) this._samplePosition.fromArray(position);
@@ -534,6 +579,7 @@ class LearningGates {
   _collect() {
     this._passed++;
     this._courseStep++;
+    if (this._pathMode === 'free') this._planNextFreeGate();
     const item = this._advanceCollected();
     if (item) this.onToast(`Collected ${item.word} · ${this._passed} ${this._passed === 1 ? 'gate' : 'gates'} cleared`);
     return item;
@@ -576,6 +622,7 @@ class LearningGates {
       collected: this._collected.length,
       passed: this._passed,
       mode: this._mode,
+      pathMode: this._pathMode,
       source: this.source,
       skyWords: this._skyWords,
       target: this.target,
@@ -615,7 +662,7 @@ class LearningGates {
   }
 
   _buildGate() {
-    if (this._group || !this._enabled || (this._mode === 'gates' && !this.route.length)) return;
+    if (this._group || !this._enabled || (this._mode === 'gates' && this._pathMode === 'course' && !this.route.length)) return;
     const T = this.THREE;
     const group = new T.Group();
     group.name = 'golingo-vocabulary-gate';
@@ -664,11 +711,19 @@ class LearningGates {
       this._label.position.set(0, 0, 0);
       this._group.visible = this._enabled && !this._paused && this._hasFlightPose;
       this._positionSkyWord();
-    } else if (this.route.length) {
-      const entry = this._entryPoint && this._courseStep === 0;
-      const at = this._entryPoint ? (this._courseStart + this._courseStep - 1) % this.route.length : this._courseStep % this.route.length;
-      const point = entry ? this._entryPoint : this.route[at];
-      const previous = entry ? this._entryStart : this._entryPoint && this._courseStep === 1 ? this._entryPoint : this.route[(at + this.route.length - 1) % this.route.length];
+    } else if (this._pathMode === 'free' || this.route.length) {
+      if (this._pathMode === 'free' && !this._freePoint) {
+        this._group.visible = false;
+        this._drawLabel();
+        return;
+      }
+      let point = this._freePoint, previous = this._freeStart;
+      if (this._pathMode === 'course') {
+        const entry = this._entryPoint && this._courseStep === 0;
+        const at = this._entryPoint ? (this._courseStart + this._courseStep - 1) % this.route.length : this._courseStep % this.route.length;
+        point = entry ? this._entryPoint : this.route[at];
+        previous = entry ? this._entryStart : this._entryPoint && this._courseStep === 1 ? this._entryPoint : this.route[(at + this.route.length - 1) % this.route.length];
+      }
       this._gatePosition.set(point.x, point.y, point.z);
       this._group.position.copy(this._gatePosition);
       const normal = this._gateNormal.set(point.x - previous.x, point.y - previous.y, point.z - previous.z);
@@ -678,7 +733,7 @@ class LearningGates {
       // The word is in the opening the player actually crosses.
       this._label.position.set(0, 0, 0);
       this._group.visible = this._enabled && !this._paused;
-    }
+    } else this._group.visible = false;
     this._drawLabel();
   }
 
