@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#211d29"><meta name="description" content="Ink & Iron — Word Patrol. Learn languages in a cartoon-noir FPS: hear vocabulary, defeat word robots, practice sentences, and collect a GoLingo review basket.">
+<title>INK & IRON — Word Patrol | GoLingo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='15' fill='%23ffc943'/%3E%3Cpath d='M21 19h38v12H47v18h12v12H21V49h12V31H21z' fill='%23191827'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="learning.css">
+</head>
+<body>
+<main id="game" aria-label="Ink and Iron first-person shooter">
+ <canvas id="scene" aria-label="3D cartoon warzone. Start the game to play." tabindex="0"></canvas>
+ <div id="grain" aria-hidden="true"></div><div id="vignette" aria-hidden="true"></div><div id="damageFlash" aria-hidden="true"></div><div id="speedLines" aria-hidden="true"></div>
+ <div id="comicLayer" aria-hidden="true"></div>
+ <header id="masthead">
+  <div class="bureau"><svg class="seal" viewBox="0 0 50 50" aria-hidden="true"><path d="M25 2 31 8 40 6 42 16 49 22 43 30 44 40 34 42 25 49 17 43 7 44 6 34 0 25 7 18 7 8 17 8Z" fill="currentColor"/><circle cx="25" cy="25" r="16" fill="#211d29"/><path d="M15 25q10-13 20 0-10 13-20 0Z" fill="currentColor"/><circle cx="25" cy="25" r="4" fill="#211d29"/></svg><span>DEPARTMENT OF<br><b>LAST RESORT</b></span><span class="year">EST.<br>1965</span></div>
+  <div class="topActions"><button id="soundBtn" class="iconBtn" aria-label="Mute audio" title="Sound on/off"><svg id="speakerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h4l5-4v14l-5-4H3Z"/><path id="soundWaves" d="M16 8q5 4 0 8M19 4q8 8 0 16"/></svg></button><button id="pauseBtn" class="iconBtn hidden" aria-label="Pause game" title="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button></div>
+ </header>
+ <section id="frontMenu" class="screen front">
+  <div class="coverContent">
+   <div class="caseLabel"><span></span> GOLINGO · LEARN THROUGH PLAY</div>
+   <h1><span>INK <i>&</i></span><span class="iron">IRON<span class="period">.</span></span></h1>
+   <div class="chapterBadge">WORD PATROL <span>—</span> EVERY WORD COUNTS</div>
+   <p class="coverCopy">Hear it. Find it.<br>Make every hit a new word.</p>
+   <button id="startBtn" class="primary" disabled><span id="startLabel">SETTING THE SCENE…</span><span class="arrow">↗</span></button>
+   <p class="missionNote">Relaxed by default · Your words, freshly shuffled.</p>
+   <div class="coverControls" id="desktopInstructions"><span><kbd>W A S D</kbd> MOVE</span><span><kbd>↖</kbd> AIM + FIRE</span><span><kbd>SHIFT</kbd> DASH</span><span><kbd>SPACE</kbd> DOUBLE JUMP</span><span><kbd>F</kbd> PUNCH & HEAL</span><span><kbd>R</kbd> RELOAD</span></div>
+   <div class="coverControls touchInstructions">LEFT STICK TO MOVE · DRAG RIGHT TO AIM<br>FIRE, PUNCH, DASH & DOUBLE JUMP WITH BUTTONS</div>
+  </div>
+  <div class="fieldStamp"><span>LISTEN<br>PLAY</span><b>COLLECT<br>REPEAT</b></div>
+  <footer class="coverFooter"><span><i class="liveDot"></i> GOLINGO · TIN TOWN</span><span>LANGUAGE LEARNING <span class="smallHide">/ CARTOON-NOIR FPS</span></span></footer>
+ </section>
+ <section id="hud" class="hidden" aria-label="Game status">
+  <div class="operation"><small>OPERATION: WORD PATROL</small><div><b id="roundLabel">ROUND 01</b><span id="remaining">5 WORD ROBOTS</span></div><div id="roundTrack"><i></i><i></i><i></i></div></div>
+  <div class="scoreboard"><small>SCRAP ACCOUNT</small><strong id="score">00000</strong><span id="killCount">0 DECOMMISSIONED</span></div>
+  <div id="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div><div id="hitMarker" aria-hidden="true">×</div>
+  <div class="vitals"><div class="heart">♥</div><div class="vitalNumbers"><small>STILL EMPLOYED</small><div><strong id="health">100</strong><span>/100</span></div><div class="healthTrack"><i id="healthFill"></i></div></div></div>
+  <div class="dashMeter"><span>SHIFT / DASH</span><div><i id="dashFill"></i></div></div>
+  <div class="ammo"><div class="ammoLabel">THE FINAL WORD <span>12 GA.</span></div><div class="ammoNumbers"><strong id="ammo">06</strong><span>/ <b id="reserve">36</b></span></div><div id="shells" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><small id="reloadHint">R TO RELOAD</small></div>
+  <div id="reloadProgress" class="hidden"><span>MAKING A POINT…</span><div><i></i></div></div>
+  <div id="objective">KEEP MOVING. MAKE YOUR POINT.</div>
+  <div id="waveBanner" class="hidden"><small id="bannerTop">CHAPTER 6</small><strong id="bannerMain">NOTHING TO HIDE</strong><span id="bannerBottom">THEY HAVE A FEW QUESTIONS.</span></div>
+  <div id="toast" role="status"></div>
+  <div class="inGameHint">WASD MOVE <span>·</span> SHIFT DASH <span>·</span> SPACE ×2 JUMP <span>·</span> F PUNCH <span>·</span> R RELOAD <span>·</span> ESC PAUSE</div>
+ </section>
+ <div id="touchControls" class="hidden" aria-label="Touch game controls">
+  <div id="movePad"><div class="stickRing"></div><div id="stickThumb"></div><span>MOVE</span></div>
+  <div id="lookZone" aria-label="Drag to aim"></div>
+  <div class="touchButtons"><button id="jumpBtn" class="action round" aria-label="Jump; tap twice to double jump"><b>↑</b><span>JUMP ×2</span></button><button id="dashBtn" class="action round" aria-label="Dash"><b>»</b><span>DASH</span></button><button id="punchBtn" class="action" aria-label="Punch"><b>✦</b><span>PUNCH</span></button><button id="fireBtn" class="action fire" aria-label="Fire shotgun"><b>⌖</b><span>FIRE</span></button><button id="reloadBtn" class="action reload" aria-label="Reload"><b>↻</b><span>RELOAD</span></button></div>
+ </div>
+ <section id="pauseMenu" class="screen modal hidden"><div class="paper"><span class="eyebrow">AN UNSCHEDULED INTERMISSION</span><h2>HOLD THAT<br>THOUGHT.</h2><p>The bureaucracy can wait.</p><button id="resumeBtn" class="primary">BACK TO BUSINESS <span>↗</span></button><button id="restartBtn" class="secondary">RESTART OPERATION</button><div class="settings"><label for="sensitivity">LOOK SENSITIVITY <b id="sensitivityValue">100%</b></label><input id="sensitivity" type="range" min="0.3" max="2" step="0.1" value="1"><label class="settingToggle"><input id="assistToggle" type="checkbox" checked> GENTLE AIM ASSIST</label><p class="pauseControls">WASD move · Shift dash · Space double jump<br>F punch · R reload · Esc pause<br>H hunt word · L listen · B basket</p></div></div></section>
+ <section id="resultMenu" class="screen modal hidden"><div class="paper result"><span id="resultEyebrow" class="eyebrow">PATROL COMPLETE</span><h2 id="resultTitle">WORDS IN<br>THE BAG.</h2><p id="resultCopy">Replay your collected words and sentences.</p><div class="resultStats"><div><strong id="finalScore">0</strong><span>PATROL SCORE</span></div><div><strong id="finalKills">0</strong><span>WORDS PRACTICED</span></div><div><strong id="finalTime">0:00</strong><span>ON THE CLOCK</span></div></div><button id="againBtn" class="primary">PRACTICE AGAIN <span>↗</span></button><button id="reviewWordsBtn" class="secondary">REVIEW & EXPORT WORDS</button><button id="menuBtn" class="secondary">BACK TO TITLE</button></div></section>
+ <div id="rotateHint">↻ &nbsp; Turn your phone sideways for the best view.</div>
+ <div id="errorPanel" class="hidden" role="alert"><h2>THE PROJECTOR JAMMED.</h2><p id="errorText">The scene couldn't start.</p><button onclick="location.reload()" class="primary">TRY AGAIN ↗</button></div>
+</main>
+<noscript>This game needs JavaScript and a WebGL-capable browser.</noscript>
+<script>window.addEventListener('error',function(e){if(e.message&&document.getElementById('startBtn').disabled&&document.getElementById('errorPanel').classList.contains('hidden')){document.getElementById('errorPanel').classList.remove('hidden');document.getElementById('errorText').textContent='The scene could not load. '+e.message;}});</script>
+<script type="module" src="main.js"></script>
+</body></html>

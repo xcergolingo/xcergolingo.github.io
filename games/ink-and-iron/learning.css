@@ -1,0 +1,109 @@
+/* GoLingo field notes: a compact learning layer over the street. */
+.glHidden{display:none!important}
+#golingoLearning{position:absolute;inset:0;z-index:21;pointer-events:none;color:var(--ink,#191827);font-family:Arial,Helvetica,sans-serif}
+#golingoLearning button,.glHeaderButton,.glCoverLesson button{font-family:var(--mono,monospace);font-weight:800;letter-spacing:.05em;-webkit-appearance:none;appearance:none}
+#golingoLearning button:focus-visible,#golingoLearning input:focus-visible,#golingoLearning select:focus-visible,#golingoLearning textarea:focus-visible,#golingoLearning a:focus-visible,#golingoLearning summary:focus-visible{outline:3px solid #a54677;outline-offset:3px}
+#golingoLearning button:disabled{cursor:default;opacity:.42;transform:none}
+#golingoLearning button:active,.glHeaderButton:active,.glCoverLesson button:active{transform:translateY(1px)}
+.glHeaderButton{pointer-events:auto;height:38px;padding:0 12px;background:#fff1cd12;color:var(--cream,#fff1cd);border:1px solid #fff1cd70;font-size:9px;white-space:nowrap;box-shadow:2px 2px 0 #19182766;transition:background .15s}
+.glHeaderButton:hover{background:var(--cream,#fff1cd);color:var(--ink,#191827)}
+.glHeaderButton span{display:inline-grid;place-content:center;min-width:17px;height:17px;margin-left:4px;background:var(--yellow,#ffc943);color:var(--ink,#191827);border-radius:50%;font-size:9px}
+.glCoverLesson{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px 12px;width:min(100%,390px);margin:0 0 15px;color:var(--cream,#fff1cd);font:10px/1.4 var(--mono,monospace)}
+.glCoverLesson>span{opacity:.86;overflow-wrap:anywhere}
+.glCoverLesson button{padding:7px 9px;color:var(--yellow,#ffc943);background:#191827b3;border:1px solid #ffc94388;font-size:9px;white-space:nowrap}
+.glCoverLesson small{grid-column:1/-1;color:var(--yellow,#ffc943);font-size:9px}
+.glCoverLesson small:empty{display:none}
+.glWordCard{position:absolute;top:108px;left:50%;transform:translateX(-50%) rotate(-.6deg);width:min(340px,calc(100% - 36px));padding:11px 14px 8px;pointer-events:auto;background:#fff1cdf7;border:2px solid var(--ink,#191827);box-shadow:4px 5px 0 #191827bb;border-radius:3px 9px 3px 8px;touch-action:manipulation;transition:box-shadow .15s}
+.glWordCard:before{content:"";position:absolute;width:47px;height:8px;left:calc(50% - 23px);top:-6px;transform:rotate(2deg);background:var(--yellow,#ffc943);border:1px solid var(--ink,#191827);pointer-events:none}
+.glCardEyebrow{display:flex;justify-content:space-between;gap:12px;font:700 8px/1.2 var(--mono,monospace);letter-spacing:.08em;color:#655660}
+#glTargetLabel{color:#9c4163}
+.glReplayWord{display:block;width:100%;padding:5px 0 0!important;border:0;background:transparent;text-align:left;color:var(--ink,#191827);font:800 28px/1.12 Arial,Helvetica,sans-serif!important;letter-spacing:-.035em!important;overflow-wrap:anywhere}
+.glReplayWord:hover{color:#a44466}
+#glWordHidden{letter-spacing:.08em}
+#glWordHidden small{font:700 9px var(--mono,monospace);letter-spacing:.04em;vertical-align:middle;color:#665667}
+.glTranslation{padding-top:3px;font-size:15px;font-weight:600;line-height:1.2;overflow-wrap:anywhere;color:#62506b}
+.glExample{margin-top:5px;font-size:12px;max-height:140px;overflow:auto;touch-action:pan-y;overscroll-behavior:contain}
+.glExample summary,.glBasketExample summary{cursor:pointer;font:700 9px/1.4 var(--mono,monospace);letter-spacing:.015em;color:#6b5266;list-style-position:inside}
+.glExample p{margin:7px 0 0;line-height:1.5;overflow-wrap:anywhere}
+#glSentence{font-weight:700}
+#glSentenceTranslation{color:#6b5266}
+#glReplaySentence{margin:7px 0 2px;padding:4px 0;border:0;background:transparent;color:#9c4163;font-size:8px}
+.glCardActions{display:flex;align-items:center;gap:5px;margin-top:7px;padding-top:6px;border-top:1px solid #19182724}
+.glCardActions button{height:25px;border:1px solid var(--ink,#191827);background:transparent;color:var(--ink,#191827);font-size:9px;padding:0 8px;white-space:nowrap}
+.glCardActions #glListen{background:var(--yellow,#ffc943);min-width:88px}
+.glCardActions #glHunt{background:var(--ink,#191827);color:var(--cream,#fff1cd);margin-right:auto}
+.glCardActions #glWordToggle,.glCardActions #glTranslationToggle{padding:0;width:27px;letter-spacing:0;font-size:12px}
+.glCardActions [aria-pressed="false"]{color:#8a7486;background:#1918270a;border-style:dashed}
+.glSpeechHint{margin-top:5px;font-size:9px;line-height:1.3;color:#6b576b;max-height:2.6em;overflow:hidden}
+.glIsSpeaking{box-shadow:4px 5px 0 #191827bb,0 0 0 2px var(--yellow,#ffc943)}
+.glIsSpeaking #glListen{background:#e271a4}
+.glPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:auto;background:#15111edb;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);touch-action:pan-y;color-scheme:light}
+.glPanelPaper{display:flex;flex-direction:column;width:min(720px,100%);max-height:calc(100dvh - 40px);background:var(--cream,#fff1cd);border:3px solid var(--ink,#191827);box-shadow:8px 8px 0 #0006;overflow:hidden}
+.glPanelHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex:none;padding:23px 27px 18px;border-bottom:1px solid #1918272b;background:linear-gradient(105deg,#ffc94344,transparent 80%)}
+.glEyebrow{font:700 9px/1.3 var(--mono,monospace);letter-spacing:.18em;color:#93604b}
+.glPanelHeader h2{font:44px/.92 var(--display,Impact,sans-serif);letter-spacing:-.02em;margin:9px 0 0}
+.glClose{display:grid;place-content:center;width:36px;height:36px;flex:none;border:2px solid var(--ink,#191827);background:transparent;color:var(--ink,#191827);font:29px/1 Arial!important}
+.glTabs{display:flex;flex:none;gap:0;border-bottom:2px solid var(--ink,#191827);background:#ebdfbc}
+.glTabs button{flex:1;padding:12px;border:0;background:transparent;color:#715c6c;font-size:11px}
+.glTabs button[aria-selected="true"]{background:var(--yellow,#ffc943);color:var(--ink,#191827);box-shadow:inset 0 -3px 0 var(--ink,#191827)}
+.glTabs span{padding-left:7px;font-size:10px}
+.glPanelScroll{min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:23px 27px;scrollbar-color:#a57f79 #eddfbf;scrollbar-width:thin}
+.glIntro{margin:0 0 20px;color:#675465;font-size:13px;line-height:1.6}
+.glLanguagePair{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:10px;align-items:center}
+.glLanguagePair label{display:flex;flex-direction:column;gap:7px;font:700 9px var(--mono,monospace);letter-spacing:.08em}
+.glLanguagePair>span{text-align:center;margin-top:17px;color:#9b5e6f}
+.glLanguagePair select{width:100%;min-height:39px;padding:8px 9px;border:1px solid #938079;border-radius:0;background:#fff8e7;color:var(--ink,#191827);font-size:14px;letter-spacing:0;touch-action:manipulation}
+.glFine{margin:9px 0 18px;color:#796577;font-size:10px;line-height:1.5}
+.glSettings{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:17px 0 4px;border-top:1px solid #19182722}
+.glSettings label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;line-height:1.3}
+.glSettings input{width:17px;height:17px;accent-color:#ab506c;flex:none;cursor:pointer;margin:0;touch-action:manipulation}
+.glImportHeading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:19px}
+.glImportHeading label{font:800 10px var(--mono,monospace);letter-spacing:.04em}
+.glTextButton{border:0;background:transparent;color:#9c4163;padding:6px 0;font-size:9px;text-align:left;line-height:1.4;text-decoration:underline;text-underline-offset:3px}
+#glImport,#glExportText{display:block;resize:vertical;width:100%;min-height:118px;max-height:280px;padding:12px;margin:9px 0 13px;border:1px solid #8f7d75;background:#fff9ec;color:var(--ink,#191827);font:12px/1.6 var(--mono,monospace);-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;touch-action:pan-y}
+#glImport::placeholder{color:#948184;opacity:1}
+.glApplyRow{display:flex;align-items:center;justify-content:space-between;gap:13px}
+.glPrimary,.glSecondary{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:41px;padding:11px 15px;background:var(--yellow,#ffc943);border:2px solid var(--ink,#191827);box-shadow:2px 3px 0 var(--ink,#191827);color:var(--ink,#191827);font-size:10px}
+.glSecondary{background:transparent;min-height:35px;box-shadow:none;font-size:9px}
+#glLessonCount{font:10px var(--mono,monospace);color:#826b7d;text-align:right}
+.glStatus{font-size:12px;line-height:1.5;color:#536c5d;margin-top:13px;overflow-wrap:anywhere}
+.glStatus:empty{display:none}
+.glStatus.glError{color:#b44248}
+.glVoiceInfo{margin-top:19px;padding:12px 14px;background:#19182709;font-size:10px;line-height:1.5;color:#6a5568}
+.glVoiceInfo b{display:block;font:800 8px var(--mono,monospace);letter-spacing:.08em;color:#a15c69;margin-bottom:5px}
+.glPanelFooter{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;padding:14px 27px;background:#ebdfbc;border-top:1px solid #19182725;flex:none}
+.glPanelFooter a{font:700 9px/1.5 var(--mono,monospace);color:#634b62;text-decoration:none}
+.glPanelFooter a:hover{text-decoration:underline}
+.glBasketSummary{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px;padding-bottom:17px;border-bottom:1px solid #19182730}
+.glBasketSummary>div{display:flex;align-items:baseline;gap:9px;white-space:nowrap}
+.glBasketSummary strong{font:46px/1 var(--display,Impact,sans-serif);letter-spacing:-.03em}
+.glBasketSummary span{font:700 10px var(--mono,monospace);text-transform:uppercase}
+.glBasketSummary p{margin:0;font-size:11px;line-height:1.5;color:#796577;max-width:260px}
+.glBasketList{display:grid;gap:10px}
+.glBasketItem{position:relative;padding:13px 15px;border:1px solid #19182738;background:#fff8e5;box-shadow:2px 2px 0 #19182716}
+.glBasketWord{padding:0 32px 2px 0;border:0;background:transparent;text-align:left;color:var(--ink,#191827);font:800 22px/1.2 Arial,sans-serif!important;letter-spacing:-.02em!important;max-width:100%;overflow-wrap:anywhere}
+.glBasketWord:after{content:'▶';position:absolute;right:15px;top:17px;font-size:12px;color:#a64c6d}
+.glBasketTranslation{margin:2px 0 5px;font-size:13px;color:#705a70;line-height:1.4;overflow-wrap:anywhere}
+.glBasketMeta{font:9px var(--mono,monospace);color:#998085}
+.glBasketExample{margin-top:10px;border-top:1px solid #1918271c;padding-top:8px;font-size:12px}
+.glBasketExample p{margin:9px 0 0;line-height:1.5;overflow-wrap:anywhere}
+.glBasketExample p+p{color:#796577}
+.glBasketExample button{margin-top:6px}
+.glBasketEmpty{padding:32px 15px;margin:0 0 8px;border:1px dashed #a58e8d;color:#877183;text-align:center;font-size:13px;line-height:1.7}
+.glBasketTools{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px}
+.glExportFallback{margin-top:20px;padding-top:17px;border-top:1px dashed #a58e8d}
+.glExportFallback>label{font:700 9px var(--mono,monospace);letter-spacing:.08em}
+.glExportFallback .glFine{margin-bottom:0}
+@media(max-width:900px){.glWordCard{top:87px;width:310px}.glHeaderButton{height:36px;padding:0 9px;font-size:8px}.topActions{gap:6px}.glPanelPaper{max-height:calc(100dvh - 26px)}.glPanel{padding:13px}}
+@media(max-width:650px) and (orientation:portrait){.glWordCard{top:147px;width:calc(100% - 40px);max-width:350px}.topActions{gap:5px}.glHeaderButton{height:34px;padding:0 7px;font-size:8px}.glHeaderButton span{font-size:8px;min-width:14px;height:14px;margin-left:2px}.topActions .iconBtn{width:34px;height:34px}.bureau .seal{width:27px;height:27px}.bureau{gap:7px!important;font-size:6px!important}.bureau b{font-size:9px!important}.bureau .year{display:none}.glCoverLesson{font-size:9px;max-width:350px}.glPanel{padding:9px}.glPanelPaper{max-height:calc(100dvh - 18px);box-shadow:4px 4px 0 #0006}.glPanelHeader{padding:17px 19px 15px}.glPanelHeader h2{font-size:35px}.glPanelScroll{padding:18px 19px}.glPanelFooter{padding:13px 19px;gap:8px}.glSettings{gap:12px 10px}.glSettings label{font-size:11px}.glLanguagePair{gap:6px;grid-template-columns:minmax(0,1fr) 15px minmax(0,1fr)}.glLanguagePair label{font-size:8px}.glLanguagePair select{font-size:13px;padding:8px 6px}.glBasketSummary{align-items:flex-start;flex-direction:column;gap:10px}.glBasketSummary p{max-width:none}.glBasketTools{align-items:flex-start;flex-direction:column}.glBasketTools .glPrimary{width:100%}#glImport,#glExportText{font-size:16px;line-height:1.5}.glIntro{font-size:12px}.glImportHeading{align-items:flex-start}.glImportHeading label{font-size:9px;padding-top:5px}.glApplyRow{gap:10px}.glPrimary{font-size:9px;gap:10px;padding:11px 12px}}
+@media(max-width:390px) and (orientation:portrait){#masthead{padding-left:15px!important;padding-right:15px!important}.bureau .seal{display:none}.glWordCard{width:calc(100% - 30px)}.glCoverLesson{font-size:8px}}
+@media(max-height:550px) and (orientation:landscape){.glWordCard{top:68px;width:255px;padding:7px 10px 5px;border-radius:2px 6px 2px 5px;box-shadow:3px 3px 0 #191827bb}.glCardEyebrow{font-size:7px}.glReplayWord{font-size:22px!important;padding-top:3px!important;line-height:1.05!important}.glTranslation{font-size:12px;padding-top:2px}.glExample{margin-top:3px;max-height:75px}.glExample summary{font-size:8px}.glExample p{font-size:11px}.glCardActions{gap:4px;margin-top:4px;padding-top:4px}.glCardActions button{font-size:8px;height:22px;padding:0 6px}.glCardActions #glListen{min-width:76px}.glCardActions #glWordToggle,.glCardActions #glTranslationToggle{height:22px;width:23px;font-size:10px}.glSpeechHint{font-size:8px;margin-top:3px;max-height:1.3em}.glCoverLesson{margin-bottom:8px;gap:5px 8px;width:min(100%,360px);font-size:8px}.glCoverLesson button{padding:5px 7px;font-size:8px}.glCoverLesson small{font-size:7px}.coverContent .coverCopy{margin:8px 0}.coverContent h1{margin:10px 0}.coverContent .missionNote{margin:8px 0}.glHeaderButton{height:32px;padding:0 8px;font-size:8px}.glHeaderButton span{height:14px;min-width:14px;font-size:8px}.topActions{gap:6px}.topActions .iconBtn{height:32px;width:32px}.glPanel{padding:8px 20px}.glPanelPaper{max-height:calc(100dvh - 16px)}.glPanelHeader{padding:10px 20px;align-items:center}.glEyebrow{font-size:7px}.glPanelHeader h2{font-size:26px;margin-top:6px}.glPanelHeader h2 br{display:none}.glClose{width:29px;height:29px;font-size:23px!important}.glTabs button{padding:8px;font-size:9px}.glPanelScroll{padding:15px 20px}.glPanelFooter{padding:8px 20px}.glPanelFooter a{font-size:8px}.glIntro{margin-bottom:12px;font-size:12px}}
+@media(max-height:390px) and (orientation:landscape){.coverContent{padding-top:48px}.coverContent h1{font-size:54px;margin:8px 0}.coverContent .chapterBadge{padding:4px 0;font-size:7px}.coverContent .coverCopy{font-size:10px;line-height:1.25;margin:7px 0}.glCoverLesson{margin-bottom:6px}.coverContent .primary{padding:10px 14px;font-size:10px}.coverContent .missionNote{margin:7px 0}.coverContent .coverControls{font-size:6px;gap:5px 8px}.glWordCard{top:61px;width:245px}.glWordCard .glExample{position:relative}.glWordCard .glExample[open]{max-height:68px}.glSpeechHint{display:none}}
+@media(max-height:750px) and (orientation:portrait){.coverContent{padding-top:69px!important;padding-bottom:64px!important}.coverContent h1{font-size:84px!important;margin:16px 0!important}.coverContent .coverCopy{font-size:14px;margin:13px 0!important}.coverContent .missionNote{margin:12px 0}.coverContent .coverControls{gap:8px 10px}.glCoverLesson{margin-bottom:11px}}
+@media(max-height:650px) and (orientation:portrait){.coverContent h1{font-size:68px!important;margin:12px 0!important}.coverContent .chapterBadge{font-size:7px}.coverContent .coverCopy{font-size:12px;margin:10px 0!important}.coverContent .primary{padding:13px 17px;font-size:11px}.coverContent .missionNote{font-size:8px;margin:10px 0}.coverContent .coverControls{font-size:7px}.glCoverLesson{font-size:8px;margin-bottom:9px}}
+@media(prefers-reduced-motion:reduce){.glWordCard,.glHeaderButton{transition:none}}
+/* Keep even long supplied sentences clear of the reticle. Full text is in Basket. */
+#glWordText{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;max-height:2.24em}
+.glReplayWord.glLongWord{font-size:19px!important;line-height:1.15!important}
+.glTranslation{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;max-height:2.5em}
+@media(max-height:550px) and (orientation:landscape){#glWordText{-webkit-line-clamp:1;line-clamp:1;max-height:1.15em}.glTranslation{-webkit-line-clamp:1;line-clamp:1;max-height:1.25em}.glReplayWord.glLongWord{font-size:16px!important}.glWordCard{left:47%}.glExample[open]{position:absolute;top:calc(100% + 5px);left:0;right:0;padding:8px 10px;margin:0;background:var(--cream,#fff1cd);border:2px solid var(--ink,#191827);max-height:92px}}

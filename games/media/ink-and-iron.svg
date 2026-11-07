@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Ink &amp; Iron — Word Patrol cover illustration</title>
+  <desc id="desc">An original cartoon-noir illustration: a cream and yellow wind-up robot with pie-cut eyes, black rubber-hose limbs and white gloves stands in a ruined orange and violet street. A speech balloon teaches hola, hello. A comic POW burst and a foreground yellow blaster suggest the first-person action.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#33233f"/><stop offset=".45" stop-color="#a44c63"/><stop offset="1" stop-color="#ffb54a"/></linearGradient>
+    <linearGradient id="road" x2="0" y2="1"><stop stop-color="#c97a61"/><stop offset="1" stop-color="#3a2a49"/></linearGradient>
+    <linearGradient id="tin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff3ca"/><stop offset=".62" stop-color="#ffdf73"/><stop offset="1" stop-color="#e99632"/></linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#65506b"/><stop offset="1" stop-color="#322c43"/></linearGradient>
+    <pattern id="halftone" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.2" fill="#1e1829" opacity=".18"/></pattern>
+    <pattern id="windows" width="49" height="65" patternUnits="userSpaceOnUse"><path d="M12 13h20v32H12z" fill="#ffb968" stroke="#211b2c" stroke-width="5"/><path d="M22 13v32m-10-15h20" stroke="#211b2c" stroke-width="4"/></pattern>
+    <filter id="neon" x="-30%" y="-50%" width="160%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1200v750H0z"/>
+  <circle cx="715" cy="317" r="186" fill="#ffcc69" stroke="#ed9352" stroke-width="12"/>
+  <g fill="#ffe5a0" opacity=".19"><path d="M710 432 275 0h81zM710 432 507 0h56zM710 432 895 0h72zM710 432 1200 164v76z"/></g>
+  <g fill="#472b49" stroke="#221b2c" stroke-width="7" stroke-linejoin="round">
+    <path d="M-20 119Q2 70 55 82 78 23 139 58 197 11 236 66 294 45 320 87 367 76 383 122 287 145 218 132 132 164 65 141L-20 147Z"/>
+    <path d="M879 65Q899 16 951 40 978 4 1026 35 1070-6 1112 41 1168 29 1210 71v68q-76 12-132-16-78 20-132-12-50 2-67-46Z"/>
+  </g>
+  <g fill="#69405a" stroke="#39243e" stroke-width="5"><path d="M311 218v-84h35v-32h32v111Z"/><path d="M381 248V147h41v-39h24v139Z"/><path d="m447 303 8-120h34l15 119Z"/><path d="M851 328v-119h52v-33h29v152Z"/><path d="M944 345V151h52v73h37v121Z"/></g>
+  <g fill="#57314c" opacity=".8"><path d="M324 130q-45-20-20-48-68-15-61-49 50-6 78 26 54 2 40 45Z"/><path d="M419 138q-28-33-5-49-14-27 12-43 31 15 16 39 30 27-2 52Z"/></g>
+  <g stroke="#211a2b" stroke-width="8" stroke-linejoin="round">
+    <path fill="url(#wall)" d="M0 143 67 164 75 129 118 140 132 185 184 164 207 199 249 185 278 450 0 543Z"/>
+    <path fill="#8e5a6b" d="m0 243 208-33 19 43L0 289Z"/>
+    <path fill="url(#windows)" d="m28 292 188-27 19 151L24 471Z"/>
+    <path fill="#3b2c45" d="m260 300 47-20 12-40 64 12 10 53 48 14 8 116-166 27Z"/>
+    <path fill="#c07a77" d="m272 335 155-4 5 27-156 10Z"/>
+    <path fill="#242132" d="m317 385 52-6 5 70-52 7Z"/>
+    <path fill="#473147" d="m1000 202 48-34 19 32 40-59 52 17 41-19v386l-236-73Z"/>
+    <path fill="#77506a" d="m965 288 235-25v53l-242 16Z"/>
+    <path fill="url(#windows)" d="m1011 342 174-11v158l-190-44Z"/>
+  </g>
+  <g stroke="#201a2a" stroke-width="7" stroke-linejoin="round">
+    <path d="m929 413 19-282m-59 282 59-282 54 282M908 291h76m-62-65h49m-36-56h28M907 291l74 64m-90 38 93-103" fill="none"/>
+    <path d="m914 116 73-5 8 42-86 5Z" fill="#fff0bd"/>
+    <path d="m930 94 43-3 17 21-78 4Z" fill="#ffb94c"/>
+    <path d="m955 132 22 1m-45 0 12 1" stroke-width="9"/>
+    <path d="M1085 0v305M273 0v220M0 81q159 124 275-23 338 158 811-13 56 38 114 24" fill="none" stroke-width="5"/>
+  </g>
+  <g transform="translate(45 180) rotate(-7)">
+    <path d="M0 0h184v56H0z" fill="#201b2b" stroke="#161520" stroke-width="7"/>
+    <text x="92" y="39" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-size="31" textLength="165" lengthAdjust="spacingAndGlyphs" fill="#ff8fb2" filter="url(#neon)">ON THE RECORD!</text>
+    <text x="92" y="39" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-size="31" textLength="165" lengthAdjust="spacingAndGlyphs" fill="#ffd5dc">ON THE RECORD!</text>
+  </g>
+  <g transform="translate(38 344) rotate(-4)" stroke="#231c2b" stroke-linejoin="round">
+    <path d="m0 0 80 2-3 115-73-5Z" fill="#ecd294" stroke-width="6"/>
+    <path d="M15 13h48v33H15z" fill="#ac4b54" stroke-width="3"/>
+    <path d="m40 19 8 8-4 16H32l-3-16Z" fill="#f4dfab" stroke-width="2"/>
+    <text x="40" y="65" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-size="15" stroke="none" fill="#30222e">WORDS</text>
+    <text x="40" y="82" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-size="15" stroke="none" fill="#30222e">WANTED!</text>
+    <path d="M14 92h47m-39 9h34" stroke-width="3"/>
+  </g>
+  <path d="M0 513 505 420h274l421 88v242H0Z" fill="url(#road)" stroke="#211b2c" stroke-width="9"/>
+  <path d="m0 567 487-128 33 2L0 643Zm1200 64L815 441h25l360 119Z" fill="#e69b69" stroke="#302334" stroke-width="6"/>
+  <g fill="none" stroke="#241f32" stroke-width="5" opacity=".7">
+    <path d="M0 700q532-78 1200 16M0 630q556-73 1200 21M43 570q526-54 1113 21M160 522q449-35 891 19M301 483q340-19 636 13M407 453q229-9 428 8"/>
+    <path d="m179 750 358-313m-85 313 137-313m87 313-34-313m278 313L694 437m438 313L744 437M48 699l72 55m23-132 45 50m79-102 42 42m-36-81 31 33m494 78 54-37m-67-28 45-24m-14-24 34-18"/>
+  </g>
+  <g fill="#322539" stroke="#171624" stroke-width="7" stroke-linejoin="round">
+    <path d="m0 519 48-45 59 18 10 45-58 25-59-13Z"/><path d="m191 555 31-25 47 6 12 28-63 16Z"/>
+    <path d="m1012 544 42-47 68 17 24 60-75 21Z"/>
+    <path d="m268 439 19-61 44 9 4 64Z" fill="#9b725f"/><path d="m276 412 52 6m-36-35-8 63m31-57-1 61" fill="none"/>
+  </g>
+  <ellipse cx="640" cy="654" rx="206" ry="40" fill="#171622" opacity=".38"/>
+  <!-- Wind-up key, drawn behind the robot. -->
+  <g transform="translate(717 360) rotate(-17)" fill="#f6c14e" stroke="#1a1824" stroke-width="8" stroke-linejoin="round">
+    <path d="M0 14h91v25H0Z"/>
+    <path d="M80 8C51-32 82-62 109-36c24-30 59-7 40 24-11 17-36 29-40 47Z"/>
+    <path d="M94-18q-13-19-19-5t22 27m22-8q24-16 13-23t-22 20" fill="none" stroke-width="6"/>
+  </g>
+  <!-- Bendy, jointless ink limbs. -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M544 391C482 393 497 470 447 453S408 398 389 380M721 393C770 408 793 436 817 401S818 352 830 329M574 529C584 577 535 578 540 632M675 531C678 569 728 585 713 626" stroke="#171723" stroke-width="33"/>
+    <path d="M541 390C483 398 499 462 448 446M722 388C778 408 793 426 810 399M575 543C581 577 543 584 542 609M680 545C690 572 727 594 717 611" stroke="#776d83" stroke-width="6"/>
+  </g>
+  <g fill="#fff3ce" stroke="#1b1823" stroke-width="7" stroke-linejoin="round">
+    <path d="m373 380 25-15 18 28-31 14Z" fill="#e3ae4f"/>
+    <path d="M388 375c-19 7-40 0-47-15-9-18-5-29 6-32-10-20-10-34 0-38 12-6 19 8 28 24-8-25-1-36 10-33 10 2 11 19 13 32 5-23 14-27 22-19 5 7-4 28-6 37 17-14 30-11 31-1 2 12-22 24-32 30-3 10-13 14-25 15Z"/>
+    <path d="m826 340-18-14 6-23 30 15Z" fill="#e3ae4f"/>
+    <path d="M822 315c-23-5-39-17-42-34-3-15 7-24 19-13-15-25-9-40 3-37 11 2 13 18 19 31-5-30 3-41 14-35 9 6 7 24 6 37 14-28 25-30 31-19 5 10-11 30-15 40 23-18 34-13 31-1-4 14-27 27-39 28-9 7-17 9-27 3Z"/>
+    <path d="M356 333q19 4 21 22m24-27-10 19m431-67q11 10 10 23m17-37-3 21" fill="none" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Rounded tin body with a wordbook badge. -->
+  <g stroke="#181723" stroke-width="9" stroke-linejoin="round">
+    <path d="M551 365q72-28 151 2l22 140q-6 34-84 39-83 5-100-30Z" fill="url(#tin)"/>
+    <path d="M541 499q92 33 183-5l-6 30q-81 38-174-1Z" fill="#dc9a38"/>
+    <path d="M585 327h83v51h-83Z" fill="#332d3d"/>
+    <path d="M586 342h81m-80 16h80" stroke="#b7a791" stroke-width="5"/>
+    <path d="M570 392q60-19 127-1" fill="none" stroke="#fff7dc" stroke-width="8" stroke-linecap="round"/>
+    <path d="M581 422q27-9 51 2 25-11 51-2v61q-26-6-51 6-23-11-51-5Z" fill="#fff4cf" stroke-width="6"/>
+    <path d="M632 424v65m-36-49 20 1m-20 13 20 1m31-15 21-2m-21 15 21-2" fill="none" stroke-width="4"/>
+  </g>
+  <g fill="#f6e1aa" stroke="#211b29" stroke-width="4"><circle cx="564" cy="402" r="6"/><circle cx="703" cy="401" r="6"/><circle cx="561" cy="509" r="6"/><circle cx="701" cy="508" r="6"/></g>
+  <!-- Original block-headed, pie-eyed character. -->
+  <g transform="rotate(-7 625 272)" stroke="#181722" stroke-linejoin="round">
+    <path d="M609 194v-26q-26-7-1-17t-1-16 10-14" fill="none" stroke-width="8"/>
+    <circle cx="622" cy="119" r="13" fill="#ffcc50" stroke-width="6"/>
+    <path d="M529 205q-3-25 24-29l134 3q34 3 35 34l-1 94q-2 34-37 37l-125-3q-34-1-33-36Z" fill="url(#tin)" stroke-width="10"/>
+    <path d="M549 194q70-11 138 5" fill="none" stroke="#fff7dc" stroke-width="9" stroke-linecap="round"/>
+    <path d="M519 244h-18v47h23m199-45h18v46h-20" fill="#e1a33c" stroke-width="7"/>
+    <ellipse cx="578" cy="251" rx="25" ry="35" fill="#1c1a26" stroke="none"/>
+    <path d="m578 251 26-17-3 30Z" fill="#ffe7a0" stroke="none"/>
+    <ellipse cx="658" cy="251" rx="25" ry="35" fill="#1c1a26" stroke="none"/>
+    <path d="m658 251 26-17-3 30Z" fill="#ffdc79" stroke="none"/>
+    <path d="M575 299q43 24 91-2-5 27-43 28-36-1-48-26Z" fill="#fdf5d6" stroke-width="6"/>
+    <path d="m599 308 3 16m21-11 1 14m22-17-2 14" stroke-width="4"/>
+    <path d="m618 279 9-4 10 5" fill="none" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="545" cy="217" r="5" fill="#d99532" stroke-width="3"/><circle cx="701" cy="217" r="5" fill="#d99532" stroke-width="3"/>
+  </g>
+  <g stroke="#191725" stroke-width="9" stroke-linejoin="round">
+    <path d="M526 617q20-9 36 6l4 26q-7 21-68 19-24-1-18-16 8-20 46-35Z" fill="#242331"/>
+    <path d="M699 616q20-9 37 6 41 17 39 35-2 14-41 12-40-2-46-18Z" fill="#242331"/>
+    <path d="M487 644q31-18 72-7m137-3q44-3 72 17" fill="none" stroke="#f8e8bd" stroke-width="6"/>
+  </g>
+  <!-- A high-contrast language balloon remains legible at gallery size. -->
+  <g transform="translate(841 146) rotate(7)">
+    <path d="M-23 9Q-18-15 14-15h214q37 0 39 31l-4 85q-2 29-32 30l-155-1-43 41 3-40-27-1q-36-1-36-29Z" fill="#211b2a"/>
+    <path d="M-31 0q5-26 37-26h214q37 0 39 31l-4 85q-2 29-32 30l-155-1-43 41 3-40-27-1q-36-1-36-29Z" fill="#fff4d3" stroke="#211b2a" stroke-width="8" stroke-linejoin="round"/>
+    <text x="113" y="54" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-weight="900" font-size="77" fill="#302137">¡hola!</text>
+    <path d="M36 72h151" stroke="#d2b579" stroke-width="3"/>
+    <text x="111" y="100" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="22" letter-spacing="6" fill="#755266">HELLO</text>
+  </g>
+  <!-- Comic punctuation and tiny pieces of spring-powered scrap. -->
+  <g transform="translate(245 280) rotate(-12)">
+    <path d="m-124-37 44-9-4-47 43 28 23-52 19 45 54-36-6 47 71-5-34 34 58 29-61 9 11 55-48-21-23 51-20-45-54 20 8-45-62 2 38-34Z" fill="#ffbd44" stroke="#201b29" stroke-width="9" stroke-linejoin="round"/>
+    <path d="m-90-31 48-7-1-31 33 26 38-33-4 37 47-1-26 22 34 23-47 1-8 33-28-23-36 20 3-30-42 2 21-22Z" fill="#fff0bd" opacity=".6"/>
+    <text x="0" y="20" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-weight="900" font-size="68" letter-spacing="-2" fill="#fff4d0" stroke="#221b2a" stroke-width="8" paint-order="stroke fill">POW!</text>
+  </g>
+  <g fill="#ffe8a2" stroke="#211a29" stroke-width="5" stroke-linejoin="round">
+    <path d="m441 172 8-25 7 25 25 8-25 7-7 24-8-24-24-7Z"/>
+    <path d="m774 530 6-19 7 19 20 6-20 7-7 20-6-20-20-7Z"/>
+    <path d="m355 549 18-8 12 18-21 12Z"/><path d="m475 536 9-19 13 7-9 19Z"/>
+    <path d="M451 580q-21-13-6-18t0-18 1-18" fill="none" stroke-width="6"/>
+  </g>
+  <g stroke="#ffe1a4" stroke-width="3" stroke-linecap="round" opacity=".22"><path d="m58 54-9 30m392 2-10 30m110-12-10 30m-171 73-8 25m450-111-9 28m301 83-8 26M95 584l-8 28m1040-234-8 26m-60-39-8 26M760 18l-9 28m-267 348-8 26"/></g>
+  <!-- Foreground blaster and gloved hand imply a first-person view. -->
+  <g transform="translate(964 600) rotate(-30)" stroke="#171723" stroke-width="9" stroke-linejoin="round">
+    <path d="M57 64h94v104H42Z" fill="#f4e5bf"/>
+    <path d="M56 83q-39-8-31-29 5-18 23-12 2-29 19-28 17-1 21 25 7-20 21-16 17 6 13 24 25-14 35 1 15 20-17 34l-12 29H66Z" fill="#fff5d5"/>
+    <path d="M29-62h93V62H30Z" fill="#f2b640"/>
+    <path d="M40-115h70v72H40Z" fill="#302c3b"/>
+    <path d="M35-119h80v21H35Z" fill="#f1bf4d"/>
+    <path d="M47-93h56v25H47Z" fill="#171723"/>
+    <path d="M21 1h109v26H21Z" fill="#2a2635"/>
+    <path d="M46 36h62v16H46Z" fill="#665567" stroke-width="4"/>
+    <path d="M45-48h13v40H45Z" fill="#fff0b5" stroke="none"/>
+    <path d="m80 86 30 3m-45-15 26 2" fill="none" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <path d="M0 0h1200v750H0z" fill="url(#halftone)" opacity=".42"/>
+  <path d="M4 4h1192v742H4z" fill="none" stroke="#211a2b" stroke-width="8"/>
+</svg>
