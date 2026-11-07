@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18251f">
+  <meta name="description" content="Learn languages in Pinefall. Listen, track deer carrying words and phrases, collect vocabulary, and bring your own GoLingo lesson into this Three.js forest.">
+  <title>Pinefall — GoLingo Word Hunt</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./learning.css?v=2">
+  <script src="./bridge.js?v=2"></script>
+</head>
+<body>
+  <main id="game" aria-label="Pinefall hunting game">
+    <canvas id="world" aria-label="Three-dimensional forest. Drag to look around. Use the on-screen controls to move, aim, and fire."></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="film-grain" aria-hidden="true"></div>
+    <header id="masthead" class="masthead">
+      <div class="brand"><svg viewBox="0 0 52 52" aria-hidden="true"><path d="M26 42V24M26 29 15 22 10 8M15 22 6 19 3 12M13 17 19 11 19 3M26 29 37 22 42 8M37 22 46 19 49 12M39 17 33 11 33 3M19 32 26 43 33 32"/></svg><div><strong>PINEFALL</strong><span>GOLINGO WORD HUNT</span></div></div>
+      <div class="masthead-right"><span class="live-dot"></span><span>EARLY AUTUMN</span><span class="separator">/</span><span>06:42 AM</span></div>
+    </header>
+
+    <section id="welcome" class="welcome" aria-label="Start your hunt">
+      <div class="welcome-content">
+        <div class="eyebrow"><span class="short-line"></span> YOUR WORDS. A WILDER WORLD.</div>
+        <h1>Quiet woods.<br><em>Living words.</em></h1>
+        <p class="welcome-description">Listen to a word. Find it in the forest.<br>Collect it, hear it, and make it yours.</p>
+        <div class="expedition-meta"><span><svg viewBox="0 0 24 24"><path d="M3 20 9 8l4 7 3-5 5 10ZM9 8l2-4 3 6"/></svg> PINEFALL VALLEY</span><span><svg viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg> GOLDEN MORNING</span></div>
+        <div class="mode-select" role="group" aria-label="Hunt mode"><button id="mode-calm" class="mode selected" aria-pressed="true" data-mode="calm"><strong>Word hunt</strong><span>8 words / phrases · your own pace</span></button><button id="mode-timed" class="mode" aria-pressed="false" data-mode="timed"><strong>Timed word trail</strong><span>4 minutes · best score</span></button></div>
+        <div class="start-row"><button id="start" class="primary" disabled><span id="start-label">PREPARING THE FOREST</span><span class="arrow">↗</span></button><button id="intro-settings" class="round-button" aria-label="Open settings"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg></button></div>
+        <p class="start-hint" id="start-hint">Drag to look · WASD to walk · F to scope</p>
+      </div>
+      <div class="location-caption"><span class="caption-rule"></span><span>45° NORTH<br><strong>A little closer to the wild.</strong></span></div>
+      <div class="welcome-footer"><span>GOLINGO — LEARNING LANGUAGES IN VIRTUAL WORLDS</span><span>HEADPHONES RECOMMENDED <svg viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3M4 14H2v6h4v-6Zm16 0h2v6h-4v-6Z"/></svg></span></div>
+    </section>
+
+    <section id="hud" class="hud hidden" aria-label="Hunt information">
+      <div class="top-left"><div class="mission-label"><span class="live-dot"></span><span id="mission-label">WORD HUNT</span></div><div class="mission-value"><strong id="harvests">0</strong><span>/ <span id="goal">5</span></span><i></i><span id="score">0000</span><small>PTS</small></div><div class="mission-sub" id="mission-sub">Listen and find your word</div></div>
+      <div class="compass"><div class="compass-scale">···<span id="compass-left">NW</span>······<b id="compass-main">N</b>······<span id="compass-right">NE</span>···</div><span class="compass-tick"></span><small id="heading">000°</small></div>
+      <div class="top-right"><button id="sound" class="small-button" aria-label="Mute sound" title="Toggle sound"><svg id="sound-icon" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4ZM15 8c2 2 2 6 0 8m3-11c4 4 4 10 0 14"/></svg></button><button id="pause" class="small-button" aria-label="Pause game" title="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button></div>
+      <div id="track" class="track"><span class="track-icon">⌖</span><div><span id="track-title">DEER NEARBY</span><b id="track-distance">48 m</b></div><span id="track-direction">↑</span></div>
+      <div id="timer" class="timer hidden">04:00</div>
+      <div class="bottom-status"><div class="stance"><span id="stance-icon">◈</span><span id="stance-label">WALKING</span></div><span class="status-divider"></span><span id="awareness">MOVE QUIETLY</span></div>
+      <div class="ammo-panel"><div id="ammo-shells" class="ammo-shells" aria-hidden="true"></div><span class="ammo-number" id="ammo">5</span><span class="ammo-slash">/</span><span class="ammo-reserve" id="reserve">30</span><small id="rifle-state">BOLT-ACTION · READY</small></div>
+      <div id="desktop-hint" class="desktop-hint"><span><kbd>W A S D</kbd> Move</span><span>Drag to look</span><span><kbd>F</kbd> Scope</span><span><kbd>R</kbd> Reload</span><span><kbd>C</kbd> Crouch</span></div>
+      <div id="reticle" class="reticle" aria-hidden="true"><span></span><i></i></div>
+      <div id="hit-marker" class="hit-marker" aria-hidden="true">×</div>
+      <div id="target-tag" class="target-tag hidden"><strong id="target-name">MOUNTAIN STAG</strong><span id="target-range">48 m</span></div>
+      <div id="shot-toast" class="shot-toast hidden"><span class="toast-eyebrow" id="toast-eyebrow">CLEAN SHOT</span><strong id="toast-score">+150</strong><span id="toast-detail">Mountain stag · 48 m</span></div>
+      <div id="hint-toast" class="hint-toast hidden" role="status"></div>
+      <div id="reload-progress" class="reload-progress hidden"><span>RELOADING</span><div><i id="reload-fill"></i></div></div>
+      <div id="tutorial" class="tutorial"><span id="tutorial-text">Drag on the forest to look around. Tap the scope to take a closer look.</span><button id="dismiss-tutorial" aria-label="Dismiss tip">×</button></div>
+      <div id="scope-overlay" class="scope-overlay hidden" aria-hidden="true"><div class="scope-circle"><div class="scope-horizontal"></div><div class="scope-vertical"></div><div class="scope-center"></div><div class="scope-ticks">─<br>─<br>─</div><span class="scope-inscription">PINEFALL OPTICS</span><span class="scope-zoom" id="scope-zoom-label">4×</span></div><div class="scope-shade"></div></div>
+      <div id="breath-meter" class="breath-meter hidden"><span id="breath-label">STEADY</span><div><i id="breath-fill"></i></div></div>
+    </section>
+
+    <nav id="controls" class="controls hidden" aria-label="Game controls">
+      <div id="joystick" class="joystick" role="button" aria-label="Drag to move"><div class="joystick-rim"></div><span class="joy-n">⌃</span><span class="joy-s">⌄</span><span class="joy-w">‹</span><span class="joy-e">›</span><div id="joystick-knob" class="joystick-knob"></div><small>MOVE</small></div>
+      <div class="left-tools"><button id="crouch" class="control-button compact" aria-label="Toggle crouch" aria-pressed="false"><svg viewBox="0 0 28 28"><circle cx="17" cy="6" r="3"/><path d="m16 10-5 6 7 3 1 6M12 15l-6 5H2m13-8 7 2 4-2"/></svg><span>CROUCH</span></button><button id="find" class="control-button compact" aria-label="Face the deer carrying the current word"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="8"/><path d="M14 2v7m0 10v7M2 14h7m10 0h7m-8-4-3 8-3-3Z"/></svg><span>TRACK</span></button></div>
+      <div class="right-tools"><div class="utility-controls"><button id="breath" class="control-button compact" aria-label="Steady aim" aria-pressed="false"><svg viewBox="0 0 28 28"><path d="M3 12h5l3-6 5 15 3-9h6"/></svg><span>STEADY</span></button><button id="reload" class="control-button compact" aria-label="Reload rifle"><svg viewBox="0 0 28 28"><path d="M22 10a9 9 0 1 0 1 9M22 3v8h-8"/></svg><span>RELOAD</span></button></div><button id="scope" class="control-button scope-button" aria-label="Toggle rifle scope" aria-pressed="false"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="9"/><path d="M14 2v8m0 8v8M2 14h8m8 0h8"/></svg><span>SCOPE</span></button><button id="fire" class="fire-button" aria-label="Fire rifle"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="12"/><path d="M19 1v10m0 16v10M1 19h10m16 0h10"/><circle cx="19" cy="19" r="3"/></svg><span>FIRE</span></button></div>
+      <button id="zoom" class="zoom-button hidden" aria-label="Change scope magnification">4×</button>
+    </nav>
+
+    <section id="pause-screen" class="modal-backdrop hidden" aria-label="Game paused"><div class="panel pause-panel"><div class="eyebrow">TAKE A BREATH</div><h2>The forest<br>can wait.</h2><p>Your hunt is paused.</p><button id="resume" class="primary"><span>CONTINUE HUNT</span><span>↗</span></button><button id="pause-settings" class="text-button">Settings & controls</button><button id="restart" class="text-button subdued">Return to trailhead</button></div></section>
+    <section id="settings" class="modal-backdrop hidden" aria-label="Settings"><div class="panel settings-panel"><div class="panel-header"><div><div class="eyebrow">MAKE YOURSELF AT HOME</div><h2>Field settings</h2></div><button id="close-settings" class="close-button" aria-label="Close settings">×</button></div><label class="setting-row"><span>Look sensitivity</span><input id="sensitivity" type="range" min="0.35" max="2" value="1" step="0.05"></label><label class="setting-row"><span>Sound</span><input id="volume" type="range" min="0" max="1" value="0.65" step="0.05"></label><label class="setting-row"><span>Gentle aim assist<small>Small adjustment when close to a deer</small></span><input id="aim-assist" type="checkbox" checked></label><label class="setting-row"><span>Invert vertical look</span><input id="invert" type="checkbox"></label><label class="setting-row"><span>Graphics</span><select id="graphics"><option value="auto">Adaptive</option><option value="high">High</option><option value="low">Battery saver</option></select></label><div class="controls-guide"><strong>IN THE FIELD</strong><p><b>Touch</b> — left wheel to walk; drag the forest to look. Use Scope, Fire, and Reload on the right.</p><p><b>Desktop</b> — WASD / arrows to walk; drag to look; click to fire; F or right-click to scope; R reload; C crouch; Space steady aim; Shift move faster; Esc pause.</p><p><b>Track</b> turns you toward the deer carrying your current word. Crouch to approach quietly. Steady aim lasts up to 4 seconds.</p></div><div class="settings-actions"><button id="fullscreen" class="outlined-button">Fullscreen</button><button id="lock-mouse" class="outlined-button">Lock mouse</button></div><small class="settings-note">Everything is generated in Three.js. No downloads needed to play.</small></div></section>
+    <section id="results" class="modal-backdrop hidden" aria-label="Hunt results"><div class="panel result-panel"><div class="eyebrow" id="result-eyebrow">EXPEDITION COMPLETE</div><svg class="result-antlers" viewBox="0 0 52 52"><path d="M26 42V24M26 29 15 22 10 8M15 22 6 19 3 12M13 17 19 11 19 3M26 29 37 22 42 8M37 22 46 19 49 12M39 17 33 11 33 3M19 32 26 43 33 32"/></svg><h2 id="result-title">A morning<br>well spent.</h2><div class="result-stats"><div><strong id="result-score">0</strong><span>POINTS</span></div><div><strong id="result-count">0</strong><span>WORDS / PHRASES</span></div><div><strong id="result-accuracy">0%</strong><span>ACCURACY</span></div></div><p id="result-best">Best shot: —</p><button id="play-again" class="primary"><span>ANOTHER EXPEDITION</span><span>↗</span></button><button id="continue-roam" class="text-button">Keep practicing</button></div></section>
+    <div id="fatal" class="modal-backdrop hidden" role="alert"><div class="panel"><h2>The trail is<br>not ready yet.</h2><p id="fatal-text">Your browser could not start the 3D scene.</p><button id="retry" class="primary">TRY AGAIN</button></div></div>
+  </main>
+  <script type="module" src="./game.js?v=2"></script>
+</body>
+</html>

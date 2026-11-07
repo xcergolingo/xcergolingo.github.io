@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title description">
+  <title id="title">Pinefall — Word Hunt illustrated cover</title>
+  <desc id="description">An original illustration of antlered deer in a sunlit mountain pine forest, with Spanish word labels for ciervo and bosque.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#91b6b0"/><stop offset=".55" stop-color="#d2dbbd"/><stop offset="1" stop-color="#efe1af"/></linearGradient>
+    <radialGradient id="sunGlow"><stop stop-color="#fff3c7" stop-opacity=".98"/><stop offset=".25" stop-color="#f8e8b7" stop-opacity=".65"/><stop offset="1" stop-color="#fae0a4" stop-opacity="0"/></radialGradient>
+    <linearGradient id="farRidge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#849f96"/><stop offset="1" stop-color="#b6c5aa"/></linearGradient>
+    <linearGradient id="meadow" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#a4ae78"/><stop offset=".5" stop-color="#8f9b65"/><stop offset="1" stop-color="#4e6a48"/></linearGradient>
+    <linearGradient id="trail" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8c795"/><stop offset="1" stop-color="#b6a17b"/></linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b0c6ac"/><stop offset="1" stop-color="#567c71"/></linearGradient>
+    <linearGradient id="pine" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#234a3e"/><stop offset=".5" stop-color="#365a46"/><stop offset="1" stop-color="#60815a"/></linearGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#c5a06c"/><stop offset=".38" stop-color="#a77a47"/><stop offset="1" stop-color="#79573c"/></linearGradient>
+    <linearGradient id="neck" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d3b282"/><stop offset=".5" stop-color="#a17a50"/><stop offset="1" stop-color="#805a3a"/></linearGradient>
+    <linearGradient id="vignette" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#173b30" stop-opacity=".1"/><stop offset=".6" stop-color="#163a2e" stop-opacity="0"/><stop offset="1" stop-color="#173429" stop-opacity=".5"/></linearGradient>
+    <filter id="labelShadow" x="-.3" y="-.4" width="1.6" height="2"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#274637" flood-opacity=".2"/></filter>
+    <filter id="haze"><feGaussianBlur stdDeviation="9"/></filter>
+    <g id="pineTree">
+      <path d="M-4 0 4 0 3-148-2-148Z" fill="#4b5840"/>
+      <path d="M0-207-25-161-13-164-40-122-23-128-54-78-35-86-67-31-42-40-75-3Q-18 10 0 5 24 14 76-3L43-40 67-31 34-86 54-78 23-128 40-122 13-164 25-161Z" fill="url(#pine)"/>
+      <path d="M0-207 8-165 25-161 11-151 23-128 40-122 16-119 34-86 54-78 21-82 43-40 67-31 28-39 49 0 75-3 42-40 67-31 34-86 54-78 23-128 40-122 13-164 25-161Z" fill="#7b9563" opacity=".2"/>
+      <path d="M0-178 0 0M-31-109-3-120M2-102 39-87M-40-59-2-73M2-51 49-32" fill="none" stroke="#203f35" stroke-width="2" opacity=".28"/>
+    </g>
+    <g id="deer">
+      <path d="M32 17 44 63 25 113 18 115 28 61 19 24M139 17 137 62 151 108 143 111 125 64 123 22" fill="#6c513b"/>
+      <path d="M17 111 27 109 27 118 15 118ZM142 108l10-1 3 9-13 0Z" fill="#344035"/>
+      <path d="M-14-10Q-35-23-41-2L-20 14Z" fill="#e0d1aa"/>
+      <path d="M-19-7Q-36-20-40-4L-27 2Z" fill="#846345"/>
+      <path d="M-20-5C-20-27 12-39 60-37L123-33C149-31 165-14 166 9C161 34 140 43 98 37L30 35C-1 32-19 16-20-5Z" fill="url(#fur)"/>
+      <path d="M-16 2C-13-19-3-25 9-25L13 9 2 25C-9 21-14 13-16 2Z" fill="#d8c5a0" opacity=".8"/>
+      <path d="M27 20C61 29 119 29 145 19L139 34C102 43 57 36 36 34Z" fill="#dfcba1"/>
+      <path d="M134-20C154-37 164-66 178-88L194-87C198-49 190-13 165 20L147 31 125 17Z" fill="url(#neck)"/>
+      <path d="M184-76C187-50 177-17 158 10L157 26 171 15C191-16 198-50 194-79Z" fill="#e2cea5"/>
+      <path d="M173-86C186-98 209-99 221-90L239-83 239-74 217-68C203-66 191-70 180-74Z" fill="url(#neck)"/>
+      <path d="m208-88 32 6 4 6-7 5-23-1-13-5Z" fill="#b0926a"/>
+      <path d="m237-82 10 5-5 7-7-1Z" fill="#2b3d32"/>
+      <path d="M183-90Q166-106 171-124 190-121 194-94Z" fill="#b39062"/>
+      <path d="M181-96Q171-109 176-116 184-113 188-98Z" fill="#e0ca9e"/>
+      <path d="M199-91Q201-111 220-122 223-106 210-90Z" fill="#bb9a68"/>
+      <path d="M205-94Q210-108 216-113 216-104 210-97Z" fill="#e3d4ab"/>
+      <ellipse cx="213" cy="-84" rx="3.2" ry="3.8" fill="#24372e"/>
+      <circle cx="214" cy="-85.4" r=".9" fill="#f8f0cf"/>
+      <path d="m228-70 9-2M207-89l9-1" fill="none" stroke="#634b36" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M23 24C29 44 28 58 21 74L19 113 11 113 9 73 12 58 7 25Z" fill="url(#fur)"/>
+      <path d="M157 17C159 39 157 54 154 72L159 115 150 115 143 73 141 39 142 22Z" fill="url(#fur)"/>
+      <path d="m10 111 10 1 1 9H8Zm138 4 22-1 4 8h-23Z" fill="#314033"/>
+      <path d="M24-29C56-36 104-34 133-27M152-23l20-42" fill="none" stroke="#e5c996" stroke-width="2.2" stroke-linecap="round" opacity=".66"/>
+      <path d="M31 8C54 14 72 15 93 14M105-15l18 4M53-18l20 2" fill="none" stroke="#84613e" stroke-width="1.1" opacity=".28"/>
+    </g>
+    <g id="antlers" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M190-93 184-119 166-139 155-165 153-181M184-121l-16-4-16-16M171-134l5-26-5-16M160-153l-18-10-8-18M179-109l-18-1-17-10M202-94l9-25 19-15 13-27 2-22M215-124l-3-23 5-18M233-142l18-8 11-20M239-157l-11-17-1-13" stroke="#705e40" stroke-width="6"/>
+      <path d="M190-94 183-119 166-139 155-165M202-94l10-25 18-15 13-27" stroke="#c9b28b" stroke-width="3.3"/>
+      <path d="M153-177v-8m18 13-4-8m-32 2-3-8m13 67-7-6m79-37 3-8m25-8v-7m17 19 4-8m-39-10-1-7" stroke="#d9c8a4" stroke-width="3"/>
+    </g>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h960v600H0z"/>
+  <ellipse cx="396" cy="123" rx="290" ry="250" fill="url(#sunGlow)"/>
+  <circle cx="395" cy="124" r="37" fill="#f7edc5" opacity=".75"/>
+  <path d="M0 271 92 213 142 229 221 143 257 171 300 154 374 230 429 210 484 242 567 175 624 221 683 165 744 210 823 162 894 213 960 199V375H0Z" fill="url(#farRidge)"/>
+  <path d="m194 170 27-27 36 28 21-8-20 23-21-10-8 12-9-16Z" fill="#dee0c3" opacity=".65"/>
+  <path d="M0 307 77 282 146 302 212 252 270 276 324 245 405 290 466 255 539 278 603 252 680 303 735 265 817 286 893 254 960 275V397H0Z" fill="#769382"/>
+  <g opacity=".4" fill="#f0e5b4"><path d="m355 155 37-16-214 347-126 0Z"/><path d="m402 161 16-8-51 297-60 0Z"/><path d="m426 158 18-13 96 287-59 0Z"/></g>
+  <g opacity=".46">
+    <use href="#pineTree" transform="translate(33 359) scale(.48)"/><use href="#pineTree" transform="translate(76 353) scale(.55)"/><use href="#pineTree" transform="translate(122 356) scale(.46)"/><use href="#pineTree" transform="translate(166 348) scale(.43)"/><use href="#pineTree" transform="translate(204 348) scale(.34)"/><use href="#pineTree" transform="translate(242 350) scale(.43)"/><use href="#pineTree" transform="translate(286 351) scale(.32)"/><use href="#pineTree" transform="translate(329 351) scale(.38)"/><use href="#pineTree" transform="translate(371 351) scale(.26)"/><use href="#pineTree" transform="translate(417 353) scale(.36)"/><use href="#pineTree" transform="translate(460 355) scale(.32)"/><use href="#pineTree" transform="translate(498 353) scale(.31)"/><use href="#pineTree" transform="translate(543 355) scale(.37)"/><use href="#pineTree" transform="translate(589 355) scale(.3)"/><use href="#pineTree" transform="translate(626 356) scale(.37)"/><use href="#pineTree" transform="translate(674 350) scale(.5)"/><use href="#pineTree" transform="translate(719 349) scale(.46)"/><use href="#pineTree" transform="translate(762 348) scale(.58)"/><use href="#pineTree" transform="translate(810 347) scale(.48)"/><use href="#pineTree" transform="translate(856 350) scale(.59)"/><use href="#pineTree" transform="translate(908 351) scale(.6)"/>
+  </g>
+  <path d="M0 361Q140 331 308 354T628 357Q827 319 960 350V600H0Z" fill="url(#meadow)"/>
+  <path d="M550 360Q671 342 788 361T960 353V453Q817 395 706 411 638 403 688 383Z" fill="url(#water)"/>
+  <g fill="none" stroke="#e7e6bc" stroke-linecap="round" opacity=".45"><path d="M668 373h89m38 10h80m-149 13h95m-87-32h42m62 42h79m-14-33h46"/><path d="M777 417h39m31-22h58" stroke-width="2"/></g>
+  <path d="M383 352C394 384 315 393 310 427S448 489 406 600H124C200 527 251 517 243 475S253 404 336 383 375 359 371 354Z" fill="url(#trail)" opacity=".85"/>
+  <path d="M290 415q-42 17-17 57M313 487q53 24 29 61" fill="none" stroke="#dbcba2" stroke-width="2" opacity=".5"/>
+  <ellipse cx="360" cy="347" rx="290" ry="14" fill="#e1e0b9" opacity=".3" filter="url(#haze)"/>
+  <g opacity=".85"><use href="#pineTree" transform="translate(123 395) scale(.99)"/><use href="#pineTree" transform="translate(204 367) scale(.65)"/><use href="#pineTree" transform="translate(66 397) scale(1.23)"/><use href="#pineTree" transform="translate(839 399) scale(.91)"/><use href="#pineTree" transform="translate(906 411) scale(1.25)"/></g>
+  <g transform="translate(323 348) scale(.37)" opacity=".78"><ellipse cx="90" cy="124" rx="116" ry="15" fill="#536f49" opacity=".4"/><use href="#deer"/></g>
+  <path d="M468 445 494 434 521 442 529 458 482 464 459 455Z" fill="#89927a"/><path d="m468 445 26-11 27 8-17 9Z" fill="#b6b79c"/>
+  <ellipse cx="653" cy="497" rx="138" ry="19" fill="#496447" opacity=".4"/>
+  <g transform="translate(545 374) scale(1.03)"><use href="#deer"/><use href="#antlers"/></g>
+  <g fill="none" stroke-linecap="round">
+    <path d="m579 509-5-28m5 19 9-17m-9 21-13-15m104 21-4-30m3 19 11-19m-9 25-13-18m120 20 2-30m-3 18-10-18m12 24 11-16m-327 41-2-29m1 16 10-19m-10 25-13-15" stroke="#5d7748" stroke-width="3"/>
+    <path d="m559 528 4-22m-2 15-10-15m11 12 10-17m135 38 1-30m0 21 14-15m-15 7-9-18m91 32-1-19m-2 10-10-10m12 13 10-17" stroke="#d2c58b" stroke-width="2"/>
+  </g>
+  <g fill="#e0c87e" opacity=".8"><circle cx="524" cy="429" r="2"/><circle cx="532" cy="452" r="1.5"/><circle cx="829" cy="469" r="2.5"/><circle cx="759" cy="527" r="2"/><circle cx="431" cy="407" r="1.5"/><circle cx="303" cy="535" r="2"/><circle cx="215" cy="414" r="1.6"/><circle cx="815" cy="432" r="1.5"/></g>
+  <g fill="#2d4e3c"><path d="M0 448Q84 425 151 463T281 600H0Z"/><path d="M960 451Q884 446 837 493T737 600h223Z"/></g>
+  <use href="#pineTree" transform="translate(-29 566) scale(2.52)"/>
+  <use href="#pineTree" transform="translate(1018 556) scale(2.5)"/>
+  <g fill="none" stroke="#749168" stroke-width="3" stroke-linecap="round" opacity=".6"><path d="m84 543 10-49m-6 30-18-26m21 14 22-22m-22 38 27-12m12 45-7-31m6 21 18-17m683 37-8-51m3 30-22-20m25 13 17-26m-18 35-24-7"/></g>
+  <path fill="url(#vignette)" d="M0 0h960v600H0z"/>
+  <g stroke="#f4e5b6" stroke-width="1.5" fill="none" opacity=".8"><path d="M644 159v20l52 19" stroke-dasharray="3 5"/><circle cx="697" cy="198" r="3"/></g>
+  <g filter="url(#labelShadow)">
+    <rect x="547" y="83" width="214" height="78" rx="14" fill="#f5edcf"/>
+    <rect x="555" y="91" width="62" height="62" rx="10" fill="#e4dfb9"/>
+    <g transform="translate(574 108)" fill="none" stroke="#41664b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m0 14 7-5 8-5v26l-8-5H0Zm21-7q8 10 0 20m5-25q13 15 0 30"/></g>
+    <text x="632" y="119" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="600" fill="#254535">ciervo</text>
+    <text x="633" y="143" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="1.1" fill="#748060">deer</text>
+  </g>
+  <g transform="translate(195 220) rotate(-4)" filter="url(#labelShadow)">
+    <rect width="154" height="60" rx="12" fill="#274b3d" fill-opacity=".9" stroke="#c3cdab" stroke-opacity=".5"/>
+    <text x="22" y="29" font-family="Arial,Helvetica,sans-serif" font-size="23" font-weight="500" fill="#f0e8c9">bosque</text>
+    <text x="23" y="47" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing=".7" fill="#c6d0af">forest</text>
+    <path d="m68 60 9 9 9-9" fill="#274b3d"/>
+  </g>
+  <g fill="#f8ebbf" opacity=".55"><circle cx="464" cy="238" r="2"/><circle cx="501" cy="191" r="1.4"/><circle cx="440" cy="286" r="1.4"/><circle cx="545" cy="264" r="1.7"/><circle cx="368" cy="191" r="1.3"/></g>
+</svg>

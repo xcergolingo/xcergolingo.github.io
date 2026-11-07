@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "title": "Forest essentials",
+  "primaryLanguage": "en",
+  "learningLanguage": "es",
+  "words": [
+    { "id": "nature-deer", "word": "ciervo", "translation": "deer", "sentence": "El ciervo está en el bosque.", "sentenceTranslation": "The deer is in the forest." },
+    { "id": "nature-forest", "word": "bosque", "translation": "forest", "sentence": "El bosque es tranquilo.", "sentenceTranslation": "The forest is peaceful." },
+    { "id": "nature-tree", "word": "árbol", "translation": "tree", "sentence": "El árbol es alto.", "sentenceTranslation": "The tree is tall." },
+    { "id": "nature-water", "word": "agua", "translation": "water", "sentence": "El agua está fría.", "sentenceTranslation": "The water is cold." },
+    { "id": "nature-mountain", "word": "montaña", "translation": "mountain", "sentence": "La montaña está lejos.", "sentenceTranslation": "The mountain is far away." },
+    { "id": "nature-river", "word": "río", "translation": "river", "sentence": "El río pasa por el bosque.", "sentenceTranslation": "The river runs through the forest." },
+    { "id": "nature-sky", "word": "cielo", "translation": "sky", "sentence": "El cielo está azul.", "sentenceTranslation": "The sky is blue." },
+    { "id": "nature-leaf", "word": "hoja", "translation": "leaf", "sentence": "La hoja es verde.", "sentenceTranslation": "The leaf is green." }
+  ]
+}
