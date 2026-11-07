@@ -6,7 +6,12 @@ A language-learning Three.js r170 sniper game for desktop and touch browsers. Al
 
 Serve `dist/` with an HTTP static server. Opening `index.html` as a `file://` URL does not support its JavaScript modules. The hosted version uses the static directory declared in `.openai/hosting.json`.
 
-Hit orange training targets across three rounds: 6 stationary targets, 8 moving targets, then 10 mixed-distance moving targets. Small bright centers and head plates award precision bonuses. Relaxed practice has no time limit by default. Enable Timed challenge for a countdown and remaining-time bonuses. The rifle holds 5 rounds, uses a 2.1-second reload, and cycles its bolt between shots. A new supply box becomes available when reserves are depleted. Best score and preferences are saved locally.
+Choose a difficulty on the start screen:
+
+- **Relaxed:** orange training targets across three rounds of 6, 8, and 10 targets. There is no time limit by default. The optional Timed challenge setting adds a countdown and remaining-time bonuses. Small bright centers and head plates award precision bonuses.
+- **Hard — Walking patrols:** stylized people walk around the rooftops with moving arms and legs, natural turns, brief pauses, and changes in direction. Solid rooftop cover blocks shots until a character steps into view. Three rounds have 8, 10, and 12 characters with faster patrols and limits of 85, 95, and 110 seconds. Hard always uses a timer and disables aim slowdown; Find still helps locate a patrol. Head hits award precision bonuses.
+
+Both difficulties support language learning and Classic mode. Word labels stay attached to the characters, and a hit teaches the word carried by that target. The rifle holds 5 rounds, uses a 2.1-second reload, and cycles its bolt between shots. A new supply box becomes available when reserves are depleted. Best scores are saved separately for each difficulty. Difficulty changes during a run apply on the next restart, and the selected difficulty is remembered locally. Aim assist and optional timed challenge preferences apply to Relaxed mode.
 
 ### Controls
 
@@ -49,6 +54,7 @@ Native/web integrations may call `window.setGoLingoData(payload)` or `window.rec
 - `dist/index.html` — interface and dialogs
 - `dist/style.css` — desktop, portrait, and landscape layouts
 - `dist/game.js` — input, targets, raycast scoring, rounds, audio, and UI
+- `dist/patrols.js` — articulated walking characters, bounded patrol routes, and solid rooftop cover
 - `dist/world.js` — procedural skyline, harbor, rooftops, and lighting
 - `dist/weapon.js` — camera-attached rifle and animation
 - `dist/learning.js` — content, repeating speech, import/export, native hooks
@@ -62,5 +68,7 @@ The public game is hosted at `https://xcergolingo.github.io/games/longshot/` and
 ## Verification
 
 JavaScript syntax checks pass. A Node harness using real Three.js geometry, camera transforms, and raycasts, with mocked browser DOM/audio/renderer, completed all 24 hits across three rounds and checked scoring, precision hits, reloading, cooldown, scope state, pause, timeout, restart, and Japanese payload learning/export. Independent geometry checks passed 1,500 target sightlines and 270 target-mesh intersections from multiple rooftop positions. Responsive interface layouts were inspected separately.
+
+The Hard-mode harness completed all 30 walking targets and an intentionally blocked cover shot, and verified that each successful hit collected the corresponding lesson word. It checked pause/resume, the timer, difficulty changes on restart, separate score histories, and removal of old cover. A 40-second simulation of all 12 rooftops at all three speed tiers checked bounded routes, articulated gait, pauses, turns, and both covered and exposed shooting windows. The updated difficulty selector and Start control were checked at 320×568, 390×844, 844×390, and 1280×800.
 
 The available preview browser reported its WebGL renderer as disabled. GPU rendering, visual scene quality, device performance, and actual mobile audio playback could not be verified in that environment.

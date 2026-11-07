@@ -132,7 +132,7 @@ export function createTargetWords() {
       const sprite = new THREE.Sprite(material);
       sprite.name = 'GoLingo target word';
       sprite.center.set(.5, 0);
-      sprite.position.set(0, 5.05, 0);
+      sprite.position.set(0, target.labelHeight ?? 5.05, 0);
       sprite.userData.isTargetWord = true;
       target.group.add(sprite);
       target.wordLabel = sprite;

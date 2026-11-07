@@ -2,26 +2,38 @@ import * as THREE from './vendor/three.module.js';
 import { createWorld } from './world.js';
 import { createWeapon } from './weapon.js';
 import { createLearning } from './learning.js?v=2';
-import { createTargetWords } from './target-words.js?v=2';
+import { createTargetWords } from './target-words.js?v=3';
+import { createPatrolTarget } from './patrols.js?v=3';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
 const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
-const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
+const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, difficulty: 'relaxed', showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
+settings.difficulty = settings.difficulty === 'hard' ? 'hard' : 'relaxed';
 const rounds = [
   { name: 'SIGHTING IN', count: 6, seconds: 100, moving: false, pads: [0, 1, 2, 3, 4, 5] },
   { name: 'ON THE MOVE', count: 8, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7] },
   { name: 'THE LONG GAME', count: 10, seconds: 130, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
 ];
+const hardRounds = [
+  { name: 'WALKING PATROLS', count: 8, seconds: 85, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7] },
+  { name: 'QUICKER FOOTSTEPS', count: 10, seconds: 95, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
+  { name: 'ROOFTOP PURSUIT', count: 12, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+];
+const bestKey = (difficulty = state.difficulty) => difficulty === 'hard' ? 'longshot.best.hard.v1' : 'longshot.best.v1';
+const readBest = difficulty => Math.max(0, Number(read(bestKey(difficulty), 0)) || 0);
 const state = {
-  mode: 'menu', round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
+  mode: 'menu', difficulty: settings.difficulty, round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
   ammo: 5, reserve: 25, time: 100, reloadTime: 0, cooldown: 0, recoil: 0,
   scoped: false, zoom: 4, yaw: 0, pitch: -.07, moveX: 0, moveY: 0,
   steady: false, breath: 1, transitioning: 0, elapsed: 0, guideTime: 0,
-  best: Math.max(0, Number(read('longshot.best.v1', 0)) || 0), lessonOffset: 0,
+  best: readBest(settings.difficulty), lessonOffset: 0,
 };
+const isHard = () => state.difficulty === 'hard';
+const activeRounds = () => isHard() ? hardRounds : rounds;
+const isTimed = () => isHard() || settings.timed;
 let renderer, scene, camera, world, weapon, targetWords, targets = [], effects = [], audioContext;
 let currentWord = null, learning, aimTween = null, toastUntil = 0, hitUntil = 0, bannerUntil = 0;
 let dialogResume = false, lastHud = 0, lastRange = 0, targetUnderAim = null;
@@ -98,33 +110,42 @@ function createTarget(pad, index, moving) {
 }
 
 function clearTargets() {
-  for (const target of targets) { targetWords?.remove(target); scene.remove(target.group); target.group.traverse(o => o.geometry?.dispose()); target.materials.forEach(m => m.dispose()); }
+  for (const target of targets) {
+    targetWords?.remove(target);
+    scene.remove(target.group); target.group.traverse(o => o.geometry?.dispose());
+    if (target.coverGroup) { scene.remove(target.coverGroup); target.coverGroup.traverse(o => o.geometry?.dispose()); }
+    target.materials.forEach(m => m.dispose());
+  }
   targets = [];
 }
 function assignTargetLessons() {
   if (!learning || !targetWords) return;
   const words = learning.getItems();
   if (!words.length) return;
-  const roundOffset = rounds.slice(0, state.round).reduce((total, round) => total + round.count, 0);
+  const roundOffset = activeRounds().slice(0, state.round).reduce((total, round) => total + round.count, 0);
   targets.forEach((target, index) => {
     const item = words[(state.lessonOffset + roundOffset + index) % words.length];
     targetWords.assign(target, item, { showTranslation: settings.showTranslations });
     targetWords.update(target, { visible: learning.enabled && settings.showTargetWords && state.mode === 'playing', showTranslation: settings.showTranslations, camera });
   });
 }
-function loadTargets(moving = false, pads = rounds[state.round].pads) {
-  clearTargets(); pads.forEach((p, i) => targets.push(createTarget(world.targetPads[p], i, moving)));
+function loadTargets(moving = false, pads = activeRounds()[state.round].pads) {
+  clearTargets(); pads.forEach((p, i) => targets.push(isHard()
+    ? createPatrolTarget(scene, world.targetPads[p], i, state.round)
+    : createTarget(world.targetPads[p], i, moving)));
   assignTargetLessons();
   scene.updateMatrixWorld(true);
 }
 
 function updateHud() {
-  const r = rounds[state.round];
+  const r = activeRounds()[state.round];
   $('roundLabel').textContent = `ROUND ${String(state.round + 1).padStart(2, '0')} / 03`;
+  $('difficultyLabel').textContent = isHard() ? 'HARD' : 'RELAXED';
+  $('difficultyLabel').classList.toggle('hard', isHard());
   $('roundName').textContent = r.name;
-  $('objective').textContent = learning?.enabled ? `Discover ${r.count} word targets` : `Hit all ${r.count} orange targets`;
-  $('timerLabel').textContent = settings.timed ? 'TIME REMAINING' : 'LEARN AT YOUR PACE';
-  $('timer').textContent = settings.timed ? formatTime(state.time) : '∞'; $('timer').parentElement.classList.toggle('urgent', settings.timed && state.time < 20);
+  $('objective').textContent = learning?.enabled ? `Discover ${r.count}${isHard() ? ' walking' : ''} word targets` : `Hit all ${r.count} ${isHard() ? 'walking' : 'orange'} targets`;
+  $('timerLabel').textContent = isTimed() ? 'TIME REMAINING' : 'LEARN AT YOUR PACE';
+  $('timer').textContent = isTimed() ? formatTime(state.time) : '∞'; $('timer').parentElement.classList.toggle('urgent', isTimed() && state.time < 20);
   $('score').textContent = String(state.score).padStart(4, '0');
   $('kills').textContent = state.kills; $('goal').textContent = r.count;
   $('accuracy').textContent = `ACCURACY ${state.shots ? Math.round(state.totalKills / state.shots * 100) + '%' : '—'}`;
@@ -151,14 +172,15 @@ function toggleScope() { if (state.mode !== 'playing') return; state.scoped = !s
 function zoomScope() { state.zoom = state.zoom === 2 ? 4 : state.zoom === 4 ? 8 : 2; if (!state.scoped) state.scoped = true; updateScope(); }
 
 function startRound() {
-  const r = rounds[state.round]; state.kills = 0; state.time = r.seconds; state.ammo = 5; state.reserve = 25;
+  const r = activeRounds()[state.round]; state.kills = 0; state.time = r.seconds; state.ammo = 5; state.reserve = 25;
   state.reloadTime = 0; state.cooldown = 0; state.transitioning = 0; state.breath = 1; state.guideTime = 7;
-  loadTargets(r.moving, r.pads); banner(`ROUND ${String(state.round + 1).padStart(2, '0')} / 03`, r.name, 2.5);
+  loadTargets(r.moving, r.pads); banner(`${isHard() ? 'HARD · ' : ''}ROUND ${String(state.round + 1).padStart(2, '0')} / 03`, r.name, 2.5);
   if (learning.enabled && targets[0]?.lessonItem) learning.preview(targets[0].lessonItem);
   updateHud();
 }
 function startGame() {
   unlockAudio(); learning.stop();
+  state.difficulty = settings.difficulty; state.best = readBest(state.difficulty);
   state.mode = 'playing'; state.round = 0; state.score = 0; state.totalKills = 0; state.shots = 0; state.precise = 0;
   state.elapsed = 0; state.scoped = false; state.yaw = 0; state.pitch = -.08; state.recoil = 0; state.steady = false;
   const lessonSize = learning.getItems().length || 1;
@@ -167,7 +189,7 @@ function startGame() {
   camera.position.copy(world.spawn); resetInput();
   $('intro').hidden = true; $('hud').hidden = false; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
   document.body.classList.add('playing'); updateScope(); startRound(); syncLearning();
-  toast(isTouch ? 'Drag to aim · Scope to zoom · Fire to shoot' : 'Drag to aim · Space to scope · Click or F to fire', 4);
+  toast(isHard() ? 'Hard: track the walking patrols · Watch for cover · Beat the clock' : isTouch ? 'Drag to aim · Scope to zoom · Fire to shoot' : 'Drag to aim · Space to scope · Click or F to fire', 4);
 }
 function pauseGame(showPanel = true) {
   if (state.mode !== 'playing') return;
@@ -177,20 +199,21 @@ function pauseGame(showPanel = true) {
 function resumeGame() { state.mode = 'playing'; $('pausePanel').hidden = true; resetInput(); unlockAudio(); if (learning.enabled) learning.resume(); }
 function resetInput() { keys.clear(); state.moveX = 0; state.moveY = 0; state.steady = false; $('steadyBtn').classList.remove('active'); $('joystickThumb').style.transform = ''; pointer.id = null; aimTween = null; }
 function mainMenu() {
-  state.mode = 'menu'; state.scoped = false; state.recoil = 0; resetInput(); learning.stop();
+  state.mode = 'menu'; state.difficulty = settings.difficulty; state.best = readBest(state.difficulty); state.round = 0;
+  state.scoped = false; state.recoil = 0; resetInput(); learning.stop();
   $('intro').hidden = false; $('hud').hidden = true; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
-  document.body.classList.remove('playing'); camera.position.copy(world.spawn); loadTargets(false, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
-  $('bestIntro').textContent = state.best ? state.best.toLocaleString() : '—'; updateScope();
+  document.body.classList.remove('playing'); camera.position.copy(world.spawn); loadTargets(isHard(), isHard() ? hardRounds[0].pads : [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  syncDifficultyUI(); updateScope();
 }
 function finishGame(won) {
   state.mode = 'results'; state.scoped = false; resetInput(); learning.stop(); updateScope();
   const newRecord = state.score > state.best;
-  if (newRecord) { state.best = state.score; save('longshot.best.v1', state.best); }
-  $('resultEyebrow').textContent = won ? 'ALL THREE ROUNDS COMPLETE' : 'THE CLOCK RAN OUT';
+  if (newRecord) { state.best = state.score; save(bestKey(), state.best); }
+  $('resultEyebrow').textContent = won ? isHard() ? 'HARD PATROLS COMPLETE' : 'ALL THREE ROUNDS COMPLETE' : 'THE CLOCK RAN OUT';
   $('resultTitle').replaceChildren(...(won ? ['NICE', 'SHOOTING.'] : ['KEEP', 'YOUR FOCUS.']).flatMap((txt, i) => i ? [document.createElement('br'), document.createTextNode(txt)] : [document.createTextNode(txt)]));
-  $('resultSubtitle').textContent = won ? 'Every target cleared. The rooftop is yours.' : `${state.totalKills} targets hit. Try using Find to face a target, then Scope for a closer look.`;
+  $('resultSubtitle').textContent = won ? isHard() ? '30 walking targets cleared. You mastered the patrols.' : 'Every target cleared. The rooftop is yours.' : `${state.totalKills} targets hit. ${isHard() ? 'Watch the walking rhythm and wait for an opening past cover.' : 'Try using Find to face a target, then Scope for a closer look.'}`;
   $('resultScore').textContent = state.score.toLocaleString(); $('resultAccuracy').textContent = (state.shots ? Math.round(state.totalKills / state.shots * 100) : 0) + '%';
-  $('resultPrecision').textContent = state.precise; $('recordLine').textContent = newRecord ? 'NEW PERSONAL BEST. MAKE YOUR MARK.' : `YOUR BEST: ${state.best.toLocaleString()}`;
+  $('resultPrecision').textContent = state.precise; $('recordLine').textContent = newRecord ? `NEW ${isHard() ? 'HARD' : 'RELAXED'} PERSONAL BEST.` : `${isHard() ? 'HARD' : 'RELAXED'} BEST: ${state.best.toLocaleString()}`;
   $('exportBtn').hidden = !learning.enabled; $('resultPanel').hidden = false;
   if (won) { tone(440, .25, .08); setTimeout(() => tone(660, .4, .08), 130); }
 }
@@ -219,7 +242,7 @@ function fire() {
   state.ammo--; state.shots++; state.cooldown = .88; shotSound(); weapon.flash();
   scene.updateMatrixWorld(true); raycaster.setFromCamera(center, camera);
   const hitMeshes = targets.filter(t => t.alive).flatMap(t => t.hitMeshes);
-  const intersections = raycaster.intersectObjects([...hitMeshes, ...world.colliders], false);
+  const intersections = raycaster.intersectObjects([...hitMeshes, ...world.colliders, ...targets.flatMap(t => t.coverMeshes || [])], false);
   const nearest = intersections[0];
   const point = nearest ? nearest.point.clone() : raycaster.ray.at(320, new THREE.Vector3());
   const from = new THREE.Vector3(.26, -.20, -.95).applyMatrix4(camera.matrixWorld);
@@ -235,12 +258,12 @@ function fire() {
     setTimeout(() => tone(precise ? 1160 : 820, .13, .055, 'sine', precise ? 1500 : 1000), 65);
     if (learning.enabled) learning.onHit(target.lessonItem);
     state.guideTime = 1.5;
-    if (state.kills >= rounds[state.round].count) {
-      const bonus = settings.timed ? Math.ceil(state.time) * 10 : 0; state.score += bonus; state.transitioning = 3.2;
+    if (state.kills >= activeRounds()[state.round].count) {
+      const bonus = isTimed() ? Math.ceil(state.time) * 10 : 0; state.score += bonus; state.transitioning = 3.2;
       banner(learning.enabled ? 'WORDS COLLECTED' : 'ROUND CLEAR', bonus ? `+${bonus} TIME BONUS` : state.round === 2 ? 'LESSON COMPLETE' : 'NEXT ROOFTOP TRIAL', 2.8); tone(520, .2, .07);
     }
   } else {
-    $('hitNotice').textContent = nearest ? 'ADJUST YOUR AIM' : 'SHOT WIDE';
+    $('hitNotice').textContent = nearest?.object.userData.isPatrolCover ? 'COVER BLOCKED · WAIT FOR AN OPENING' : nearest ? 'ADJUST YOUR AIM' : 'SHOT WIDE';
     $('hitNotice').style.opacity = '.8'; hitUntil = performance.now() + 800;
   }
   effectAt(point, !!target, from); state.recoil = 1; updateHud();
@@ -249,7 +272,7 @@ function fire() {
 function nearestTarget() {
   camera.getWorldDirection(rayDirection);
   let nearest = null, angle = -Infinity;
-  for (const t of targets) { if (!t.alive) continue; v.copy(t.group.position); v.y += 1.95; v.sub(camera.position).normalize(); const dot = v.dot(rayDirection); if (dot > angle) { angle = dot; nearest = t; } }
+  for (const t of targets) { if (!t.alive) continue; v.copy(t.group.position); v.y += t.aimHeight ?? 1.95; v.sub(camera.position).normalize(); const dot = v.dot(rayDirection); if (dot > angle) { angle = dot; nearest = t; } }
   return nearest;
 }
 function hunt() {
@@ -257,13 +280,13 @@ function hunt() {
   const t = nearestTarget(); if (!t) return;
   aimTween = { target: t, time: .65 }; state.guideTime = 4;
   if (learning.enabled && t.lessonItem) learning.preview(t.lessonItem);
-  toast('Target located. Scope in and take the shot.', 2.1);
+  toast(isHard() ? 'Patrol located. Track their movement and watch the cover.' : 'Target located. Scope in and take the shot.', 2.1);
 }
 function aim(dx, dy) {
   if (state.mode !== 'playing') return;
   aimTween = null;
   let sensitivity = .0025 * settings.sensitivity * (state.scoped ? 1 / state.zoom : 1);
-  if (settings.assist && targetUnderAim && state.scoped) sensitivity *= .65;
+  if (!isHard() && settings.assist && targetUnderAim && state.scoped) sensitivity *= .65;
   state.yaw -= dx * sensitivity; state.pitch = clamp(state.pitch - dy * sensitivity, -.92, 1.1);
 }
 
@@ -271,6 +294,29 @@ let learningStatusText = '';
 function setLearningStatus(message) {
   learningStatusText = message;
   $('importStatus').textContent = message;
+}
+function syncDifficultyUI() {
+  const hard = settings.difficulty === 'hard';
+  $('difficultySelect').value = settings.difficulty; $('difficultySetting').value = settings.difficulty;
+  $('difficultyHint').textContent = hard
+    ? 'Walking people · changing directions · cover · timed · no aim assist'
+    : 'Training targets · gentle aim assist · learn at your pace';
+  const pending = state.mode !== 'menu' && settings.difficulty !== state.difficulty;
+  $('difficultySettingHint').textContent = pending
+    ? `Next run: ${hard ? 'Hard walking patrols' : 'Relaxed'}. Restart from the pause menu to switch.`
+    : 'Hard uses walking patrols, a round timer and no aim assist. Difficulty changes apply to your next run.';
+  $('paceLabel').textContent = hard ? 'HARD · TIMED PATROLS' : settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
+  const best = readBest(settings.difficulty);
+  $('bestIntro').textContent = best ? best.toLocaleString() : '—';
+}
+function setDifficulty(value) {
+  settings.difficulty = value === 'hard' ? 'hard' : 'relaxed';
+  save('longshot.settings.v1', settings);
+  if (state.mode === 'menu' && world) {
+    state.difficulty = settings.difficulty; state.best = readBest(state.difficulty); state.round = 0;
+    loadTargets(isHard(), isHard() ? hardRounds[0].pads : [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  }
+  syncDifficultyUI();
 }
 function syncLearning() {
   if (!learning) return;
@@ -281,7 +327,7 @@ function syncLearning() {
   $('wordTranslation').hidden = !settings.showTranslations;
   $('sentenceBtn').hidden = !currentWord?.sentence;
   $('startBtn').firstElementChild.textContent = learning.enabled ? 'PLAY & LEARN' : 'ENTER THE RANGE';
-  $('paceLabel').textContent = settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
+  syncDifficultyUI();
   const languageSelect = $('languageSelect'), code = learning.languages.learningLanguage;
   for (const option of languageSelect.querySelectorAll('option[data-imported]')) if (option.value !== code) option.remove();
   if (![...languageSelect.options].some(option => option.value === code)) {
@@ -307,7 +353,7 @@ function settingsChanged() {
   settings.assist = $('assistSetting').checked; settings.hints = $('hintsSetting').checked;
   settings.timed = $('timedSetting').checked; settings.showTargetWords = $('targetWordsSetting').checked; settings.showTranslations = $('translationSetting').checked;
   $('wordTranslation').hidden = !settings.showTranslations;
-  $('paceLabel').textContent = settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
+  syncDifficultyUI();
   document.body.classList.toggle('no-hints', !settings.hints); $('soundBtn').classList.toggle('off', !settings.sound);
   $('soundBtn').setAttribute('aria-label', settings.sound ? 'Mute game sound' : 'Unmute game sound'); save('longshot.settings.v1', settings);
 }
@@ -318,6 +364,8 @@ function openDialog(id) {
 
 function bindUI() {
   $('startBtn').addEventListener('click', startGame);
+  $('difficultySelect').addEventListener('change', e => setDifficulty(e.target.value));
+  $('difficultySetting').addEventListener('change', e => setDifficulty(e.target.value));
   $('classicMode').addEventListener('click', () => setLearning(false)); $('learningMode').addEventListener('click', () => setLearning(true));
   $('settingsBtn').addEventListener('click', () => openDialog('settingsDialog'));
   $('pauseSettings').addEventListener('click', () => openDialog('settingsDialog'));
@@ -413,16 +461,19 @@ function resize() {
 
 function updateTargets(dt, time) {
   for (const t of targets) {
-    targetWords.update(t, { visible: learning.enabled && settings.showTargetWords && state.mode === 'playing', showTranslation: settings.showTranslations, camera });
     if (t.alive) {
-      if (t.moving) t.group.position.x = t.pad.x + Math.sin(time * (.35 + state.round * .08) + t.phase) * t.pad.width * .32;
-      t.marker.position.y = 4.7 + Math.sin(time * 2.1 + t.phase) * .12;
-      t.marker.rotation.y = time * .8;
+      if (t.kind === 'patrol') t.update(dt, time);
+      else {
+        if (t.moving) t.group.position.x = t.pad.x + Math.sin(time * (.35 + state.round * .08) + t.phase) * t.pad.width * .32;
+        t.marker.position.y = 4.7 + Math.sin(time * 2.1 + t.phase) * .12;
+        t.marker.rotation.y = time * .8;
+      }
     } else if (t.hitAge > 0) {
       t.hitAge += dt; t.group.rotation.x = -Math.min(Math.PI / 2, t.hitAge * 4.5);
       t.group.position.y = t.pad.y - Math.min(.3, t.hitAge * .4);
       if (t.hitAge > .7) { t.group.visible = false; t.hitAge = 0; }
     }
+    targetWords.update(t, { visible: learning.enabled && settings.showTargetWords && state.mode === 'playing', showTranslation: settings.showTranslations, camera });
   }
 }
 function updateEffects(dt) {
@@ -436,7 +487,7 @@ function updateGuide(dt) {
   state.guideTime = Math.max(0, state.guideTime - dt);
   const t = nearestTarget();
   if (!t || state.guideTime <= 0 || state.scoped) { $('targetGuide').hidden = true; return; }
-  targetPoint.copy(t.group.position); targetPoint.y += 5.3; targetPoint.project(camera);
+  targetPoint.copy(t.group.position); targetPoint.y += t.guideHeight ?? 5.3; targetPoint.project(camera);
   if (targetPoint.z > 1 || Math.abs(targetPoint.x) > .9 || Math.abs(targetPoint.y) > .8) { $('targetGuide').hidden = true; return; }
   $('targetGuide').hidden = false; $('targetGuide').style.left = `${(targetPoint.x * .5 + .5) * innerWidth}px`; $('targetGuide').style.top = `${(-targetPoint.y * .5 + .5) * innerHeight}px`;
 }
@@ -446,14 +497,14 @@ function updateGame(dt, now) {
   if (state.reloadTime > 0) { state.reloadTime = Math.max(0, state.reloadTime - dt); if (state.reloadTime === 0) { const amount = Math.min(5 - state.ammo, state.reserve); state.ammo += amount; state.reserve -= amount; tone(210, .07, .06, 'square', 110); } }
   if (state.transitioning > 0) {
     state.transitioning -= dt;
-    if (state.transitioning <= 0) { if (state.round === rounds.length - 1) { finishGame(true); return; } state.round++; startRound(); state.scoped = false; updateScope(); }
-  } else if (settings.timed) { state.time = Math.max(0, state.time - dt); if (state.time <= 0) { finishGame(false); return; } }
+    if (state.transitioning <= 0) { if (state.round === activeRounds().length - 1) { finishGame(true); return; } state.round++; startRound(); state.scoped = false; updateScope(); }
+  } else if (isTimed()) { state.time = Math.max(0, state.time - dt); if (state.time <= 0) { finishGame(false); return; } }
 
   const wantsSteady = state.steady || keys.has('shift');
   state.breath = clamp(state.breath + dt * (wantsSteady && state.scoped ? -.18 : .15), 0, 1);
   const steady = wantsSteady && state.breath > .02;
   if (aimTween) {
-    const t = aimTween.target; v.copy(t.group.position); v.y += 1.95; v.sub(camera.position);
+    const t = aimTween.target; v.copy(t.group.position); v.y += t.aimHeight ?? 1.95; v.sub(camera.position);
     const yaw = Math.atan2(-v.x, -v.z), pitch = Math.atan2(v.y, Math.hypot(v.x, v.z));
     let delta = yaw - state.yaw; delta = Math.atan2(Math.sin(delta), Math.cos(delta));
     state.yaw += delta * Math.min(1, dt * 13); state.pitch = lerp(state.pitch, pitch, Math.min(1, dt * 13));
@@ -477,7 +528,7 @@ function updateGame(dt, now) {
   if (now - lastHud > 100) { updateHud(); lastHud = now; }
   if (now - lastRange > 200) {
     lastRange = now; scene.updateMatrixWorld(true); raycaster.setFromCamera(center, camera);
-    const hit = raycaster.intersectObjects(targets.filter(t => t.alive).flatMap(t => t.hitMeshes), false)[0]; targetUnderAim = hit?.object.userData.target || null;
+    const hit = raycaster.intersectObjects([...targets.filter(t => t.alive).flatMap(t => t.hitMeshes), ...world.colliders, ...targets.flatMap(t => t.coverMeshes || [])], false)[0]; targetUnderAim = hit?.object.userData.target || null;
     const nearest = targetUnderAim || nearestTarget(); $('scopeRange').textContent = nearest ? Math.round(camera.position.distanceTo(nearest.group.position)) : '—';
   }
 }
@@ -515,7 +566,7 @@ async function init() {
     window.__gameReady = true; $('startBtn').disabled = false; $('loader').style.opacity = '0'; setTimeout(() => $('loader').hidden = true, 650);
     requestAnimationFrame(frame);
     // Read-only QA state keeps validation separate from gameplay controls.
-    window.longshotStatus = () => ({ mode: state.mode, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), learning: learning.enabled, words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving })) });
+    window.longshotStatus = () => ({ mode: state.mode, difficulty: state.difficulty, nextDifficulty: settings.difficulty, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), timed: isTimed(), learning: learning.enabled, words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving, kind: t.kind || 'training' })) });
   } catch (error) {
     console.error(error); $('loader').hidden = true; $('fatal').hidden = false;
     $('fatalText').textContent = 'This game needs WebGL graphics. Try reopening it in an up-to-date Safari or Chrome browser. ' + (error?.message || '');
