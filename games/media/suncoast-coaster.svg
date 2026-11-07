@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">Suncoast — Word Coaster illustration</title>
+  <desc id="desc">An original illustration of an orange roller coaster sweeping over a green coastal island. A teal Ferris wheel, sunny sky, and vocabulary gates with agua and water, cielo and sky, and hola and hello invite visitors to learn as they ride.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#b7dcd9"/><stop offset="1" stop-color="#f8ebcf"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#8acbc6"/><stop offset="1" stop-color="#4da6a5"/></linearGradient>
+    <linearGradient id="land" x1=".15" y1="0" x2=".8" y2="1"><stop stop-color="#a9bf8c"/><stop offset="1" stop-color="#72976d"/></linearGradient>
+    <linearGradient id="rail" x1="0" x2="0" y2="1"><stop stop-color="#f4a066"/><stop offset="1" stop-color="#db6544"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-40%" width="160%" height="190%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#345b51" flood-opacity=".14"/></filter>
+    <g id="pine"><path d="M-3 0h6v-27h-6" fill="#907851"/><path d="m0-66 24 42h-48z" fill="#477d65"/><path d="m0-85 20 39h-40z" fill="#639574"/></g>
+    <g id="cabin"><path d="M0-7v10" stroke="#f6e5be" stroke-width="3"/><rect x="-10" y="3" width="20" height="21" rx="5" fill="#f3bb64"/><path d="M-10 4h20v7h-20" fill="#fff1ce"/><path d="M-5 12h10v6h-10" fill="#317c76"/></g>
+    <g id="car"><path d="M-30-10h58l-3 23h-49z" fill="#e9784b"/><path d="M-29-10h58v7h-58" fill="#fff0ca"/><path d="M-23-18h17v13h-17m25-13h17v13h-17" fill="#28665d"/><path d="M-23-18h17m8 0h17" stroke="#edce9e" stroke-width="4" stroke-linecap="round"/><path d="M-23 13h46" stroke="#315c51" stroke-width="5"/><circle cx="-17" cy="17" r="5" fill="#315c51"/><circle cx="18" cy="17" r="5" fill="#315c51"/><path d="M-23-3v-6h44v6" fill="none" stroke="#a3b8a5" stroke-width="3"/></g>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h960v600H0z"/>
+  <circle cx="754" cy="100" r="47" fill="#fff2cc"/>
+  <circle cx="754" cy="100" r="62" fill="none" stroke="#fff2cc" stroke-width="1.5" opacity=".55"/>
+  <g fill="#fff9e9" opacity=".85"><path d="M92 137c-18 0-21-22-4-27 3-27 36-33 51-11 14-17 41-8 40 12 27-2 31 26 9 26z"/><path d="M463 98c-16 0-18-16-5-20 4-22 30-26 41-9 11-11 28-4 30 9 20-1 24 20 4 20z"/></g>
+  <path d="M0 291c58-15 74-29 113-20 35-25 67-33 107-12 32-19 53-16 88 5 56-38 88-42 137-17 52-34 99-25 130 2 52-23 86-9 113 9 46-18 79-18 112 11 56-20 112-7 160 19v88H0z" fill="#a6c5b3" opacity=".48"/>
+  <path d="M0 302c187-12 320 10 486 0s309-14 474-1v299H0z" fill="url(#sea)"/>
+  <g fill="none" stroke="#d4e6d0" stroke-linecap="round" opacity=".5"><path d="M31 355h49m68-29h80m-217 126h57m759-102h81m-32 106h57M56 545h74m664-18h90m-539 40h71" stroke-width="3"/><path d="M27 382h27m830-49h31m-49 164h35m-799-5h38m633 68h48" stroke-width="2"/></g>
+  <ellipse cx="480" cy="454" rx="420" ry="105" fill="#377f7a" opacity=".16"/>
+  <path d="M95 411c19-62 112-98 219-110 84-32 173-30 246-3 119-7 252 24 293 84 61 27 47 78-24 111-63 39-181 60-293 45-90 14-173 3-231-18-110 8-206-28-230-63-11-16-6-33 20-48z" fill="#e8d4a9"/>
+  <path d="M107 402c38-52 113-76 211-88 95-24 162-20 242 0 112-8 233 15 275 67 36 24 43 57-19 93-58 36-171 54-280 41-84 12-161 4-225-18-98 7-179-20-199-52-12-17-18-28-5-43z" fill="url(#land)"/>
+  <path d="M302 388c36-15 84-22 126-8 53-1 93 18 80 42-14 27-92 42-154 20-52-2-77-27-52-54z" fill="#dfd2ac"/>
+  <path d="M308 394c40-14 79-18 118-6 48-2 85 13 72 32-18 25-80 34-142 15-41 0-67-24-48-41z" fill="#65b3a7"/>
+  <path d="M185 446c122-24 216 1 311 28 69 22 168 12 255-6M658 321l-28 129" fill="none" stroke="#e5d9b5" stroke-width="15" stroke-linecap="round"/>
+  <path d="M179 448c123-25 220 0 319 28 66 20 168 10 253-6" fill="none" stroke="#f3e8cd" stroke-width="2" stroke-dasharray="1 12" stroke-linecap="round"/>
+  <g opacity=".85"><use href="#pine" xlink:href="#pine" transform="translate(124 414) scale(.6)"/><use href="#pine" xlink:href="#pine" transform="translate(153 404) scale(.75)"/><use href="#pine" xlink:href="#pine" transform="translate(188 397) scale(.63)"/><use href="#pine" xlink:href="#pine" transform="translate(208 413) scale(.55)"/><use href="#pine" xlink:href="#pine" transform="translate(563 334) scale(.6)"/><use href="#pine" xlink:href="#pine" transform="translate(594 350) scale(.7)"/><use href="#pine" xlink:href="#pine" transform="translate(829 442) scale(.72)"/><use href="#pine" xlink:href="#pine" transform="translate(806 463) scale(.58)"/></g>
+  <!-- The open-frame wheel uses the same cream and teal palette as the park. -->
+  <g transform="translate(735 248)">
+    <path d="m0 0-39 111h13L0 27l26 84h13z" fill="#286f68"/>
+    <path d="m-34 111h68" stroke="#f0e3bc" stroke-width="7" stroke-linecap="round"/>
+    <circle r="85" fill="#f9e9bf" fill-opacity=".08" stroke="#2c7b74" stroke-width="6"/>
+    <circle r="77" fill="none" stroke="#f8eccb" stroke-width="2"/>
+    <g stroke="#5e9c8e" stroke-width="2.4"><path d="M-84 0H84M0-84V84M-59-59 59 59M-59 59 59-59M-78-32 78 32M-32-78 32 78M-78 32 78-32M-32 78 32-78"/></g>
+    <use href="#cabin" xlink:href="#cabin" transform="translate(0 -85)"/><use href="#cabin" xlink:href="#cabin" transform="translate(60 -60)"/><use href="#cabin" xlink:href="#cabin" transform="translate(85 0)"/><use href="#cabin" xlink:href="#cabin" transform="translate(60 60)"/><use href="#cabin" xlink:href="#cabin" transform="translate(0 85)"/><use href="#cabin" xlink:href="#cabin" transform="translate(-60 60)"/><use href="#cabin" xlink:href="#cabin" transform="translate(-85 0)"/><use href="#cabin" xlink:href="#cabin" transform="translate(-60 -60)"/>
+    <circle r="12" fill="#f4c073" stroke="#fff1cf" stroke-width="4"/>
+    <circle r="3" fill="#348078"/>
+  </g>
+  <!-- Cream steel supports stand on the island beneath the orange rails. -->
+  <g fill="none" stroke="#e9dfc1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m139 405 64-200 40 181m-40-181v188m8-218 69-68 31 293m-31-293v292m21-273 38 91 11 198m-11-198v198m35-107 21 121m26-76 21 87m67-71v61m-48-66v59m97-73v65m58-98 10 89m35-111v96m45-102 2 83m-11-75 42 80"/>
+    <path d="m163 330 58-24m-21-52 42 80m7-106 50-20m-50 76 56-24m-44-74 42 112" stroke-width="3"/>
+  </g>
+  <g fill="#e9dec0"><ellipse cx="140" cy="410" rx="11" ry="5"/><ellipse cx="243" cy="390" rx="10" ry="4"/><ellipse cx="280" cy="402" rx="11" ry="4"/><ellipse cx="312" cy="403" rx="10" ry="4"/><ellipse cx="350" cy="418" rx="10" ry="4"/></g>
+  <path d="M126 411c36-33 51-168 91-238 30-54 58-93 89-30 32 64 41 208 84 247 52 47 122 30 176-10 50-37 83-101 133-85 42 13 56 81 20 122-37 42-126 61-222 62-135 1-256-46-345-28" fill="none" stroke="#8b7355" stroke-opacity=".2" stroke-width="12" transform="translate(0 12)"/>
+  <path d="M126 398c36-33 51-168 91-238 30-54 58-93 89-30 32 64 41 208 84 247 52 47 122 30 176-10 50-37 83-101 133-85 42 13 56 81 20 122-37 42-126 61-222 62-135 1-256-46-345-28" fill="none" stroke="#b7573e" stroke-width="17" stroke-linecap="round"/>
+  <path d="M126 392c36-33 51-168 91-238 30-54 58-93 89-30 32 64 41 208 84 247 52 47 122 30 176-10 50-37 83-101 133-85 42 13 56 81 20 122-37 42-126 61-222 62-135 1-256-46-345-28" fill="none" stroke="url(#rail)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M126 387c36-33 51-168 91-238 30-54 58-93 89-30 32 64 41 208 84 247 52 47 122 30 176-10 50-37 83-101 133-85 42 13 56 81 20 122-37 42-126 61-222 62-135 1-256-46-345-28" fill="none" stroke="#ffdab0" stroke-width="2.5" stroke-linecap="round"/>
+  <g fill="none" stroke="#ffcf87" stroke-width="5"><ellipse cx="438" cy="354" rx="32" ry="56" transform="rotate(-19 438 354)"/><ellipse cx="629" cy="318" rx="23" ry="43" transform="rotate(27 629 318)"/></g>
+  <g filter="url(#shadow)" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <g transform="translate(432 248) rotate(-6)"><path d="M-75 0h150v74q0 12-12 12H-63q-12 0-12-12z" fill="#fff4d9" stroke="#e6bc7d" stroke-width="2"/><path d="M-75 0q0-12 12-12H63q12 0 12 12" fill="#e9bb70"/><text y="32" font-size="30" font-weight="700" fill="#285d50">agua</text><text y="62" font-size="18" fill="#778a71">water</text></g>
+    <g transform="translate(567 153) rotate(7)"><rect x="-65" y="-13" width="130" height="79" rx="12" fill="#fff4d9" stroke="#e5bc7b" stroke-width="2"/><text y="20" font-size="26" font-weight="700" fill="#285d50">cielo</text><text y="47" font-size="16" fill="#778a71">sky</text></g>
+    <g transform="translate(683 449) rotate(-3)"><rect x="-66" y="-13" width="132" height="77" rx="12" fill="#fff4d9" stroke="#e5bc7b" stroke-width="2"/><text y="20" font-size="25" font-weight="700" fill="#285d50">¡Hola!</text><text y="46" font-size="16" fill="#778a71">Hello!</text></g>
+  </g>
+  <!-- Three cars descend the lift's far side. This is vector artwork, not a screenshot. -->
+  <use href="#car" xlink:href="#car" transform="translate(311 144) rotate(67) scale(.83)"/>
+  <use href="#car" xlink:href="#car" transform="translate(329 191) rotate(73) scale(.88)"/>
+  <use href="#car" xlink:href="#car" transform="translate(345 244) rotate(73) scale(.94)"/>
+  <g transform="translate(542 433)"><path d="M-32 0h65v39h-65z" fill="#f7dbb1"/><path d="m-39 0 39-24L40 0z" fill="#d87853"/><path d="M-23 16h14v23h-14m22-23h20v15H-1" fill="#377b70"/><path d="M-33 5h67" stroke="#fff0d1" stroke-width="5"/></g>
+  <use href="#pine" xlink:href="#pine" transform="translate(203 488) scale(.6)"/><use href="#pine" xlink:href="#pine" transform="translate(224 500) scale(.5)"/><use href="#pine" xlink:href="#pine" transform="translate(785 419) scale(.48)"/>
+  <g fill="#faf0d6" opacity=".9"><path d="m469 118 3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path d="m848 171 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g>
+</svg>

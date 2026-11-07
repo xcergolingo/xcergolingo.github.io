@@ -1,0 +1,15 @@
+{
+  "title": "A day at Suncoast",
+  "primaryLanguage": "en",
+  "learningLanguage": "ja",
+  "words": [
+    {"id":"101","word":"水","translation":"water","sentence":"水を飲みます。","sentenceTranslation":"I drink water."},
+    {"id":"102","word":"海","translation":"sea","sentence":"海が見えます。","sentenceTranslation":"I can see the sea."},
+    {"id":"103","word":"空","translation":"sky","sentence":"空は青いです。","sentenceTranslation":"The sky is blue."},
+    {"id":"104","word":"公園","translation":"park","sentence":"公園に行きましょう。","sentenceTranslation":"Let’s go to the park."},
+    {"id":"105","word":"観覧車","translation":"Ferris wheel","sentence":"観覧車は高いです。","sentenceTranslation":"The Ferris wheel is tall."}
+  ],
+  "sentences": [
+    {"id":"s101","sentence":"もう一度乗りたいです。","sentenceTranslation":"I want to ride again."}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "suncoast-coaster",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GoLingo language learning on a scenic Three.js roller coaster",
+  "scripts": {
+    "check": "node --check main.js && node --check track.js && node --check park.js && node --check audio.js && node --check learning.js"
+  }
+}

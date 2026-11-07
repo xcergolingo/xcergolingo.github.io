@@ -15,9 +15,9 @@
   function validateLesson(raw) {
     const value = JSON.parse(raw);
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('Use a JSON object.');
-    const list = value.words || value.sentences || value.phrases || value.items || value.entries;
-    if (!Array.isArray(list) || list.length === 0) throw Error('Include a nonempty words, sentences, phrases or items array.');
-    if (list.length > 500) throw Error('Limit a lesson to 500 entries.');
+    const count = ['words', 'sentences', 'phrases', 'items', 'entries'].reduce((total, key) => total + (Array.isArray(value[key]) ? value[key].length : 0), 0);
+    if (count === 0) throw Error('Include a nonempty words, sentences, phrases, items or entries array.');
+    if (count > 500) throw Error('Limit a lesson to 500 entries.');
     if (raw.length > 100000) throw Error('Lesson is too large.');
     return value;
   }
@@ -26,7 +26,8 @@
     sessionStorage.setItem(lessonKey, JSON.stringify(parsed));
     activeLesson = parsed;
     lessonInput.value = JSON.stringify(parsed, null, 2);
-    lessonStatus.textContent = 'Lesson saved · ' + (parsed.words || parsed.sentences || parsed.phrases || parsed.items || parsed.entries).length + ' items';
+    const count = ['words', 'sentences', 'phrases', 'items', 'entries'].reduce((total, key) => total + (Array.isArray(parsed[key]) ? parsed[key].length : 0), 0);
+    lessonStatus.textContent = 'Lesson saved · ' + count + (count === 1 ? ' item' : ' items');
   }
   try {
     const params = new URLSearchParams(location.search);
@@ -154,4 +155,5 @@
   video.addEventListener('error', () => { if (video.getAttribute('src')) document.getElementById('video-error').hidden = false; });
   document.querySelectorAll('img').forEach(image => image.addEventListener('error', () => image.classList.add('image-unavailable')));
 })();
+
 
