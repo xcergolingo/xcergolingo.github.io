@@ -1,8 +1,14 @@
 import * as THREE from './vendor/three.module.js';
 
-/** The track uses arc-length distance everywhere. Local +Z is the direction of travel. */
-export function createTrack(scene) {
-  const points = [
+// Each ride shares the boarding platform, then follows its own complete circuit.
+// Speed values are metres per second; heights and lengths are metres.
+const definitions = [
+  {
+    id:'sunburst', name:'The Sunburst', kicker:'THE SIGNATURE RIDE',
+    description:'The original skyline climb, sweeping turns, and sunshine drop.',
+    intensity:'Classic', pace:'Big hills · flowing turns', color:'#ef6748',
+    maxSpeed:43, liftSpeed:9.4, assistSpeed:7, bankStrength:18, maxBank:.71,
+    points:[
     [-60,7,65],[-45,7,65],[-25,9,65],[-10,25,62],[8,53,56],
     [25,62,43],[42,55,25],[47,16,0],[35,6,-20],[10,7,-32],
     [-12,28,-48],[-27,36,-65],[-48,21,-75],[-70,8,-60],
@@ -10,11 +16,76 @@ export function createTrack(scene) {
     [25,28,4],[55,34,-4],[75,18,-23],[85,8,-45],[75,7,-66],
     [50,8,-79],[24,8,-82],[8,14,-70],[-3,17,-55],[-10,9,-35],
     [-22,6,-20],[-42,7,-15],[-60,12,0],[-66,10,24],[-63,7,45]
-  ].map(p => new THREE.Vector3(...p));
+    ],
+    sections:[
+      [0,'Boardwalk station','station'],[2,'The sky climb','lift'],
+      [5,'Sunshine drop','drop'],[8,'Canyon curves','turn'],
+      [13,'Palm ridge','turn'],[16,'Lagoon flyby','cruise'],
+      [20,'Coastal sweep','turn'],[26,'Homeward glide','cruise']
+    ]
+  },
+  {
+    id:'lagoon', name:'Lagoon Glide', kicker:'A GENTLE COASTAL ESCAPE',
+    description:'Low hills and wide lagoon turns, with a gentler pace to listen.',
+    intensity:'Gentle', pace:'Low hills · easy turns', color:'#279d9a',
+    maxSpeed:20, liftSpeed:6.5, assistSpeed:6.2, bankStrength:9, maxBank:.32,
+    points:[
+      [-60,7,65],[-45,7,65],[-25,9,65],[0,16,62],[25,22,55],
+      [52,24,41],[72,18,20],[84,11,-5],[90,8,-32],[82,9,-62],
+      [60,14,-82],[32,17,-90],[4,14,-88],[-20,11,-74],
+      [-39,10,-52],[-52,15,-26],[-58,16,0],[-55,12,24],[-63,8,45]
+    ],
+    sections:[
+      [0,'Boardwalk station','station'],[2,'The gentle climb','lift'],
+      [5,'Seabreeze glide','drop'],[8,'Lagoon lookout','turn'],
+      [11,'Palm coast','cruise'],[14,'Garden bends','turn'],
+      [16,'The homeward drift','cruise']
+    ]
+  },
+  {
+    id:'skyrocket', name:'Sky Rocket', kicker:'THE SKYLINE ADVENTURE',
+    description:'Our tallest climb, steep drops, and high banked crossover turns.',
+    intensity:'Exciting', pace:'Tall drops · fast turns', color:'#7475cf',
+    maxSpeed:48, liftSpeed:10.5, assistSpeed:7.5, bankStrength:23, maxBank:.82,
+    points:[
+      [-60,7,65],[-45,7,65],[-25,9,65],[-5,40,63],[17,76,58],
+      [42,88,44],[64,66,24],[72,20,0],[63,7,-25],[41,22,-45],
+      [17,56,-67],[-10,61,-88],[-40,38,-99],[-63,11,-85],
+      [-72,7,-61],[-62,13,-36],[-40,43,-15],[-9,56,-3],
+      [24,46,-4],[47,33,-14],[76,35,-34],[101,47,-60],
+      [104,40,-85],[82,18,-104],[54,9,-110],[23,15,-112],
+      [-1,32,-103],[-20,28,-85],[-26,12,-56],[-17,8,-31],
+      [-22,21,-8],[-45,30,12],[-65,19,26],[-67,8,46]
+    ],
+    sections:[
+      [0,'Boardwalk station','station'],[2,'The rocket climb','lift'],
+      [5,'Skyline plunge','drop'],[8,'Cloud nine crest','cruise'],
+      [11,'North coast dive','drop'],[15,'Sky bridge','turn'],
+      [18,'Ocean overbank','turn'],[22,'Seaside dive','drop'],
+      [25,'The high crossover','turn'],[29,'Homeward rush','cruise']
+    ]
+  }
+];
+
+// Small reusable curve data keeps the picker previews identical to the real rides.
+const routes = definitions.map(definition => {
+  const points = definition.points.map(p => new THREE.Vector3(...p));
   const curve = new THREE.CatmullRomCurve3(points, true, 'centripetal');
   curve.arcLengthDivisions = 8192;
   curve.updateArcLengths();
   const length = curve.getLength();
+  const samples = curve.getSpacedPoints(1200);
+  const {points:ignoredPoints,sections:ignoredSections,...metadata} = definition;
+  const ride = Object.freeze({...metadata, lengthMeters:length,
+    heightMeters:Math.max(...samples.map(p => p.y)),
+    previewPoints:curve.getSpacedPoints(72).map(p => [p.x,p.z])});
+  return {definition,points,curve,length,samples,ride};
+});
+export const RIDE_OPTIONS = Object.freeze(routes.map(route => route.ride));
+
+/** The track uses arc-length distance everywhere. Local +Z is the direction of travel. */
+export function createTrack(scene, rideId='sunburst') {
+  const {definition,points,curve,length,samples,ride} = routes.find(route => route.ride.id===rideId) || routes[0];
   const worldUp = new THREE.Vector3(0,1,0);
   const wrap = d => ((d % length) + length) % length;
   const tangentAt = d => curve.getTangentAt(wrap(d) / length).normalize();
@@ -30,17 +101,17 @@ export function createTrack(scene) {
     const after = tangentAt(d+6); after.y=0; after.normalize();
     const angle = Math.atan2(new THREE.Vector3().crossVectors(before,after).y, before.dot(after));
     const curvature = angle/12;
-    const bank = THREE.MathUtils.clamp(-Math.atan(curvature*18), -.71,.71);
+    const bank = THREE.MathUtils.clamp(-Math.atan(curvature*ride.bankStrength), -ride.maxBank,ride.maxBank);
     right.applyAxisAngle(tangent,bank);
     up.applyAxisAngle(tangent,bank);
     const quaternion = new THREE.Quaternion().setFromRotationMatrix(basis.makeBasis(right,up,tangent));
     return {position,tangent,right,up,quaternion};
   }
-  const samples = curve.getSpacedPoints(1200);
-  const root = new THREE.Group(); root.name='Suncoast roller coaster'; scene.add(root);
+  const root = new THREE.Group(); root.name=`Suncoast — ${ride.name}`; scene.add(root);
   const mat = (color, extras={}) => new THREE.MeshStandardMaterial({color,roughness:.55,metalness:.12,...extras});
-  const railMat=mat(0xef6748,{metalness:.34,roughness:.31});
-  const tieMat=mat(0xc34d3d), spineMat=mat(0xb74637);
+  const railMat=mat(ride.color,{metalness:.34,roughness:.31});
+  const tieMat=mat(new THREE.Color(ride.color).multiplyScalar(.73));
+  const spineMat=mat(new THREE.Color(ride.color).multiplyScalar(.64));
   const steelMat=mat(0xf2ead3,{roughness:.48,metalness:.24});
   const tealMat=mat(0x306c6a,{roughness:.45,metalness:.23});
   const concreteMat=mat(0xd0cab5,{roughness:.9,metalness:0});
@@ -140,7 +211,7 @@ export function createTrack(scene) {
     boxBatches.get(material).push(object.matrix.clone());
   }
   // Open-sided boarding pavilion, set beside the track so the front view stays clear.
-  const stationCream=mat(0xf8eed4), roofMat=mat(0xcb654a), darkMat=mat(0x244d4c), woodMat=mat(0xbd9367,{roughness:.85,metalness:0});
+  const stationCream=mat(0xf8eed4), roofMat=mat(new THREE.Color(ride.color).multiplyScalar(.82)), darkMat=mat(0x244d4c), woodMat=mat(0xbd9367,{roughness:.85,metalness:0});
   box([31,5.6,9.4],stationCream,[-47,2.8,71.4]);
   box([31.5,.30,10],woodMat,[-47,5.75,71.2]);
   box([31,.22,1.25],tealMat,[-47,5.96,66.8]);
@@ -169,7 +240,7 @@ export function createTrack(scene) {
   if(typeof document!=='undefined') {
     const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=192;
     const ctx=canvas.getContext('2d');ctx.fillStyle='#f7ecd2';ctx.fillRect(0,0,1024,192);
-    ctx.fillStyle='#275956';ctx.font='900 96px Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('SUNCOAST',512,102);
+    ctx.fillStyle='#275956';ctx.font='900 86px Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(ride.name.toUpperCase(),512,102,960);
     const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
     const sign=new THREE.Mesh(new THREE.PlaneGeometry(12.4,2.32),new THREE.MeshStandardMaterial({map:texture,roughness:.8,side:THREE.DoubleSide}));sign.position.set(-47,12.1,77.13);root.add(sign);
   }
@@ -179,23 +250,12 @@ export function createTrack(scene) {
     for(let i=0;i<samples.length;i++) {const d=samples[i].distanceToSquared(p);if(d<best){best=d;bestD=i/(samples.length-1)*length;}}
     return bestD;
   };
-  const stationEnd=distanceOf(points[2]);
-  const crest=distanceOf(points[5]);
-  const dropEnd=distanceOf(points[8]);
-  const tunnelStart=distanceOf(points[13]);
-  const tunnelEnd=distanceOf(points[16]);
-  const coastStart=distanceOf(points[20]);
-  const cruiseStart=distanceOf(points[26]);
-  const sections=[
-    {start:0,end:stationEnd,name:'Boardwalk station',type:'station'},
-    {start:stationEnd,end:crest,name:'The sky climb',type:'lift'},
-    {start:crest,end:dropEnd,name:'Sunshine drop',type:'drop'},
-    {start:dropEnd,end:tunnelStart,name:'Canyon curves',type:'turn'},
-    {start:tunnelStart,end:tunnelEnd,name:'Palm ridge',type:'turn'},
-    {start:tunnelEnd,end:coastStart,name:'Lagoon flyby',type:'cruise'},
-    {start:coastStart,end:cruiseStart,name:'Coastal sweep',type:'turn'},
-    {start:cruiseStart,end:length,name:'Homeward glide',type:'cruise'}
-  ];
+  const sections=definition.sections.map(([pointIndex,name,type],index,all)=>({
+    start:index ? distanceOf(points[pointIndex]) : 0,
+    end:index+1<all.length ? distanceOf(points[all[index+1][0]]) : length,
+    name,type
+  }));
+  const {start:stationEnd,end:crest}=sections.find(section=>section.type==='lift');
   const chainCount=Math.ceil((crest-stationEnd)/1.7);
   const chain=new THREE.InstancedMesh(new THREE.BoxGeometry(.29,.19,.65),darkMat,chainCount);
   const walkway=new THREE.InstancedMesh(new THREE.BoxGeometry(.9,.12,1.7),steelMat,chainCount);
@@ -217,5 +277,23 @@ export function createTrack(scene) {
     matrices.forEach((matrix,index)=>batch.setMatrixAt(index,matrix));batch.castShadow=true;batch.receiveShadow=true;root.add(batch);
   }
   root.userData.trackLength=length;
-  return {curve,length,samples,getFrame,sections};
+  root.userData.rideId=ride.id;
+  let disposed=false;
+  function dispose() {
+    if(disposed)return;
+    disposed=true;
+    root.removeFromParent();
+    const geometries=new Set(),materials=new Set(),textures=new Set();
+    root.traverse(object=>{
+      if(object.isInstancedMesh)object.dispose();
+      if(object.geometry)geometries.add(object.geometry);
+      for(const material of Array.isArray(object.material)?object.material:object.material?[object.material]:[])materials.add(material);
+    });
+    for(const material of materials)for(const value of Object.values(material))if(value?.isTexture)textures.add(value);
+    for(const texture of textures)texture.dispose();
+    for(const geometry of geometries)geometry.dispose();
+    for(const material of materials)material.dispose();
+    root.clear();
+  }
+  return {curve,length,samples,getFrame,sections,root,ride,dispose};
 }

@@ -5,3 +5,30 @@
 @media(orientation:landscape) and (max-height:600px){.gl-menu-summary{height:35px;margin-bottom:8px}.gl-menu-lesson{padding:4px 8px}.gl-menu-lesson b{font-size:8px}.gl-menu-lesson small{font-size:6px}.gl-menu-mark{font-size:15px}.gl-menu-basket{font-size:11px;padding:0 8px}.gl-card{left:24px;right:auto;width:265px;bottom:99px;padding:8px 11px 7px}.gl-card-kicker{font-size:5.5px}.gl-current-text{font-size:20px;max-height:48px}.gl-current-translation{font-size:10px;max-height:30px}.gl-word-button{padding:2px 0 6px;gap:3px}.gl-card-bottom{padding-top:5px}.gl-speech-hint{font-size:5px}.gl-card-bottom button{height:23px;min-width:23px;padding:3px 6px}.gl-card-bottom .gl-example{font-size:7px}.gl-dialog{width:min(100%,540px);max-height:calc(100dvh - 24px);padding:24px}.gl-dialog h2{font-size:24px}.gl-basket-list{max-height:41vh}.gl-root .gl-primary,.gl-root .gl-secondary{min-height:32px}}
 
 .gl-current-text,.gl-current-translation{pointer-events:auto}.gl-basket-actions{flex-wrap:wrap}.gl-export-fallback textarea{max-height:190px}.gl-export-fallback .gl-import-label{font-size:10px;line-height:1.6}
+
+/* A hidden card leaves only one small control strip at the edge of the view. */
+.gl-card-kicker{min-width:0;flex:1}
+.gl-card-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.gl-card-hide{display:flex;align-items:center;justify-content:center;gap:4px;min-width:57px;min-height:32px;padding:4px 7px;background:#e8ede0;border:1px solid #b7c8b744;border-radius:7px;color:#345d46;font-size:10px}
+.gl-card-hide svg,.gl-dock svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.gl-card-hide:hover,.gl-dock button:hover{background:#e1e9d7}
+.gl-dock{position:fixed;left:max(40px,env(safe-area-inset-left));bottom:124px;display:flex;align-items:center;gap:3px;max-width:calc(100vw - 40px);padding:4px;background:#fff9eeed;border:1px solid #fff9;border-radius:11px;z-index:8;box-shadow:0 4px 20px #20483014;backdrop-filter:blur(12px)}
+.gl-dock button{display:flex;align-items:center;justify-content:center;gap:5px;min-width:40px;min-height:40px;padding:7px 9px;background:transparent;border-radius:7px;color:#3c614a;font-size:10px;white-space:nowrap;line-height:1.2}
+.gl-dock .gl-card-show{background:#e8ede0;font-weight:600;padding-left:10px;padding-right:11px}
+.gl-dock .gl-dock-basket{gap:4px;padding-left:8px;padding-right:8px}
+.gl-dock-basket span{font-size:10px;font-variant-numeric:tabular-nums}
+.gl-dock .gl-dock-replay{padding:7px}
+@media(max-width:1150px){.gl-dock{left:max(28px,env(safe-area-inset-left));bottom:122px}}
+@media(max-width:760px){
+  .gl-card-actions{gap:6px}
+  .gl-card-hide{min-height:38px;min-width:62px;font-size:11px;padding:5px 8px}
+  .gl-card-actions .gl-translation-toggle{width:38px;min-height:38px;height:auto;font-size:12px}
+  .gl-dock{left:max(20px,env(safe-area-inset-left));bottom:180px;max-width:calc(100vw - 40px)}
+  .gl-dock button{min-height:40px;font-size:10px}
+}
+@media(max-width:390px){.gl-dock{left:max(14px,env(safe-area-inset-left));max-width:calc(100vw - 28px);bottom:180px}}
+@media(orientation:landscape) and (max-height:600px){
+  .gl-card-hide{min-height:32px;min-width:57px;font-size:10px;padding:4px 7px}
+  .gl-card-actions .gl-translation-toggle{min-height:32px;height:32px;width:32px}
+  .gl-dock{left:max(24px,env(safe-area-inset-left));bottom:99px}
+}

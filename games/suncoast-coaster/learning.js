@@ -80,18 +80,24 @@ function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));}ca
 export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()=>{},onToast=()=>{}}={}) {
   let lesson=sampleLesson('es');
   const saved=readSaved(STORAGE);
-  let settings={showTranslation:true,repeat:true,voiceOn:true,practice:'words',volume:.85};
-  if(saved?.settings){for(const k of ['showTranslation','repeat','voiceOn'])if(typeof saved.settings[k]==='boolean')settings[k]=saved.settings[k];if(['words','sentences'].includes(saved.settings.practice))settings.practice=saved.settings.practice;if(Number.isFinite(saved.settings.volume))settings.volume=Math.max(0,Math.min(1,saved.settings.volume));}
+  let settings={showCard:true,showTranslation:true,repeat:true,voiceOn:true,practice:'words',volume:.85};
+  if(saved?.settings){for(const k of ['showCard','showTranslation','repeat','voiceOn'])if(typeof saved.settings[k]==='boolean')settings[k]=saved.settings[k];if(['words','sentences'].includes(saved.settings.practice))settings.practice=saved.settings.practice;if(Number.isFinite(saved.settings.volume))settings.volume=Math.max(0,Math.min(1,saved.settings.volume));}
   if(saved?.lesson)try{lesson=normalizeLesson(saved.lesson,{baseUrl:location.href});lesson.source=saved.lesson.source==='sample'?'sample':'import';}catch{}
   let basket=Array.isArray(readSaved(BASKET))?readSaved(BASKET).slice(0,MAX_ITEMS).filter(e=>e&&typeof e.text==='string'&&typeof e.key==='string'):[];
   let running=false,unlocked=false,visible=false,current=null,deck=[],cursor=0,lastFirst='',speechToken=0,repeatTimer=0,player=null,utterance=null,modalOpen=false,modalResume=false,pausingInternally=false,previousFocus=null,voices=[];
   let selectedLearning=lesson.learningLanguage,selectedPrimary=lesson.primaryLanguage;
   const root=document.createElement('div');root.className='gl-root';root.innerHTML=`
-    <aside class="gl-card" hidden aria-label="Current GoLingo vocabulary">
-      <div class="gl-card-top"><span class="gl-card-kicker">GOLINGO · WORD</span><button class="gl-translation-toggle" type="button" title="Show or hide translation" aria-label="Show or hide translation">Aa</button></div>
+    <aside id="gl-word-card" class="gl-card" hidden aria-label="Current GoLingo vocabulary">
+      <div class="gl-card-top"><span class="gl-card-kicker">GOLINGO · WORD</span><div class="gl-card-actions"><button class="gl-translation-toggle" type="button" title="Show or hide translation" aria-label="Show or hide translation">Aa</button><button class="gl-card-hide" type="button" title="Hide word card (V)" aria-label="Hide word card" aria-controls="gl-word-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span>Hide</span></button></div></div>
       <button class="gl-word-button" type="button" aria-label="Replay this word"><span class="gl-current-text" dir="auto">Your next word is ahead.</span><span class="gl-current-translation" dir="auto"></span></button>
       <div class="gl-card-bottom"><span class="gl-speech-hint">TAP THE WORD TO HEAR IT</span><button class="gl-example" type="button">Example ↗</button><button class="gl-card-settings" type="button" aria-label="Lesson settings" title="Lesson settings">⚙</button><button class="gl-card-basket" type="button" aria-label="Collected vocabulary" title="Collected vocabulary">☷ <span>0</span></button></div>
     </aside>
+    <div class="gl-dock" hidden role="group" aria-label="Vocabulary controls">
+      <button class="gl-card-show" type="button" title="Show word card (V)" aria-label="Show word card" aria-controls="gl-word-card" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span>Show words</span></button>
+      <button class="gl-dock-replay" type="button" title="Replay current word" aria-label="Replay current word"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></button>
+      <button class="gl-dock-settings" type="button" title="Lesson settings" aria-label="Lesson settings"><span>Lesson</span></button>
+      <button class="gl-dock-basket" type="button" title="Collected vocabulary" aria-label="Collected vocabulary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Zm3 0V6a4 4 0 0 1 8 0v2"/></svg><span>0</span></button>
+    </div>
     <div class="gl-backdrop" hidden>
       <section class="gl-dialog" role="dialog" aria-modal="true" aria-labelledby="gl-dialog-title" tabindex="-1">
         <button class="gl-close" type="button" aria-label="Close learning panel">×</button><div class="gl-eyebrow">GOLINGO · LEARN ON THE RIDE</div><h2 id="gl-dialog-title">Your words. Your adventure.</h2>
@@ -99,7 +105,7 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
         <div class="gl-settings-panel">
           <div class="gl-current-lesson"><b></b><span></span></div>
           <fieldset class="gl-practice"><legend>Practice on this ride</legend><label><input type="radio" name="gl-practice" value="words"> Words</label><label><input type="radio" name="gl-practice" value="sentences"> Sentences</label></fieldset>
-          <div class="gl-options"><label><span>Show translations</span><input type="checkbox" data-setting="showTranslation"></label><label><span>Repeat until the next word</span><input type="checkbox" data-setting="repeat"></label><label><span>Speak learning words</span><input type="checkbox" data-setting="voiceOn"></label><label class="gl-volume"><span>Speech volume</span><input type="range" min="0" max="1" step="0.05" aria-label="Speech volume"></label></div>
+          <div class="gl-options"><label><span>Show word card</span><input type="checkbox" data-setting="showCard"></label><label><span>Show translations</span><input type="checkbox" data-setting="showTranslation"></label><label><span>Repeat until the next word</span><input type="checkbox" data-setting="repeat"></label><label><span>Speak learning words</span><input type="checkbox" data-setting="voiceOn"></label><label class="gl-volume"><span>Speech volume</span><input type="range" min="0" max="1" step="0.05" aria-label="Speech volume"></label></div>
           <h3>Choose or import a lesson</h3><p class="gl-note">These languages apply to your next import. Your current lesson keeps its own language labels.</p>
           <div class="gl-language-row"><label>Learning language<select class="gl-learning-language"></select></label><label>Translation language<select class="gl-primary-language"></select></label></div>
           <button class="gl-sample gl-secondary" type="button">Use theme-park sample</button><p class="gl-sample-note gl-note"></p>
@@ -113,7 +119,7 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
     </div>`;
   document.body.append(root);
   const $=sel=>root.querySelector(sel);
-  const card=$('.gl-card'),backdrop=$('.gl-backdrop'),dialog=$('.gl-dialog'),learningSelect=$('.gl-learning-language'),primarySelect=$('.gl-primary-language');
+  const card=$('.gl-card'),dock=$('.gl-dock'),backdrop=$('.gl-backdrop'),dialog=$('.gl-dialog'),learningSelect=$('.gl-learning-language'),primarySelect=$('.gl-primary-language');
   for(const [code,name] of LANGUAGES)for(const select of [learningSelect,primarySelect]){const option=document.createElement('option');option.value=code;option.textContent=name;select.append(option);}
   const summary=document.createElement('div');summary.className='gl-menu-summary';summary.innerHTML='<button type="button" class="gl-menu-lesson"><span class="gl-menu-mark">✦</span><span><b></b><small></small></span><i>↗</i></button><button type="button" class="gl-menu-basket" aria-label="Collected vocabulary">☷ <span>0</span></button>';
   if(typeof mount==='string')mount=document.querySelector(mount);if(mount?.append)mount.append(summary);
@@ -143,12 +149,15 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
     tts();
   }
   function refreshCard(){
-    card.hidden=!visible;
+    card.hidden=!visible||!settings.showCard;dock.hidden=!visible||settings.showCard;
+    $('.gl-card-show').setAttribute('aria-expanded',String(settings.showCard));$('.gl-card-hide').setAttribute('aria-expanded',String(settings.showCard));
     $('.gl-current-text').textContent=current?.text||'Your next word is ahead.';$('.gl-current-text').lang=lesson.learningLanguage;
     $('.gl-current-translation').textContent=current?.translation||'';$('.gl-current-translation').lang=lesson.primaryLanguage;$('.gl-current-translation').hidden=!settings.showTranslation||!current?.translation;
     $('.gl-card-kicker').textContent=`GOLINGO · ${languageName(lesson.learningLanguage)} · ${current?.kind==='sentence'?'SENTENCE':'WORD'}`;
     $('.gl-translation-toggle').setAttribute('aria-pressed',String(settings.showTranslation));$('.gl-example').hidden=!current?.sentence||current.kind==='sentence';
-    $('.gl-word-button').disabled=!current;const count=filteredBasket().length;$('.gl-card-basket span').textContent=count;summary.querySelector('.gl-menu-basket span').textContent=count;$('.gl-basket-count').textContent=count;
+    $('.gl-word-button').disabled=!current;$('.gl-dock-replay').disabled=!current;
+    const replayLabel=current?.kind==='sentence'?'Replay current sentence':'Replay current word';$('.gl-dock-replay').setAttribute('aria-label',replayLabel);$('.gl-dock-replay').title=replayLabel;
+    const count=filteredBasket().length;$('.gl-card-basket span').textContent=count;$('.gl-dock-basket span').textContent=count;summary.querySelector('.gl-menu-basket span').textContent=count;$('.gl-basket-count').textContent=count;
   }
   function sync(){
     const count=entriesFor(lesson,settings.practice).length;summary.querySelector('b').textContent=`${languageName(lesson.learningLanguage)} → ${languageName(lesson.primaryLanguage)}`;summary.querySelector('small').textContent=`${count} ${settings.practice} · change lesson`;
@@ -165,6 +174,16 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
   function present(entry,{collect:shouldCollect=true}={}){if(!entry)return;current={...entry};if(shouldCollect)collect(current);refreshCard();if(running)speak(current,{loop:true});}
   function setRunning(value){running=!!value;if(!running){if(modalOpen&&!pausingInternally)modalResume=false;stopSpeech();}else if(current&&!modalOpen)speak(current,{loop:true});}
   function setVisible(value){visible=!!value;refreshCard();}
+  // Card visibility is a display preference: never touch the speech loop or lesson deck.
+  function setCardVisible(value){
+    const show=!!value;if(show===settings.showCard)return show;
+    const active=document.activeElement,oldControls=show?dock:card;
+    const restoreFocus=[...oldControls.querySelectorAll('button')].includes(active);
+    settings.showCard=show;persist();sync();notify('visibility');
+    if(restoreFocus&&visible&&!modalOpen)(show?$('.gl-card-hide'):$('.gl-card-show')).focus();
+    return show;
+  }
+  function toggleCard(){return setCardVisible(!settings.showCard);}
   function unlock(){unlocked=true;try{window.speechSynthesis?.resume();}catch{}if(current&&running)speak(current,{loop:true});return true;}
   function notify(reason){onChange({reason,lesson,settings:{...settings}});}
   function applyLesson(value,defaults={}){
@@ -196,8 +215,9 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
     const value=revealExport();try{if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(value);$('.gl-basket-feedback').textContent='GoLingo JSON copied. Paste it into your lesson or save it as a JSON file.';}catch{selectExport();$('.gl-basket-feedback').textContent='The JSON is selected. Use your device’s Copy command to copy it.';}
   }
   $('.gl-card-settings').addEventListener('click',()=>open('settings'));$('.gl-card-basket').addEventListener('click',()=>open('basket'));summary.querySelector('.gl-menu-lesson').addEventListener('click',()=>open('settings'));summary.querySelector('.gl-menu-basket').addEventListener('click',()=>open('basket'));$('.gl-close').addEventListener('click',close);backdrop.addEventListener('click',e=>{if(e.target===backdrop)close();});
+  $('.gl-card-hide').addEventListener('click',()=>setCardVisible(false));$('.gl-card-show').addEventListener('click',()=>setCardVisible(true));$('.gl-dock-settings').addEventListener('click',()=>open('settings'));$('.gl-dock-basket').addEventListener('click',()=>open('basket'));$('.gl-dock-replay').addEventListener('click',()=>{if(current)speak(current,{manual:true,loop:running});});
   $('.gl-word-button').addEventListener('click',()=>{if(current)speak(current,{manual:true,loop:running});});$('.gl-example').addEventListener('click',()=>{if(current)speak(current,{example:true,manual:true,loop:running});});
-  function changeSetting(key,value){settings[key]=value;persist();sync();if(key==='practice'){beginRide();notify('practice');}else if(key==='voiceOn'||key==='repeat'){stopSpeech();if(running&&current)speak(current,{loop:true});}else if(key==='volume'&&player)player.volume=settings.volume;if(key!=='practice')notify('setting');}
+  function changeSetting(key,value){if(key==='showCard'){setCardVisible(value);return;}settings[key]=value;persist();sync();if(key==='practice'){beginRide();notify('practice');}else if(key==='voiceOn'||key==='repeat'){stopSpeech();if(running&&current)speak(current,{loop:true});}else if(key==='volume'&&player)player.volume=settings.volume;if(key!=='practice')notify('setting');}
   $('.gl-translation-toggle').addEventListener('click',()=>changeSetting('showTranslation',!settings.showTranslation));for(const input of root.querySelectorAll('[data-setting]'))input.addEventListener('change',()=>changeSetting(input.dataset.setting,input.checked));for(const input of root.querySelectorAll('[name="gl-practice"]'))input.addEventListener('change',()=>{if(input.checked)changeSetting('practice',input.value);});$('.gl-volume input').addEventListener('input',e=>changeSetting('volume',Number(e.target.value)));
   learningSelect.addEventListener('change',()=>{selectedLearning=learningSelect.value;sync();});primarySelect.addEventListener('change',()=>{selectedPrimary=primarySelect.value;sync();});
   $('.gl-sample').addEventListener('click',()=>{const sample=sampleLesson(selectedLearning);if(!sample||selectedPrimary!=='en')return;applyLesson(sample);lesson.source='sample';persist();feedback(`Loaded ${languageName(lesson.learningLanguage)} theme-park words. Close this panel when you’re ready.`);});
@@ -213,5 +233,5 @@ export function createLearning({mount,onChange=()=>{},onPause=()=>{},onResume=()
   window.addEventListener('hashchange',fromLocation);
   makeDeck();sync();
   queueMicrotask(()=>{if(fromLocation())return;try{const active=sessionStorage.getItem('golingo:active-lesson:v1');if(active)load(active);}catch{}});
-  return {get lesson(){return lesson;},get settings(){return {...settings};},get current(){return current;},get collectedCount(){return filteredBasket().length;},get isOpen(){return modalOpen;},beginRide,nextBatch,present,setRunning,setVisible,unlock,openSettings:()=>open('settings'),openBasket:()=>open('basket'),closePanel:close,close,load};
+  return {get lesson(){return lesson;},get settings(){return {...settings};},get current(){return current;},get collectedCount(){return filteredBasket().length;},get isOpen(){return modalOpen;},beginRide,nextBatch,present,setRunning,setVisible,setCardVisible,toggleCard,unlock,openSettings:()=>open('settings'),openBasket:()=>open('basket'),closePanel:close,close,load};
 }

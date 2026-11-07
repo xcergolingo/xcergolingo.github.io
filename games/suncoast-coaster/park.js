@@ -586,6 +586,7 @@ export function createPark(scene, { trackSamples = [] } = {}) {
   const cloudMaterial = new THREE.MeshBasicMaterial({ vertexColors: true, fog: true }); materials.push(cloudMaterial);
   cloudBatch.bake(clouds, cloudMaterial, false);
 
+  let disposed = false;
   return {
     root,
     update(time, dt) {
@@ -595,7 +596,10 @@ export function createPark(scene, { trackSamples = [] } = {}) {
       clouds.rotation.y = Math.sin(time * 0.001) * 0.02;
     },
     dispose() {
+      if (disposed) return;
+      disposed = true;
       root.removeFromParent();
+      root.traverse(object => { if (object.isInstancedMesh) object.dispose(); });
       for (const resource of owned) resource.dispose();
       for (const mat of materials) mat.dispose();
     },

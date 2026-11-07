@@ -1,8 +1,8 @@
 import * as THREE from './vendor/three.module.js';
-import {createTrack} from './track.js';
-import {createPark} from './park.js';
-import {RideAudio} from './audio.js';
-import {createLearning} from './learning.js';
+import {createTrack,RIDE_OPTIONS} from './track.js?v=2.1.0';
+import {createPark} from './park.js?v=2.1.0';
+import {RideAudio} from './audio.js?v=2.1.0';
+import {createLearning} from './learning.js?v=2.1.0';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -10,13 +10,15 @@ const lerp = THREE.MathUtils.lerp;
 const damp = (a,b,k,dt) => lerp(a,b,1-Math.exp(-k*dt));
 const v3 = (x=0,y=0,z=0) => new THREE.Vector3(x,y,z);
 const isSmall = () => innerWidth < 760 || matchMedia('(pointer:coarse)').matches;
+function savedRide(){try{const id=localStorage.getItem('suncoast-ride-v1');return RIDE_OPTIONS.some(ride=>ride.id===id)?id:'sunburst';}catch{return 'sunburst';}}
 const state = {
   phase:'loading',mode:'free',camera:'front',distance:18,traveled:0,speed:6,
   elapsed:0,score:0,perfect:0,lap:1,fuel:100,maxSpeed:0,brake:false,boost:false,
   sound:false,lookX:0,lookY:0,dragging:false,toastTime:0,ready:false,helpFrom:'menu',
-  cameraSnap:true,frameCount:0,lastRenderMs:0,practiced:0
+  cameraSnap:true,frameCount:0,lastRenderMs:0,practiced:0,rideId:savedRide()
 };
 let learning=null,learningSignature='',lessonWasRiding=false;
+let activeModal=null,ridePickerFrom=null;
 const inputResetters=[];
 const renderer = new THREE.WebGLRenderer({canvas:$('world'),antialias:true,alpha:false,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,isSmall()?1.4:1.7));
@@ -45,14 +47,30 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(900,32,16),new THREE.ShaderM
 }));scene.add(sky);
 
 $('loading-text').textContent='Laying out a little adventure…';
-const track = createTrack(scene);
-const park = createPark(scene,{trackSamples:track.samples});
+let track = createTrack(scene,state.rideId);
+let park = createPark(scene,{trackSamples:track.samples});
 const audio = new RideAudio();
-const trackLength=track.length;
+let trackLength=track.length;
 const startDistance=18;
 const getSection = d => track.sections.find(s=>{const a=((d%trackLength)+trackLength)%trackLength;return a>=s.start&&a<s.end;})||track.sections[0];
-$('track-length').textContent=Math.round(trackLength).toLocaleString();
-$('track-height').textContent=Math.round(Math.max(...track.samples.map(p=>p.y)));
+function updateRideInfo(){
+  const ride=track.ride;
+  $('track-length').textContent=Math.round(trackLength).toLocaleString();
+  $('track-height').textContent=Math.round(ride.heightMeters);
+  $('track-title').textContent=ride.name;
+  $('track-kicker').textContent=ride.kicker;
+  $('track-number').textContent=String(RIDE_OPTIONS.findIndex(r=>r.id===ride.id)+1).padStart(2,'0');
+  $('track-intensity').textContent=ride.intensity.toUpperCase();
+  $('track-description').textContent=ride.description;
+  $('map-ride-name').textContent=ride.name.toUpperCase();
+  $('selected-ride-name').textContent=ride.name;
+  $('selected-ride-detail').textContent=`${ride.intensity} · ${Math.round(ride.heightMeters)} m high · ${Math.round(trackLength)} m`;
+  document.documentElement.style.setProperty('--ride-color',ride.color);
+  document.body.dataset.ride=ride.id;
+  fitMapToTrack();
+  $('choose-ride-menu').setAttribute('aria-label',`Choose ride. Selected: ${ride.name}`);
+  for(const button of document.querySelectorAll('.ride-option')){const selected=button.dataset.ride===ride.id;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));button.querySelector('.ride-option-action').textContent=selected?'Selected ✓':'Choose ride ↗';}
+}
 
 function mat(color, extras={}) {return new THREE.MeshStandardMaterial({color,roughness:.5,metalness:.08,...extras});}
 const trainMaterials={orange:mat(0xed6b48),cream:mat(0xffeac5),dark:mat(0x284d43),seat:mat(0x407468),metal:mat(0xd9d7bd,{metalness:.7,roughness:.25}),rubber:mat(0x263c37),skin:mat(0xb97852),skinLight:mat(0xf0bd8e),shirt:mat(0xf0cc72),blue:mat(0x91bbc1)};
@@ -97,26 +115,27 @@ updateTrain();
 function nextSpeed(speed,distance,dt,brake=false,boost=false){
   const section=getSection(distance);
   const tangent=track.curve.getTangentAt((((distance%trackLength)+trackLength)%trackLength)/trackLength);
-  if(section.type==='lift')return damp(speed,brake?4.2:9.4,1.65,dt);
+  if(section.type==='lift')return damp(speed,brake?4.2:track.ride.liftSpeed,1.65,dt);
   let acceleration=-9.81*tangent.y*.85-.0043*speed*speed-.12;
-  if(speed<7&&!brake)acceleration+=Math.max(0,7-speed)*2.5+Math.max(0,9.81*tangent.y*.85);
+  if(speed<track.ride.assistSpeed&&!brake)acceleration+=Math.max(0,track.ride.assistSpeed-speed)*2.5+Math.max(0,9.81*tangent.y*.85);
   if(boost)acceleration+=12.5*(typeof boost==='number'?clamp(boost,0,1):1);
   if(brake)acceleration-=19;
   if(section.type==='station'&&speed>10&&!boost)acceleration-=8;
-  return clamp(speed+acceleration*dt,brake?.65:3.2,43);
+  return clamp(speed+acceleration*dt,brake?.65:3.2,track.ride.maxSpeed);
 }
 
 const gateFractions=[.22,.31,.43,.53,.63,.73,.83,.93];
 const gateNames=['Sunshine drop','Canyon crest','Palm ridge','Lagoon flyby','Ocean breeze','Coastal sweep','The home stretch','Last little rush'];
 const gates=gateFractions.map((fraction,i)=>({baseDistance:startDistance+trackLength*fraction,distance:startDistance+trackLength*fraction,name:gateNames[i],index:i,done:false,perfect:false,min:0,max:0,group:null,entry:null}));
 // Set achievable ranges from a simulated unassisted lap, then vary the ideal pace.
-{
+function calibrateGates(){
   let d=startDistance,v=6,index=0;const offsets=[-22,20,-18,20,-22,22,-18,20];
   for(let step=0;step<30000&&index<gates.length;step++){
     v=nextSpeed(v,d,1/45);d+=v/45;
-    if(d>=gates[index].distance){const center=Math.round(clamp(v*3.6+offsets[index],20,140)/5)*5;gates[index].min=Math.max(12,center-8);gates[index].max=center+8;index++;}
+    if(d>=gates[index].baseDistance){const center=Math.round(clamp(v*3.6+offsets[index]*(track.ride.maxSpeed<25?.6:1),20,track.ride.maxSpeed*3.6-10)/5)*5;gates[index].min=Math.max(12,center-8);gates[index].max=Math.min(Math.floor(track.ride.maxSpeed*3.6),center+8);index++;}
   }
 }
+calibrateGates();
 function fitCanvasText(ctx,text,y,maxLines=2,size=62,color='#315b48'){
   const chars=Array.from(String(text||''));let lines=[''];ctx.font=`600 ${size}px Arial, sans-serif`;
   for(const char of chars){let i=lines.length-1;if(ctx.measureText(lines[i]+char).width>900&&lines[i]){if(lines.length===maxLines){lines[i]=lines[i].slice(0,-2)+'…';break;}lines.push(char);}else lines[i]+=char;}
@@ -143,8 +162,9 @@ function repaintGateLabels(){for(const gate of gates){gate.sign.material.map?.di
 function assignGateWords(){
   if(!learning)return;const entries=learning.nextBatch(gates.length);gates.forEach((gate,i)=>{gate.entry=entries[i%entries.length]||null;});repaintGateLabels();
 }
-function refreshLearning(){
+function refreshLearning(change={}){
   if(!learning)return;
+  if(change.reason==='visibility'){if(!learning.settings.showCard){state.toastTime=0;$('toast').classList.remove('show');$('toast').textContent='';}return;}
   const signature=JSON.stringify([learning.lesson,learning.settings.practice]);
   if(signature!==learningSignature){learningSignature=signature;learning.beginRide();assignGateWords();const next=gates.find(g=>!g.done)||gates[0];if(next.entry)learning.present(next.entry,{collect:false});}
   else repaintGateLabels();
@@ -168,7 +188,7 @@ function updateParticles(dt){if(particleLife<=0)return;particleLife-=dt;particle
 function setPhase(phase){state.phase=phase;document.body.dataset.phase=phase;learning?.setVisible(phase==='riding'||phase==='paused');learning?.setRunning(phase==='riding');}
 function clearInput(){state.brake=false;state.boost=false;state.dragging=false;for(const reset of inputResetters)reset();$('brake').classList.remove('pressed');$('boost').classList.remove('pressed');}
 function toast(text,sub='',seconds=2.8){$('toast').textContent=text;if(sub){const detail=document.createElement('small');detail.textContent=sub;$('toast').appendChild(detail);}$('toast').classList.add('show');state.toastTime=seconds;}
-function modal(which){$('modal-backdrop').hidden=!which;for(const id of ['pause','help','results'])$(id+'-dialog').hidden=id!==which;}
+function modal(which){activeModal=which;$('modal-backdrop').hidden=!which;for(const id of ['pause','help','results','rides'])$(id+'-dialog').hidden=id!==which;}
 function syncSoundUI(){document.body.classList.toggle('sound-enabled',state.sound);$('sound').setAttribute('aria-pressed',String(state.sound));$('sound').setAttribute('aria-label',state.sound?'Mute ride sounds':'Turn ride sounds on');$('sound').title=state.sound?'Mute ride sounds':'Turn ride sounds on';}
 async function unlockSound(){
   if(!state.sound)return;
@@ -184,9 +204,60 @@ function startRide(){
   gates.forEach(g=>{g.distance=g.baseDistance;g.done=false;g.perfect=false;g.group.visible=true;g.material.color.set(0xf4bf69);g.material.emissive.set(0xd28e29);g.sign.visible=true;});
   particleLife=0;particleMaterial.opacity=0;setPhase('riding');modal(null);setCamera('front');updateTrain();updateHUD();unlockSound();
   learning.unlock();if(gates[0].entry)learning.present(gates[0].entry,{collect:false});
-  toast('A new word around every turn.',state.mode==='thrill'?'Collect words. Match the speed for a bonus.':'Listen, repeat, and enjoy the coast.',3.2);
+  if(learning.settings.showCard)toast(track.ride.name+' · All aboard.',state.mode==='thrill'?'Collect words. Match the speed for a bonus.':'Listen, repeat, and enjoy the coast.',3.2);
 }
-function home(){clearInput();setPhase('menu');modal(null);state.distance=startDistance;state.cameraSnap=true;state.lookX=0;state.lookY=0;state.toastTime=0;$('toast').classList.remove('show');gates.forEach(g=>g.group.visible=false);updateTrain();updateHUD();audio.suspend();}
+function home(){clearInput();ridePickerFrom=null;setPhase('menu');modal(null);state.distance=startDistance;state.cameraSnap=true;state.lookX=0;state.lookY=0;state.toastTime=0;$('toast').classList.remove('show');gates.forEach(g=>g.group.visible=false);updateTrain();updateHUD();audio.suspend();}
+function showRidePicker(){
+  if(!state.ready||learning?.isOpen)return;
+  ridePickerFrom={phase:state.phase,modal:activeModal};
+  if(state.phase==='riding'){clearInput();setPhase('paused');audio.suspend();}
+  modal('rides');
+  document.querySelector(`.ride-option[data-ride="${state.rideId}"]`)?.focus();
+}
+function closeRidePicker(){
+  const from=ridePickerFrom;ridePickerFrom=null;
+  if(!from){modal(null);return;}
+  modal(from.modal);
+  if(from.phase==='riding'){setPhase('riding');clearInput();audio.resume();unlockSound();}
+  else $(from.phase==='menu'?'choose-ride-menu':'choose-ride').focus();
+}
+function selectRide(id){
+  if(!state.ready||!RIDE_OPTIONS.some(ride=>ride.id===id))return;
+  if(id===state.rideId){closeRidePicker();return;}
+  clearInput();audio.suspend();learning.setRunning(false);state.ready=false;
+  try{
+    // Replace the route and route-aware planting; dispose the previous GPU resources.
+    const newTrack=createTrack(scene,id);
+    let newPark;
+    try{newPark=createPark(scene,{trackSamples:newTrack.samples});}catch(error){newTrack.dispose();throw error;}
+    track.dispose();park.dispose();track=newTrack;park=newPark;trackLength=track.length;state.rideId=id;
+    trainMaterials.orange.color.set(track.ride.color);
+    Object.assign(state,{distance:startDistance,traveled:0,speed:6,elapsed:0,score:0,perfect:0,lap:1,fuel:100,maxSpeed:0,practiced:0,cameraSnap:true});
+    gates.forEach((gate,i)=>{gate.baseDistance=startDistance+trackLength*gateFractions[i];gate.distance=gate.baseDistance;gate.done=false;gate.perfect=false;gate.name=getSection(gate.distance).name;const frame=track.getFrame(gate.distance);gate.group.position.copy(frame.position);gate.group.quaternion.copy(frame.quaternion);gate.sign.visible=true;gate.material.color.set(0xf4bf69);gate.material.emissive.set(0xd28e29);});
+    calibrateGates();learning.beginRide();assignGateWords();
+    particleLife=0;particleMaterial.opacity=0;updateRideInfo();home();drawMap();
+    try{localStorage.setItem('suncoast-ride-v1',id);}catch{}
+    $('start').focus();
+  }catch(error){console.error('Could not switch coaster:',error);closeRidePicker();toast('This ride could not be prepared.','Your current route is still available.');}
+  finally{state.ready=true;}
+}
+function createRidePicker(){
+  const ns='http://www.w3.org/2000/svg';
+  for(const ride of RIDE_OPTIONS){
+    const button=document.createElement('button');button.type='button';button.className='ride-option';button.dataset.ride=ride.id;button.style.setProperty('--route-color',ride.color);
+    const graphic=document.createElementNS(ns,'svg');graphic.setAttribute('viewBox','0 0 190 144');graphic.setAttribute('aria-hidden','true');graphic.classList.add('ride-option-map');
+    const points=ride.previewPoints;const xs=points.map(p=>p[0]),zs=points.map(p=>p[1]);const minX=Math.min(...xs),maxX=Math.max(...xs),minZ=Math.min(...zs),maxZ=Math.max(...zs);const scale=Math.min(162/(maxX-minX),112/(maxZ-minZ));
+    const path=document.createElementNS(ns,'path');path.setAttribute('d',points.map((p,i)=>`${i?'L':'M'}${(95+(p[0]-(minX+maxX)/2)*scale).toFixed(1)},${(72+(p[1]-(minZ+maxZ)/2)*scale).toFixed(1)}`).join(' ')+' Z');graphic.append(path);
+    const copy=document.createElement('span');copy.className='ride-option-copy';
+    const badge=document.createElement('small');badge.className='ride-option-intensity';badge.textContent=ride.intensity;
+    const name=document.createElement('strong');name.textContent=ride.name;
+    const description=document.createElement('span');description.className='ride-option-description';description.textContent=ride.description;
+    const stats=document.createElement('span');stats.className='ride-option-stats';stats.textContent=`${Math.round(ride.heightMeters)} m high · ${Math.round(ride.lengthMeters)} m circuit`;
+    const action=document.createElement('span');action.className='ride-option-action';
+    copy.append(badge,name,description,stats,action);button.append(graphic,copy);button.addEventListener('click',()=>selectRide(ride.id));$('ride-options').append(button);
+  }
+  updateRideInfo();
+}
 function pauseRide(){if(state.phase!=='riding')return;clearInput();setPhase('paused');modal('pause');audio.suspend();setTimeout(()=>$('resume').focus(),50);}
 function resumeRide(){if(state.phase!=='paused')return;modal(null);setPhase('riding');clearInput();audio.resume();unlockSound();}
 function showHelp(){state.helpFrom=state.phase;if(state.phase==='riding'){clearInput();setPhase('paused');audio.suspend();}modal('help');setTimeout(()=>$('close-help').focus(),40);}
@@ -198,15 +269,15 @@ function finishRide(){
   $('result-score').textContent=state.score.toLocaleString();$('result-perfect').textContent=`${state.perfect}/8`;$('result-max').textContent=Math.round(state.maxSpeed*3.6);$('result-time').textContent=formatTime(state.elapsed);
   $('result-title').textContent=state.perfect===8?'Pure sunshine.':state.perfect>=5?'What a ride.':'Chasing sunshine.';
   $('result-message').textContent=`${state.practiced} learning gates collected · ${state.perfect} perfect speed ${state.perfect===1?'bonus':'bonuses'}. Replay your discoveries in the word basket.`;
-  try{const best=Number(localStorage.getItem('suncoast-best')||0);const newBest=Math.max(best,state.score);localStorage.setItem('suncoast-best',String(newBest));$('personal-best').textContent=state.score>best?'✦ A NEW PERSONAL BEST':`PERSONAL BEST · ${newBest.toLocaleString()} POINTS`;}catch{$('personal-best').textContent='A LITTLE ADVENTURE, WELL EARNED';}
+  try{const key='suncoast-best:'+state.rideId;const best=Number(localStorage.getItem(key)||(state.rideId==='sunburst'?localStorage.getItem('suncoast-best'):0)||0);const newBest=Math.max(best,state.score);localStorage.setItem(key,String(newBest));$('personal-best').textContent=state.score>best?'✦ A NEW PERSONAL BEST':`PERSONAL BEST · ${newBest.toLocaleString()} POINTS`;}catch{$('personal-best').textContent='A LITTLE ADVENTURE, WELL EARNED';}
 }
-function crossGate(gate){gate.done=true;gate.perfect=state.mode==='thrill'&&state.speed*3.6>=gate.min&&state.speed*3.6<=gate.max;state.score+=gate.perfect?300:100;if(gate.perfect)state.perfect++;state.practiced++;gate.material.color.set(0x75c390);gate.material.emissive.set(0x4d9367);gate.sign.visible=false;burst(track.getFrame(gate.distance).position.add(v3(0,3,0)),true);audio.chime(gate.perfect);if(gate.entry)learning.present(gate.entry,{collect:true});toast(gate.perfect?'+300 · Perfect pace and a new discovery!':gate.entry?.kind==='sentence'?'Sentence collected.':'Word collected.',gate.entry?.text||gate.name,2.1);}
+function crossGate(gate){gate.done=true;gate.perfect=state.mode==='thrill'&&state.speed*3.6>=gate.min&&state.speed*3.6<=gate.max;state.score+=gate.perfect?300:100;if(gate.perfect)state.perfect++;state.practiced++;gate.material.color.set(0x75c390);gate.material.emissive.set(0x4d9367);gate.sign.visible=false;burst(track.getFrame(gate.distance).position.add(v3(0,3,0)),true);audio.chime(gate.perfect);if(gate.entry)learning.present(gate.entry,{collect:true});if(learning.settings.showCard)toast(gate.perfect?'+300 · Perfect pace and a new discovery!':gate.entry?.kind==='sentence'?'Sentence collected.':'Word collected.',gate.entry?.text||gate.name,2.1);}
 
 function simulate(dt){
   let remaining=dt;
   while(remaining>0){const h=Math.min(remaining,1/90);const lift=getSection(state.distance).type==='lift';const boostPower=state.boost&&state.fuel>0&&!state.brake&&!lift?Math.min(1,state.fuel/(27*h)):0;state.speed=nextSpeed(state.speed,state.distance,h,state.brake,boostPower);state.fuel=clamp(state.fuel-27*h*boostPower+(!state.boost?13*h:0),0,100);const travel=state.speed*h;state.distance+=travel;state.traveled+=travel;state.elapsed+=h;state.maxSpeed=Math.max(state.maxSpeed,state.speed);
     for(const gate of gates)if(!gate.done&&state.distance>=gate.distance)crossGate(gate);
-    if(state.traveled>=trackLength*state.lap){if(state.mode==='thrill'){finishRide();break;}state.lap++;assignGateWords();gates.forEach(g=>{g.distance=g.baseDistance+(state.lap-1)*trackLength;g.done=false;g.perfect=false;g.sign.visible=true;g.material.color.set(0xf4bf69);g.material.emissive.set(0xd28e29);});if(gates[0].entry)learning.present(gates[0].entry,{collect:false});toast('New lap. New words.',`Lap ${state.lap} · Your lesson keeps rolling.`,3);}
+    if(state.traveled>=trackLength*state.lap){if(state.mode==='thrill'){finishRide();break;}state.lap++;assignGateWords();gates.forEach(g=>{g.distance=g.baseDistance+(state.lap-1)*trackLength;g.done=false;g.perfect=false;g.sign.visible=true;g.material.color.set(0xf4bf69);g.material.emissive.set(0xd28e29);});if(gates[0].entry)learning.present(gates[0].entry,{collect:false});if(learning.settings.showCard)toast('New lap. New words.',`Lap ${state.lap} · Your lesson keeps rolling.`,3);}
     remaining-=h;
   }
 }
@@ -238,16 +309,16 @@ function updateCamera(dt,time){
     const k=state.camera==='front'&&state.phase!=='menu'?28:state.camera==='chase'?8:3;camera.position.lerp(cameraPosition,1-Math.exp(-k*dt));smoothedUp.lerp(targetUp,1-Math.exp(-12*dt)).normalize();
   }
   camera.up.copy(smoothedUp);camera.lookAt(cameraTarget);
-  const desiredFov=state.phase==='riding'&&state.camera==='front'?58+clamp(state.speed/43,0,1)*9:innerHeight>innerWidth?52:53;camera.fov=damp(camera.fov,desiredFov,3,dt);camera.updateProjectionMatrix();
+  const desiredFov=state.phase==='riding'&&state.camera==='front'?58+clamp(state.speed/track.ride.maxSpeed,0,1)*9:innerHeight>innerWidth?52:53;camera.fov=damp(camera.fov,desiredFov,3,dt);camera.updateProjectionMatrix();
   if(!state.dragging){state.lookX=damp(state.lookX,0,1.6,dt);state.lookY=damp(state.lookY,0,1.6,dt);}
 }
 
 let hudAccumulator=0;
 function updateHUD(){
   const frame=track.getFrame(state.distance),section=getSection(state.distance);
-  $('speed').textContent=Math.round(state.speed*3.6);$('speed-meter').style.width=`${Math.min(state.speed/43,1)*100}%`;$('altitude').textContent=Math.round(frame.position.y);
+  $('speed').textContent=Math.round(state.speed*3.6);$('speed-meter').style.width=`${Math.min(state.speed/track.ride.maxSpeed,1)*100}%`;$('altitude').textContent=Math.round(frame.position.y);
   $('score-label').textContent=state.mode==='thrill'?'THRILL SCORE':'PRACTICED';$('score').textContent=state.mode==='thrill'?state.score.toLocaleString():state.practiced;$('gate-count').textContent=`${gates.filter(g=>g.done).length} / 8 GATES`;
-  $('ride-time').textContent=formatTime(state.elapsed);$('stage').textContent=section.type==='lift'?'THE SKY CLIMB · CHAIN LIFT':section.name.toUpperCase();$('boost-meter').style.width=state.fuel+'%';$('map-lap').textContent=state.phase==='menu'?'PARK MAP':`LAP ${String(state.lap).padStart(2,'0')}`;
+  $('ride-time').textContent=formatTime(state.elapsed);$('stage').textContent=section.name.toUpperCase()+(section.type==='lift'?' · CHAIN LIFT':'');$('boost-meter').style.width=state.fuel+'%';$('map-lap').textContent=state.phase==='menu'?'PARK MAP':`LAP ${String(state.lap).padStart(2,'0')}`;
   $('map-progress').textContent=state.phase==='menu'?'READY WHEN YOU ARE':`${Math.floor(((state.traveled%trackLength)/trackLength)*100)}% OF THE CIRCUIT`;
   const nextGate=gates.find(g=>!g.done);
   const showTarget=state.mode==='thrill'&&!!nextGate&&state.phase==='riding';$('gate-target').hidden=!showTarget;
@@ -256,12 +327,18 @@ function updateHUD(){
   }
 }
 const map=$('minimap'),mapCtx=map.getContext('2d');
-const mx=x=>200+(x+1)*1.78,mz=z=>120+(z+7)*1.29;
+let mapView={x:0,z:0,scale:1};
+function fitMapToTrack(){
+  const xs=track.samples.map(p=>p.x),zs=track.samples.map(p=>p.z);
+  const minX=Math.min(...xs,5),maxX=Math.max(...xs,63),minZ=Math.min(...zs,-58),maxZ=Math.max(...zs,-14);
+  mapView={x:(minX+maxX)/2,z:(minZ+maxZ)/2,scale:Math.min(368/(maxX-minX),208/(maxZ-minZ))};
+}
+const mx=x=>200+(x-mapView.x)*mapView.scale,mz=z=>120+(z-mapView.z)*mapView.scale;
 function drawMap(){
   const ctx=mapCtx;ctx.clearRect(0,0,400,240);
-  ctx.fillStyle='#d8e9df';ctx.beginPath();ctx.ellipse(mx(34),mz(-36),50,30,-.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#d8e9df';ctx.beginPath();ctx.ellipse(mx(34),mz(-36),29*mapView.scale,22*mapView.scale,0,0,Math.PI*2);ctx.fill();
   ctx.lineWidth=5;ctx.strokeStyle='#e6d7bc';ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();track.samples.forEach((p,i)=>{if(i===0)ctx.moveTo(mx(p.x),mz(p.z));else ctx.lineTo(mx(p.x),mz(p.z));});ctx.closePath();ctx.stroke();
-  ctx.lineWidth=2.2;ctx.strokeStyle='#dc7653';ctx.stroke();
+  ctx.lineWidth=2.2;ctx.strokeStyle=track.ride.color;ctx.stroke();
   if(state.phase!=='menu')for(const g of gates){const p=track.getFrame(g.distance).position;ctx.beginPath();ctx.arc(mx(p.x),mz(p.z),g.done?3:4.5,0,Math.PI*2);ctx.fillStyle=g.done?'#639e77':'#e2b962';ctx.fill();}
   const p=track.getFrame(state.distance).position;
   ctx.beginPath();ctx.arc(mx(p.x),mz(p.z),8,0,Math.PI*2);ctx.fillStyle='#fffaf0';ctx.fill();ctx.beginPath();ctx.arc(mx(p.x),mz(p.z),4.8,0,Math.PI*2);ctx.fillStyle='#2b5c48';ctx.fill();
@@ -271,6 +348,8 @@ for(const button of document.querySelectorAll('.mode'))button.addEventListener('
 $('start').addEventListener('click',startRide);$('home').addEventListener('click',e=>{e.preventDefault();home();});$('pause').addEventListener('click',pauseRide);$('resume').addEventListener('click',resumeRide);
 $('restart').addEventListener('click',startRide);$('back-home').addEventListener('click',home);$('ride-again').addEventListener('click',startRide);$('results-home').addEventListener('click',home);
 $('review-words').addEventListener('click',()=>learning.openBasket());
+$('choose-ride').addEventListener('click',showRidePicker);$('choose-ride-menu').addEventListener('click',showRidePicker);$('choose-ride-pause').addEventListener('click',showRidePicker);$('close-rides').addEventListener('click',closeRidePicker);$('cancel-rides').addEventListener('click',closeRidePicker);
+$('rides-dialog').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeRidePicker();}if(e.key==='Tab'){const controls=[...$('rides-dialog').querySelectorAll('button:not(:disabled)')];const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
 $('help').addEventListener('click',showHelp);$('close-help').addEventListener('click',closeHelp);$('help-done').addEventListener('click',closeHelp);
 for(const button of document.querySelectorAll('.camera'))button.addEventListener('click',()=>setCamera(button.dataset.camera));
 $('sound').addEventListener('click',()=>{state.sound=!state.sound;syncSoundUI();if(state.sound)unlockSound();else audio.setEnabled(false);});
@@ -295,16 +374,19 @@ for(const type of ['pointerup','pointercancel','lostpointercapture'])$('world').
 $('world').addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('keydown',e=>{
   if(learning?.isOpen||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName||'')||e.target?.isContentEditable)return;
+  if(activeModal==='rides'){if(e.code==='Escape'){e.preventDefault();closeRidePicker();}return;}
+  if(e.code==='Space'&&e.target?.closest?.('button'))return;
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
   if(e.repeat)return;
   if(e.code==='Escape'){if(!$('help-dialog').hidden)closeHelp();else if(state.phase==='riding')pauseRide();else if(state.phase==='paused')resumeRide();return;}
   if(e.code==='KeyP'){if(state.phase==='riding')pauseRide();else if(state.phase==='paused'&&$('help-dialog').hidden)resumeRide();return;}
-  if(state.phase==='menu'&&e.code==='Enter'&&$('modal-backdrop').hidden){startRide();return;}
+  if(state.phase==='menu'&&e.code==='Enter'&&$('modal-backdrop').hidden&&!e.target?.closest?.('button,a')){startRide();return;}
   if(state.phase!=='riding')return;
   if(e.code==='Space'||e.code==='ArrowDown'){state.brake=true;$('brake').classList.add('pressed');}
   if(e.code==='KeyW'||e.code==='ArrowUp'){state.boost=true;$('boost').classList.add('pressed');}
   if(e.code==='KeyC')setCamera(['front','chase','park'][(['front','chase','park'].indexOf(state.camera)+1)%3]);
   if(e.code==='KeyR')startRide();
+  if(e.code==='KeyV')learning.toggleCard();
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowDown'){state.brake=false;$('brake').classList.remove('pressed');}if(e.code==='KeyW'||e.code==='ArrowUp'){state.boost=false;$('boost').classList.remove('pressed');}});
 // Releasing a drag or changing focus never opens a pause overlay. Only explicit pause or a hidden tab does.
@@ -314,7 +396,7 @@ window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);c
 $('world').addEventListener('webglcontextlost',e=>{e.preventDefault();audio.suspend();$('fatal').hidden=false;$('fatal-message').textContent='Your browser paused the 3D graphics. Reload the park to take another ride.';});
 
 // Read-only diagnostics make it possible to verify the real running game without changing it.
-Object.defineProperty(window,'suncoast',{value:{get status(){return {phase:state.phase,mode:state.mode,camera:state.camera,distance:state.distance,traveled:state.traveled,speed:state.speed,score:state.score,perfect:state.perfect,fuel:state.fuel,elapsed:state.elapsed,lap:state.lap,brake:state.brake,boost:state.boost,ready:state.ready,practiced:state.practiced,gateCount:gates.filter(g=>g.done).length,trackLength,learning:{learningLanguage:learning.lesson.learningLanguage,primaryLanguage:learning.lesson.primaryLanguage,settings:learning.settings,collectedCount:learning.collectedCount,isOpen:learning.isOpen},renderer:{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles},gateTargets:gates.map(g=>({distance:g.distance,min:g.min,max:g.max,done:g.done,word:g.entry?.text}))};}},writable:false});
+Object.defineProperty(window,'suncoast',{value:{get status(){return {phase:state.phase,mode:state.mode,rideId:state.rideId,rideName:track.ride.name,rideMaxSpeed:track.ride.maxSpeed,camera:state.camera,distance:state.distance,traveled:state.traveled,speed:state.speed,score:state.score,perfect:state.perfect,fuel:state.fuel,elapsed:state.elapsed,lap:state.lap,brake:state.brake,boost:state.boost,ready:state.ready,practiced:state.practiced,gateCount:gates.filter(g=>g.done).length,trackLength,learning:{learningLanguage:learning.lesson.learningLanguage,primaryLanguage:learning.lesson.primaryLanguage,settings:learning.settings,collectedCount:learning.collectedCount,isOpen:learning.isOpen},renderer:{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles},gateTargets:gates.map(g=>({distance:g.distance,min:g.min,max:g.max,done:g.done,word:g.entry?.text}))};}},writable:false});
 
 let previous=performance.now(),time=0;
 function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-previous)/1000,.05);previous=now;time+=dt;
@@ -327,4 +409,5 @@ function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-prev
   hudAccumulator+=dt;if(hudAccumulator>.08){hudAccumulator=0;if(state.phase==='riding')updateHUD();drawMap();}
   renderer.render(scene,camera);state.frameCount++;
 }
+createRidePicker();trainMaterials.orange.color.set(track.ride.color);
 state.ready=true;setPhase('menu');gates.forEach(g=>g.group.visible=false);$('start').disabled=false;drawMap();updateCamera(.1,0);renderer.render(scene,camera);$('loading').classList.add('fade');setTimeout(()=>$('loading').hidden=true,650);requestAnimationFrame(animate);
