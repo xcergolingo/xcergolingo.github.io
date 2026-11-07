@@ -86,6 +86,7 @@ class LearningGates {
     this._collectedKeys = new Set();
     this._showTranslation = true;
     this._showWords = true;
+    this._skyWords = true;
     this._repeat = true;
     this._armed = true;
     this._cooldown = 0;
@@ -102,6 +103,15 @@ class LearningGates {
     this._group = null;
     this._gatePosition = new THREE.Vector3();
     this._samplePosition = new THREE.Vector3();
+    this._flightPosition = new THREE.Vector3();
+    this._flightQuaternion = new THREE.Quaternion();
+    this._hasFlightPose = false;
+    this._listenLift = 65;
+    this._forward = new THREE.Vector3();
+    this._up = new THREE.Vector3();
+    this._labelWorld = new THREE.Vector3();
+    this._labelCamera = new THREE.Vector3();
+    this._inverseRotation = new THREE.Quaternion();
   }
 
   get enabled() { return this._enabled; }
@@ -118,8 +128,15 @@ class LearningGates {
   get showWords() { return this._showWords; }
   set showWords(value) {
     this._showWords = !!value;
-    if (this._label) this._label.visible = this._showWords && this._enabled && this._mode === 'gates';
+    if (this._label) this._label.visible = this._showWords && this._enabled && this._skyWords;
     if (this._showWords) this._drawLabel();
+    this._emit();
+  }
+  get skyWords() { return this._skyWords; }
+  set skyWords(value) {
+    this._skyWords = !!value;
+    if (this._label) this._label.visible = this._skyWords && this._showWords && this._enabled;
+    if (this._skyWords) this._drawLabel();
     this._emit();
   }
   get repeat() { return this._repeat; }
@@ -135,7 +152,8 @@ class LearningGates {
     if (value === this._enabled) { this._emit(); return; }
     this._enabled = value;
     if (value) {
-      if (this._mode === 'gates') { this._buildGate(); this._placeGate(); }
+      this._buildGate();
+      this._placeGate();
       this._armed = true;
       this._cooldown = 1;
       this._emit();
@@ -181,7 +199,7 @@ class LearningGates {
     this._listenRemaining = LISTEN_SECONDS;
     this._armed = true;
     this._cooldown = 1;
-    if (mode === 'gates' && this._enabled) {
+    if (this._enabled) {
       this._buildGate();
       this._placeGate();
     } else this._destroyGate();
@@ -269,15 +287,22 @@ class LearningGates {
     value = !!value;
     if (value === this._paused) { if (value && this._reviewing) this._stopSpeech(); return; }
     this._paused = value;
-    if (this._group) this._group.visible = this._enabled && this._mode === 'gates' && !value;
+    if (this._group) this._group.visible = this._enabled && !value;
     if (value) this._stopSpeech();
     else if (this._enabled) this.speak();
     this._emit();
   }
 
-  update(dt, position) {
+  update(dt, position, aircraftQuaternion) {
     if (!this._enabled || this._paused || this._disposed) return;
     dt = Math.min(0.2, Math.max(0, Number.isFinite(dt) ? dt : 0));
+    if (position) {
+      if (Array.isArray(position)) this._flightPosition.fromArray(position);
+      else this._flightPosition.copy(position);
+      if (aircraftQuaternion) this._flightQuaternion.copy(aircraftQuaternion);
+      this._hasFlightPose = true;
+      if (this._mode === 'listen') this._positionSkyWord();
+    }
     this._clock += dt;
     this._cooldown = Math.max(0, this._cooldown - dt);
     if (this._mode === 'listen' && !this._reviewing) {
@@ -487,6 +512,7 @@ class LearningGates {
       collected: this._collected.length,
       mode: this._mode,
       source: this.source,
+      skyWords: this._skyWords,
       target: this._enabled && this._mode === 'gates' && this._group
         ? { x: this._gatePosition.x, y: this._gatePosition.y, z: this._gatePosition.z } : null,
     };
@@ -525,7 +551,7 @@ class LearningGates {
   }
 
   _buildGate() {
-    if (this._group || !this.route.length || !this._enabled || this._mode !== 'gates') return;
+    if (this._group || !this._enabled || (this._mode === 'gates' && !this.route.length)) return;
     const T = this.THREE;
     const group = new T.Group();
     group.name = 'golingo-vocabulary-gate';
@@ -539,64 +565,113 @@ class LearningGates {
     );
     group.add(this._ring, this._halo);
     this._canvas = document.createElement('canvas');
-    this._canvas.width = 768;
-    this._canvas.height = 160;
+    this._canvas.width = 1024;
+    this._canvas.height = 256;
     this._texture = new T.CanvasTexture(this._canvas);
     this._texture.colorSpace = T.SRGBColorSpace;
-    this._label = new T.Sprite(new T.SpriteMaterial({ map: this._texture, transparent: true, depthWrite: false, toneMapped: false }));
-    this._label.scale.set(118, 24.58, 1);
+    this._label = new T.Sprite(new T.SpriteMaterial({ map: this._texture, transparent: true, depthWrite: false, depthTest: false, fog: false, toneMapped: false }));
+    this._label.name = 'golingo-sky-word';
+    this._label.scale.set(240, 60, 1);
+    this._label.renderOrder = 20;
     this._label.position.set(0, 91, 0);
-    this._label.visible = this._showWords;
+    this._label.visible = this._showWords && this._skyWords;
     group.add(this._label);
     group.visible = this._enabled && !this._paused;
     this._group = group;
     this.scene.add(group);
   }
 
+  _positionSkyWord() {
+    if (!this._group || !this._hasFlightPose || this._mode !== 'listen') return;
+    // A sky label follows the aircraft's flight direction, independently of head look.
+    this._forward.set(0, 0, -600).applyQuaternion(this._flightQuaternion);
+    this._up.set(0, this._listenLift, 0).applyQuaternion(this._flightQuaternion);
+    this._group.position.copy(this._flightPosition).add(this._forward).add(this._up);
+    this._group.quaternion.identity();
+    this._group.visible = this._enabled && !this._paused;
+  }
+
   _placeGate() {
-    if (!this._group || !this.route.length) return;
-    const at = this._step % this.route.length;
-    const point = this.route[at];
-    const previous = this.route[(at + this.route.length - 1) % this.route.length];
-    this._gatePosition.set(point.x, point.y, point.z);
-    this._group.position.copy(this._gatePosition);
-    const normal = new this.THREE.Vector3(point.x - previous.x, point.y - previous.y, point.z - previous.z);
-    if (normal.lengthSq() < 0.001) normal.set(0, 0, 1);
-    else normal.normalize();
-    this._group.quaternion.setFromUnitVectors(new this.THREE.Vector3(0, 0, 1), normal);
+    if (!this._group) return;
+    const gates = this._mode === 'gates';
+    this._ring.visible = this._halo.visible = gates;
+    if (!gates) {
+      this._group.quaternion.identity();
+      this._label.position.set(0, 0, 0);
+      this._group.visible = this._enabled && !this._paused && this._hasFlightPose;
+      this._positionSkyWord();
+    } else if (this.route.length) {
+      const at = this._step % this.route.length;
+      const point = this.route[at];
+      const previous = this.route[(at + this.route.length - 1) % this.route.length];
+      this._gatePosition.set(point.x, point.y, point.z);
+      this._group.position.copy(this._gatePosition);
+      const normal = this._forward.set(point.x - previous.x, point.y - previous.y, point.z - previous.z);
+      if (normal.lengthSq() < 0.001) normal.set(0, 0, 1);
+      else normal.normalize();
+      this._group.quaternion.setFromUnitVectors(this._up.set(0, 0, 1), normal);
+      // Keep the text anchor above the ring in world-up, even on a climbing leg.
+      this._inverseRotation.copy(this._group.quaternion).invert();
+      this._label.position.set(0, 91, 0).applyQuaternion(this._inverseRotation);
+      this._group.visible = this._enabled && !this._paused;
+    }
     this._drawLabel();
   }
 
+  updateView(camera, width, height) {
+    if (!this._label || !this._group || !this._enabled || this._paused) return;
+    if (this._mode === 'listen') {
+      const lift = width > height && height < 360 ? -20 : 65;
+      if (lift !== this._listenLift) { this._listenLift = lift; this._positionSkyWord(); }
+    }
+    camera.updateMatrixWorld(true);
+    this._group.updateMatrixWorld(true);
+    this._label.getWorldPosition(this._labelWorld);
+    this._labelCamera.copy(this._labelWorld).applyMatrix4(camera.matrixWorldInverse);
+    const depth = -this._labelCamera.z;
+    this._label.visible = this._skyWords && this._showWords && depth > camera.near;
+    if (!this._label.visible || !(width > 0 && height > 0)) return;
+    // Keep the lettering legible at the 1–2 km gate distances, including phones.
+    // Text occupies about 1/3 of the panel height; the rest is transparent padding.
+    const panelPixels = Math.min(84, height * .19, width * .65 / 4);
+    const worldHeight = 2 * depth * Math.tan(camera.fov * Math.PI / 360) * panelPixels / height;
+    this._label.scale.set(worldHeight * 4, worldHeight, 1);
+  }
+
   _drawLabel() {
-    if (!this._canvas || !this._texture || !this._enabled || this._mode !== 'gates' || !this._showWords) return;
+    if (!this._canvas || !this._texture || !this._enabled || !this._skyWords || !this._showWords) return;
     const ctx = this._canvas.getContext('2d');
     if (!ctx) return;
     const item = this._words[this.index];
-    ctx.clearRect(0, 0, 768, 160);
+    ctx.clearRect(0, 0, 1024, 256);
     if (!item) return;
-    ctx.fillStyle = 'rgba(6, 19, 29, .87)';
+    // A transparent sky sign leaves the scenery visible around the lettering.
+    ctx.fillStyle = 'rgba(6, 19, 29, .30)';
     ctx.beginPath();
-    ctx.roundRect(2, 2, 764, 156, 18);
+    ctx.roundRect(4, 6, 1016, 244, 26);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(121, 224, 247, .55)';
+    ctx.strokeStyle = 'rgba(121, 224, 247, .42)';
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#83d9ec';
-    ctx.font = '500 16px Arial, sans-serif';
-    ctx.fillText(`GOLINGO  ·  ${this.index + 1} / ${this._words.length}`, 384, 24);
+    ctx.shadowColor = 'rgba(0, 8, 17, .95)';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#b2eff9';
+    ctx.font = '600 25px Arial, sans-serif';
+    ctx.fillText(`${this._mode === 'gates' ? 'FLY TO THIS WORD' : 'LISTEN & FLY'}  ·  ${this.index + 1} / ${this._words.length}`, 512, 37);
     const mainText = item.word;
-    let fontSize = 43;
-    do { ctx.font = `600 ${fontSize}px Arial, sans-serif`; fontSize -= 2; }
-    while (ctx.measureText(mainText).width > 700 && fontSize >= 27);
-    ctx.fillStyle = '#f2fcff';
-    ctx.fillText(this._fitText(ctx, mainText, 700), 384, this._showTranslation && item.translation ? 76 : 91);
+    let fontSize = 88;
+    do { ctx.font = `700 ${fontSize}px Arial, sans-serif`; fontSize -= 4; }
+    while (ctx.measureText(mainText).width > 940 && fontSize >= 48);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(this._fitText(ctx, mainText, 940), 512, this._showTranslation && item.translation ? 121 : 147);
     if (this._showTranslation && item.translation) {
-      ctx.fillStyle = '#afc5cd';
-      ctx.font = '400 24px Arial, sans-serif';
-      ctx.fillText(this._fitText(ctx, item.translation, 700), 384, 125);
+      ctx.fillStyle = '#d3f0f4';
+      ctx.font = '500 40px Arial, sans-serif';
+      ctx.fillText(this._fitText(ctx, item.translation, 940), 512, 208);
     }
+    ctx.shadowBlur = 0;
     this._texture.needsUpdate = true;
   }
 
