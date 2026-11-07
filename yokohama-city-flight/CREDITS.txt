@@ -1,0 +1,27 @@
+YOKOHAMA CITY SCENERY — SOURCES AND LICENSES
+
+City data: MLIT Project PLATEAU 3D city models, 2020 release.
+Copyright: City of Yokohama.
+Original dataset: https://www.geospatial.jp/ckan/dataset/plateau-14100-yokohama-city-2020
+Project PLATEAU: https://www.mlit.go.jp/plateau/
+Site policy: https://www.mlit.go.jp/plateau/site-policy/
+
+GLB conversion, tiling, texture atlases, mesh optimization, mobile variants,
+and original collision meshes by CodePawl.
+Dataset: https://huggingface.co/datasets/codepawl/plateau-city-glb
+Original license notice: https://huggingface.co/datasets/codepawl/plateau-city-glb/blob/main/LICENSES.md
+
+City assets are licensed under Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+
+Changes made for this game: selected the Yokohama mobile tiles for the game;
+prepared conservative, quarter-metre-quantized collision heightfields from the
+provided LOD1 building and terrain meshes; integrated scenery into the flight
+simulation with game lighting, water, scenery additions, and flight activities.
+
+The city scenery is modified data. This game is not made or endorsed by MLIT,
+the City of Yokohama, the local governments, or CodePawl. The source models were
+published in 2020 and are simplified for rendering. They are not for survey use.
+
+The Creative Commons license applies to the source-derived city assets and
+heightfields. It does not change the license of unrelated game source code.

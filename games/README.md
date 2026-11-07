@@ -12,6 +12,7 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 
 | Game | Browser demo | Preview |
 | --- | --- | --- |
+| Yokohama City Flight | https://xcergolingo.github.io/yokohama-city-flight/ | Original vector illustration + playable game |
 | 御剑飞仙 — Sword Riding Immortal | https://xcergolingo.github.io/games/sword-riding-immortal/ | Illustrated card + playable game |
 | Lagoon | https://xcergolingo.github.io/far-cry-lagoon/ | media/lagoon.mp4 |
 | Word Folio | https://xcergolingo.github.io/word-folio/ | media/word-folio.mp4 |
@@ -55,3 +56,9 @@ The gallery links five existing browser games and hosts Matterhorn in `matterhor
 ## Sword Riding Immortal
 
 The new sword-flight game and its editable source are in `sword-riding-immortal/`. Its illustrated card appears in Flying, Scenery, Explore, Avatar, Language Learning, Words, and Sentences filters. Both card links pass the shared lesson using the existing `#golingoLesson=` launch handler.
+
+## Yokohama City Flight
+
+Yokohama City Flight is the 22nd gallery card. Its built game is hosted at the repository-root `yokohama-city-flight/` path. The card appears in Flying, Airplane, Scenery, Explore, Language Learning, Words, and Sentences filters. Both links use the existing `#golingoLesson=` launch handler and remain in the current tab.
+
+`media/yokohama-city-flight.svg` is an original vector illustration of a cockpit, dense city, and vocabulary gate. It is not a recorded gameplay preview or a navigation map. The existing preview-video map, lesson persistence, filters, app download links, and all previous cards are unchanged.

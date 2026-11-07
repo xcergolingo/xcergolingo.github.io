@@ -1,0 +1,63 @@
+Completed city streaming and distant-geometry optimization.
+
+Public API
+- Existing city.preload(position, radius) and city.update(position, dt) work.
+- Optional third preload argument { ahead: THREE.Vector3 } prioritizes the spawn
+  and its initial flight path. Preload the actual air spawn with city centre ahead,
+  or preload the city centre with the actual air spawn as ahead.
+- Initial preload waits for all 23 conservative collision grids plus four
+  detailed foreground tiles. All 23 distant tiles then stream in the background.
+- city.setDetail('auto'|'low'|'high') retains all tiles. Nearby detail budgets
+  are 8 / 4 / 14 respectively, capped by the constructor's maxTiles.
+- stats.loaded is distinct visible coverage (maximum 23).
+- stats.near + stats.far equals stats.loaded.
+- stats.skylineLoaded is the number of cached distant tiles.
+- stats.failed indicates a required tile unavailable from both representations.
+  stats.optionalFailed tracks detail/distant request failures separately.
+- stats.triangles is the measured visible primitive triangle count from the GLBs.
+
+Host recommendation
+A fog density of .00004 to .000045 makes the broader skyline clearer. The existing
+20,000 m far plane is ample. This update does not change app.js or environment.js.
+
+Final geometry
+The complete distant set contains 344,628 triangles in 4,457,636 bytes. This is
+22.24% of the original source LOD3 triangles and 72.42% less transfer data. The
+original source LOD3 set had 1,549,742 triangles in 16,163,152 bytes; the complete
+nearby mobile set has 1,814,485 triangles. Counts are measured from GLB accessors.
+
+Twenty-one distant tiles were derived using gltfpack 1.3.0 with permissive,
+aggressive simplification and EXT meshopt compression. Nineteen target 20% of
+source triangles. Tiles 53391560 and 53391570 target 40% with locked boundaries.
+Tiles 53391532 and 53391550 retain their original LOD3 geometry to protect the
+landmark silhouettes. Named material colors and all 8 embedded KTX2 textures
+are preserved, with textures verified byte-for-byte. No additional buildings,
+other cities, or synthetic geographic fill were inserted.
+
+Geometry checks
+Across all tiles, maximum bounding-extent deviation is 1.501 m. Maximum roof
+height changes range from -0.026 to +0.005 m. The two-axis, above-70 m orthographic
+silhouette overlap checks on the seven taller tiles range from 96.37% to 100%
+at a 512 by 256 analysis grid. These are geometry checks, not a GPU performance
+or complete visual-fidelity claim. Detailed nearby meshes remain unchanged.
+
+The source city bounds are x [-3773.19, 3109.5] and z [-2702.31, 3827.6] metres,
+approximately 6.88 by 6.53 km. Original tile offsets and collision grids are
+unchanged. All source geometry remains in the same geographic coordinate frame.
+
+Verification
+The vendored Meshopt decoder decoded all 89 additional compressed views,
+representing 10,120,476 decoded bytes; the actual KTX parser validated 8 images.
+CPU lifecycle checks verified 23-tile coverage, 8 nearby plus 15 distant tiles at
+initial focus, 813,126 visible triangles there, two concurrent decodes, one visible
+representation per tile, retention during travel, detail presets, the unchanged
+299.5 m landmark collision, fallback for a missing detailed model, and request
+timeouts. JavaScript syntax checks and a complete reproducible preparation run
+passed. No GPU/browser rendering claim: the shared browser GPU was disabled.
+
+Reproduction
+Run scripts/prepare-city.py first if rebuilding the base city, followed by
+scripts/prepare-skyline.py. The latter uses scripts/expand-city-glbs.mjs and
+pinned gltfpack 1.3.0, caches tooling outside the repository, and writes derived
+assets plus manifest hashes/counts. GLTFPACK_CLI can point to an existing
+compatible cli.js. Geometry and download source metadata are in manifest.json.

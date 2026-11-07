@@ -1,0 +1,56 @@
+Yokohama CityWorld integration — prepared and verified
+
+Import { CityWorld } from './city.js'.
+const city = new CityWorld(THREE, gltfLoader, scene, { onProgress, radius: 2200, maxTiles: 12, maxConcurrent: 2 });
+await city.preload(new THREE.Vector3(1800, 360, 1800), 2200);
+city.update(aircraft.position, dt);
+city.heightAt(x, z);        // conservative top of buildings / terrain, metres
+city.heightAt(x, z, true);  // terrain raster only, bilinear sample
+city.contains(x, z);        // inside source heightfield bounds (not exact landmask)
+city.retry(); city.dispose();
+
+GLTFLoader MUST have MeshoptDecoder and KTX2Loader (detectSupport(renderer)) because these are the genuine mobile GLB variants. No runtime network to Hugging Face is needed. All city models and collision heightfields are local under assets/city.
+
+Flags: ready = heightfield loading has settled; collisionReady = all 23 fields loaded successfully; visualReady = at least one model available.
+Status: city.stats includes loaded, near, far, skylineLoaded, loading, queued, total:23, heightfields, collisionReady, failed, optionalFailed, errors, bytesLoaded, triangles and detail. Preload rejects if collision coverage or its required foreground cannot load. A failed detail upgrade can use the distant representation. Model retries wait 15 seconds. update keeps all 23 distant tiles cached and replaces nearby meshes according to the selected detail budget.
+
+Coordinates are original metres: x east, y up, z south. CRS EPSG:6677, city origin east/north [-18569, -59982]. Minato Mirai focus [225.51,0,555.55]. Suggested airborne approach [1800,360,1800] towards [200,180,400] (northwest). Start above 300 m if flying straight across the tallest towers.
+
+Highest source building: 299.44m, approximately x253 z458 (Landmark Tower district). Next 256.41m near x119 z-110. Terrain maximum across the city 65.24m. At x225 z555 terrain 4.5m, obstacle23.75m; x200 z400 terrain4m, obstacle41m (these samples precede conservative one-cell margin).
+
+The artificial island runway is defined by environment.js and has separate collision handling. It is a fictional runway, not a mapped airport. Validate its full deck and approach against source heightfields when moving it; checking its centre alone is insufficient.
+
+Source coverage has holes: 23 tiles are not a filled rectangle. Main useful coastal band is x~-1500..850; sparse port tiles lie around x1900..3100; disconnected western column around x-3780..-2580. The five textured tiles are 53391459,53391530,53391540,53391550,53391560. Treat the edges as free-flight boundaries / surrounding sea; do not claim full-city continuous coverage.
+
+Verification:
+- 23 mobile GLBs: 17,423,712 bytes, expected source sizes, correct GLB headers/lengths, per-file SHA256 recorded in manifest.
+- 23 heightfields: 4,104,148 bytes (1,284,234 bytes total if individually gzip compressed), all RLE decodes valid, obstacle>=terrain.
+- Heightfield cells approximately 4.5-4.7m x 3.6-4.0m; 0.25m vertical quantization. heightAt obstacles adds a one-cell raster margin to cover thin projected walls.
+- All 2,651,147 original collision triangle centroids tested: conservative obstacle sample never underestimated source centroid height (0 failures).
+- Original collision meshes stay in /tmp cache and are not shipped. Heightfields cannot represent tunnels/overhangs or flying below a bridge. Collision is simplified and conservative, not exact triangle mesh contact.
+- node --check dist/js/city.js passed. Browser rendering is root agent's integration task.
+
+Source and CC BY4.0 attribution are included in dist/CREDITS.txt and manifest.json. Pipeline reproducible with python scripts/prepare-city.py (requires numpy and Pillow). Download cache /tmp/plateau-yokohama-cache avoids repeat transfer.
+
+Expanded skyline integration
+All 23 original Yokohama tiles have a self-hosted distant representation in
+skyline/. Most are derived from source LOD3 using gltfpack 1.3 simplification;
+two landmark tiles retain original LOD3 geometry, and two boundary-sensitive
+tiles use a gentler pass. The original mobile variants remain in models/ for
+nearby detail. Both representations use the same tile offsets and preserve
+source materials, colors and embedded textures. No extra buildings or geographic
+fill were added. Distant details are approximations of the original geometry.
+
+Scenery presets keep all source tiles in view after background loading: low
+uses up to four nearby mobile meshes; auto uses up to eight; high uses up to
+fourteen, subject to the host's maxTiles cap. Collision heightfields remain
+loaded for every tile, independent of the visible mesh detail.
+
+After regenerating the original city with scripts/prepare-city.py, run
+scripts/prepare-skyline.py to restore skyline assets and manifest metadata.
+
+The final distant set has 344,628 triangles and occupies 4,457,636 bytes, versus
+1,549,742 triangles and 16,163,152 bytes in the original source LOD3 set.
+Per-tile geometry extent differences are at most 1.51 m, and maximum roof
+heights differ by less than 0.03 m. The two retained landmark tiles were selected
+after geometry silhouette checks. Collision grids remain entirely unchanged.

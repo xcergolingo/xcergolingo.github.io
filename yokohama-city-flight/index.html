@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101a21"><meta name="description" content="Fly from the cockpit over real Yokohama city scenery. Look through the side windows, explore the skyline, and learn languages with spoken words and sentences.">
+<title>Yokohama City Flight · GoLingo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23131f29'/%3E%3Cpath d='M32 9 37 27 55 38 55 43 36 36 36 49 43 54 43 57 32 53 21 57 21 54 28 49 28 36 9 43 9 38 27 27Z' fill='%23efb76f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+</head>
+<body>
+<div id="scene" aria-label="Three dimensional Yokohama flight simulator"></div>
+<div class="screen-shade" id="shade"></div>
+<svg class="icon-defs" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="i-plane" viewBox="0 0 24 24"><path d="m12 3 2 7 7 4v2l-7-2v5l3 2H7l3-2v-5l-7 2v-2l7-4z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6M16 14v6"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 7h5l2-3h4l2 3h5v13H3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+<symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 8c3 2 3 6 0 8M20 5c5 4 5 10 0 14"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 3 6-2v15l-6 2-6-3-6 2zM9 3v15M15 6v15"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2m-15-7 1.5 1.5M17.5 17.5 1.5 1.5M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
+</defs></svg>
+
+<header class="topbar">
+ <a class="brand" href="https://xcergolingo.github.io/games/" aria-label="Back to GoLingo games"><span class="brand-mark"><svg><use href="#i-plane"/></svg></span><span>GoLingo<span class="brand-sub">LEARN THROUGH FLIGHT</span></span></a>
+ <div class="location-tag"><span class="live-dot"></span> YOKOHAMA <span class="country">JAPAN</span></div>
+ <div class="top-actions">
+  <button class="icon-button game-action" id="cameraBtn" title="Change camera (C)" aria-label="Change camera"><svg><use href="#i-camera"/></svg></button>
+  <button class="icon-button game-action" id="mapBtn" title="Map" aria-label="Toggle map"><svg><use href="#i-map"/></svg></button>
+  <button class="icon-button" id="soundBtn" title="Engine sound" aria-label="Toggle engine sound" aria-pressed="true"><svg><use href="#i-volume"/></svg><span class="muted-slash"></span></button>
+  <button class="icon-button" id="fullscreenBtn" title="Full screen" aria-label="Full screen"><svg><use href="#i-expand"/></svg></button>
+  <button class="icon-button" id="settingsBtn" title="Settings" aria-label="Open settings"><svg><use href="#i-settings"/></svg></button>
+  <button class="icon-button game-action" id="pauseBtn" title="Pause (P)" aria-label="Pause flight"><svg><use href="#i-pause"/></svg></button>
+ </div>
+</header>
+
+<main id="briefing" class="briefing">
+ <section class="intro">
+  <div class="eyebrow"><span></span> EXPLORE · LISTEN · LEARN <span class="edition">01 / JAPAN</span></div>
+  <h1>Yokohama<br><span>City Flight.</span></h1>
+  <p class="intro-copy">Take your seat above the waterfront.<br>Explore the city. Learn a little as you fly.</p>
+  <div class="intro-meta"><div><b>35.45° N</b><small>139.63° E</small></div><i></i><div><b>PLATEAU</b><small>REAL CITY MODELS</small></div><i></i><div><b>COCKPIT</b><small>YOUR POINT OF VIEW</small></div></div>
+ </section>
+ <section class="flight-card" aria-label="Flight setup">
+  <div class="card-heading"><span class="micro">PREFLIGHT</span><span class="weather"><svg><use href="#i-sun"/></svg> <span id="weatherLabel">Clear day</span></span></div>
+  <h2>Ready for departure?</h2><p class="card-copy">Choose where your flight begins.</p>
+  <div class="start-options" role="group" aria-label="Starting location">
+   <button class="start-option selected" data-start="air"><span class="option-icon">↗</span><span><b>City approach</b><small>Already airborne · 1,100 ft</small></span><span class="radio-dot"></span></button>
+   <button class="start-option" data-start="runway"><span class="option-icon runway-icon">Ⅱ</span><span><b>Runway departure</b><small>Harbour training strip · RWY 36</small></span><span class="radio-dot"></span></button>
+  </div>
+  <div class="preflight-learning">
+   <label for="languageStart">LEARN<select id="languageStart"><option value="ja">Japanese</option><option value="es">Spanish</option><option value="fr">French</option><option value="zh">Chinese</option><option value="en">English</option></select></label>
+   <label for="modeStart">YOUR LESSON<select id="modeStart"><option value="listen">Listen & fly</option><option value="gates">Word gates</option></select></label>
+  </div>
+  <div class="lesson-source" id="lessonSource">Starter lesson · 12 city words</div>
+  <label class="inline-toggle"><span><b>Flight assistance</b><small>Smoother turns and easier control</small></span><input type="checkbox" id="assistStart" checked><span class="switch"></span></label>
+  <button class="start-flight" id="startBtn" disabled><span id="startLabel">Preparing your cockpit</span><svg><use href="#i-arrow"/></svg></button>
+  <div class="load-status"><span class="loading-dot" id="loadDot"></span><span id="loadText">Loading flight systems…</span></div>
+  <div class="quick-controls"><span><b>LEFT</b> Throttle</span><span><b>RIGHT</b> Flight stick</span><span><b>DOWN</b> Nose up</span></div>
+ </section>
+ <div class="briefing-footer"><span>A new view. A few new words.</span><button id="creditsBtn">City data & credits ↗</button></div>
+</main>
+
+<section id="flightHUD" class="flight-hud hidden" aria-label="Flight instruments and controls">
+ <div class="readouts"><div><span class="readout-label">AIRSPEED</span><b id="speedReadout">170</b><small>KTS</small></div><div><span class="readout-label">ALTITUDE</span><b id="altReadout">1,100</b><small>FT</small></div></div>
+ <div class="heading-indicator"><span class="heading-tick"></span><div id="headingMarks"></div><b id="headingReadout">340°</b></div>
+ <div class="route-status"><span class="live-dot"></span><span id="flightStatus">LISTEN &amp; FLY</span><span id="cameraLabel">COCKPIT</span></div>
+ <div class="look-controls" id="lookControls" role="group" aria-label="Look around the cockpit"><button id="lookLeftBtn" aria-label="Look through the left side window" title="Look left (J)">← LEFT</button><button id="lookCentreBtn" aria-label="Centre cockpit view" title="Look forward (R)">FORWARD</button><button id="lookRightBtn" aria-label="Look through the right side window" title="Look right (L)">RIGHT →</button></div>
+ <div id="mapPanel" class="map-panel hidden"><div class="map-title">HARBOUR CIRCUIT <span>N ↑</span></div><canvas id="mapCanvas" width="360" height="320"></canvas><div class="map-foot"><span id="tileStatus">CITY SCENERY</span><button id="hideMapBtn" aria-label="Close map">×</button></div></div>
+ <div class="throttle-panel"><div class="control-title">THRUST <b id="throttleValue">68%</b></div><div class="throttle-track"><span class="throttle-ticks"></span><input type="range" id="throttle" min="0" max="100" value="68" aria-label="Engine throttle"><div class="throttle-fill" id="throttleFill"></div><div class="throttle-handle" id="throttleHandle"><span></span><span></span><span></span></div></div><span class="control-caption">THROTTLE</span></div>
+ <div class="stick-panel"><div class="control-title">FLIGHT STICK <span class="stick-light"></span></div><div id="flightStick" class="flight-stick" role="slider" tabindex="0" aria-label="Flight stick. Pull down to climb; move sideways to bank." aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="stick-guide guide-x"></span><span class="stick-guide guide-y"></span><span class="stick-ring"></span><span class="stick-knob" id="stickKnob"><i></i></span><span class="stick-top">↓</span><span class="stick-bottom">↑</span></div><span class="control-caption">PULL DOWN TO CLIMB</span></div>
+ <div class="flight-toolbar"><button id="autoBtn" aria-pressed="false"><span class="button-dot"></span> AUTO PILOT</button><button id="gearBtn" aria-pressed="false">GEAR <b id="gearState">UP</b></button><button id="flapsBtn" aria-pressed="false">FLAPS <b id="flapsState">0</b></button><button id="brakeBtn" class="hidden">BRAKE</button><button id="learnBtn" aria-pressed="true">LEARN <b id="learnState">ON</b></button></div>
+ <button class="clean-view" id="cleanViewBtn" title="Hide controls (H)">CLEAR VIEW</button>
+ <div class="control-hint" id="controlHint">Pull the stick down to climb. Bank gently to turn.</div>
+ <div id="warning" class="flight-warning hidden" role="status"></div>
+ <div id="wordCaption" class="word-caption hidden"><button id="speakWord" aria-label="Replay current word" title="Replay (V)"><svg><use href="#i-volume"/></svg></button><span class="word-copy"><span class="lesson-status" id="lessonStatus"></span><b id="wordText" dir="auto"></b><small id="wordTranslation" dir="auto"></small><button id="wordSentence" class="word-sentence" dir="auto" aria-label="Listen to the example sentence" title="Listen to this sentence"></button><small id="wordSentenceTranslation" class="sentence-translation" dir="auto"></small><span class="lesson-guidance" id="lessonGuidance"></span></span><span class="word-progress" id="wordProgress"></span><button id="nextWordBtn" class="next-word" aria-label="Practice this word and go to the next" title="Next word (N)">NEXT →</button><button id="hideWordsBtn" aria-label="Hide word caption and keep listening" title="Hide caption">×</button></div>
+ <button id="showWordsBtn" class="show-words hidden">SHOW LESSON</button>
+ <div class="flight-footer"><span id="sessionTimer">FLIGHT TIME 00:00</span><span class="data-credit">CITY DATA · PLATEAU / CODEPAWL</span></div>
+</section>
+
+<button id="restoreViewBtn" class="restore-view hidden">SHOW CONTROLS</button>
+<div id="toast" class="toast" role="status"></div>
+<div id="rotateHint" class="rotate-hint hidden"><span>↻</span> Turn your phone sideways for a wider cockpit view.<button id="dismissRotate" aria-label="Dismiss rotation tip">×</button></div>
+
+<div id="pauseModal" class="modal-layer hidden"><section class="modal compact"><span class="micro">FLIGHT PAUSED</span><h2>A moment above the city.</h2><p>Your aircraft is holding its position.</p><button id="resumeBtn" class="primary">Resume flight <span>↗</span></button><button id="restartBtn" class="secondary">Return to preflight</button><button id="recoverMenuBtn" class="text-button">Reposition safely above the harbour</button></section></div>
+<div id="crashModal" class="modal-layer hidden"><section class="modal compact"><span class="micro amber">FLIGHT INTERRUPTED</span><h2 id="crashTitle">Let’s try that again.</h2><p id="crashMessage">You can recover above the harbour and keep flying.</p><div class="flight-stats"><div><b id="crashTime">00:00</b><small>FLIGHT TIME</small></div><div><b id="crashDistance">0.0</b><small>KILOMETRES FLOWN</small></div></div><button id="recoverBtn" class="primary">Recover & continue <span>↗</span></button><button id="runwayResetBtn" class="secondary">Start again on the runway</button></section></div>
+
+<div id="settingsModal" class="modal-layer hidden"><section class="modal settings-modal"><div class="modal-header"><div><span class="micro">MAKE IT YOUR FLIGHT</span><h2>Flight settings</h2></div><button class="icon-button" id="closeSettings" aria-label="Close settings"><svg><use href="#i-close"/></svg></button></div>
+ <div class="settings-tabs"><button class="selected" data-tab="flight">Flight</button><button data-tab="learning">Learning</button><button data-tab="controls">Controls</button></div>
+ <div class="settings-tab" data-content="flight">
+  <label class="setting-row"><span><b>Flight assistance</b><small>Auto coordination and gentle stability</small></span><input id="assistSetting" type="checkbox" checked></label>
+  <label class="setting-row"><span><b>Pull down to climb</b><small>Reverse this for a direct vertical stick</small></span><input id="invertSetting" type="checkbox" checked></label>
+  <label class="setting-row"><span><b>Control sensitivity</b><small>Fine control for close city flights</small></span><select id="sensitivitySetting"><option value="0.65">Gentle</option value="1" selected>Normal</option><option value="1.35">Responsive</option></select></label>
+  <label class="setting-row"><span><b>Time of day</b><small>Lighting across the waterfront</small></span><select id="daySetting"><option value="day">Clear day</option><option value="sunset">Golden hour</option></select></label>
+  <label class="setting-row"><span><b>Graphics</b><small>Change rendering resolution</small></span><select id="qualitySetting"><option value="auto">Automatic</option><option value="low">Battery friendly</option><option value="high">High detail</option></select></label>
+  <label class="setting-row"><span><b>Engine sound</b><small>Quiet cabin and airflow</small></span><input id="soundSetting" type="checkbox" checked></label>
+ </div>
+ <div class="settings-tab hidden" data-content="learning">
+  <label class="setting-row"><span><b>Language flight</b><small>Learn as you explore the city</small></span><input id="learningSetting" type="checkbox" checked></label>
+  <label class="setting-row"><span><b>Learning language</b></span><select id="languageSetting"><option value="ja">Japanese</option><option value="es">Spanish</option><option value="fr">French</option><option value="zh">Chinese</option><option value="en">English</option></select></label>
+  <label class="setting-row"><span><b>Practice mode</b><small>Listen on autopilot, or steer through gates</small></span><select id="modeSetting"><option value="listen">Listen &amp; fly</option><option value="gates">Word gates</option></select></label>
+  <label class="setting-row"><span><b>Show translation</b></span><input id="translationSetting" type="checkbox" checked></label>
+  <label class="setting-row"><span><b>Repeat current word</b></span><input id="repeatSetting" type="checkbox" checked></label>
+  <label class="import-label" for="wordInput">Paste GoLingo JSON or one <code>word | translation</code> per line</label><textarea id="wordInput" rows="4" placeholder="空 | sky&#10;海 | sea&#10;街 | city" spellcheck="false"></textarea><div class="import-actions"><button id="importWordsBtn" class="secondary">Load lesson</button><button id="exportWordsBtn" class="text-button">Export collected</button></div><p id="importStatus" class="form-note">Starter vocabulary is ready. Lessons from your GoLingo games gallery load automatically.</p><button id="starterWordsBtn" class="text-button">Use the starter lesson</button><div class="review-heading"><b>Your practice list</b><span id="reviewCount">0 practiced</span></div><div id="reviewList" class="review-list"></div>
+ </div>
+ <div class="settings-tab hidden" data-content="controls"><div class="controls-grid"><b>Drag windshield</b><span>Look through the front and side windows</span><b>J / L · I / K</b><span>Look left / right · up / down</span><b>R or double-click</b><span>Centre your view</span><b>N / V</b><span>Next word / replay pronunciation</span><b>Flight stick</b><span>Pull down to climb; left or right to bank</span><b>Left slider</b><span>Engine throttle</span><b>W / S or ↑ / ↓</b><span>Pitch down / pitch up</span><b>A / D or ← / →</b><span>Bank left / bank right</span><b>Q / E</b><span>Rudder left / right</span><b>Shift / Ctrl</b><span>Increase / decrease throttle</span><b>B</b><span>Hold wheel brakes</span><b>G / F</b><span>Landing gear / flaps</span><b>Space</b><span>Level the aircraft</span><b>P / Escape</b><span>Pause / resume</span><b>C / H</b><span>Change camera / clear view</span></div><p class="form-note">Listen &amp; fly advances your lesson every 14 seconds while you fly. Autopilot is useful for sightseeing and listening; manually fly to the displayed heading in Word gates mode. Use Next to practice without reaching a gate.</p><p class="form-note">For takeoff: release brakes, set full thrust, then pull back gently above 100 knots. For landing: lower gear and flaps, approach runway 36 from the south at about 110–125 knots, and reduce thrust before touchdown.</p></div>
+ <div class="settings-footer"><span>GoLingo · Learn through exploration</span><button class="primary small" id="doneSettings">Done</button></div>
+</section></div>
+
+<div id="creditsModal" class="modal-layer hidden"><section class="modal credits-modal"><div class="modal-header"><div><span class="micro">REAL PLACES, OPEN DATA</span><h2>City data & credits</h2></div><button class="icon-button" id="closeCredits" aria-label="Close credits"><svg><use href="#i-close"/></svg></button></div><p>Yokohama city scenery is based on <a href="https://www.mlit.go.jp/plateau/" target="_blank" rel="noopener">MLIT Project PLATEAU</a>, 2020 releases. Copyright of the original city data belongs to the City of Yokohama.</p><p>GLB conversion, tiling, and optimization by <a href="https://huggingface.co/datasets/codepawl/plateau-city-glb" target="_blank" rel="noopener">CodePawl</a>. City assets are licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Further integration, material adjustments, collision height fields, and game scenery by GoLingo.</p><p>The harbour training strip is fictional game scenery. City data has been simplified. This game is not endorsed by MLIT, the local government, or CodePawl.</p><p><a href="./CREDITS.txt" target="_blank">Full asset notices</a> · <a href="./vendor/THREE-LICENSE.txt" target="_blank">Three.js license</a></p></section></div>
+<div id="startupError" class="modal-layer hidden"><section class="modal compact"><span class="micro amber">STARTUP ISSUE</span><h2>The cockpit couldn’t load.</h2><p id="startupErrorText">Please reload the page to try again.</p><button class="primary" onclick="location.reload()">Try again</button></section></div>
+<script>window.addEventListener('error',function(e){if(!window.flightBooted){document.getElementById('startupError').classList.remove('hidden');document.getElementById('startupErrorText').textContent='A flight component could not load. '+(e.message||'Please reload to retry.');}});</script>
+<script type="module" src="./js/app.js"></script>
+</body></html>
