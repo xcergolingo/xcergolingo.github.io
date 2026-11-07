@@ -87,3 +87,22 @@
  .preflight-options{row-gap:8px}
  .preflight-details{margin:10px 0}
 }
+
+/* The visible path is independent of the route and autopilot. */
+.preflight-toggles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:7px}
+.preflight-toggles .inline-toggle{min-width:0;justify-content:space-between;gap:5px;flex-shrink:1}
+.inline-toggle input:focus-visible+.switch{outline:2px solid var(--amber);outline-offset:4px}
+.flight-path-note{margin:0 0 10px;font-size:9px;line-height:1.45;color:#9abdc6}
+.look-controls .path-guide-toggle{min-width:58px;margin-left:2px;border-left:1px solid #91dfed38;color:#a1eafa;pointer-events:auto}
+.look-controls .path-guide-toggle[aria-pressed=true]{background:#2ad7ff18;box-shadow:inset 0 0 0 1px #91dfed32}
+.look-controls .path-guide-toggle[aria-pressed=false]{color:#a9bac4;background:transparent;box-shadow:none}
+#pathSettingHelp{max-width:330px;line-height:1.5}
+@media(max-height:650px) and (orientation:landscape){
+ .preflight-toggles{gap:9px;margin-bottom:5px}
+ .flight-path-note{font-size:8px;margin-bottom:7px}
+ .look-controls .path-guide-toggle{min-width:53px}
+}
+@media(orientation:portrait){
+ .preflight-toggles{gap:9px;margin-bottom:6px}
+ .look-controls .path-guide-toggle{min-width:54px;padding-left:8px;padding-right:8px}
+}
