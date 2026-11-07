@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Longshot — Word Marksman</title>
+  <desc id="desc">An original editorial illustration of a sunset city viewed from a rooftop. A circular scope surrounds an orange vocabulary target with the Spanish word cielo and its English translation sky. This is a game cover illustration, not a gameplay screenshot.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#96b8b2"/><stop offset=".48" stop-color="#d6d8b8"/><stop offset="1" stop-color="#f2b27e"/></linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0c3"/><stop offset="1" stop-color="#f7c18b"/></linearGradient>
+    <linearGradient id="facade" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5a8580"/><stop offset="1" stop-color="#426c69"/></linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#345b55"/><stop offset="1" stop-color="#183e38"/></linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#163b35" stop-opacity="0"/><stop offset="1" stop-color="#163b35" stop-opacity=".78"/></linearGradient>
+    <pattern id="windows" width="31" height="37" patternUnits="userSpaceOnUse"><rect x="10" y="10" width="10" height="17" rx="1" fill="#b4c5ac" opacity=".5"/></pattern>
+    <pattern id="lit-windows" width="42" height="47" patternUnits="userSpaceOnUse"><rect x="12" y="12" width="15" height="23" rx="1" fill="#f2c696" opacity=".65"/></pattern>
+    <filter id="card-shadow" x="-.2" y="-.2" width="1.4" height="1.6"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#163b35" flood-opacity=".18"/></filter>
+  </defs>
+  <rect width="1200" height="750" fill="url(#sky)"/>
+  <circle cx="357" cy="218" r="104" fill="url(#sun)"/>
+  <path d="M0 262C138 230 242 263 362 249S586 255 667 227 854 218 1007 238s145 14 193 3" fill="none" stroke="#f8e7bf" stroke-width="13" opacity=".35"/>
+  <path d="M50 129h115m36 0h45M566 111h141m38 0h63M943 163h113" stroke="#f4edd2" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+  <g fill="#70968b" opacity=".4"><path d="M0 389V309h40v-39h44v119h31V330h63v-42h38v101h21V271h53v118h22V299h55v90h24V334h48v55h20V303h59v86h17V260h34v-28h32v157h26V304h45v85h14V271h69v118h19V317h49v72h30V266h54v123h31V327h66v62h16V294h48v95h30V250h66v139h35V309h57v80h37V280h36v109Z"/></g>
+  <g fill="#699087" opacity=".85"><path d="M0 467V367h83v100h21V335h80v132h31V378h74v89h26V316h50v151h39V347h100v120h27V370h76v97h29V300h57v167h22V335h88v132h23V378h107v89h26V336h62v131h27V300h69v167h25V348h85v119h26V371h59v96Z"/></g>
+  <path d="M0 447c199-25 330 13 486 4s294-21 412-12 209 30 302 10v96H0Z" fill="#d4b996" opacity=".7"/>
+  <g>
+    <path d="M0 480 149 452l68 24v274H0Z" fill="#3f706b"/><path d="m149 452 68 24v274h-68Z" fill="#285c59"/><path d="m0 480 149-28 68 24-144 31Z" fill="#8aa092"/><path d="M0 505h148v245H0Z" fill="url(#windows)"/>
+    <path d="m239 388 198-30 50 28v364H239Z" fill="url(#facade)"/><path d="m437 358 50 28v364h-50Z" fill="#315f5b"/><path d="m239 388 198-30 50 28-194 33Z" fill="#adc2a9"/><path d="M251 421h174v329H251Z" fill="url(#windows)"/>
+    <path d="m274 380 103-17v-31l-103 14Z" fill="#84a296"/><path d="m377 332 20 11v26l-20-6Z" fill="#5f857b"/><path d="m274 346 103-14 20 11-104 16Z" fill="#c2ccb0"/>
+    <path d="m517 485 144-25 67 27v263H517Z" fill="#638780"/><path d="m661 460 67 27v263h-67Z" fill="#3d6962"/><path d="m517 485 144-25 67 27-147 26Z" fill="#9dae99"/><path d="M532 516h119v234H532Z" fill="url(#windows)"/>
+    <path d="m723 394 288-37 89 46v347H723Z" fill="#547b70"/><path d="m1011 357 89 46v347h-89Z" fill="#315c51"/><path d="m707 388 304-40 106 52-313 47Z" fill="#bbc2a4"/><path d="m707 388 97 50 313-47v16l-313 47-97-47Z" fill="#6b8d78"/><path d="M742 453h251v297H742Z" fill="url(#lit-windows)"/>
+    <path d="m1041 482 159-24v292h-159Z" fill="#5d8275"/><path d="M1061 503h139v247h-139Z" fill="url(#windows)"/>
+  </g>
+  <g stroke="#3b6a5b" stroke-width="5" fill="none" stroke-linecap="round"><path d="M1091 347V210m-62 26h147m-122 0 37-26 70 26m-14 0v64m-11 0h22"/><path d="M157 372v-99m-29 27h58m-29-27-20 27h40Z"/></g>
+  <g><path d="m865 402 12-102h17l13 96" stroke="#694e36" stroke-width="10" fill="none"/><path d="m848 398 60-7 15 10-61 8Z" fill="#355d4d" opacity=".55"/><rect x="849" y="254" width="77" height="101" rx="14" fill="#e6773f"/><path d="M860 266h54v76h-54Z" fill="#ef9457"/><circle cx="887" cy="304" r="26" fill="#fbe7b8"/><circle cx="887" cy="304" r="17" fill="#e77940"/><circle cx="887" cy="304" r="8" fill="#fbe7b8"/></g>
+  <g fill="none" stroke="#fcf1d4"><circle cx="887" cy="304" r="154" stroke-width="2.5" opacity=".84"/><circle cx="887" cy="304" r="143" stroke-width="1" opacity=".45"/><path d="M887 135v31m0 276v31M718 304h31m276 0h31" stroke-width="4"/><path d="M887 279v13m0 24v13m-25-25h13m24 0h13" stroke-width="1.8"/><path d="m777 194 9 9m202-9-9 9M777 414l9-9m202 9-9-9" stroke-width="2" opacity=".75"/></g>
+  <g filter="url(#card-shadow)"><rect x="681" y="136" width="192" height="98" rx="16" fill="#183f38"/><path d="m832 232 16 20 4-20" fill="#183f38"/><text x="703" y="184" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#fff0d0">cielo</text><text x="704" y="212" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#efae74">sky</text><g stroke="#f1bd85" fill="none" stroke-width="2" stroke-linecap="round"><path d="m818 170 7-5v18l-7-5h-5v-8Z"/><path d="M833 168q8 6 0 12m5-16q13 10 0 20"/></g></g>
+  <path d="M0 599 357 541l843 133v76H0Z" fill="url(#roof)"/><path d="m0 589 359-59 841 130v23L358 553 0 613Z" fill="#84a18c"/><path d="m0 613 358-60 842 130v13L358 569 0 630Z" fill="#2b5547"/><path d="m552 583-52 167m230-139-13 139m208-108 26 108" stroke="#4b6e58" stroke-width="2" opacity=".4"/>
+  <rect y="510" width="1200" height="240" fill="url(#shade)"/>
+  <g fill="#fcf1d4" font-family="Arial, Helvetica, sans-serif"><text x="66" y="97" font-size="16" font-weight="700" letter-spacing="4">GOLINGO / AIM &amp; LEARN</text><text x="62" y="656" font-size="76" font-weight="800" letter-spacing="-2">LONGSHOT</text><text x="67" y="698" font-size="23" letter-spacing="8" fill="#efb77c">WORD MARKSMAN</text></g>
+  <g transform="translate(1100 655)" stroke="#f9eacd" fill="none" opacity=".8"><circle cx="25" cy="25" r="27" stroke-width="1.5"/><path d="m19 14 18 11-18 11Z" stroke-width="2" stroke-linejoin="round"/></g>
+</svg>

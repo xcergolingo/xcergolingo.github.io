@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#151f21">
+  <meta name="description" content="Learn languages above the city. Shoot word targets, hear repeating pronunciation, discover sentences, and practice your own GoLingo lesson at your pace.">
+  <title>Longshot — Word Marksman | GoLingo</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=2">
+</head>
+<body>
+  <canvas id="scene" aria-label="Three dimensional rooftop sniper range"></canvas>
+  <div id="vignette"></div>
+  <div id="loader"><span class="loader-mark">L<span>+</span>S</span><span id="loadText">PREPARING THE ROOFTOP</span><div class="loading-line"></div></div>
+  <div id="fatal" hidden><h2>The range could not start</h2><p id="fatalText"></p><button onclick="location.reload()">Try again</button></div>
+
+  <header id="masthead">
+    <a class="brand" href="https://www.golingoapp.com" target="_blank" rel="noopener"><span class="brand-icon">G<span>↗</span></span><span>GoLingo<span class="brand-sub">PLAY. EXPLORE. LEARN.</span></span></a>
+    <div class="mast-label"><span class="status-dot"></span> WORD MARKSMAN <span class="slash">/</span> GOLINGO</div>
+    <div class="top-actions"><button id="soundBtn" class="icon-button" aria-label="Toggle game sound" title="Sound">♪</button><button id="settingsBtn" class="icon-button" aria-label="Settings" title="Settings">⚙</button></div>
+  </header>
+
+  <main id="intro">
+    <div class="intro-copy">
+      <div class="eyebrow"><span class="mini-cross">+</span> MAKE EVERY WORD A HIT</div>
+      <h1>LONG<span>SHOT</span><b>+</b></h1>
+      <div class="title-rule"><span>YOUR WORDS. A NEW PERSPECTIVE.</span><span>01 — 03</span></div>
+      <p class="intro-desc">Find a word.<br>Hear it. Make it yours.</p>
+      <div class="mode-pick" aria-label="Choose game mode"><button id="learningMode" class="mode active" aria-pressed="true"><span class="tiny-plus">+</span> LEARN &amp; PLAY</button><button id="classicMode" class="mode" aria-pressed="false">CLASSIC</button></div>
+      <button id="startBtn" class="primary-button" disabled><span>PLAY &amp; LEARN</span><span class="arrow">↗</span></button>
+      <div class="start-notes"><span class="status-dot"></span> <span id="paceLabel">NO TIME LIMIT</span> <i>·</i> BEST: <b id="bestIntro">—</b></div>
+      <div class="intro-links"><button id="howBtn" class="text-button">How to play <span>↗</span></button><a class="text-button" href="https://xcergolingo.github.io/games/">All GoLingo games ↗</a></div>
+    </div>
+    <div class="scene-caption"><span class="caption-cross">+</span><div><span class="small-label">RANGE 07</span><strong>HARBOR DISTRICT</strong><span>GOLDEN HOUR <i>·</i> 18:42</span></div></div>
+    <div class="intro-bottom"><div><span class="step-no">01</span><span>FIND YOUR<br><b>WORD</b></span></div><div><span class="step-no">02</span><span>HEAR IT<br><b>AGAIN</b></span></div><div><span class="step-no">03</span><span>MAKE IT<br><b>YOURS</b></span></div><span class="bottom-note">A LITTLE FOCUS.<br>A LONG WAY.</span></div>
+    <span class="vertical-note">GOLINGO &nbsp; / &nbsp; LEARN THROUGH PLAY</span>
+  </main>
+
+  <section id="hud" hidden aria-label="Game information">
+    <div class="hud-top"><div class="round-block"><span class="small-label" id="roundLabel">ROUND 01 / 03</span><strong id="roundName">SIGHTING IN</strong><span id="objective">Hit all 6 orange targets</span></div><div class="timer-block"><span class="small-label" id="timerLabel">LEARN AT YOUR PACE</span><strong id="timer">∞</strong></div><button id="pauseBtn" class="icon-button" aria-label="Pause game">Ⅱ</button></div>
+    <div class="target-count"><span class="small-label">TARGETS</span><b><span id="kills">0</span><em>/</em><span id="goal">6</span></b><div id="targetPips"></div></div>
+    <div id="compass"><span>W</span><span>·</span><span>·</span><span>NW</span><span>·</span><span id="heading">N</span><span>·</span><span>NE</span><span>·</span><span>·</span><span>E</span><i></i></div>
+    <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+    <div id="scope" hidden><div class="scope-circle"><div class="scope-h"></div><div class="scope-v"></div><div class="scope-center"></div><div class="scope-ticks h">┊ &nbsp; ┊ &nbsp; ┊ &nbsp; ┊ &nbsp; ┊ &nbsp; ┊</div><div class="scope-ticks v">—<br>—<br>—<br>—</div><span class="scope-top">LS–07 <b id="scopeZoom">4×</b></span><span class="scope-bottom">RANGE <b id="scopeRange">—</b> M <i>·</i> <span id="scopeSteady">HOLD TO STEADY</span></span></div></div>
+    <div id="hitmark">╳</div><div id="hitNotice" aria-live="polite"></div>
+    <div id="targetGuide" hidden><span>↓</span><b>ORANGE TARGET</b></div>
+    <div id="toast" role="status"></div>
+    <div id="roundBanner"><span id="bannerEyebrow"></span><strong id="bannerTitle"></strong></div>
+    <div class="hud-bottom"><div class="score-block"><span class="small-label">TOTAL SCORE</span><strong id="score">0000</strong><span id="accuracy">ACCURACY —</span></div><div id="desktopHints"><span><kbd>WASD</kbd> MOVE</span><span><kbd>DRAG</kbd> AIM</span><span><kbd>SPACE</kbd> SCOPE</span><span><kbd>R</kbd> RELOAD</span></div><div class="ammo-block"><span class="small-label">BOLT ACTION <em>LS–07</em></span><strong><span id="ammo">5</span><small>/ <span id="reserve">25</span></small></strong><div id="ammoPips"></div><span id="weaponStatus">READY</span></div></div>
+    <div id="reloadIndicator" hidden><span>RELOADING</span><div><i id="reloadProgress"></i></div></div>
+    <div id="touchJoystick" aria-label="Drag to move"><span class="joystick-cross">+</span><div id="joystickThumb"></div></div>
+    <div id="lookHint">DRAG TO AIM</div>
+    <div id="actions"><button id="huntBtn" class="control-button minor" aria-label="Find next target" title="Find target (H)"><span>⌖</span><b>FIND</b></button><button id="reloadBtn" class="control-button minor" aria-label="Reload rifle" title="Reload (R)"><span>↻</span><b>RELOAD</b></button><button id="steadyBtn" class="control-button minor" aria-label="Hold to steady aim" title="Hold breath (Shift)"><span>≈</span><b>STEADY</b></button><button id="zoomBtn" class="control-button zoom" aria-label="Change magnification">4×</button><button id="scopeBtn" class="control-button" aria-label="Toggle scope" title="Scope (Space or right click)"><span>⊕</span><b>SCOPE</b></button><button id="fireBtn" class="fire-button" aria-label="Fire rifle" title="Fire (F or click)"><span class="fire-reticle">⊹</span><b>FIRE</b></button></div>
+    <div id="learningBar" hidden><button id="wordToggle" aria-label="Show or hide word">Aa</button><button id="wordReplay" aria-label="Replay word pronunciation"><span id="wordText">Hit a target to learn</span><small id="wordTranslation"></small></button><button id="sentenceBtn" aria-label="Hear example sentence" title="Example sentence" hidden>▤</button><button id="learnedBtn" aria-label="View learned words"><span id="learnedCount">0</span> ↗</button></div>
+  </section>
+
+  <div id="pausePanel" class="modal-backdrop" hidden><section class="panel compact"><div class="eyebrow">TAKE YOUR TIME</div><h2>HOLD YOUR<br>POSITION.</h2><p>The timer is paused. Your next shot can wait.</p><button id="resumeBtn" class="primary-button"><span>BACK TO THE RANGE</span><span>↗</span></button><div class="panel-secondary"><button id="pauseSettings" class="text-button">Settings</button><button id="restartBtn" class="text-button">Restart run</button><button id="menuBtn" class="text-button">Main menu</button></div></section></div>
+
+  <div id="resultPanel" class="modal-backdrop" hidden><section class="panel result-panel"><div class="eyebrow" id="resultEyebrow">RANGE COMPLETE</div><h2 id="resultTitle">NICE<br>SHOOTING.</h2><p id="resultSubtitle"></p><div class="result-stats"><div><span>SCORE</span><b id="resultScore">0</b></div><div><span>ACCURACY</span><b id="resultAccuracy">0%</b></div><div><span>PRECISE HITS</span><b id="resultPrecision">0</b></div></div><p class="record-line" id="recordLine"></p><button id="againBtn" class="primary-button"><span>ONE MORE ROUND</span><span>↗</span></button><div class="panel-secondary"><button id="resultMenu" class="text-button">Main menu</button><button id="exportBtn" class="text-button" hidden>Export learned words ↗</button></div></section></div>
+
+  <dialog id="settingsDialog" class="settings-dialog"><form method="dialog"><button class="dialog-close icon-button" aria-label="Close settings">×</button></form><div class="eyebrow">MAKE IT YOURS</div><h2>RANGE SETTINGS</h2><label class="setting-row"><span>Look sensitivity</span><input id="sensitivity" type="range" min="0.35" max="2.2" step="0.05" value="1"></label><label class="setting-row"><span>Sound effects</span><input id="soundSetting" type="checkbox" checked></label><label class="setting-row"><span>Gentle aim assist <small>Softens aiming near a target</small></span><input id="assistSetting" type="checkbox" checked></label><label class="setting-row"><span>Show control hints</span><input id="hintsSetting" type="checkbox" checked></label><label class="setting-row"><span>GoLingo vocabulary mode</span><input id="learningSetting" type="checkbox" checked></label><label class="setting-row"><span>Timed challenge <small>Off means relaxed, untimed practice</small></span><input id="timedSetting" type="checkbox"></label><div id="learningSettings"><label class="setting-row"><span>Words on targets</span><input id="targetWordsSetting" type="checkbox" checked></label><label class="setting-row"><span>Show translations</span><input id="translationSetting" type="checkbox" checked></label><label class="setting-row"><span>Repeat pronunciation <small>Until the next word or Pause</small></span><input id="repeatSetting" type="checkbox" checked></label><div class="language-grid"><label>LEARNING LANGUAGE<select id="languageSelect"><option value="es">Spanish</option><option value="en">English</option><option value="ja">Japanese</option><option value="zh-CN">Chinese</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="ko">Korean</option><option value="vi">Vietnamese</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="th">Thai</option><option value="uk">Ukrainian</option></select></label><label>TRANSLATION LANGUAGE<select id="primaryLanguageSelect"><option value="en">English</option><option value="zh-CN">Chinese</option><option value="es">Spanish</option><option value="ja">Japanese</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="ko">Korean</option><option value="vi">Vietnamese</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="th">Thai</option><option value="uk">Ukrainian</option></select></label></div><p class="language-note">Load words and translations for your chosen languages, or bring a lesson from GoLingo.</p><label for="wordInput" class="small-label">YOUR WORDS OR GOLINGO JSON</label><textarea id="wordInput" rows="4" placeholder="cielo = sky&#10;ciudad = city&#10;ventana = window"></textarea><div class="import-actions"><button id="importBtn" type="button" class="small-button">LOAD WORDS ↗</button><span id="importStatus">16 Spanish words ready</span></div></div><p class="settings-footnote">Your settings and best score are saved on this device.</p></dialog>
+
+  <dialog id="helpDialog" class="settings-dialog"><form method="dialog"><button class="dialog-close icon-button" aria-label="Close controls">×</button></form><div class="eyebrow">YOUR FIELD GUIDE</div><h2>TAKE THE SHOT.</h2><p>Read the words above the orange targets, then hit a target to hear and collect its word. Pronunciation repeats until you hit another target or pause. Take your time through all three rounds, or enable Timed challenge in Settings.</p><div class="help-grid"><div><h3>ON YOUR PHONE</h3><p>Drag the open view to aim. Use the left thumbstick to move, <b>Scope</b> to zoom, and the orange <b>Fire</b> button to shoot.</p></div><div><h3>ON A COMPUTER</h3><p><b>WASD</b> move · <b>Drag</b> aim · <b>Click / F</b> fire · <b>Space / right-click</b> scope · <b>R</b> reload · <b>Shift</b> steady · <b>H</b> find target · <b>Esc</b> pause.</p></div></div><p class="help-tip">Tap <b>Find</b> to face a target. Tap <b>Aa</b> to hide the bottom word card. Settings can hide target words or translations. The sentence button opens an example sentence, and the collection count opens your review list.</p><button id="helpDone" class="small-button">GOT IT ↗</button></dialog>
+
+  <dialog id="sentenceDialog" class="settings-dialog"><form method="dialog"><button class="dialog-close icon-button" aria-label="Close sentence">×</button></form><div class="eyebrow">PUT THE WORD TO WORK</div><h2 id="sentenceWord"></h2><p id="sentenceText" class="sentence-text"></p><p id="sentenceTranslation"></p><button id="sentenceSpeakBtn" class="small-button">HEAR SENTENCE ↗</button></dialog>
+
+  <dialog id="wordsDialog" class="settings-dialog"><form method="dialog"><button class="dialog-close icon-button" aria-label="Close learned words">×</button></form><div class="eyebrow">GOLINGO FIELD NOTES</div><h2>WORDS COLLECTED.</h2><div id="wordsList"></div><button id="wordsExportBtn" class="small-button">EXPORT TO GOLINGO ↗</button></dialog>
+  <script>window.addEventListener('error',function(e){if(!window.__gameReady){document.getElementById('loadText').textContent='Something went wrong. Please refresh to try again.';}});setTimeout(function(){if(!window.__gameReady)document.getElementById('loadText').textContent='Taking longer than expected. Please refresh if the range does not open.';},18000);</script>
+  <script type="module" src="./game.js?v=2"></script>
+</body>
+</html>
