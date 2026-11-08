@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#bd714f">
+  <meta name="description" content="Argon Airspace — a vintage 3D air traffic control and GoLingo language-learning arcade game. Draw flight paths, land aircraft, and practice words in 28+ languages.">
+  <title>ARGON AIRSPACE — Air Traffic Control, 1958</title>
+  <style>
+    :root{--cream:#f9efcc;--paper:#f0dfb0;--ink:#3d312a;--rust:#9e4635;--red:#db6050;--cyan:#6ac6dc;--yellow:#f5cc57;--green:#80b86a;--line:rgba(61,49,42,.23)}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{background:#aa654c;color:var(--cream);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;user-select:none;-webkit-user-select:none}
+    button{font:inherit;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+    button:focus-visible{outline:3px solid #fff8d2;outline-offset:3px}
+    #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+    .vignette{pointer-events:none;position:fixed;inset:0;z-index:1;background:radial-gradient(ellipse at center,transparent 46%,rgba(54,32,24,.26) 100%)}
+    .grain{pointer-events:none;position:fixed;inset:0;z-index:1;opacity:.18;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.23'/%3E%3C/svg%3E")}
+    .hud{position:fixed;z-index:5;pointer-events:none}
+    .hud button{pointer-events:auto}
+    .topbar{top:0;left:0;right:0;min-height:96px;padding:18px 24px 19px;display:flex;align-items:flex-start;gap:18px;justify-content:space-between;background:linear-gradient(180deg,rgba(56,39,30,.80),rgba(56,39,30,.36) 74%,transparent)}
+    .brand{display:flex;align-items:center;gap:11px;min-width:0}
+    .brand-roundel{height:43px;width:43px;flex:0 0 43px;border:2px solid #f7dfaa;border-radius:100%;display:grid;place-items:center;position:relative;font-family:Georgia,serif;font-size:28px;color:#fff0bf;box-shadow:inset 0 0 0 4px rgba(248,230,179,.15)}
+    .brand-roundel:before,.brand-roundel:after{content:"";height:1px;width:19px;background:#f7dfaa;position:absolute;top:20px}
+    .brand-roundel:before{right:40px}.brand-roundel:after{left:40px}
+    .brand strong{font-family:Georgia,"Times New Roman",serif;font-weight:900;letter-spacing:.09em;font-size:clamp(17px,2.1vw,27px);white-space:nowrap;text-shadow:0 2px 8px rgba(20,15,12,.3)}
+    .brand small{display:block;font-size:9px;letter-spacing:.25em;color:#f1d3aa;margin-top:3px;white-space:nowrap}
+    .header-meta{display:flex;gap:20px;align-items:center}
+    .meta-item{text-align:right;min-width:79px;border-left:1px solid rgba(250,234,184,.28);padding-left:14px}
+    .meta-item b{display:block;font-size:16px;letter-spacing:.12em;color:#fff6d4;font-weight:700}
+    .meta-item span{display:block;font-size:9px;color:#f8dfb2;letter-spacing:.16em;margin-top:4px}
+    .pill-status{border:1px solid rgba(249,227,178,.7);color:#f7e9c6;border-radius:2px;padding:9px 13px;font-size:10px;letter-spacing:.1em;white-space:nowrap;background:rgba(64,49,37,.25)}
+    .pill-status i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#a8d474;box-shadow:0 0 10px #b0e184;margin-right:5px;vertical-align:middle}
+    .corner-legend{top:114px;left:22px;background:rgba(62,48,37,.82);border:1px solid rgba(245,225,179,.47);border-radius:3px;padding:12px 14px;box-shadow:0 7px 25px #4d352631;min-width:190px}
+    .legend-title{font-size:9px;letter-spacing:.23em;color:#ecd6ad;margin-bottom:12px}
+    .legend-row{display:flex;gap:9px;align-items:center;margin:8px 0;font-size:10px;letter-spacing:.06em;white-space:nowrap}
+    .legend-dot{width:9px;height:9px;display:inline-block;border:1px solid #fff7d0a0;transform:rotate(45deg);box-shadow:0 0 7px #0002}
+    .legend-row small{color:#e3d0ad;font-size:9px;margin-left:auto}
+    .right-hint{top:130px;right:24px;text-align:right;font-size:9px;letter-spacing:.16em;line-height:1.85;color:#fff0cd;text-shadow:0 1px 4px #4f3120}
+    .right-hint b{font-size:20px;font-family:Georgia,serif;letter-spacing:.04em;font-weight:normal}
+    .toast{position:fixed;z-index:6;top:106px;left:50%;transform:translate(-50%,-14px);max-width:92vw;text-align:center;white-space:nowrap;background:#f3e3b9;color:#40352b;border:2px solid #815644;border-radius:3px;padding:10px 19px;letter-spacing:.13em;font-size:11px;box-shadow:3px 3px 0 #59362b88;opacity:0;transition:transform .25s,opacity .25s;pointer-events:none}
+    .toast.show{opacity:1;transform:translate(-50%,0)}.toast.alert{background:#bd4e40;color:#fff2d2;border-color:#f8c39b}
+    .bottom{left:20px;right:20px;bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+    .board{display:flex;align-items:stretch;background:rgba(59,45,34,.88);border:1px solid #f1d4a58c;border-radius:4px;box-shadow:0 7px 20px #3e291e40;min-height:78px}
+    .board-cell{padding:11px 17px;border-right:1px solid rgba(245,218,165,.21);min-width:92px}
+    .board-cell:last-child{border:0}
+    .board-cell span{font-size:9px;letter-spacing:.2em;display:block;color:#e2c69a}
+    .board-cell b{font-size:28px;line-height:1.25;font-family:Georgia,serif;font-weight:800;color:#fff2c9;display:block;font-variant-numeric:tabular-nums}
+    .board-cell b.blue{color:#b6e4e5}
+    .control-strip{display:flex;gap:6px;align-items:center;background:rgba(59,45,34,.86);border:1px solid #f1d4a58c;padding:7px;border-radius:4px;box-shadow:0 7px 20px #3e291e40}
+    .control-btn{border:1px solid rgba(248,221,170,.42);color:#fce8c0;background:rgba(245,224,183,.08);border-radius:2px;min-width:66px;height:52px;padding:8px 11px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:9px;letter-spacing:.08em;transition:background .15s}
+    .control-btn b{font-size:17px;line-height:16px;font-weight:500}
+    .control-btn:hover,.control-btn.active{background:#ecdbb3;color:#49382d}
+    .control-btn[aria-pressed="false"]{opacity:.7}
+    .instruction{position:fixed;z-index:4;bottom:111px;left:50%;transform:translateX(-50%);padding:7px 18px;border-radius:2px;background:rgba(50,38,29,.55);font-size:10px;letter-spacing:.16em;color:#fff0c8;white-space:nowrap;text-align:center;pointer-events:none;text-shadow:0 1px 3px #312118}
+    .plane-label{position:fixed;z-index:3;pointer-events:none;transform:translate(-50%,-100%);text-align:center;font-size:9px;color:#fff8dd;text-shadow:1px 1px 2px #32231b,-1px -1px 2px #32231b;letter-spacing:.06em;white-space:nowrap;line-height:1.2}
+    .plane-label b{font-size:10px}.plane-label em{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
+    .plane-label.warn{color:#fff3ab;animation:blink .4s step-end infinite alternate}@keyframes blink{50%{opacity:.4}}
+    .overlay{position:fixed;inset:0;z-index:12;background:rgba(47,33,27,.60);display:flex;align-items:center;justify-content:center;padding:15px;backdrop-filter:blur(3px);overflow:auto}
+    .overlay[hidden]{display:none}
+    .ticket{position:relative;background:var(--paper);color:var(--ink);border:5px solid #e5cca0;outline:2px solid #744b39;outline-offset:-11px;box-shadow:0 22px 80px rgba(34,23,16,.50);width:min(720px,100%);max-height:calc(100dvh - 30px);overflow:auto}
+    .ticket:before,.ticket:after{content:"✦";position:absolute;top:10px;font-size:13px;color:#a25e44}.ticket:before{left:18px}.ticket:after{right:18px}
+    .ticket-head{text-align:center;padding:29px 20px 21px;border-bottom:2px dashed rgba(117,75,52,.46);margin:0 24px}
+    .eyebrow{font-size:10px;letter-spacing:.36em;font-weight:700;color:#a6543b}
+    .ticket-head h1{font-family:Georgia,"Times New Roman",serif;color:#382f2b;font-size:clamp(34px,6vw,62px);line-height:.95;margin:12px 0 13px;letter-spacing:.03em;font-weight:900}
+    .ticket-head p{font-size:12px;letter-spacing:.13em;margin:0;color:#806651}
+    .ticket-content{display:grid;grid-template-columns:1.12fr 1fr;gap:26px;padding:24px 38px 16px}
+    .ticket h2{font-family:Georgia,serif;font-size:27px;line-height:1.1;margin:2px 0 13px;font-weight:800}
+    .ticket-copy{font-family:Georgia,serif;font-size:15px;line-height:1.55;color:#5d4738}
+    .ticket-copy strong{color:#a74d39}
+    .howto{border:1px solid #a97c60;background:#e8d3a5;padding:18px 17px;box-shadow:4px 4px 0 #ceb58d}
+    .howto-title{font-size:11px;font-weight:900;letter-spacing:.17em;border-bottom:1px solid #b7946d;padding-bottom:9px;margin-bottom:12px}
+    .howto-step{display:flex;align-items:flex-start;gap:11px;font-size:11px;line-height:1.55;margin:11px 0;color:#594337}
+    .howto-step span{border-radius:50%;border:1px solid #a36f4e;min-width:22px;height:22px;display:grid;place-items:center;font-family:Georgia,serif;font-weight:bold;color:#9f4634}
+    .mini-planes{display:flex;gap:7px;margin-top:19px;flex-wrap:wrap}.mini-planes i{height:9px;flex:1;min-width:24px;border-radius:1px;box-shadow:1px 1px 0 #604a3959}
+    .ticket-foot{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;padding:17px 38px 30px}
+    .start-btn{border:0;border-radius:1px;background:#a84634;color:#fff2d0;padding:15px 28px;font-size:13px;font-weight:900;letter-spacing:.2em;box-shadow:4px 4px 0 #653d30;transition:transform .12s,box-shadow .12s}
+    .start-btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 #653d30}
+    .tinyprint{font-size:10px;letter-spacing:.11em;color:#906e56;line-height:1.6}
+    .field-chip{display:inline-block;border:1px solid #a77c60;padding:7px 10px;color:#884c38;font-size:10px;font-weight:800;letter-spacing:.1em;margin:11px 5px 0 0}
+    .field-chip.muted{color:#9d8b77;border-color:#c1ab8f}
+    .end-title{font-family:Georgia,serif;font-size:clamp(32px,6vw,54px);margin:7px 0;color:#9d4433}
+    .end-body{padding:28px 38px 8px;text-align:center;font-family:Georgia,serif}
+    .end-score{display:flex;justify-content:center;gap:24px;margin:22px 0 18px}
+    .end-score div{border-top:2px solid #a57a5a;padding-top:9px;min-width:100px}
+    .end-score b{display:block;font-family:Georgia,serif;font-size:36px;color:#44352b}.end-score span{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.14em;color:#8c634a}
+    .record{color:#a34d38;font-size:13px;min-height:20px}.pause-overlay{background:rgba(50,34,25,.4)}
+    .icon-plane{display:inline-block;font-size:20px;font-family:Georgia,serif;line-height:14px}
+    .lesson-ribbon{bottom:111px;left:50%;transform:translateX(-50%);width:min(430px,calc(100vw - 28px));display:flex;align-items:center;gap:10px;min-height:64px;padding:9px 12px;background:rgba(56,44,35,.91);border:1px solid #edd4aa;border-radius:3px;box-shadow:0 7px 20px #39271e55;pointer-events:auto}
+    .lesson-ribbon[hidden],.lesson-modal[hidden]{display:none}
+    .lesson-ribbon .ribbon-copy{min-width:0;flex:1}.ribbon-eyebrow{display:block;font-size:8px;letter-spacing:.18em;color:#e7cd9f;white-space:nowrap}
+    .ribbon-word{display:block;color:#fff5d2;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.12}
+    .ribbon-translation{display:block;margin-top:3px;font-size:10px;color:#bde6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ribbon-action{min-width:32px;height:35px;padding:5px;border:1px solid #dec69b85;border-radius:2px;background:#f2dfb817;color:#f8e8bf;font-size:18px}
+    .ribbon-action:hover{background:#ecd8af;color:#3b3129}
+    .ribbon-action:focus-visible{outline:2px solid #fff0bb}.plane-label .plane-word{display:block;max-width:100px;margin:3px auto 0;padding:2px 5px;border-radius:2px;background:rgba(46,38,31,.77);font-family:Georgia,serif;font-size:10px;color:#fff5d8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .lesson-form{padding:18px 28px 10px;color:#4e3b30}.lesson-form label{display:block;font-size:10px;letter-spacing:.13em;font-weight:800;margin-bottom:7px}
+    .lesson-form textarea{width:100%;height:134px;resize:vertical;border:1px solid #b59172;border-radius:2px;background:#fff8e6;color:#3f302a;padding:11px;font:12px/1.5 ui-monospace,monospace;user-select:text;-webkit-user-select:text}
+    .lesson-form textarea:focus{outline:2px solid #a54d38}.lesson-settings{display:flex;flex-wrap:wrap;gap:15px;margin:15px 0 4px}.lesson-settings label{display:flex;align-items:center;gap:7px;letter-spacing:.02em;font-size:11px;text-transform:none;cursor:pointer}
+    .lesson-settings input{accent-color:#ac4b37;width:16px;height:16px}.lesson-status{font-size:11px;color:#77543e;min-height:30px;line-height:1.5}
+    .lesson-actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:9px;padding:12px 28px 28px}.lesson-utility{border:1px solid #9d7355;background:#e7d1a5;color:#5b3f2f;padding:11px 14px;font-size:10px;letter-spacing:.1em;font-weight:900}
+    .lesson-utility:hover{background:#f9e5b9}.lesson-footnote{font-size:10px;color:#84664d;margin:8px 0 0;line-height:1.45}
+    .instruction{bottom:189px}
+    @media(max-width:800px){.lesson-ribbon{bottom:78px;min-height:53px;padding:7px 10px;max-width:340px}.ribbon-word{font-size:19px}.instruction{bottom:146px}.lesson-form{padding:12px 20px 3px}.lesson-actions{padding:10px 20px 18px}}
+    @media(max-width:600px){.lesson-ribbon{bottom:68px;min-height:48px;max-width:calc(100vw - 18px);gap:7px}.ribbon-eyebrow{font-size:7px}.ribbon-word{font-size:17px}.ribbon-translation{font-size:9px}.ribbon-action{min-width:30px;height:31px}.instruction{bottom:132px}.control-strip .control-btn{min-width:36px}.lesson-form textarea{height:100px}}
+    @media(max-height:630px){.lesson-ribbon{bottom:72px;min-height:42px}.lesson-form textarea{height:72px}}
+    @media(max-width:800px){.topbar{padding:13px 14px;min-height:72px}.brand-roundel{height:35px;width:35px;flex-basis:35px;font-size:22px}.brand-roundel:before,.brand-roundel:after{top:16px;width:9px}.brand-roundel:before{right:34px}.brand-roundel:after{left:34px}.header-meta{gap:8px}.meta-item{min-width:60px;padding-left:7px}.meta-item b{font-size:13px}.meta-item span{font-size:8px}.pill-status{display:none}.corner-legend{top:77px;left:12px;padding:9px 11px;min-width:154px}.legend-row{font-size:9px;margin:6px 0}.legend-title{font-size:8px;margin-bottom:8px}.right-hint{top:81px;right:12px;font-size:8px}.right-hint b{font-size:16px}.bottom{bottom:max(9px,env(safe-area-inset-bottom));left:8px;right:8px}.board{min-height:58px}.board-cell{padding:9px 12px;min-width:68px}.board-cell b{font-size:23px}.board-cell span{font-size:8px}.control-strip{padding:4px;gap:4px}.control-btn{height:47px;min-width:49px;padding:5px 7px;font-size:8px}.control-btn b{font-size:15px}.instruction{bottom:80px;font-size:9px;letter-spacing:.06em;max-width:94vw;white-space:normal}.toast{top:85px;font-size:10px}.ticket-content{padding:20px 27px 12px;gap:15px}.ticket-foot{padding:15px 27px 25px}}
+    @media(max-width:600px){.brand strong{font-size:15px}.brand small{font-size:7px;letter-spacing:.14em}.brand-roundel{display:none}.header-meta .meta-item:nth-child(2){display:none}.meta-item b{font-size:13px}.right-hint{display:none}.corner-legend{top:72px;left:10px;background:rgba(62,48,37,.70)}.legend-row small{display:none}.legend-title{margin-bottom:5px}.bottom{align-items:flex-end}.board-cell{min-width:55px;padding:8px 9px}.board-cell b{font-size:21px}.board-cell span{letter-spacing:.07em}.board-cell:nth-child(3){display:none}.control-btn{min-width:38px;padding:4px 5px;font-size:7px}.control-btn b{font-size:15px}.control-strip{gap:3px}.instruction{bottom:75px;font-size:8px}.ticket-head{padding:22px 12px 15px;margin:0 18px}.ticket-head h1{font-size:37px}.ticket-head p{font-size:9px}.ticket-content{grid-template-columns:1fr;padding:15px 24px 8px;gap:12px}.ticket h2{font-size:22px}.ticket-copy{font-size:13px;margin:4px 0}.howto{padding:10px 13px}.howto-title{margin-bottom:8px}.howto-step{margin:6px 0;font-size:10px}.mini-planes{margin-top:10px}.ticket-foot{padding:9px 24px 20px;gap:9px}.start-btn{width:100%;padding:12px;font-size:11px}.tinyprint{font-size:9px}.field-chip{font-size:8px;margin-top:8px;padding:5px}.end-body{padding:16px 25px 7px}.end-score{margin:13px 0}.end-score b{font-size:29px}}
+    @media(max-height:630px){.corner-legend{display:none}.ticket-head{padding-top:18px}.ticket-content{padding-top:12px}.howto-step{margin:5px 0}.ticket-foot{padding-bottom:15px}.instruction{display:none}}
+    @media(min-height:631px) and (max-width:800px){.instruction{bottom:148px}}
+    @media(min-height:631px) and (max-width:600px){.instruction{bottom:131px}}
+  </style>
+</head>
+<body>
+  <canvas id="scene" aria-label="Interactive airfield game"></canvas>
+  <div class="vignette"></div><div class="grain"></div>
+  <header class="hud topbar">
+    <div class="brand"><div class="brand-roundel">✦</div><div><strong>ARGON AIRSPACE</strong><small>FLIGHT CONTROL DIVISION · EST. 1958</small></div></div>
+    <div class="header-meta"><div class="meta-item"><b id="clock">08:30</b><span>LOCAL TIME</span></div><div class="meta-item"><b id="wind">NW 08</b><span>WIND / KTS</span></div><div class="pill-status"><i></i><span id="status">ALL SECTORS CLEAR</span></div></div>
+  </header>
+  <aside class="hud corner-legend" id="legend"><div class="legend-title">APPROACH FREQUENCIES</div><div class="legend-row"><i class="legend-dot" style="background:#db6050"></i> RED JETLINER <small>01</small></div><div class="legend-row"><i class="legend-dot" style="background:#f5cc57"></i> YELLOW TWIN-PROP <small>02</small></div><div class="legend-row"><i class="legend-dot" style="background:#6ac6dc"></i> BLUE BIPLANE <small>03</small></div><div class="legend-row"><i class="legend-dot" style="background:#80b86a"></i> GREEN RESCUE <small>H</small></div></aside>
+  <div class="hud right-hint">CLASSIC OUTBACK<br><b>SECTOR 01</b><br>34° 18′ S / 128° 24′ E</div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="instruction" id="instruction">DRAG FROM AN AIRCRAFT TO ITS MATCHING RUNWAY · KEEP THE SKY CLEAR</div>
+  <section class="hud lesson-ribbon" id="lessonRibbon" aria-label="GoLingo learning radio" aria-live="polite">
+    <div class="ribbon-copy"><span class="ribbon-eyebrow" id="lessonCaption">GOLINGO · SPANISH APPROACH</span><strong class="ribbon-word" id="lessonWord">avión</strong><span class="ribbon-translation" id="lessonTranslation">airplane</span></div>
+    <button class="ribbon-action" id="replayWordBtn" type="button" aria-label="Hear the current word again" title="Hear word">♫</button>
+    <button class="ribbon-action" id="hideWordsBtn" type="button" aria-label="Hide word text" title="Show / hide words">◉</button>
+  </section>
+  <div class="hud bottom">
+    <div class="board"><div class="board-cell"><span>LANDED</span><b id="landed">00</b></div><div class="board-cell"><span>BEST SHIFT</span><b class="blue" id="high">00</b></div><div class="board-cell"><span>INBOUND</span><b id="inbound">00</b></div></div>
+    <div class="control-strip"><button class="control-btn" id="speedBtn" aria-label="Toggle fast forward" aria-pressed="false"><b>×1</b>SPEED</button><button class="control-btn active" id="musicBtn" aria-label="Toggle music" aria-pressed="true"><b>♪</b>MUSIC</button><button class="control-btn active" id="voiceBtn" aria-label="Toggle public address announcements" aria-pressed="true"><b>◉</b>PA</button><button class="control-btn" id="lessonBtn" aria-label="Open GoLingo lesson settings"><b>字</b>LESSON</button><button class="control-btn" id="pauseBtn" aria-label="Pause game"><b>Ⅱ</b>PAUSE</button></div>
+  </div>
+  <div class="overlay" id="startOverlay">
+    <div class="ticket" role="dialog" aria-labelledby="startTitle" aria-modal="true">
+      <div class="ticket-head"><div class="eyebrow">✦ DEPARTMENT OF CIVIL AVIATION ✦</div><h1 id="startTitle">ARGON<br>AIRSPACE</h1><p>THE SKIES ARE YOURS TO COMMAND · CIRCA 1958</p></div>
+      <div class="ticket-content">
+        <div><div class="eyebrow">AIRFIELD No. 001</div><h2>Classic Outback</h2><p class="ticket-copy">A quiet morning on the frontier. Four aircraft classes, a handful of runways, and <strong>one busy controller.</strong> Every landing counts. Every aircraft carries a GoLingo word to practice.</p><div><span class="field-chip">● CLASSIC OUTBACK</span><span class="field-chip muted">RESORT ATOLL · SOON</span><span class="field-chip muted">NAVAL CARRIER · SOON</span></div></div>
+        <div class="howto"><div class="howto-title">YOUR CONTROLLER'S BRIEFING</div><div class="howto-step"><span>1</span><div><b>Touch an aircraft</b> and draw its approach through the sky.</div></div><div class="howto-step"><span>2</span><div><b>Release at a matching color</b> runway or the green H helipad.</div></div><div class="howto-step"><span>3</span><div><b>Keep aircraft apart.</b> Red warning rings mean dangerous proximity.</div></div><div class="mini-planes"><i style="background:#cc5d49"></i><i style="background:#e8c350"></i><i style="background:#62bad0"></i><i style="background:#80a965"></i></div></div>
+      </div>
+      <div class="ticket-foot"><div class="tinyprint"><span id="startLessonMeta">GOLINGO · 16 SPANISH PRACTICE WORDS</span><br><button class="lesson-utility" id="startLessonBtn" type="button" style="margin-top:8px">IMPORT MY LESSON</button></div><button id="startBtn" class="start-btn">START YOUR SHIFT →</button></div>
+    </div>
+  </div>
+  <div class="overlay" id="gameoverOverlay" hidden><div class="ticket" role="dialog" aria-labelledby="endTitle" aria-modal="true"><div class="ticket-head"><div class="eyebrow">✦ ARGON CONTROL · FINAL REPORT ✦</div><h1 class="end-title" id="endTitle">SHIFT COMPLETE</h1><p id="endReason">AIRSPACE CLOSED FOR INVESTIGATION</p></div><div class="end-body"><div class="end-score"><div><b id="finalScore">0</b><span>SAFE LANDINGS</span></div><div><b id="finalHigh">0</b><span>CAREER BEST</span></div></div><div class="record" id="recordText"></div></div><div class="ticket-foot" style="justify-content:center;gap:12px;flex-wrap:wrap"><button id="endLessonBtn" class="lesson-utility" type="button">REVIEW & EXPORT WORDS</button><button id="restartBtn" class="start-btn">TAKE ANOTHER SHIFT →</button></div></div></div>
+  <div class="overlay pause-overlay" id="pauseOverlay" hidden><div class="ticket" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" style="max-width:450px"><div class="ticket-head"><div class="eyebrow">✦ CONTROL TOWER ✦</div><h1 id="pauseTitle" style="font-size:41px">ON BREAK</h1><p>YOUR AIRSPACE IS HOLDING STEADY</p></div><div class="ticket-foot" style="justify-content:center"><button id="resumeBtn" class="start-btn">RETURN TO TOWER →</button></div></div></div>
+  <div class="overlay lesson-modal" id="lessonOverlay" hidden><div class="ticket" role="dialog" aria-labelledby="lessonTitle" aria-modal="true" style="max-width:660px">
+    <div class="ticket-head" style="padding:21px 15px 13px"><div class="eyebrow">✦ GOLINGO FLIGHT SCHOOL ✦</div><h1 id="lessonTitle" style="font-size:38px;margin:9px 0">LESSON RADIO</h1><p>YOUR WORDS. EVERY SAFE LANDING.</p></div>
+    <div class="lesson-form"><label for="lessonJson">PASTE A GOLINGO WORD OR SENTENCE JSON LESSON</label><textarea id="lessonJson" spellcheck="false" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"word":"水","translation":"water"}]}'></textarea>
+      <p class="lesson-footnote">Your gallery sends its saved lesson automatically. Nothing is uploaded; imported content stays in this browser tab. Each plane receives a word or sentence. A safe landing plays it aloud.</p>
+      <div class="lesson-settings"><label><input id="showWordsCheck" type="checkbox" checked> Show words</label><label><input id="showTranslationCheck" type="checkbox" checked> Show translation</label><label><input id="repeatCheck" type="checkbox" checked> Repeat until next landing</label></div>
+      <p id="lessonStatus" class="lesson-status" role="status" aria-live="polite">Demo lesson ready.</p>
+    </div>
+    <div class="lesson-actions"><button id="loadLessonBtn" type="button" class="lesson-utility">LOAD LESSON</button><button id="demoLessonBtn" type="button" class="lesson-utility">USE DEMO</button><button id="exportBasketBtn" type="button" class="lesson-utility">EXPORT LANDED WORDS</button><button id="closeLessonBtn" type="button" class="start-btn" style="padding:11px 18px;font-size:10px">RETURN TO TOWER →</button></div>
+  </div></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

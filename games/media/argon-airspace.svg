@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Argon Airspace — GoLingo Flight School</title>
+  <desc id="desc">Vintage aerial illustration of an outback airport with color-coded aircraft and curved approach paths</desc>
+  <defs>
+    <linearGradient id="sand" x2="1" y2="1"><stop stop-color="#dda179"/><stop offset="1" stop-color="#9d4c3f"/></linearGradient>
+    <linearGradient id="grass" x2="1" y2="1"><stop stop-color="#a3b96f"/><stop offset="1" stop-color="#648847"/></linearGradient>
+    <radialGradient id="shine"><stop stop-color="#ffe8ae" stop-opacity=".28"/><stop offset="1" stop-color="#ffe8ae" stop-opacity="0"/></radialGradient>
+    <pattern id="grain" width="49" height="49" patternUnits="userSpaceOnUse"><circle cx="3" cy="8" r=".8" fill="#f9d6a3" opacity=".34"/><path d="m20 32 8 -3 6 6" stroke="#703a30" fill="none" opacity=".22"/></pattern>
+    <filter id="shadow"><feDropShadow dx="1" dy="5" stdDeviation="5" flood-color="#442c24" flood-opacity=".32"/></filter>
+    <g id="plane"><path d="M0-30 7-13 7-4 32 6 32 13 6 8 7 25 17 30 17 35 0 31-17 35-17 30-7 25-6 8-32 13-32 6-7-4-7-13Z"/><rect x="-4" y="-19" width="8" height="13" rx="4" fill="#304a51"/><circle cy="-27" r="3" fill="#fdf4dd"/></g>
+  </defs>
+  <rect width="800" height="480" fill="url(#sand)"/>
+  <rect width="800" height="480" fill="url(#grain)"/>
+  <circle cx="572" cy="163" r="310" fill="url(#shine)"/>
+  <path d="M129 123q85-55 185-24t133-14q118-43 189 51t-20 187q-66 58-195 46T204 355q-111-48-112-133t37-99Z" fill="url(#grass)" stroke="#e0bc80" stroke-width="7" filter="url(#shadow)"/>
+  <g stroke-linecap="square" filter="url(#shadow)">
+    <path d="M230 327 315 121" stroke="#e2715f" stroke-width="57"/>
+    <path d="M230 327 315 121" stroke="#343e3b" stroke-width="52"/>
+    <path d="M230 327 315 121" stroke="#f9e6ba" stroke-width="3" stroke-dasharray="24 23"/>
+    <path d="M435 155 511 310" stroke="#7bd4e4" stroke-width="44"/>
+    <path d="M435 155 511 310" stroke="#343e3b" stroke-width="39"/>
+    <path d="M435 155 511 310" stroke="#f9e6ba" stroke-width="3" stroke-dasharray="18 17"/>
+    <path d="M342 310h133" stroke="#f9d46d" stroke-width="36"/>
+    <path d="M342 310h133" stroke="#343e3b" stroke-width="31"/>
+    <path d="M342 310h133" stroke="#f9d46d" stroke-width="3" stroke-dasharray="15 12"/>
+  </g>
+  <g fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="5 11" opacity=".88">
+    <path d="M44 245C80 162 179 144 260 177" stroke="#ffd9ce"/>
+    <path d="M726 110Q620 75 485 230" stroke="#c3ecf3"/>
+    <path d="M708 369Q610 349 413 310" stroke="#ffeca0"/>
+  </g>
+  <g transform="translate(105 185) rotate(72) scale(1.45)" fill="#e96351" stroke="#ffcab6" stroke-width="2" filter="url(#shadow)"><use href="#plane"/></g>
+  <g transform="translate(637 130) rotate(-103) scale(1.12)" fill="#5bc0e5" stroke="#d6f8ff" stroke-width="2" filter="url(#shadow)"><use href="#plane"/></g>
+  <g transform="translate(633 356) rotate(-69) scale(.96)" fill="#e7c34d" stroke="#fff1a6" stroke-width="2" filter="url(#shadow)"><use href="#plane"/></g>
+  <g transform="translate(552 238)" fill="#47534c" stroke="#b9df9a" stroke-width="2"><circle r="35"/><circle r="28" fill="none" stroke-width="4"/><text y="14" fill="#eff7cf" font-family="Georgia,serif" font-size="41" text-anchor="middle" stroke="none">H</text></g>
+  <path d="M0 0h800v480H0Z" fill="none" stroke="#ecd9ad" stroke-width="12"/>
+  <path d="M18 18h764v444H18Z" fill="none" stroke="#ecd9ad" stroke-width="1" opacity=".7"/>
+  <g fill="#fdf0d0" font-family="Georgia,serif" text-anchor="middle" filter="url(#shadow)">
+    <rect x="192" y="26" width="416" height="76" rx="2" fill="#3b342d" opacity=".9"/>
+    <text x="400" y="66" font-size="35" font-weight="bold" letter-spacing="4">ARGON AIRSPACE</text>
+    <text x="400" y="85" font-size="10" letter-spacing="5" font-family="monospace">FLIGHT SCHOOL · CIRCA 1958</text>
+  </g>
+  <g font-family="monospace" fill="#fef0c8" font-size="12" letter-spacing="2" text-anchor="middle">
+    <rect x="234" y="399" width="332" height="38" fill="#49362d" opacity=".9"/>
+    <text x="400" y="423">DRAW PATHS · LAND &amp; LEARN</text>
+  </g>
+</svg>
