@@ -154,18 +154,49 @@
         const row = document.createElement(enemy ? 'div' : 'button');
         row.className = 'ship-token'; row.dataset.ship = ship.id;
         if (!enemy) { row.type = 'button'; row.disabled = privacyLocked; row.addEventListener('click', () => selectShip(ship.id)); }
-        const revealed = !enemy || ship.sunk || game.status === 'finished';
-        const damage = revealed && !privacyLocked ? ship.hits.length : 0;
-        const status = ship.sunk ? 'sunk' : enemy ? 'unlocated' : ship.length - damage + ' squares intact';
+        const damage = privacyLocked ? 0 : ship.hits.length;
+        const status = privacyLocked ? 'hidden' : ship.sunk ? 'sunk' : damage ? damage + ' of ' + ship.length + ' squares hit' : 'unhit · size ' + ship.length;
         row.title = ship.name + ' · ' + ship.length + ' squares · ' + status;
         row.setAttribute('aria-label', row.title);
         if (!enemy) row.setAttribute('aria-pressed', String(game.phase === 'deployment' && selectedShipId === ship.id && !privacyLocked));
         row.classList.toggle('selected', !enemy && game.phase === 'deployment' && selectedShipId === ship.id && !privacyLocked);
         row.classList.toggle('is-sunk', ship.sunk);
-        row.innerHTML = shipArt(ship, !revealed || privacyLocked);
+        // Fleet composition and damage are visible; only exact enemy coordinates stay concealed.
+        row.innerHTML = shipArt(ship, privacyLocked);
         const pips = document.createElement('span'); pips.className = 'ship-pips'; pips.setAttribute('aria-hidden', 'true');
         for (let i = 0; i < ship.length; i++) { const pip = document.createElement('i'); pip.classList.toggle('damaged', i < damage); pips.appendChild(pip); }
         row.appendChild(pips); host.appendChild(row);
+      });
+    });
+  }
+  function renderStatusHUD() {
+    const ownBoard = game[viewer], enemyBoard = game[opposite(viewer)];
+    const summarize = (board, own) => {
+      const hitShips = board.ships.filter((ship) => ship.hits.length > 0).length;
+      const sunkShips = board.ships.filter((ship) => ship.sunk).length;
+      const hullHits = board.ships.reduce((sum, ship) => sum + ship.hits.length, 0);
+      if (privacyLocked) return 'Fleet hidden during handoff';
+      if (!hullHits) return own ? 'All 5 ships intact · 0 / 17 hits' : '0 of 5 ships hit · 0 sunk · 0 / 17 hull';
+      return hitShips + ' of ' + board.ships.length + ' ships hit · ' + sunkShips + ' sunk · ' + hullHits + ' / ' + TOTAL_HULL + ' hull';
+    };
+    $('own-damage-summary').textContent = summarize(ownBoard, true);
+    $('enemy-damage-summary').textContent = summarize(enemyBoard, false);
+    [['own-status-list', ownBoard], ['enemy-status-list', enemyBoard]].forEach(([id, board]) => {
+      const host = $(id); host.replaceChildren();
+      board.ships.forEach((ship) => {
+        const damage = privacyLocked ? 0 : ship.hits.length;
+        const state = privacyLocked ? 'HIDDEN' : ship.sunk ? 'SUNK' : damage ? 'HIT ' + damage + '/' + ship.length : 'UNHIT';
+        const chip = document.createElement('div');
+        chip.className = 'fleet-status-chip ' + (ship.sunk ? 'sunk' : damage ? 'hit' : 'unhit');
+        chip.setAttribute('aria-label', ship.name + ', size ' + ship.length + ', ' + state.toLowerCase());
+        const top = document.createElement('div'); top.className = 'fleet-status-chip-top';
+        const name = document.createElement('strong'); name.textContent = privacyLocked ? 'Fleet hidden' : ship.name;
+        const size = document.createElement('span'); size.textContent = privacyLocked ? '' : 'SIZE ' + ship.length;
+        top.append(name, size);
+        const pips = document.createElement('div'); pips.className = 'fleet-status-pips'; pips.setAttribute('aria-hidden', 'true');
+        for (let i = 0; i < ship.length; i++) { const pip = document.createElement('i'); pip.classList.toggle('hit', i < damage); pips.appendChild(pip); }
+        const label = document.createElement('span'); label.className = 'fleet-status-state'; label.textContent = state;
+        chip.append(top, pips, label); host.appendChild(chip);
       });
     });
   }
@@ -218,7 +249,7 @@
         cell.setAttribute('aria-label', coordinate(index) + ', ' + (privacyLocked ? 'fleet hidden' : shot || (ship ? ship.name : 'uncharted')));
       });
     });
-    renderShips(); renderRosters();
+    renderShips(); renderRosters(); renderStatusHUD();
     const ownBoard = game[viewer], enemyBoard = game[opposite(viewer)];
     $('own-captain').textContent = game.mode === 'local' ? captain(viewer).toUpperCase() + ' / YOUR FLEET' : 'CAPTAIN 01 / YOU';
     $('enemy-captain').textContent = game.mode === 'local' ? 'OPPONENT / ' + captain(opposite(viewer)).toUpperCase() : 'OPPONENT / COMPUTER';
@@ -484,19 +515,28 @@
     if (!computer) learningForShot(result, quizItem);
     render(); animateShot(result.defender, result.index);
     const actor = game.mode === 'local' ? captain(result.attacker) : computer ? 'Enemy' : 'You';
+    const defenderBoard = game[result.defender];
+    const defenderShip = result.shipId ? defenderBoard.ships.find((ship) => ship.id === result.shipId) : null;
+    const damagedShips = defenderBoard.ships.filter((ship) => ship.hits.length > 0).length;
+    const sunkShips = defenderBoard.ships.filter((ship) => ship.sunk).length;
     let message = coordinate(result.index) + ' · ';
-    if (result.sunk) message += actor + ' sank ' + (computer ? 'your ' : 'the ') + result.shipName.toLowerCase() + '!';
-    else if (result.hit) message += computer ? 'Enemy hit your fleet.' : 'Direct hit! Follow the neighboring squares.';
-    else message += computer ? 'Enemy fire missed your fleet.' : 'Open water. Keep searching, Captain.';
+    if (result.sunk) {
+      message += actor + ' sank ' + (computer ? 'your ' : 'the enemy ') + result.shipName.toLowerCase() + '! ';
+      message += damagedShips + ' of ' + defenderBoard.ships.length + ' ships hit · ' + sunkShips + ' sunk.';
+    } else if (result.hit) {
+      message += computer
+        ? 'Enemy hit your ' + result.shipName.toLowerCase() + ' · ' + defenderShip.hits.length + '/' + defenderShip.length + ' hull. ' + damagedShips + ' of your ' + defenderBoard.ships.length + ' ships have been hit.'
+        : 'Direct hit on enemy ' + result.shipName.toLowerCase() + ' · ' + defenderShip.hits.length + '/' + defenderShip.length + ' hull.';
+    } else message += computer ? 'Enemy fire missed your fleet.' : 'Open water. Keep searching, Captain.';
     if (!computer && result.sunk && currentWord && currentWord.kind === 'sentence') message += ' A sentence is unlocked.';
     setMessage(message, !computer && result.hit);
-    announce(result.sunk ? 'SHIP SUNK' : result.hit ? 'DIRECT HIT' : 'OPEN WATER');
-    if (result.sunk) { $('scene-ship-name').textContent = result.shipName + ' sunk'; $('scene-caption').textContent = computer ? 'Regroup and keep your course.' : 'A ship found. New language remembered.'; }
-    else if (result.hit) { $('scene-ship-name').textContent = 'Direct hit'; $('scene-caption').textContent = computer ? 'Your fleet is under fire.' : 'Stay on target. The next square could reveal the ship.'; }
+    announce(result.sunk ? result.shipName.toUpperCase() + ' SUNK' : result.hit ? (computer ? 'YOUR ' + result.shipName.toUpperCase() + ' HIT' : result.shipName.toUpperCase() + ' HIT') : 'OPEN WATER');
+    if (result.sunk) { $('scene-ship-name').textContent = result.shipName + ' sunk'; $('scene-caption').textContent = computer ? E.remaining(defenderBoard) + ' of your ships remain afloat.' : E.remaining(defenderBoard) + ' enemy ships remain afloat.'; }
+    else if (result.hit) { $('scene-ship-name').textContent = result.shipName + ' hit'; $('scene-caption').textContent = defenderShip.hits.length + ' of ' + defenderShip.length + ' hull sections hit. ' + (computer ? damagedShips + ' of your ships have taken fire.' : 'Keep pressure on this ship.'); }
     else { $('scene-ship-name').textContent = 'Open water'; $('scene-caption').textContent = 'A splash, a bearing, and another chance.'; }
     sound.effect(result.sunk ? 'sunk' : result.hit ? 'hit' : 'miss');
-    // Enemy ship identity is used only inside the illustration, never as a tactical clue before sinking.
-    await scene.attack({ hit: result.hit, sunk: result.sunk, shipName: result.sunk || computer ? result.shipName : 'Battleship', index: result.index, side: result.defender, actionCamera: settings.actionCamera });
+    // Ship class is now part of the tactical status display; exact enemy coordinates remain concealed.
+    await scene.attack({ hit: result.hit, sunk: result.sunk, shipName: result.shipName || 'Battleship', index: result.index, side: result.defender, actionCamera: settings.actionCamera });
     if (token !== matchToken) return;
     busy = false; render(); routeTurn();
   }
