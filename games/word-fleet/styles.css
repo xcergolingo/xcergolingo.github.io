@@ -40,3 +40,53 @@ body:has(dialog[open]){overflow:hidden}.modal{width:calc(100% - 32px);max-width:
 
 .sentence-translation{font-size:9px;line-height:1.25;color:#9ab9c9;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:680px) and (orientation:portrait){.sentence-translation{display:none}}
+
+
+/* Persistent battle intelligence: fleet damage remains visible while targeting. */
+.fleet-status-hud{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:0;padding:5px 0 9px}
+.deployment .fleet-status-hud{display:none}
+.fleet-status-panel{min-width:0;border:1px solid #31536b;border-radius:7px;background:linear-gradient(135deg,#0d2941,#102f48);padding:7px 9px;box-shadow:0 4px 16px #00102030}
+.enemy-fleet-status{border-color:#5d4c3c;background:linear-gradient(135deg,#172d3f,#21354a)}
+.fleet-status-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font:6px var(--mono);letter-spacing:.9px;color:#789fb6}
+.fleet-status-heading strong{font:7px var(--mono);font-weight:550;letter-spacing:.2px;color:#c4dce8;white-space:nowrap}
+.enemy-fleet-status .fleet-status-heading strong{color:#f0c699}
+.fleet-status-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;min-width:0}
+.fleet-status-chip{min-width:0;border:1px solid #34566d;border-radius:4px;background:#0a2238aa;padding:5px 6px;display:grid;grid-template-rows:auto 3px auto;gap:4px}
+.enemy-fleet-status .fleet-status-chip{border-color:#5a4e45;background:#17283a}
+.fleet-status-chip-top{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0}
+.fleet-status-chip-top strong{font-size:8px;font-weight:600;color:#d7e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fleet-status-chip-top span{font:6px var(--mono);color:#7e9fb1;white-space:nowrap}
+.fleet-status-pips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px}
+.fleet-status-pips i{height:3px;border-radius:1px;background:#547b90}
+.fleet-status-pips i.hit{background:#f0a161}
+.fleet-status-chip.sunk .fleet-status-pips i{background:#9d6b55}
+.fleet-status-state{font:6px var(--mono);letter-spacing:.45px;color:#83aaba;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fleet-status-chip.hit{border-color:#9b6848}.fleet-status-chip.hit .fleet-status-state{color:#ffc18d}
+.fleet-status-chip.sunk{opacity:.68;border-color:#7e5747}.fleet-status-chip.sunk .fleet-status-state{color:#e2a889}
+.battle-phase .game-main{grid-template-rows:64px minmax(150px,21vh) 66px 86px minmax(0,1fr) 78px 30px}
+@media(min-width:1400px){.battle-phase .game-main{grid-template-rows:68px minmax(165px,23vh) 68px 88px minmax(0,1fr) 81px 32px}}
+@media(max-width:1000px) and (min-width:681px){.battle-phase .game-main{grid-template-rows:59px minmax(135px,20vh) 63px 82px minmax(0,1fr) 76px 29px}}
+@media(min-width:901px) and (max-height:850px){.battle-phase .game-main{grid-template-rows:54px 120px 56px 72px minmax(0,1fr) 64px 26px}.fleet-status-panel{padding:5px 7px}.fleet-status-heading{margin-bottom:4px}.fleet-status-chip{padding:4px 5px;gap:3px}}
+@media(max-width:680px) and (orientation:portrait){
+  .fleet-status-hud{display:flex;flex-direction:column;gap:6px;padding:4px 0 8px;position:sticky;top:0;z-index:8;background:#08172af2;box-shadow:0 6px 18px #06182b88}
+  .deployment .fleet-status-hud{display:none}
+  .fleet-status-panel{padding:6px 7px}
+  .fleet-status-heading{margin-bottom:5px;font-size:5px}
+  .fleet-status-heading strong{font-size:6px}
+  .fleet-status-list{gap:3px}
+  .fleet-status-chip{padding:4px 3px;gap:3px}
+  .fleet-status-chip-top{display:block}
+  .fleet-status-chip-top strong{display:block;font-size:6.5px;text-align:center}
+  .fleet-status-chip-top span{display:block;font-size:5px;text-align:center;margin-top:2px}
+  .fleet-status-state{font-size:5px;text-align:center;letter-spacing:.1px}
+  .fleet-status-pips{gap:1px}.fleet-status-pips i{height:2px}
+  .battle-phase .mobile-board-tabs{padding-top:4px}
+}
+@media(max-width:900px) and (orientation:landscape) and (max-height:600px){
+  .battle-phase .game-main{grid-template-rows:41px 0 42px 58px minmax(0,1fr) 55px 22px}
+  .fleet-status-hud{gap:7px;padding:3px 0 5px}
+  .fleet-status-panel{padding:4px 6px}
+  .fleet-status-heading{margin-bottom:3px}
+  .fleet-status-chip{padding:3px 4px;gap:2px}
+  .fleet-status-chip-top strong{font-size:6px}.fleet-status-state{font-size:5px}
+}
