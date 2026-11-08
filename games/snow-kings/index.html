@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#0c1d32">
+  <meta name="description" content="Roll, grow, and learn languages in a magical 3D snowball village. Bring your own GoLingo words and sentences, listen to pronunciation, and topple the Ice Palace.">
+  <title>Snow Kings — GoLingo Winter Language Adventure</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./bridge.js"></script>
+</head>
+<body>
+  <main id="app" aria-label="Snow Kings 3D snowball rolling game">
+    <div id="world" aria-hidden="true"></div>
+    <div class="shade" aria-hidden="true"></div>
+
+    <div id="hud" class="hud hidden">
+      <div class="top-left">
+        <div class="brand"><span class="brand-mark">✳</span><span>SNOW <strong>KINGS</strong></span><span class="brand-sub">WINTER ROYALE</span></div>
+        <div class="night-card glass">
+          <div class="night-icon">☾</div>
+          <div><div class="eyebrow" id="phase-text">MIDNIGHT RUN</div><div class="night-time" id="clock">04:30 <span>UNTIL DAWN</span></div></div>
+        </div>
+        <div id="avalanche-pill" class="avalanche-pill hidden">❄ AVALANCHE FEVER <span id="avalanche-count">12s</span></div>
+      </div>
+
+      <div class="objective glass" id="objective">
+        <div class="objective-arrow" id="objective-arrow">➤</div>
+        <div class="objective-label"><span>YOUR ROYAL QUEST</span><strong id="objective-text">TOPPLE THE ICE PALACE</strong><small id="objective-distance">FIND THE PALACE</small></div>
+      </div>
+
+      <div class="learn-ribbon glass" id="learn-ribbon" aria-label="GoLingo learning controls">
+        <button class="learn-icon" id="learn-hide" aria-label="Hide learning words" title="Show or hide word">Aa</button>
+        <div class="learn-label"><div class="learn-kicker"><span>✧ GOLINGO <span id="learn-language">SPANISH</span></span><span id="learn-progress">1 / 15</span></div><strong id="learn-word">nieve</strong><small id="learn-translation">snow</small></div>
+        <div class="learn-buttons"><button class="learn-icon" id="learn-replay" aria-label="Replay pronunciation" title="Hear word">▶</button><button class="learn-icon selected" id="learn-translate" aria-label="Toggle translation" title="Translation">文</button><button class="learn-icon" id="learn-voice" aria-label="Pause speaking" title="Repeat speech">◖))</button><button class="learn-icon" id="learn-basket" aria-label="Open vocabulary basket" title="Review basket">▤<span id="learn-word-count">0</span></button><button class="learn-icon" id="learn-settings" aria-label="Import lesson and settings" title="Import lesson">⚙</button></div>
+      </div>
+
+      <aside class="leaderboard glass" aria-label="The Snow Kings leaderboard">
+        <div class="board-title"><span>♛</span> THE SNOW KINGS <small>LIVE</small></div>
+        <ol id="rank-list" class="rank-list"></ol>
+      </aside>
+
+      <div id="toasts" class="toasts" aria-live="polite"></div>
+
+      <div class="bottom-hud">
+        <section class="size-panel glass" aria-live="off">
+          <div class="eyebrow">❄ SNOWBALL SIZE</div>
+          <div class="size-amount"><span id="mass">180</span><small>kg</small></div>
+          <div class="growth-line"><div id="growth-fill"></div></div>
+          <div class="growth-caption"><span id="tier-text">COLLECT GIFTS & SNOWMEN</span><span id="growth-percent">0%</span></div>
+          <div class="score-line">✦ <span id="score">0</span> <span>ROYAL POINTS</span></div>
+        </section>
+        <div class="desktop-controls"><span><kbd>W A S D</kbd> ROLL</span><span><kbd>SPACE</kbd> FLARE BOOST</span><span><kbd>P</kbd> PAUSE</span></div>
+        <div class="action-controls">
+          <button class="icon-button glass" id="sound-btn" aria-label="Toggle music and sound" title="Toggle sound">♪</button>
+          <button class="icon-button glass" id="help-btn" aria-label="Help and settings" title="Help">?</button>
+          <button id="boost-btn" class="boost-btn" aria-label="Flare boost"><span class="boost-icon">✦</span><span>FLARE<small id="boost-text">READY</small></span></button>
+        </div>
+      </div>
+      <div class="joystick" id="joystick" aria-label="Move snowball using virtual joystick"><div class="joystick-ring"><div class="joystick-knob" id="joystick-knob">❄</div></div><span>DRAG TO ROLL</span></div>
+      <div class="study-pill" id="study-pill"><span>✧</span> <span id="study-word">ROLL TO DISCOVER</span></div>
+    </div>
+
+    <div class="screen intro" id="intro">
+      <div class="intro-top"><div class="edition">✦ AN ENCHANTED WINTER ARCADE ✦</div><button id="intro-sound" class="sound-intro" aria-label="Toggle sound">♫ SOUND ON</button></div>
+      <div class="intro-main">
+        <div class="crown">♛</div>
+        <div class="overline">THE BIGGEST SNOWBALL WINS</div>
+        <h1>SNOW<br><em>KINGS</em><span class="title-star">✳</span></h1>
+        <p>One little snowball. An enchanted village of words.<br><strong>Roll. Learn. Grow. Conquer the Ice Palace.</strong></p>
+        <button id="start-btn" class="primary-btn"><span>LET'S ROLL!</span><span class="btn-arrow">➜</span></button>
+        <button id="intro-lesson" class="lesson-intro-btn">✧ IMPORT YOUR GOLINGO WORDS <span>↗</span></button>
+        <div class="intro-tips"><span>❄ ABSORB SMALLER THINGS</span><b>✦</b><span>⚡ OUTGROW YOUR RIVALS</span><b>✦</b><span>♛ TOPPLE THE PALACE</span></div>
+      </div>
+      <div class="intro-footer"><span>GOLINGO LANGUAGE QUEST · 5 AI SNOW KINGS</span><span>DESKTOP + TOUCH FRIENDLY</span></div>
+    </div>
+
+    <div class="screen end-screen hidden" id="end-screen" role="dialog" aria-modal="true" aria-labelledby="end-title">
+      <div class="end-card glass"><div class="end-crown" id="end-crown">♛</div><div class="overline" id="end-eyebrow">A WINTER LEGEND</div><h2 id="end-title">ROYAL VICTORY!</h2><p id="end-description">The palace has fallen. All hail the Snow King!</p><div class="end-stats"><div><small>FINAL SIZE</small><strong id="end-mass">0 kg</strong></div><div><small>ROYAL POINTS</small><strong id="end-score">0</strong></div><div><small>OBJECTS CRUSHED</small><strong id="end-crushed">0</strong></div></div><button class="primary-btn" id="replay-btn">ROLL AGAIN <span class="btn-arrow">↻</span></button><button class="secondary-btn" id="end-review">REVIEW &amp; EXPORT GOLINGO WORDS</button></div>
+    </div>
+
+    <div class="screen pause-screen hidden" id="pause-screen" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card glass"><div class="crown">❄</div><h2 id="pause-title">A LITTLE SNOW BREAK</h2><p>Even a Snow King needs a breather.</p><button class="primary-btn" id="resume-btn">KEEP ROLLING <span class="btn-arrow">➜</span></button><button class="secondary-btn" id="restart-btn">RESTART THE NIGHT</button></div></div>
+    <div class="lesson-overlay hidden" id="learning-modal" role="dialog" aria-modal="true" aria-labelledby="lesson-heading">
+      <div class="lesson-dialog glass">
+        <div class="lesson-header"><div><span class="overline">✧ GOLINGO LEARNING LAB</span><h2 id="lesson-heading">Your words. Your winter.</h2><p id="lesson-summary">15 learning steps · winter demo</p></div><button id="close-learning" class="lesson-close" aria-label="Close learning settings">×</button></div>
+        <div class="lesson-tabs"><button id="tab-lesson" class="active">IMPORT LESSON</button><button id="tab-basket">REVIEW BASKET</button></div>
+        <div id="panel-lesson" class="lesson-content">
+          <p>Paste words, <code>word = translation</code> lines, or a GoLingo JSON lesson. Shared words from the game gallery load automatically.</p>
+          <textarea id="lesson-json" spellcheck="false" rows="6" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"id":"101","word":"雪","translation":"snow","sentence":"雪が降っています。","sentenceTranslation":"It is snowing."}]}'></textarea>
+          <div class="lesson-actions"><label class="file-button" for="lesson-file">↑ CHOOSE JSON/TXT <input type="file" id="lesson-file" accept=".json,.txt,application/json,text/plain"></label><button id="demo-lesson" class="lesson-quiet">TRY WINTER SPANISH</button><button id="load-lesson" class="lesson-primary">LOAD &amp; PLAY ➜</button></div>
+          <div class="lesson-example"><span>HOW IT WORKS</span><p>Find the glowing vocabulary snowflake, roll over it to collect a word, then hear the next word repeat until you collect it. Sentence lessons teach each word before speaking the full sentence. Other objects still grow your snowball.</p></div>
+        </div>
+        <div id="panel-basket" class="lesson-content hidden"><p>Your collected words are saved here for replay and GoLingo import.</p><div id="review-list" class="review-list"></div><div class="lesson-actions basket-actions"><button id="copy-lesson" class="lesson-quiet">COPY JSON</button><button id="export-lesson" class="lesson-primary">↓ DOWNLOAD GOLINGO JSON</button></div></div>
+        <div id="lesson-feedback" class="lesson-feedback" role="status">Ready to learn.</div>
+      </div>
+    </div>
+    <div id="screenflash" aria-hidden="true"></div>
+    <div id="credit">SNOW KINGS <span>·</span> MADE FOR THE JOY OF WINTER</div>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

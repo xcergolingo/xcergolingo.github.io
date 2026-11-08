@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Snow Kings — GoLingo Winter Language Adventure</title>
+  <desc id="desc">Original illustrated winter village beneath a green northern lights sky, a glowing rolling snowball and a snowflake carrying the Spanish word nieve.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#07182b"/><stop offset=".63" stop-color="#153c53"/><stop offset="1" stop-color="#6a92a4"/></linearGradient>
+    <linearGradient id="hill" x2="0" y2="1"><stop stop-color="#e7fff7"/><stop offset="1" stop-color="#88c1cf"/></linearGradient>
+    <linearGradient id="sphere" x1=".18" x2=".9" y1=".05" y2=".93"><stop stop-color="#fff"/><stop offset=".5" stop-color="#def9f5"/><stop offset="1" stop-color="#82afc4"/></linearGradient>
+    <linearGradient id="ice" x2=".9" y2="1"><stop stop-color="#dffffd"/><stop offset=".48" stop-color="#8edce3"/><stop offset="1" stop-color="#3883b4"/></linearGradient>
+    <linearGradient id="glow" x2="0" y2="1"><stop stop-color="#b5ffb8" stop-opacity=".9"/><stop offset="1" stop-color="#71f5ce" stop-opacity="0"/></linearGradient>
+    <radialGradient id="moon"><stop stop-color="#fffdec"/><stop offset="1" stop-color="#d7f4eb"/></radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="shadow" x="-40%" width="180%" y="-40%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#173f52" flood-opacity=".43"/></filter>
+    <g id="pine"><path d="M0 0 14 0 14 59H0Z" fill="#4b6471"/><path d="m7-104-53 69h30l-37 53h36l-21 32H53L31 18h36L29-35h30Z" fill="#154c54"/><path d="m7-105-39 51 14-6 30-33Z" fill="#aaf2dc" opacity=".8"/><path d="m-24-32 32 8 27-8-7 13-33 4Z" fill="#d3f7f2" opacity=".8"/><path d="m-35 25 37 5 34-7-9 13h-55Z" fill="#b9e6e6" opacity=".85"/></g>
+    <g id="house"><path d="M0 50 0 0 85 0 85 50Z" fill="#71849a"/><path d="m-12 5 54-43L97 5Z" fill="#4c4b80" stroke="#cce7ed" stroke-width="5" stroke-linejoin="round"/><rect x="12" y="14" width="18" height="22" rx="2" fill="#ffd78a"/><rect x="52" y="14" width="17" height="22" rx="2" fill="#ffd78a"/><path d="M0 50h85" stroke="#def8fb" stroke-width="6"/><path d="M12 5h66" stroke="#e8faff" stroke-width="5"/></g>
+    <g id="spark"><path d="M0-11 3-3 11 0 3 3 0 11-3 3-11 0-3-3Z" fill="#e8fff4"/></g>
+  </defs>
+  <rect width="1200" height="750" fill="url(#sky)"/>
+  <path d="M30 0C165 75 180 210 296 235S500 73 613 114 777 220 897 141 1121 29 1180 0" fill="none" stroke="#7df8b6" stroke-width="80" opacity=".17" filter="url(#blur)"/>
+  <path d="M-20 0C141 92 175 236 294 213S485 76 612 129 804 228 941 123 1093 50 1230 50" fill="none" stroke="#a4f1d6" stroke-width="17" opacity=".5" filter="url(#soft)"/>
+  <path d="M178 0C245 62 270 199 410 184S575 82 689 143 855 232 977 128 1093 93 1190 108" fill="none" stroke="#82eecc" stroke-width="4" opacity=".55"/>
+  <circle cx="974" cy="132" r="74" fill="#d8ffed" opacity=".2" filter="url(#blur)"/><circle cx="974" cy="132" r="56" fill="url(#moon)"/>
+  <g fill="#e8fff8" opacity=".75"><circle cx="77" cy="95" r="2"/><circle cx="145" cy="38" r="2"/><circle cx="315" cy="93" r="1.8"/><circle cx="452" cy="52" r="2.2"/><circle cx="640" cy="52" r="1.5"/><circle cx="741" cy="225" r="2"/><circle cx="866" cy="45" r="2"/><circle cx="1088" cy="41" r="1.5"/><circle cx="1145" cy="220" r="2"/><circle cx="88" cy="248" r="1.7"/><circle cx="533" cy="230" r="1.6"/></g>
+  <g opacity=".66"><use href="#spark" x="156" y="176" transform="rotate(20 156 176)"/><use href="#spark" x="840" y="259" transform="scale(.5) translate(840 259)"/><use href="#spark" x="1089" y="284" transform="rotate(18 1089 284) scale(.6)"/></g>
+  <path d="M0 396 94 336 201 380 322 290 441 350 560 257 650 333 777 292 896 369 1020 268 1143 348 1200 324V750H0Z" fill="#173e53" opacity=".67"/>
+  <path d="M0 483Q168 385 304 440t259-72q171-84 338 18t299-42v406H0Z" fill="#9bd5dc"/>
+  <path d="M0 492Q145 448 249 465t184-51q97-58 188-31t179 73q120 39 250-6t150-30v330H0Z" fill="url(#hill)"/>
+  <path d="M0 630q170-79 333-31t303-21q120-41 211 12t353-48v208H0Z" fill="#f1fffa"/>
+  <g transform="translate(621 338)" filter="url(#shadow)">
+    <ellipse cx="30" cy="183" rx="245" ry="28" fill="#d7f8f7" opacity=".65"/>
+    <path d="m-146 164 12-148 93-42 53 26 31-71 49 23 34 48 56-19 25 177Z" fill="url(#ice)" stroke="#baf9fb" stroke-width="8"/>
+    <path d="m-147 165 97-6V31l37-41 37 31v138l38-2V-50l28-40 28 34v218l73 2" fill="none" stroke="#e8fffe" stroke-width="7" opacity=".88"/>
+    <path d="m-134 15 72-56 71 40M33-70l58-86 62 95M98 0l67-45 50 45" fill="none" stroke="#d3fcff" stroke-width="8"/>
+    <path d="M25 166V89q0-43 47-43t47 43v77" fill="#4279a5" stroke="#e9ffff" stroke-width="8"/>
+    <path d="M42 95h57m-29-50v117" stroke="#9aece4" stroke-width="5" opacity=".8"/>
+    <rect x="-107" y="57" width="38" height="55" rx="19" fill="#fdf6b6" opacity=".9"/>
+    <rect x="149" y="56" width="32" height="53" rx="16" fill="#fdf6b6" opacity=".9"/>
+    <path d="M74-151v-59m-27 29h54" stroke="#e5ffff" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(105 517) scale(.9)"><use href="#pine"/></g>
+  <g transform="translate(1083 532) scale(.82)"><use href="#pine"/></g>
+  <g transform="translate(1125 490) scale(.52)"><use href="#pine"/></g>
+  <g transform="translate(320 460) scale(.52)"><use href="#pine"/></g>
+  <g transform="translate(465 430) scale(.45)"><use href="#pine"/></g>
+  <g transform="translate(870 475) scale(.43)"><use href="#pine"/></g>
+  <g transform="translate(230 485) scale(.84)"><use href="#house"/></g>
+  <g transform="translate(940 484) scale(.78)"><use href="#house"/></g>
+  <g transform="translate(1087 555) scale(.5)"><use href="#house"/></g>
+  <g transform="translate(399 512) scale(.54)"><use href="#house"/></g>
+  <g stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".9"><path d="M66 593h90m-79-18v37m68-37v37M852 552h94m-79-18v37m68-37v37"/></g>
+  <path d="M194 708Q263 676 328 651T483 628" fill="none" stroke="#68dcd9" stroke-width="64" stroke-linecap="round" opacity=".18" filter="url(#blur)"/>
+  <path d="M192 708Q263 676 330 650t147-20" fill="none" stroke="#d5fffd" stroke-width="6" stroke-dasharray="4 22" stroke-linecap="round" opacity=".85"/>
+  <g transform="translate(256 586)" filter="url(#shadow)">
+    <ellipse cx="0" cy="132" rx="153" ry="33" fill="#68b4bc" opacity=".45"/>
+    <circle r="129" fill="url(#sphere)" stroke="#eeffff" stroke-width="7"/>
+    <path d="M-94-71q88-72 183 16M-114-21Q0-111 115-10M-96 65q103-42 194 18" fill="none" stroke="#77c8d1" stroke-width="8" opacity=".6"/>
+    <path d="M-119 10q119-125 238 2" fill="none" stroke="#c58ad2" stroke-width="6" stroke-dasharray="5 15" stroke-linecap="round"/>
+    <g><circle cx="-97" cy="7" r="9" fill="#ffe48a"/><circle cx="-71" cy="-27" r="9" fill="#f295ce"/><circle cx="-34" cy="-48" r="9" fill="#72fcd9"/><circle cx="10" cy="-59" r="9" fill="#ffe48a"/><circle cx="53" cy="-41" r="9" fill="#ff9785"/><circle cx="90" cy="-14" r="9" fill="#7ffbe5"/></g>
+    <circle cx="-43" cy="-66" r="17" fill="#ffffff" opacity=".7" filter="url(#soft)"/>
+    <path d="M0-162-25-101h50Z" fill="#eaa0bb" stroke="#fff" stroke-width="4"/><circle cy="-167" r="10" fill="#ffedaf"/>
+    <path d="M-25-102q25 14 50 0" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(753 520)"><circle r="64" fill="#b6fffa" opacity=".19" filter="url(#blur)"/><circle r="43" fill="#1f6678" opacity=".9" stroke="#bdfff0" stroke-width="3"/><path d="M0-23v46M-20-12l40 24M-20 12l40-24" fill="none" stroke="#eafffb" stroke-width="5" stroke-linecap="round"/><text x="0" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="27" fill="#ffffff">nieve</text><text x="0" y="107" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#c5ffec">snow</text></g>
+  <g fill="#ffffff" opacity=".9"><circle cx="51" cy="615" r="3"/><circle cx="165" cy="468" r="3"/><circle cx="345" cy="566" r="4"/><circle cx="521" cy="680" r="4"/><circle cx="575" cy="470" r="3"/><circle cx="811" cy="596" r="3"/><circle cx="1176" cy="592" r="3"/><circle cx="1018" cy="669" r="3"/><circle cx="1073" cy="398" r="3"/></g>
+  <text x="55" y="69" font-family="Arial,sans-serif" font-weight="800" letter-spacing="7" font-size="19" fill="#e5fff6">GOLINGO · WINTER ARCADE</text>
+  <rect x="55" y="90" width="319" height="7" rx="3.5" fill="#92fae2" opacity=".7"/>
+</svg>
