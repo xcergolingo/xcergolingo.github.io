@@ -407,11 +407,14 @@ function setDifficulty(value) {
 }
 function syncLearning() {
   if (!learning) return;
+  if (settings.playStyle === 'learn' && !learning.enabled) settings.playStyle = 'classic';
   const style = settings.playStyle;
   $('classicMode').classList.toggle('active', style === 'classic'); $('classicMode').setAttribute('aria-pressed', String(style === 'classic'));
   $('learningMode').classList.toggle('active', style === 'learn'); $('learningMode').setAttribute('aria-pressed', String(style === 'learn'));
   $('listenMode').classList.toggle('active', style === 'listen'); $('listenMode').setAttribute('aria-pressed', String(style === 'listen'));
-  $('learningSetting').checked = learning.enabled; $('learningBar').hidden = !learning.enabled || style === 'listen'; $('listenBar').hidden = !learning.enabled || style !== 'listen'; $('learningSettings').hidden = !learning.enabled;
+  $('learningSetting').checked = learning.enabled; $('learningSetting').disabled = style === 'listen';
+  $('learningSetting').title = style === 'listen' ? 'Vocabulary is required in Listen & Find. Choose another mode on the start screen to turn it off.' : '';
+  $('learningBar').hidden = !learning.enabled || style === 'listen'; $('listenBar').hidden = !learning.enabled || style !== 'listen'; $('learningSettings').hidden = !learning.enabled;
   $('repeatSetting').checked = learning.repeatEnabled;
   $('wordTranslation').hidden = !settings.showTranslations;
   $('sentenceBtn').hidden = !currentWord?.sentence;
