@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import { createWorld } from './world.js';
 import { createWeapon } from './weapon.js';
-import { createLearning } from './learning.js?v=2';
+import { createLearning } from './learning.js?v=4';
 import { createTargetWords } from './target-words.js?v=3';
 import { createPatrolTarget } from './patrols.js?v=3';
 
@@ -10,8 +10,9 @@ const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
 const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
-const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, difficulty: 'relaxed', showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
+const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, difficulty: 'relaxed', playStyle: 'learn', showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
 settings.difficulty = settings.difficulty === 'hard' ? 'hard' : 'relaxed';
+settings.playStyle = ['learn', 'listen', 'classic'].includes(settings.playStyle) ? settings.playStyle : 'learn';
 const rounds = [
   { name: 'SIGHTING IN', count: 6, seconds: 100, moving: false, pads: [0, 1, 2, 3, 4, 5] },
   { name: 'ON THE MOVE', count: 8, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7] },
@@ -22,16 +23,20 @@ const hardRounds = [
   { name: 'QUICKER FOOTSTEPS', count: 10, seconds: 95, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
   { name: 'ROOFTOP PURSUIT', count: 12, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
 ];
-const bestKey = (difficulty = state.difficulty) => difficulty === 'hard' ? 'longshot.best.hard.v1' : 'longshot.best.v1';
-const readBest = difficulty => Math.max(0, Number(read(bestKey(difficulty), 0)) || 0);
+const bestKey = (difficulty = settings.difficulty, playStyle = settings.playStyle) => playStyle === 'listen'
+  ? (difficulty === 'hard' ? 'longshot.best.listen.hard.v1' : 'longshot.best.listen.relaxed.v1')
+  : (difficulty === 'hard' ? 'longshot.best.hard.v1' : 'longshot.best.v1');
+const readBest = (difficulty = settings.difficulty, playStyle = settings.playStyle) => Math.max(0, Number(read(bestKey(difficulty, playStyle), 0)) || 0);
 const state = {
-  mode: 'menu', difficulty: settings.difficulty, round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
+  mode: 'menu', difficulty: settings.difficulty, playStyle: settings.playStyle, round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
   ammo: 5, reserve: 25, time: 100, reloadTime: 0, cooldown: 0, recoil: 0,
   scoped: false, zoom: 4, yaw: 0, pitch: -.07, moveX: 0, moveY: 0,
   steady: false, breath: 1, transitioning: 0, elapsed: 0, guideTime: 0,
-  best: readBest(settings.difficulty), lessonOffset: 0,
+  best: readBest(settings.difficulty, settings.playStyle), lessonOffset: 0,
+  promptTarget: null, wrongTarget: null,
 };
 const isHard = () => state.difficulty === 'hard';
+const isListenMode = () => state.playStyle === 'listen';
 const activeRounds = () => isHard() ? hardRounds : rounds;
 const isTimed = () => isHard() || settings.timed;
 let renderer, scene, camera, world, weapon, targetWords, targets = [], effects = [], audioContext;
@@ -43,6 +48,7 @@ const rayDirection = new THREE.Vector3();
 const v = new THREE.Vector3();
 const targetPoint = new THREE.Vector3();
 const center = new THREE.Vector2(0, 0);
+const tapPoint = new THREE.Vector2();
 const pointer = { id: null, x: 0, y: 0, total: 0, button: 0 };
 const isTouch = matchMedia('(pointer: coarse)').matches;
 
@@ -75,6 +81,7 @@ function shotSound() {
 function toast(message, seconds = 2.5) { $('toast').textContent = message; $('toast').style.opacity = '1'; toastUntil = performance.now() + seconds * 1000; }
 function banner(eyebrow, title, seconds = 2.5) { $('bannerEyebrow').textContent = eyebrow; $('bannerTitle').textContent = title; $('roundBanner').style.opacity = '1'; bannerUntil = performance.now() + seconds * 1000; }
 function formatTime(t) { t = Math.max(0, Math.ceil(t)); return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; }
+function sameLesson(a, b) { return !!a && !!b && a.word === b.word && (a.translation || '') === (b.translation || ''); }
 
 function createTarget(pad, index, moving) {
   const group = new THREE.Group();
@@ -143,7 +150,9 @@ function updateHud() {
   $('difficultyLabel').textContent = isHard() ? 'HARD' : 'RELAXED';
   $('difficultyLabel').classList.toggle('hard', isHard());
   $('roundName').textContent = r.name;
-  $('objective').textContent = learning?.enabled ? `Discover ${r.count}${isHard() ? ' walking' : ''} word targets` : `Hit all ${r.count} ${isHard() ? 'walking' : 'orange'} targets`;
+  $('objective').textContent = isListenMode()
+    ? 'Listen · identify the matching word · one wrong target ends the run'
+    : learning?.enabled ? `Discover ${r.count}${isHard() ? ' walking' : ''} word targets` : `Hit all ${r.count} ${isHard() ? 'walking' : 'orange'} targets`;
   $('timerLabel').textContent = isTimed() ? 'TIME REMAINING' : 'LEARN AT YOUR PACE';
   $('timer').textContent = isTimed() ? formatTime(state.time) : '∞'; $('timer').parentElement.classList.toggle('urgent', isTimed() && state.time < 20);
   $('score').textContent = String(state.score).padStart(4, '0');
@@ -171,17 +180,62 @@ function updateScope() {
 function toggleScope() { if (state.mode !== 'playing') return; state.scoped = !state.scoped; tone(250, .04, .025, 'sine', 180); updateScope(); }
 function zoomScope() { state.zoom = state.zoom === 2 ? 4 : state.zoom === 4 ? 8 : 2; if (!state.scoped) state.scoped = true; updateScope(); }
 
+function chooseListenPrompt() {
+  if (!isListenMode() || state.mode !== 'playing') return null;
+  const alive = targets.filter(target => target.alive && target.lessonItem);
+  if (!alive.length) { state.promptTarget = null; return null; }
+  const different = state.promptTarget && alive.length > 1
+    ? alive.filter(target => !sameLesson(target.lessonItem, state.promptTarget.lessonItem))
+    : alive;
+  const pool = different.length ? different : alive;
+  state.promptTarget = pool[Math.floor(Math.random() * pool.length)];
+  state.wrongTarget = null;
+  state.guideTime = 0;
+  $('listenStatus').textContent = `${state.kills} correct · one wrong shot = game over`;
+  learning.speakOnly(state.promptTarget.lessonItem);
+  return state.promptTarget;
+}
+function speakPrompt() {
+  if (!isListenMode() || state.mode !== 'playing' || !state.promptTarget?.alive) return;
+  unlockAudio(); learning.speakOnly(state.promptTarget.lessonItem);
+  toast('Target word replayed. Tap any visible target to hear its word.', 1.8);
+}
+function targetAtScreen(clientX, clientY) {
+  const canvas = $('scene'), rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  tapPoint.set(((clientX - rect.left) / rect.width) * 2 - 1, -(((clientY - rect.top) / rect.height) * 2 - 1));
+  scene.updateMatrixWorld(true); raycaster.setFromCamera(tapPoint, camera);
+  const hits = raycaster.intersectObjects([
+    ...targets.filter(target => target.alive).flatMap(target => target.hitMeshes),
+    ...targets.flatMap(target => target.coverMeshes || []),
+    ...world.colliders,
+  ], false);
+  return hits[0]?.object.userData.target || null;
+}
+function listenToTargetAt(clientX, clientY) {
+  if (!isListenMode() || state.mode !== 'playing') return false;
+  const target = targetAtScreen(clientX, clientY);
+  if (!target?.alive || !target.lessonItem) { toast('Tap a visible target to hear its word.', 1.4); return false; }
+  unlockAudio(); learning.speakOnly(target.lessonItem);
+  toast('Listening to this target. Tap another to compare, or Fire when you are sure.', 1.7);
+  return true;
+}
+
 function startRound() {
   const r = activeRounds()[state.round]; state.kills = 0; state.time = r.seconds; state.ammo = 5; state.reserve = 25;
   state.reloadTime = 0; state.cooldown = 0; state.transitioning = 0; state.breath = 1; state.guideTime = 7;
-  loadTargets(r.moving, r.pads); banner(`${isHard() ? 'HARD · ' : ''}ROUND ${String(state.round + 1).padStart(2, '0')} / 03`, r.name, 2.5);
-  if (learning.enabled && targets[0]?.lessonItem) learning.preview(targets[0].lessonItem);
+  loadTargets(r.moving, r.pads); banner(`${isListenMode() ? 'LISTEN · ' : isHard() ? 'HARD · ' : ''}ROUND ${String(state.round + 1).padStart(2, '0')} / 03`, r.name, 2.5);
+  if (isListenMode()) chooseListenPrompt();
+  else if (learning.enabled && targets[0]?.lessonItem) learning.preview(targets[0].lessonItem);
   updateHud();
 }
 function startGame() {
   unlockAudio(); learning.stop();
-  state.difficulty = settings.difficulty; state.best = readBest(state.difficulty);
+  state.difficulty = settings.difficulty; state.playStyle = settings.playStyle;
+  if (isListenMode() && !learning.enabled) learning.setEnabled(true);
+  state.best = readBest(state.difficulty, state.playStyle);
   state.mode = 'playing'; state.round = 0; state.score = 0; state.totalKills = 0; state.shots = 0; state.precise = 0;
+  state.promptTarget = null; state.wrongTarget = null;
   state.elapsed = 0; state.scoped = false; state.yaw = 0; state.pitch = -.08; state.recoil = 0; state.steady = false;
   const lessonSize = learning.getItems().length || 1;
   state.lessonOffset = Math.max(0, Number(read('longshot.nextWord.v2', 0)) || 0) % lessonSize;
@@ -189,33 +243,52 @@ function startGame() {
   camera.position.copy(world.spawn); resetInput();
   $('intro').hidden = true; $('hud').hidden = false; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
   document.body.classList.add('playing'); updateScope(); startRound(); syncLearning();
-  toast(isHard() ? 'Hard: track the walking patrols · Watch for cover · Beat the clock' : isTouch ? 'Drag to aim · Scope to zoom · Fire to shoot' : 'Drag to aim · Space to scope · Click or F to fire', 4);
+  toast(isListenMode()
+    ? 'Listen & Find: hear the prompt · tap targets to compare · Fire only when sure'
+    : isHard() ? 'Hard: track the walking patrols · Watch for cover · Beat the clock'
+    : isTouch ? 'Drag to aim · Scope to zoom · Fire to shoot'
+    : 'Drag to aim · Space to scope · Click or F to fire', 4);
 }
 function pauseGame(showPanel = true) {
   if (state.mode !== 'playing') return;
   state.mode = 'paused'; resetInput(); learning.stop(); $('pausePanel').hidden = !showPanel;
   if (document.pointerLockElement) document.exitPointerLock();
 }
-function resumeGame() { state.mode = 'playing'; $('pausePanel').hidden = true; resetInput(); unlockAudio(); if (learning.enabled) learning.resume(); }
+function resumeGame() { state.mode = 'playing'; $('pausePanel').hidden = true; resetInput(); unlockAudio(); if (isListenMode()) speakPrompt(); else if (learning.enabled) learning.resume(); }
 function resetInput() { keys.clear(); state.moveX = 0; state.moveY = 0; state.steady = false; $('steadyBtn').classList.remove('active'); $('joystickThumb').style.transform = ''; pointer.id = null; aimTween = null; }
 function mainMenu() {
-  state.mode = 'menu'; state.difficulty = settings.difficulty; state.best = readBest(state.difficulty); state.round = 0;
+  state.mode = 'menu'; state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.best = readBest(state.difficulty, state.playStyle); state.round = 0;
+  state.promptTarget = null; state.wrongTarget = null;
   state.scoped = false; state.recoil = 0; resetInput(); learning.stop();
   $('intro').hidden = false; $('hud').hidden = true; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
   document.body.classList.remove('playing'); camera.position.copy(world.spawn); loadTargets(isHard(), isHard() ? hardRounds[0].pads : [0, 1, 2, 3, 4, 5, 6, 7, 8]);
   syncDifficultyUI(); updateScope();
 }
-function finishGame(won) {
+function finishGame(won, reason = '') {
   state.mode = 'results'; state.scoped = false; resetInput(); learning.stop(); updateScope();
   const newRecord = state.score > state.best;
-  if (newRecord) { state.best = state.score; save(bestKey(), state.best); }
-  $('resultEyebrow').textContent = won ? isHard() ? 'HARD PATROLS COMPLETE' : 'ALL THREE ROUNDS COMPLETE' : 'THE CLOCK RAN OUT';
-  $('resultTitle').replaceChildren(...(won ? ['NICE', 'SHOOTING.'] : ['KEEP', 'YOUR FOCUS.']).flatMap((txt, i) => i ? [document.createElement('br'), document.createTextNode(txt)] : [document.createTextNode(txt)]));
-  $('resultSubtitle').textContent = won ? isHard() ? '30 walking targets cleared. You mastered the patrols.' : 'Every target cleared. The rooftop is yours.' : `${state.totalKills} targets hit. ${isHard() ? 'Watch the walking rhythm and wait for an opening past cover.' : 'Try using Find to face a target, then Scope for a closer look.'}`;
+  if (newRecord) { state.best = state.score; save(bestKey(state.difficulty, state.playStyle), state.best); }
+  const styleName = isListenMode() ? 'LISTEN & FIND' : isHard() ? 'HARD' : 'RELAXED';
+  if (reason === 'wrong-word') {
+    const actual = state.wrongTarget?.lessonItem?.word || 'that target';
+    const expected = state.promptTarget?.lessonItem?.word || 'the spoken word';
+    $('resultEyebrow').textContent = 'WRONG WORD · RUN OVER';
+    $('resultTitle').replaceChildren(document.createTextNode('WRONG'), document.createElement('br'), document.createTextNode('TARGET.'));
+    $('resultSubtitle').textContent = `You shot “${actual}”. The spoken word was “${expected}”. Start again and listen carefully before you fire.`;
+    $('againBtn').firstElementChild.textContent = 'START AGAIN';
+  } else {
+    $('resultEyebrow').textContent = won ? isListenMode() ? 'LISTEN & FIND COMPLETE' : isHard() ? 'HARD PATROLS COMPLETE' : 'ALL THREE ROUNDS COMPLETE' : 'THE CLOCK RAN OUT';
+    $('resultTitle').replaceChildren(...(won ? ['NICE', 'SHOOTING.'] : ['KEEP', 'YOUR FOCUS.']).flatMap((txt, i) => i ? [document.createElement('br'), document.createTextNode(txt)] : [document.createTextNode(txt)]));
+    $('resultSubtitle').textContent = won
+      ? isListenMode() ? 'Every spoken word matched. Perfect listening under pressure.' : isHard() ? '30 walking targets cleared. You mastered the patrols.' : 'Every target cleared. The rooftop is yours.'
+      : `${state.totalKills} targets hit. ${isHard() ? 'Watch the walking rhythm and wait for an opening past cover.' : 'Listen again, identify the word, and take your time.'}`;
+    $('againBtn').firstElementChild.textContent = 'ONE MORE ROUND';
+  }
   $('resultScore').textContent = state.score.toLocaleString(); $('resultAccuracy').textContent = (state.shots ? Math.round(state.totalKills / state.shots * 100) : 0) + '%';
-  $('resultPrecision').textContent = state.precise; $('recordLine').textContent = newRecord ? `NEW ${isHard() ? 'HARD' : 'RELAXED'} PERSONAL BEST.` : `${isHard() ? 'HARD' : 'RELAXED'} BEST: ${state.best.toLocaleString()}`;
+  $('resultPrecision').textContent = state.precise; $('recordLine').textContent = newRecord ? `NEW ${styleName} PERSONAL BEST.` : `${styleName} BEST: ${state.best.toLocaleString()}`;
   $('exportBtn').hidden = !learning.enabled; $('resultPanel').hidden = false;
   if (won) { tone(440, .25, .08); setTimeout(() => tone(660, .4, .08), 130); }
+  else if (reason === 'wrong-word') { tone(165, .30, .10, 'sawtooth', 70); }
 }
 
 function reload() {
@@ -238,6 +311,7 @@ function effectAt(point, hit, from) {
 function fire() {
   if (state.mode !== 'playing' || state.transitioning || state.reloadTime > 0 || state.cooldown > 0) return;
   unlockAudio();
+  if (isListenMode() && !state.promptTarget) { toast('Listen for the next word before you fire.', 1.4); return; }
   if (state.ammo <= 0) { tone(120, .025, .045, 'square'); reload(); return; }
   state.ammo--; state.shots++; state.cooldown = .88; shotSound(); weapon.flash();
   scene.updateMatrixWorld(true); raycaster.setFromCamera(center, camera);
@@ -248,6 +322,12 @@ function fire() {
   const from = new THREE.Vector3(.26, -.20, -.95).applyMatrix4(camera.matrixWorld);
   let target = nearest?.object.userData.target;
   if (target?.alive) {
+    if (isListenMode() && state.promptTarget && !sameLesson(target.lessonItem, state.promptTarget.lessonItem)) {
+      state.wrongTarget = target;
+      $('hitNotice').textContent = 'WRONG WORD · RUN OVER';
+      $('hitNotice').style.opacity = '1'; $('hitmark').style.opacity = '1'; hitUntil = performance.now() + 1200;
+      effectAt(point, true, from); state.recoil = 1; updateHud(); finishGame(false, 'wrong-word'); return;
+    }
     target.alive = false; target.hitAge = .001;
     const precise = nearest.object.userData.part === 'precision';
     const distance = Math.round(camera.position.distanceTo(point));
@@ -256,11 +336,17 @@ function fire() {
     $('hitNotice').textContent = `${precise ? 'PRECISE HIT' : 'TARGET DOWN'}  +${points}  /  ${distance} M`;
     $('hitNotice').style.opacity = '1'; $('hitmark').style.opacity = '1'; hitUntil = performance.now() + 1000;
     setTimeout(() => tone(precise ? 1160 : 820, .13, .055, 'sine', precise ? 1500 : 1000), 65);
-    if (learning.enabled) learning.onHit(target.lessonItem);
-    state.guideTime = 1.5;
+    if (learning.enabled) {
+      if (isListenMode()) learning.markReviewed(target.lessonItem);
+      else learning.onHit(target.lessonItem);
+    }
+    state.guideTime = isListenMode() ? 0 : 1.5;
+    if (isListenMode()) state.promptTarget = null;
     if (state.kills >= activeRounds()[state.round].count) {
       const bonus = isTimed() ? Math.ceil(state.time) * 10 : 0; state.score += bonus; state.transitioning = 3.2;
-      banner(learning.enabled ? 'WORDS COLLECTED' : 'ROUND CLEAR', bonus ? `+${bonus} TIME BONUS` : state.round === 2 ? 'LESSON COMPLETE' : 'NEXT ROOFTOP TRIAL', 2.8); tone(520, .2, .07);
+      banner(isListenMode() ? 'LISTENING PERFECT' : learning.enabled ? 'WORDS COLLECTED' : 'ROUND CLEAR', bonus ? `+${bonus} TIME BONUS` : state.round === 2 ? 'LESSON COMPLETE' : 'NEXT ROOFTOP TRIAL', 2.8); tone(520, .2, .07);
+    } else if (isListenMode()) {
+      setTimeout(() => { if (state.mode === 'playing' && isListenMode() && !state.transitioning && !state.promptTarget) chooseListenPrompt(); }, 260);
     }
   } else {
     $('hitNotice').textContent = nearest?.object.userData.isPatrolCover ? 'COVER BLOCKED · WAIT FOR AN OPENING' : nearest ? 'ADJUST YOUR AIM' : 'SHOT WIDE';
@@ -277,6 +363,7 @@ function nearestTarget() {
 }
 function hunt() {
   if (state.mode !== 'playing' || state.transitioning) return;
+  if (isListenMode()) { speakPrompt(); return; }
   const t = nearestTarget(); if (!t) return;
   aimTween = { target: t, time: .65 }; state.guideTime = 4;
   if (learning.enabled && t.lessonItem) learning.preview(t.lessonItem);
@@ -305,28 +392,33 @@ function syncDifficultyUI() {
   $('difficultySettingHint').textContent = pending
     ? `Next run: ${hard ? 'Hard walking patrols' : 'Relaxed'}. Restart from the pause menu to switch.`
     : 'Hard uses walking patrols, a round timer and no aim assist. Difficulty changes apply to your next run.';
-  $('paceLabel').textContent = hard ? 'HARD · TIMED PATROLS' : settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
-  const best = readBest(settings.difficulty);
+  $('paceLabel').textContent = settings.playStyle === 'listen' ? (hard ? 'LISTEN & FIND · HARD' : 'LISTEN & FIND · SUDDEN DEATH') : hard ? 'HARD · TIMED PATROLS' : settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
+  const best = readBest(settings.difficulty, settings.playStyle);
   $('bestIntro').textContent = best ? best.toLocaleString() : '—';
 }
 function setDifficulty(value) {
   settings.difficulty = value === 'hard' ? 'hard' : 'relaxed';
   save('longshot.settings.v1', settings);
   if (state.mode === 'menu' && world) {
-    state.difficulty = settings.difficulty; state.best = readBest(state.difficulty); state.round = 0;
+    state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.best = readBest(state.difficulty, state.playStyle); state.round = 0;
     loadTargets(isHard(), isHard() ? hardRounds[0].pads : [0, 1, 2, 3, 4, 5, 6, 7, 8]);
   }
   syncDifficultyUI();
 }
 function syncLearning() {
   if (!learning) return;
-  $('classicMode').classList.toggle('active', !learning.enabled); $('classicMode').setAttribute('aria-pressed', String(!learning.enabled));
-  $('learningMode').classList.toggle('active', learning.enabled); $('learningMode').setAttribute('aria-pressed', String(learning.enabled));
-  $('learningSetting').checked = learning.enabled; $('learningBar').hidden = !learning.enabled; $('learningSettings').hidden = !learning.enabled;
+  const style = settings.playStyle;
+  $('classicMode').classList.toggle('active', style === 'classic'); $('classicMode').setAttribute('aria-pressed', String(style === 'classic'));
+  $('learningMode').classList.toggle('active', style === 'learn'); $('learningMode').setAttribute('aria-pressed', String(style === 'learn'));
+  $('listenMode').classList.toggle('active', style === 'listen'); $('listenMode').setAttribute('aria-pressed', String(style === 'listen'));
+  $('learningSetting').checked = learning.enabled; $('learningBar').hidden = !learning.enabled || style === 'listen'; $('listenBar').hidden = !learning.enabled || style !== 'listen'; $('learningSettings').hidden = !learning.enabled;
   $('repeatSetting').checked = learning.repeatEnabled;
   $('wordTranslation').hidden = !settings.showTranslations;
   $('sentenceBtn').hidden = !currentWord?.sentence;
-  $('startBtn').firstElementChild.textContent = learning.enabled ? 'PLAY & LEARN' : 'ENTER THE RANGE';
+  $('startBtn').firstElementChild.textContent = style === 'listen' ? 'LISTEN & FIND' : learning.enabled ? 'PLAY & LEARN' : 'ENTER THE RANGE';
+  $('huntBtn').querySelector('b').textContent = style === 'listen' ? 'HEAR' : 'FIND';
+  $('huntBtn').setAttribute('aria-label', style === 'listen' ? 'Replay target word' : 'Find next target');
+  $('huntBtn').title = style === 'listen' ? 'Replay target word (H)' : 'Find target (H)';
   syncDifficultyUI();
   const languageSelect = $('languageSelect'), code = learning.languages.learningLanguage;
   for (const option of languageSelect.querySelectorAll('option[data-imported]')) if (option.value !== code) option.remove();
@@ -347,7 +439,21 @@ function syncLearning() {
     currentWord = null; $('wordText').textContent = 'Hit a target to learn'; $('wordTranslation').textContent = '';
   }
 }
-function setLearning(enabled) { unlockAudio(); learning.setEnabled(enabled); syncLearning(); assignTargetLessons(); if (state.mode === 'playing' && enabled) learning.preview(nearestTarget()?.lessonItem || 0); }
+function setPlayStyle(value) {
+  settings.playStyle = ['learn', 'listen', 'classic'].includes(value) ? value : 'learn';
+  unlockAudio();
+  learning.setEnabled(settings.playStyle !== 'classic');
+  save('longshot.settings.v1', settings);
+  if (state.mode === 'menu') {
+    state.playStyle = settings.playStyle;
+    state.best = readBest(settings.difficulty, settings.playStyle);
+  }
+  syncLearning(); assignTargetLessons();
+}
+function setLearning(enabled) {
+  if (!enabled) setPlayStyle('classic');
+  else setPlayStyle(settings.playStyle === 'listen' ? 'listen' : 'learn');
+}
 function settingsChanged() {
   settings.sensitivity = Number($('sensitivity').value); settings.sound = $('soundSetting').checked;
   settings.assist = $('assistSetting').checked; settings.hints = $('hintsSetting').checked;
@@ -366,7 +472,10 @@ function bindUI() {
   $('startBtn').addEventListener('click', startGame);
   $('difficultySelect').addEventListener('change', e => setDifficulty(e.target.value));
   $('difficultySetting').addEventListener('change', e => setDifficulty(e.target.value));
-  $('classicMode').addEventListener('click', () => setLearning(false)); $('learningMode').addEventListener('click', () => setLearning(true));
+  $('classicMode').addEventListener('click', () => setPlayStyle('classic'));
+  $('learningMode').addEventListener('click', () => setPlayStyle('learn'));
+  $('listenMode').addEventListener('click', () => setPlayStyle('listen'));
+  $('listenPromptBtn').addEventListener('click', speakPrompt);
   $('settingsBtn').addEventListener('click', () => openDialog('settingsDialog'));
   $('pauseSettings').addEventListener('click', () => openDialog('settingsDialog'));
   $('howBtn').addEventListener('click', () => openDialog('helpDialog'));
@@ -433,7 +542,15 @@ function bindUI() {
     if (pointer.id !== e.pointerId || state.mode !== 'playing') return;
     const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y; pointer.total += Math.hypot(dx, dy); aim(dx, dy); pointer.x = e.clientX; pointer.y = e.clientY;
   });
-  canvas.addEventListener('pointerup', e => { if (pointer.id === e.pointerId) { if (e.pointerType === 'mouse' && pointer.total < 5 && pointer.button === 0) fire(); pointer.id = null; } });
+  canvas.addEventListener('pointerup', e => {
+    if (pointer.id === e.pointerId) {
+      if (pointer.total < 7 && pointer.button === 0) {
+        if (isListenMode()) listenToTargetAt(e.clientX, e.clientY);
+        else if (e.pointerType === 'mouse') fire();
+      }
+      pointer.id = null;
+    }
+  });
   canvas.addEventListener('pointercancel', () => { pointer.id = null; });
   canvas.addEventListener('lostpointercapture', () => { pointer.id = null; });
   canvas.addEventListener('wheel', e => { if (state.mode === 'playing' && state.scoped) { e.preventDefault(); zoomScope(); } }, { passive: false });
@@ -485,6 +602,7 @@ function updateEffects(dt) {
 }
 function updateGuide(dt) {
   state.guideTime = Math.max(0, state.guideTime - dt);
+  if (isListenMode()) { $('targetGuide').hidden = true; return; }
   const t = nearestTarget();
   if (!t || state.guideTime <= 0 || state.scoped) { $('targetGuide').hidden = true; return; }
   targetPoint.copy(t.group.position); targetPoint.y += t.guideHeight ?? 5.3; targetPoint.project(camera);
@@ -566,7 +684,7 @@ async function init() {
     window.__gameReady = true; $('startBtn').disabled = false; $('loader').style.opacity = '0'; setTimeout(() => $('loader').hidden = true, 650);
     requestAnimationFrame(frame);
     // Read-only QA state keeps validation separate from gameplay controls.
-    window.longshotStatus = () => ({ mode: state.mode, difficulty: state.difficulty, nextDifficulty: settings.difficulty, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), timed: isTimed(), learning: learning.enabled, words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving, kind: t.kind || 'training' })) });
+    window.longshotStatus = () => ({ mode: state.mode, difficulty: state.difficulty, playStyle: state.playStyle, nextDifficulty: settings.difficulty, nextPlayStyle: settings.playStyle, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), timed: isTimed(), learning: learning.enabled, listenPromptReady: Boolean(state.promptTarget), words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving, kind: t.kind || 'training' })) });
   } catch (error) {
     console.error(error); $('loader').hidden = true; $('fatal').hidden = false;
     $('fatalText').textContent = 'This game needs WebGL graphics. Try reopening it in an up-to-date Safari or Chrome browser. ' + (error?.message || '');

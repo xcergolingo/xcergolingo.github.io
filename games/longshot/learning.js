@@ -310,11 +310,20 @@ export function createLearning({ onWord = () => {}, onStatus = () => {}, onChang
     return receivePayload({ ...pair(), words });
   }
 
-  function onHit(value) {
+  function markReviewed(value) {
     if (!enabled || destroyed || !items.length) return null;
     const item = resolveItem(value, true); if (!item) return null;
-    select(item); reviewed.set(keyFor(item), clone(item)); persist(); emit(item); begin(item);
+    select(item); reviewed.set(keyFor(item), clone(item)); persist(); emit(item);
     return clone(item);
+  }
+  function onHit(value) {
+    const item = markReviewed(value); if (!item) return null;
+    begin(item); return clone(item);
+  }
+  function speakOnly(value) {
+    if (!enabled || destroyed || !items.length) return null;
+    const item = resolveItem(value); if (!item) return null;
+    select(item); begin(item); return clone(item);
   }
   function preview(value) {
     if (!enabled || destroyed) return null;
@@ -421,7 +430,7 @@ export function createLearning({ onWord = () => {}, onStatus = () => {}, onChang
     get reviewedCount() { return reviewed.size; },
     get currentItem() { return clone(selectedItem); },
     getItems: () => items.map(clone), getItem,
-    setEnabled, setRepeat, setLanguages, importText, receivePayload, onHit, preview, replay, replayItem, speakSentence, stop, resume, exportWords,
+    setEnabled, setRepeat, setLanguages, importText, receivePayload, markReviewed, onHit, speakOnly, preview, replay, replayItem, speakSentence, stop, resume, exportWords,
     dispose() {
       stop(); destroyed = true; window.removeEventListener('message', messageHandler);
       for (const [name, previous] of previousHooks) if (window[name] === receiver) { if (previous === undefined) delete window[name]; else window[name] = previous; }
