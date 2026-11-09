@@ -38,6 +38,46 @@
   #mobileHint{display:none;position:fixed;bottom:12px;left:12px;right:12px;z-index:9;text-align:center;font:12px Arial,sans-serif;color:#ffeece;background:#101414de;padding:10px;border:1px solid #aa895a}
   @media(max-width:800px){.menu{grid-template-columns:1fr;gap:16px;max-width:500px}.menu .intro{display:none}.panel{padding:18px}.controlGrid{gap:8px}.weapon{width:93px;padding:7px 8px;height:75px}.weapon.active{height:81px}.weapon .glyph{font-size:16px;margin:4px 0}.weapon .label{font-size:9px}#info{width:155px;left:8px;top:7px}#timer{top:8px;left:auto;right:8px;transform:none}#timer .time{font-size:23px}#minimapWrap{width:112px;height:112px;bottom:10px;left:8px}#minimap{width:108px;height:108px}#health{bottom:128px;left:8px;width:155px;padding:7px}#weapons{bottom:10px}#feed{right:8px;top:86px;width:210px}#speed{right:8px;bottom:103px}#speed .value{font-size:27px}#prompt{bottom:95px}}
   @media(pointer:coarse){#mobileHint{display:block}#hud.active~#mobileHint{display:block}}
+  /* Real touch controls: separate aim surface, analog movement and primary actions. */
+  #touchControls{display:none;position:absolute;inset:0;pointer-events:none;z-index:7}
+  #touchLook{position:absolute;top:0;right:0;width:61%;height:100%;pointer-events:auto;touch-action:none}
+  #touchStick{position:absolute;width:126px;height:126px;left:21px;bottom:calc(21px + env(safe-area-inset-bottom));border:2px solid #f5d1a478;border-radius:50%;background:radial-gradient(circle,#9daea21e 0%,#1a2925a3 70%);box-shadow:0 0 25px #0007,inset 0 0 25px #0005;pointer-events:auto;touch-action:none}
+  #touchStick:before{content:'';position:absolute;inset:25px;border:1px dashed #f9ce9c55;border-radius:50%}
+  #stickKnob{position:absolute;left:50%;top:50%;width:53px;height:53px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #ffe1b0bb;background:radial-gradient(circle at 35% 25%,#b1d2c3a3,#4b6b61dd 77%);box-shadow:0 3px 15px #0009;will-change:transform}
+  .touchBtn{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(135deg,#222b2add,#141f20e8);color:#fff1d6;border:1.5px solid #efc58f9f;border-radius:50%;font:900 12px/1 Impact,'Arial Narrow',sans-serif;letter-spacing:1px;box-shadow:0 5px 18px #000b;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;text-shadow:0 1px #000;z-index:2}
+  .touchBtn small{font:700 8px 'Courier New',monospace;color:#e7b987;margin-top:3px}.touchBtn:active,.touchBtn.pressed{background:#cb7d3d;color:#1c2526;transform:scale(.93)}
+  #touchFire{right:calc(16px + env(safe-area-inset-right));bottom:calc(21px + env(safe-area-inset-bottom));width:94px;height:94px;background:linear-gradient(145deg,#e8a15c,#b95035);color:#231d1b;border:3px solid #ffdcaa;font-size:21px;text-shadow:none}
+  #touchFire small{color:#382217;font-size:9px}#touchFire:active,#touchFire.pressed{background:#ffe1a5;box-shadow:0 0 30px #ffce785c}
+  #touchReload{right:calc(26px + env(safe-area-inset-right));bottom:calc(129px + env(safe-area-inset-bottom));width:54px;height:54px}
+  #touchJump{right:calc(87px + env(safe-area-inset-right));bottom:calc(112px + env(safe-area-inset-bottom));width:54px;height:54px}
+  #touchSwap{right:calc(119px + env(safe-area-inset-right));bottom:calc(29px + env(safe-area-inset-bottom));width:55px;height:55px}
+  #touchSprint{left:53px;bottom:calc(159px + env(safe-area-inset-bottom));width:59px;height:48px;border-radius:14px;font-size:11px}
+  #touchBike{right:calc(18px + env(safe-area-inset-right));bottom:calc(204px + env(safe-area-inset-bottom));width:77px;height:44px;border-radius:13px;display:none}
+  #touchPause{right:calc(9px + env(safe-area-inset-right));top:calc(7px + env(safe-area-inset-top));width:38px;height:38px;border-radius:9px;font-size:20px}
+  .touchInstructions{display:none;font:12px/1.7 'Courier New',monospace;color:#e1c6a3;margin:14px 0 19px;padding:11px;border-left:3px solid #efaf6b;background:#facb8610}
+  body.touch-device #mobileHint{display:none!important}
+  body.touch-device #hud.active #touchControls{display:block}
+  @media(pointer:coarse){
+    .menu{width:min(450px,calc(100% - 25px));display:block;max-height:calc(100dvh - 45px);overflow:auto}.menu .intro{display:none}.panel{padding:16px 17px}
+    .panelTitle{font-size:23px;margin-top:14px}.panelHead{padding-bottom:10px}.controlGrid{display:none}.touchInstructions{display:block}
+    #info{top:calc(8px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));width:146px;padding:7px 9px}#info .name{font-size:17px}
+    #timer{top:calc(9px + env(safe-area-inset-top));right:54px;left:auto;transform:none}#timer .time{font-size:22px}#timer .caption{font-size:7px;letter-spacing:0}
+    #target{top:43%;width:175px}#target .line{font-size:8px}
+    #minimapWrap{left:calc(8px + env(safe-area-inset-left));top:calc(87px + env(safe-area-inset-top));bottom:auto;width:94px;height:94px}#minimap{width:90px;height:90px}
+    #health{top:calc(189px + env(safe-area-inset-top));bottom:auto;left:calc(8px + env(safe-area-inset-left));width:137px;padding:6px 8px}#health .row{font-size:10px;margin-bottom:3px}#health .track{height:7px;margin-bottom:4px}
+    #weapons{top:calc(84px + env(safe-area-inset-top));bottom:auto;right:calc(7px + env(safe-area-inset-right));left:auto;transform:none;gap:3px;z-index:8;pointer-events:auto}
+    .weapon{width:68px;height:56px;padding:5px 6px}.weapon.active{height:60px}.weapon .glyph{font-size:12px;margin:4px 0}.weapon .label{font-size:8px}.weapon .ammo{font-size:9px;margin-top:3px}.weapon .index{font-size:8px;right:5px;top:4px}
+    #speed{right:calc(10px + env(safe-area-inset-right));top:calc(159px + env(safe-area-inset-top));bottom:auto}#speed .value{font-size:25px}#speed .sub{font-size:8px}
+    #feed{display:none}#prompt{display:none!important}#crosshair{z-index:1}
+  }
+  @media(pointer:coarse) and (max-height:550px){
+    #touchStick{width:103px;height:103px;left:22px;bottom:calc(13px + env(safe-area-inset-bottom))}#stickKnob{width:46px;height:46px}
+    #touchFire{width:81px;height:81px;bottom:calc(14px + env(safe-area-inset-bottom))}#touchReload{bottom:calc(103px + env(safe-area-inset-bottom));right:20px}
+    #touchJump{bottom:calc(97px + env(safe-area-inset-bottom));right:82px}#touchSwap{right:109px;bottom:calc(15px + env(safe-area-inset-bottom))}
+    #touchSprint{left:48px;bottom:calc(120px + env(safe-area-inset-bottom))}#touchBike{bottom:calc(162px + env(safe-area-inset-bottom))}
+    #minimapWrap{top:calc(76px + env(safe-area-inset-top));width:78px;height:78px}#minimap{width:74px;height:74px}
+    #health{top:calc(158px + env(safe-area-inset-top))}#weapons{top:calc(69px + env(safe-area-inset-top))}
+  }
 </style>
 </head>
 <body>
@@ -59,16 +99,28 @@
   </div>
   <div id="speed"><div class="value"><span id="speedValue" style="font:inherit;margin:0;color:inherit">00</span><span>KM/H</span></div><div class="sub micro" id="modeValue">ON FOOT</div></div>
   <div id="centerNotice"></div><div id="prompt"></div><div id="tags"></div>
+  <div id="touchControls" aria-label="Mobile game controls">
+    <div id="touchLook" aria-label="Swipe here to aim"></div>
+    <div id="touchStick" aria-label="Movement joystick"><div id="stickKnob"></div></div>
+    <button id="touchFire" class="touchBtn" aria-label="Fire weapon">FIRE<small>HOLD</small></button>
+    <button id="touchReload" class="touchBtn" aria-label="Reload weapon">R<small>RELOAD</small></button>
+    <button id="touchJump" class="touchBtn" aria-label="Jump">↑<small>JUMP</small></button>
+    <button id="touchSwap" class="touchBtn" aria-label="Switch weapon">↻<small>GUN</small></button>
+    <button id="touchSprint" class="touchBtn" aria-label="Toggle sprint">RUN<small>OFF</small></button>
+    <button id="touchBike" class="touchBtn" aria-label="Mount or dismount bike">RIDE</button>
+    <button id="touchPause" class="touchBtn" aria-label="Pause game">Ⅱ</button>
+  </div>
 </div>
 <div id="overlay">
   <div class="menu"><div class="intro"><div class="wordmark"><span class="mark"><span>✳</span></span> BLACKSITE / SECTOR 07</div><h1 class="bigtitle">DUST<em>LINE.</em></h1><div class="lines"></div><div class="micro">THE INDUSTRIAL ARENA</div><div class="slogan">STEEL IN THE AIR. SAND IN YOUR TEETH.<br>ONE ARENA. NO SECOND CHANCES.<br><span style="color:#f9b46c">LOCAL AI COMBAT / FULL 3D / NO ASSETS.</span></div></div>
     <div class="panel"><div class="panelHead"><span>ARENA CONTROL // 07</span><b>● SERVER SIMULATION</b></div><div class="panelTitle" id="menuTitle">GET READY, OPERATOR.</div><div style="font-size:12px;color:#cbbba3;line-height:1.5" id="menuDesc">Eight enemy operators are waiting. Fight through the dust, find cover, and survive five minutes.</div>
       <div class="controlGrid"><div class="control"><kbd>W A S D + SHIFT</kbd><span>Move / sprint</span></div><div class="control"><kbd>MOUSE + LEFT CLICK</kbd><span>Aim / fire</span></div><div class="control"><kbd>SPACE / R</kbd><span>Jump / reload</span></div><div class="control"><kbd>1 2 3 / SCROLL</kbd><span>Switch weapons</span></div><div class="control"><kbd>E NEAR BIKE</kbd><span>Mount / dismount</span></div><div class="control"><kbd>ESC</kbd><span>Pause / unlock mouse</span></div></div>
-      <button id="play">DEPLOY INTO ARENA ↗</button><div class="options"><button class="option" id="quality">QUALITY: HIGH</button><button class="option" id="sound">AUDIO: ON</button></div><div class="footnote">DESKTOP + MOUSE RECOMMENDED · PROCEDURAL WORLD · SINGLE-PLAYER BOTS</div>
+      <div class="touchInstructions">◉ LEFT THUMB — move with joystick<br>◉ RIGHT SIDE — swipe to aim<br>◉ HOLD FIRE — shoot · R — reload<br>◉ ↻ — switch weapon · ↑ — jump<br>◉ RUN — sprint · RIDE — dirt bike</div>
+      <button id="play">DEPLOY INTO ARENA ↗</button><div class="options"><button class="option" id="quality">QUALITY: HIGH</button><button class="option" id="sound">AUDIO: ON</button></div><div class="footnote">TOUCH-READY / DESKTOP SUPPORTED · PROCEDURAL WORLD · AI BOTS</div>
     </div>
   </div>
 </div>
-<div id="mobileHint">Desktop browser with a mouse and keyboard is recommended for FPS controls.</div>
+<div id="mobileHint">Use the left joystick to move and swipe the right side to aim.</div>
 <script id="three-source" type="text/plain">
 /**
  * @license
@@ -54680,6 +54732,8 @@ class PointerLockControls extends THREE.EventDispatcher {
 THREE.PointerLockControls=PointerLockControls;
 
 const $=id=>document.getElementById(id);
+const isTouchDevice=(navigator.maxTouchPoints||0)>0||window.matchMedia('(pointer:coarse)').matches;
+document.body.classList.toggle('touch-device',isTouchDevice);
 const WIDTH=96,DEPTH=76,HALFW=WIDTH/2,HALFD=DEPTH/2;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x54412e);scene.fog=new THREE.FogExp2(0x97714a,.0095);
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.09,150);
@@ -54976,7 +55030,7 @@ function respawnBot(bot){const s=randomSpawn(camera.position.x,camera.position.z
 function worldToScreen(p){tempV2.copy(p).project(camera);if(tempV2.z< -1||tempV2.z>1)return null;
   return{x:(tempV2.x*.5+.5)*innerWidth,y:(-tempV2.y*.5+.5)*innerHeight};}
 function botSpeech(bot,message){if(!bot.alive)return;const bubble=bot.tag.querySelector('.chat');bubble.textContent=message;bubble.hidden=false;bot.chatUntil=performance.now()+1450;}
-function updateBotTags(){for(const b of bots){const tag=b.tag;if(!b.alive||!controls.isLocked){tag.style.display='none';continue;}
+function updateBotTags(){for(const b of bots){const tag=b.tag;if(!b.alive||!inputActive()){tag.style.display='none';continue;}
   const p=new THREE.Vector3(b.root.position.x,b.root.position.y+2.85,b.root.position.z),s=worldToScreen(p);
   const dx=b.root.position.x-camera.position.x,dz=b.root.position.z-camera.position.z;
   if(!s||dx*dx+dz*dz>2600){tag.style.display='none';continue;}
@@ -55021,6 +55075,14 @@ let shooting=false,pressedShoot=false,playerKills=0,playerDeaths=0,playerHP=100,
 let matchStarted=false,matchEnded=false,matchTime=300,respawning=0,highQuality=true,soundEnabled=true,riding=false;
 let verticalVel=0,jumpHeight=0,walkingAmount=0,sprintFactor=1,playerMoving=false,noticeUntil=0,modeSpeed=0;
 const keys=Object.create(null);const playerRadius=.68;
+let touchActive=false,mobileSprint=false;
+const touchMove={x:0,y:0};
+let stickPointer=null,lookPointer=null;
+const inputActive=()=>controls.isLocked||touchActive;
+if(isTouchDevice){
+  highQuality=false;renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.shadowMap.enabled=false;
+  coneShader.uniforms.uOpacity.value=.72;$('quality').textContent='QUALITY: LOW';
+}
 function updateWeaponUI(){for(let i=0;i<3;i++){
   const w=weapons[i],el=document.querySelector(`.weapon[data-weapon="${i}"]`);el.classList.toggle('active',i===selectedWeapon);
   $(`ammo${i}`).textContent=w.reloading>0?'RELOADING...':`${w.mag} / ${w.stock}`;
@@ -55073,7 +55135,7 @@ function explode(p,radius=5,damage=78){
   burst(p,56,12,false);burst(p,24,3,true);sfx('explosion');
   for(const bot of bots){if(!bot.alive)continue;const dist=bot.root.position.distanceTo(p);
     if(dist<radius+1.5)damageBot(bot,damage*(1-dist/(radius+2)),false,bot.root.position.clone().add(new THREE.Vector3(0,1.5,0)),true);}
-  if(controls.isLocked&&respawning<=0){const dist=camera.position.distanceTo(p);if(dist<radius)damagePlayer((1-dist/radius)*42);}
+  if(inputActive()&&respawning<=0){const dist=camera.position.distanceTo(p);if(dist<radius)damagePlayer((1-dist/radius)*42);}
 }
 function updateVFX(dt,t){coneShader.uniforms.uTime.value=t;dustPoints.material.uniforms.uTime.value=t;
   for(const tr of tracerPool)if(tr.life>0){tr.life-=dt;tr.o.material.opacity=clamp(tr.life/tr.initial,0,1)*.82;if(tr.life<=0)tr.o.visible=false;}
@@ -55115,7 +55177,7 @@ function nearestCover(pos){let best=null,score=Infinity;
   return best||randomSpawn(pos.x,pos.z,3);
 }
 
-function shoot(){if(!controls.isLocked||!matchStarted||matchEnded||respawning>0)return;
+function shoot(){if(!inputActive()||!matchStarted||matchEnded||respawning>0)return;
   const w=weapons[selectedWeapon];if(w.reloading>0||w.cooldown>0)return;
   if(w.mag<=0){reloadWeapon();sfx('dry');return;}
   w.mag--;w.cooldown=w.rate;recoil+=w.recoil;gunKick+=w.recoil*1.3;
@@ -55141,7 +55203,7 @@ function shoot(){if(!controls.isLocked||!matchStarted||matchEnded||respawning>0)
     if(i===0||w.pellets===1)tracer(start,end,w.color,.13);
     else if(i%3===0)tracer(start,end,0xffd4a2,.075);
   }
-  if(w.mag===0&&w.stock>0)setTimeout(()=>{if(controls.isLocked&&selectedWeapon===weapons.indexOf(w))reloadWeapon();},180);
+  if(w.mag===0&&w.stock>0)setTimeout(()=>{if(inputActive()&&selectedWeapon===weapons.indexOf(w))reloadWeapon();},180);
   updateWeaponUI();
 }
 
@@ -55211,11 +55273,11 @@ function toggleBike(forceOff=false){if(!forceOff&&!riding&&Math.hypot(camera.pos
 }
 function updatePlayer(dt,time){if(respawning>0){respawning-=dt;if(respawning<=0){resetPlayer();notice('BACK IN THE FIGHT',1.5);}return;}
   let v=0;if(riding){
-    const forward=keys.KeyW||keys.ArrowUp,reverse=keys.KeyS||keys.ArrowDown;
+    const forward=keys.KeyW||keys.ArrowUp||(touchActive&&touchMove.y<-.15),reverse=keys.KeyS||keys.ArrowDown||(touchActive&&touchMove.y>.15);
     const accel=forward?18:reverse?-24:-Math.sign(bike.speed)*9;
     bike.speed=clamp(bike.speed+accel*dt,-5,19);
     if(!forward&&!reverse&&Math.abs(bike.speed)<.3)bike.speed=0;
-    let steering=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0);
+    let steering=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0)-(touchActive?touchMove.x:0);
     bike.heading+=steering*dt*1.55*clamp(Math.abs(bike.speed)/10,.18,1.1)*(bike.speed>=0?1:-1);
     const dx=-Math.sin(bike.heading)*bike.speed*dt,dz=-Math.cos(bike.heading)*bike.speed*dt;
     const didMove=slideMove(camera.position,dx,dz,.86);
@@ -55230,9 +55292,10 @@ function updatePlayer(dt,time){if(respawning>0){respawning-=dt;if(respawning<=0)
     if(keys.KeyS||keys.ArrowDown)desired.sub(f);
     if(keys.KeyD||keys.ArrowRight)desired.add(right);
     if(keys.KeyA||keys.ArrowLeft)desired.sub(right);
-    playerMoving=desired.lengthSq()>.1;desired.normalize();
-    sprintFactor=(keys.ShiftLeft||keys.ShiftRight)?1.64:1;
-    v=(playerMoving?5.1*sprintFactor:0);walkingAmount=v;
+    if(touchActive){desired.addScaledVector(f,-touchMove.y);desired.addScaledVector(right,touchMove.x);}
+    const moveStrength=Math.min(1,desired.length());playerMoving=moveStrength>.08;desired.normalize();
+    sprintFactor=(keys.ShiftLeft||keys.ShiftRight||mobileSprint)?1.64:1;
+    v=(playerMoving?5.1*sprintFactor*moveStrength:0);walkingAmount=v;
     slideMove(camera.position,desired.x*v*dt,desired.z*v*dt,playerRadius);
     verticalVel-=20.3*dt;jumpHeight+=verticalVel*dt;
     if(jumpHeight<0){jumpHeight=0;verticalVel=0;}
@@ -55244,6 +55307,7 @@ function updatePlayer(dt,time){if(respawning>0){respawning-=dt;if(respawning<=0)
   $('speedValue').textContent=String(Math.round(modeSpeed)).padStart(2,'0');$('modeValue').textContent=riding?'DIRT BIKE / E TO EXIT':'ON FOOT / E AT BIKE';
   const close=!riding&&Math.hypot(camera.position.x-bike.group.position.x,camera.position.z-bike.group.position.z)<3.7;
   $('prompt').style.display=close||riding?'block':'none';$('prompt').textContent=riding?'[ E ] DISMOUNT BIKE  •  W/S THROTTLE  A/D STEER':'[ E ] MOUNT DIRT BIKE';
+  if(isTouchDevice){$('touchBike').style.display=close||riding?'flex':'none';$('touchBike').textContent=riding?'EXIT':'RIDE';}
 }
 
 function botFire(bot,dist,canSee){bot.fireCooldown=rand(.88,1.67);bot.flash.visible=true;bot.shooting=.085;
@@ -55251,7 +55315,7 @@ function botFire(bot,dist,canSee){bot.fireCooldown=rand(.88,1.67);bot.flash.visi
   const miss=dist>18?1.4:1;aim.x+=rand(-miss,miss);aim.z+=rand(-miss,miss);
   tracer(muzzle,aim,0xff6141,.18);if(rnd()<.14)botSpeech(bot,choice(['Catch!','Pow! Pow!','Stay down!','Incoming!','Got you!']));
   const chance=clamp(.82-dist*.022,.18,.72)*(playerMoving?.74:1)*(riding?.57:1);
-  if(canSee&&rnd()<chance)damagePlayer(rand(6,12));
+  if(canSee&&rnd()<chance*(isTouchDevice ? .62 : 1))damagePlayer(rand(6,12));
 }
 function updateAI(dt,time){for(const b of bots){if(!b.alive){b.respawn-=dt;if(b.respawn<=0)respawnBot(b);continue;}
   if(b.shooting>0){b.shooting-=dt;if(b.shooting<=0)b.flash.visible=false;}
@@ -55325,34 +55389,38 @@ function resetMatch(){matchTime=300;playerKills=0;playerDeaths=0;matchEnded=fals
   for(const g of scene.children)if(g.userData.barrel){g.visible=true;g.userData.barrel.alive=true;g.userData.barrel.collider.enabled=true;}
   resetPlayer();for(const bot of bots)respawnBot(bot);selectWeapon(0);updateWeaponUI();
 }
-function endMatch(){matchEnded=true;controls.unlock();shooting=false;
+function endMatch(){matchEnded=true;shooting=false;
+  if(isTouchDevice){touchActive=false;$('overlay').classList.remove('hidden');}
+  else controls.unlock();
   $('menuTitle').textContent='MATCH COMPLETE.';
   $('menuDesc').textContent=`${playerKills} eliminations · ${playerDeaths} deaths. The next five-minute showdown is ready.`;
   $('play').textContent='START NEW MATCH ↗';notice('MATCH COMPLETE',3);
 }
 function openPause(){if(matchEnded||!matchStarted)return;
-  $('menuTitle').textContent='TACTICAL PAUSE.';$('menuDesc').textContent='Your arena match is paused. Lock the mouse again to resume the fight.';
+  $('menuTitle').textContent='TACTICAL PAUSE.';$('menuDesc').textContent=isTouchDevice?'Your match is paused. Tap RESUME to continue using touch controls.':'Your arena match is paused. Lock the mouse again to resume the fight.';
   $('play').textContent='RESUME OPERATIONS ↗';}
-controls.addEventListener('lock',()=>{
+function enterArena(touch=false){
   if(!matchStarted||matchEnded){resetMatch();matchStarted=true;}
+  touchActive=touch;shooting=false;pressedShoot=false;
   $('overlay').classList.add('hidden');$('boot').classList.add('hidden');$('hud').classList.add('active');
   audioCtx?.resume?.();
-});
+}
+controls.addEventListener('lock',()=>enterArena(false));
 controls.addEventListener('unlock',()=>{
   shooting=false;pressedShoot=false;
   if(matchStarted&&!matchEnded)openPause();$('overlay').classList.remove('hidden');
 });
 controls.addEventListener('error',()=>{
-  $('menuDesc').textContent='Mouse lock was blocked. Please click DEPLOY again in a desktop browser.';
+  if(!isTouchDevice)$('menuDesc').textContent='Mouse lock was blocked. Click DEPLOY again or use a desktop browser that supports pointer lock.';
 });
-$('play').addEventListener('click',()=>{initAudio();controls.lock();});
+$('play').addEventListener('click',()=>{initAudio();if(isTouchDevice)enterArena(true);else controls.lock();});
 $('quality').addEventListener('click',()=>{highQuality=!highQuality;renderer.setPixelRatio(Math.min(devicePixelRatio,highQuality?1.65:1));
-  renderer.shadowMap.enabled=highQuality;coneShader.uniforms.uOpacity.value=highQuality?1:.35;
+  renderer.shadowMap.enabled=highQuality;coneShader.uniforms.uOpacity.value=highQuality?1:.72;
   dustPoints.visible=highQuality;$('quality').textContent='QUALITY: '+(highQuality?'HIGH':'LOW');});
 $('sound').addEventListener('click',()=>{soundEnabled=!soundEnabled;if(soundEnabled)initAudio();$('sound').textContent='AUDIO: '+(soundEnabled?'ON':'OFF');});
 window.addEventListener('keydown',e=>{
   keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
-  if(!controls.isLocked||matchEnded)return;
+  if(!inputActive()||matchEnded)return;
   if(e.code==='KeyR'&&!e.repeat)reloadWeapon();
   if(e.code==='Digit1')selectWeapon(0);if(e.code==='Digit2')selectWeapon(1);if(e.code==='Digit3')selectWeapon(2);
   if(e.code==='KeyE'&&!e.repeat)toggleBike();
@@ -55366,6 +55434,59 @@ document.addEventListener('wheel',e=>{if(!controls.isLocked)return;e.preventDefa
 document.addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
+function pauseTouch(){if(!touchActive)return;
+  touchActive=false;shooting=false;pressedShoot=false;touchMove.x=0;touchMove.y=0;stickPointer=null;lookPointer=null;
+  $('stickKnob').style.transform='translate(-50%,-50%)';$('touchFire').classList.remove('pressed');
+  document.querySelectorAll('.touchBtn').forEach(b=>b.classList.remove('pressed'));
+  openPause();$('overlay').classList.remove('hidden');
+}
+// No pointer lock is requested on iOS. Both fingers can move independently:
+// left controls walking and right controls camera look/fire.
+if(isTouchDevice){
+  dustPoints.visible=false;
+  let lookX=0,lookY=0;
+  const stick=$('touchStick'),knob=$('stickKnob');
+  function moveStick(e){const rect=stick.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+    let dx=e.clientX-cx,dy=e.clientY-cy;const range=rect.width*.34,d=Math.hypot(dx,dy);
+    if(d>range){dx*=range/d;dy*=range/d;}
+    touchMove.x=clamp(dx/range,-1,1);touchMove.y=clamp(dy/range,-1,1);
+    knob.style.transform=`translate(-50%,-50%) translate(${dx}px,${dy}px)`;
+  }
+  stick.addEventListener('pointerdown',e=>{if(!touchActive||stickPointer!==null)return;
+    e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e);});
+  stick.addEventListener('pointermove',e=>{if(e.pointerId!==stickPointer)return;e.preventDefault();moveStick(e);});
+  function stopStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;touchMove.x=0;touchMove.y=0;knob.style.transform='translate(-50%,-50%)';}
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(event,stopStick);
+  const look=$('touchLook');
+  look.addEventListener('pointerdown',e=>{if(!touchActive||lookPointer!==null)return;
+    e.preventDefault();lookPointer=e.pointerId;lookX=e.clientX;lookY=e.clientY;look.setPointerCapture(e.pointerId);});
+  look.addEventListener('pointermove',e=>{if(e.pointerId!==lookPointer||!touchActive)return;
+    e.preventDefault();const dx=clamp(e.clientX-lookX,-100,100),dy=clamp(e.clientY-lookY,-100,100);
+    lookX=e.clientX;lookY=e.clientY;
+    camera.rotation.y-=dx*.0038;camera.rotation.x=clamp(camera.rotation.x-dy*.0037,-1.45,1.45);
+  });
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])look.addEventListener(event,e=>{if(e.pointerId===lookPointer)lookPointer=null;});
+  const fire=$('touchFire');
+  fire.addEventListener('pointerdown',e=>{if(!touchActive)return;e.preventDefault();e.stopPropagation();fire.setPointerCapture(e.pointerId);
+    shooting=true;pressedShoot=false;fire.classList.add('pressed');shoot();pressedShoot=true;});
+  function stopFire(){shooting=false;pressedShoot=false;fire.classList.remove('pressed');}
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])fire.addEventListener(event,stopFire);
+  function mobileButton(id,fn){const el=$(id);
+    el.addEventListener('pointerdown',e=>{if(!touchActive)return;e.preventDefault();e.stopPropagation();el.classList.add('pressed');fn();});
+    for(const event of ['pointerup','pointercancel','pointerleave'])el.addEventListener(event,()=>el.classList.remove('pressed'));
+  }
+  mobileButton('touchReload',()=>reloadWeapon());
+  mobileButton('touchJump',()=>{if(!riding&&jumpHeight<=.005&&respawning<=0){verticalVel=7.4;sfx('switch');}});
+  mobileButton('touchSwap',()=>selectWeapon((selectedWeapon+1)%3));
+  mobileButton('touchSprint',()=>{mobileSprint=!mobileSprint;
+    $('touchSprint').querySelector('small').textContent=mobileSprint?'ON':'OFF';$('touchSprint').style.borderColor=mobileSprint?'#a9f4eb':'#efc58f9f';});
+  mobileButton('touchBike',()=>toggleBike());
+  mobileButton('touchPause',()=>pauseTouch());
+  document.querySelectorAll('.weapon').forEach(el=>el.addEventListener('pointerdown',e=>{if(!touchActive)return;
+    e.preventDefault();e.stopPropagation();selectWeapon(Number(el.dataset.weapon));}));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseTouch();});
+}
+
 // Initial spectator camera shows off the arena before the player deploys.
 camera.position.set(26,7,32);camera.lookAt(0,5,-6);
 for(const b of bots)respawnBot(b);updateWeaponUI();drawMinimap();updateVitals();
@@ -55373,7 +55494,7 @@ let elapsed=0,lastUI=0;
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.045);elapsed+=dt;
   const anim=elapsed;updateVFX(dt,anim);for(const fan of fans)fan.rotation.y+=dt*2.5;
   if(!matchStarted){const a=anim*.065;camera.position.set(Math.sin(a)*28,7+Math.sin(anim*.17)*1.2,Math.cos(a)*30);camera.lookAt(0,5,-2);}
-  if(controls.isLocked&&!matchEnded){
+  if(inputActive()&&!matchEnded){
     matchTime-=dt;if(matchTime<=0){matchTime=0;endMatch();}
     else{
       updatePlayer(dt,anim);updateGuns(dt);updateAI(dt,anim);
