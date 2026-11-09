@@ -10,9 +10,10 @@ const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
 const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
-const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, difficulty: 'relaxed', playStyle: 'learn', showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
+const settings = { sensitivity: 1, sound: true, assist: true, hints: true, timed: false, difficulty: 'relaxed', playStyle: 'learn', listenLevel: 'challenge', showTargetWords: true, showTranslations: true, ...read('longshot.settings.v1', {}) };
 settings.difficulty = settings.difficulty === 'hard' ? 'hard' : 'relaxed';
 settings.playStyle = ['learn', 'listen', 'classic'].includes(settings.playStyle) ? settings.playStyle : 'learn';
+settings.listenLevel = settings.listenLevel === 'easy' ? 'easy' : 'challenge';
 const rounds = [
   { name: 'SIGHTING IN', count: 6, seconds: 100, moving: false, pads: [0, 1, 2, 3, 4, 5] },
   { name: 'ON THE MOVE', count: 8, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7] },
@@ -23,20 +24,22 @@ const hardRounds = [
   { name: 'QUICKER FOOTSTEPS', count: 10, seconds: 95, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
   { name: 'ROOFTOP PURSUIT', count: 12, seconds: 110, moving: true, pads: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
 ];
-const bestKey = (difficulty = settings.difficulty, playStyle = settings.playStyle) => playStyle === 'listen'
-  ? (difficulty === 'hard' ? 'longshot.best.listen.hard.v1' : 'longshot.best.listen.relaxed.v1')
+const bestKey = (difficulty = settings.difficulty, playStyle = settings.playStyle, listenLevel = settings.listenLevel) => playStyle === 'listen'
+  ? `longshot.best.listen.${listenLevel}.${difficulty}.v1`
   : (difficulty === 'hard' ? 'longshot.best.hard.v1' : 'longshot.best.v1');
-const readBest = (difficulty = settings.difficulty, playStyle = settings.playStyle) => Math.max(0, Number(read(bestKey(difficulty, playStyle), 0)) || 0);
+const readBest = (difficulty = settings.difficulty, playStyle = settings.playStyle, listenLevel = settings.listenLevel) => Math.max(0, Number(read(bestKey(difficulty, playStyle, listenLevel), 0)) || 0);
 const state = {
-  mode: 'menu', difficulty: settings.difficulty, playStyle: settings.playStyle, round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
+  mode: 'menu', difficulty: settings.difficulty, playStyle: settings.playStyle, listenLevel: settings.listenLevel, round: 0, score: 0, kills: 0, totalKills: 0, shots: 0, precise: 0,
   ammo: 5, reserve: 25, time: 100, reloadTime: 0, cooldown: 0, recoil: 0,
   scoped: false, zoom: 4, yaw: 0, pitch: -.07, moveX: 0, moveY: 0,
   steady: false, breath: 1, transitioning: 0, elapsed: 0, guideTime: 0,
-  best: readBest(settings.difficulty, settings.playStyle), lessonOffset: 0,
+  best: readBest(settings.difficulty, settings.playStyle, settings.listenLevel), lessonOffset: 0,
   promptTarget: null, wrongTarget: null,
 };
 const isHard = () => state.difficulty === 'hard';
 const isListenMode = () => state.playStyle === 'listen';
+const isListenEasy = () => isListenMode() && state.listenLevel === 'easy';
+const isListenChallenge = () => isListenMode() && state.listenLevel === 'challenge';
 const activeRounds = () => isHard() ? hardRounds : rounds;
 const isTimed = () => isHard() || settings.timed;
 let renderer, scene, camera, world, weapon, targetWords, targets = [], effects = [], audioContext;
@@ -151,7 +154,9 @@ function updateHud() {
   $('difficultyLabel').classList.toggle('hard', isHard());
   $('roundName').textContent = r.name;
   $('objective').textContent = isListenMode()
-    ? 'Listen · identify the matching word · one wrong target ends the run'
+    ? (isListenEasy()
+      ? 'Easy · Find can locate the spoken word · one wrong target ends the run'
+      : 'Challenge · no auto-find · identify the spoken word · one wrong target ends the run')
     : learning?.enabled ? `Discover ${r.count}${isHard() ? ' walking' : ''} word targets` : `Hit all ${r.count} ${isHard() ? 'walking' : 'orange'} targets`;
   $('timerLabel').textContent = isTimed() ? 'TIME REMAINING' : 'LEARN AT YOUR PACE';
   $('timer').textContent = isTimed() ? formatTime(state.time) : '∞'; $('timer').parentElement.classList.toggle('urgent', isTimed() && state.time < 20);
@@ -191,14 +196,25 @@ function chooseListenPrompt(previousItem = state.promptTarget?.lessonItem || nul
   state.promptTarget = pool[Math.floor(Math.random() * pool.length)];
   state.wrongTarget = null;
   state.guideTime = 0;
-  $('listenStatus').textContent = `${state.kills} correct · one wrong shot = game over`;
+  $('listenStatus').textContent = isListenEasy()
+    ? `${state.kills} correct · Find assist available · one wrong shot = game over`
+    : `${state.kills} correct · no auto-find · one wrong shot = game over`;
   learning.speakOnly(state.promptTarget.lessonItem);
   return state.promptTarget;
 }
 function speakPrompt() {
   if (!isListenMode() || state.mode !== 'playing' || !state.promptTarget?.alive) return;
   unlockAudio(); learning.speakOnly(state.promptTarget.lessonItem);
-  toast('Target word replayed. Tap any visible target to hear its word.', 1.8);
+  toast(isListenEasy()
+    ? 'Target word replayed. Tap Find for an assisted locate, or tap targets to compare.'
+    : 'Target word replayed. Search the scene yourself, then tap targets to compare.', 1.8);
+}
+function easyFindPromptTarget() {
+  if (!isListenEasy() || state.mode !== 'playing' || !state.promptTarget?.alive) return;
+  aimTween = { target: state.promptTarget, time: .72 };
+  state.guideTime = 0;
+  unlockAudio(); learning.speakOnly(state.promptTarget.lessonItem);
+  toast('Easy assist: target located. Challenge mode removes this help.', 2.0);
 }
 function targetAtScreen(clientX, clientY) {
   const canvas = $('scene'), rect = canvas.getBoundingClientRect();
@@ -231,9 +247,9 @@ function startRound() {
 }
 function startGame() {
   unlockAudio(); learning.stop();
-  state.difficulty = settings.difficulty; state.playStyle = settings.playStyle;
+  state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.listenLevel = settings.listenLevel;
   if (isListenMode() && !learning.enabled) learning.setEnabled(true);
-  state.best = readBest(state.difficulty, state.playStyle);
+  state.best = readBest(state.difficulty, state.playStyle, state.listenLevel);
   state.mode = 'playing'; state.round = 0; state.score = 0; state.totalKills = 0; state.shots = 0; state.precise = 0;
   state.promptTarget = null; state.wrongTarget = null;
   state.elapsed = 0; state.scoped = false; state.yaw = 0; state.pitch = -.08; state.recoil = 0; state.steady = false;
@@ -244,7 +260,9 @@ function startGame() {
   $('intro').hidden = true; $('hud').hidden = false; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
   document.body.classList.add('playing'); updateScope(); startRound(); syncLearning();
   toast(isListenMode()
-    ? 'Listen & Find: hear the prompt · tap targets to compare · Fire only when sure'
+    ? (isListenEasy()
+      ? 'Listen & Find · Easy: Find can locate the correct target · tap targets to compare'
+      : 'Listen & Find · Challenge: no auto-find · search, compare, then Fire when sure')
     : isHard() ? 'Hard: track the walking patrols · Watch for cover · Beat the clock'
     : isTouch ? 'Drag to aim · Scope to zoom · Fire to shoot'
     : 'Drag to aim · Space to scope · Click or F to fire', 4);
@@ -257,7 +275,7 @@ function pauseGame(showPanel = true) {
 function resumeGame() { state.mode = 'playing'; $('pausePanel').hidden = true; resetInput(); unlockAudio(); if (isListenMode()) speakPrompt(); else if (learning.enabled) learning.resume(); }
 function resetInput() { keys.clear(); state.moveX = 0; state.moveY = 0; state.steady = false; $('steadyBtn').classList.remove('active'); $('joystickThumb').style.transform = ''; pointer.id = null; aimTween = null; }
 function mainMenu() {
-  state.mode = 'menu'; state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.best = readBest(state.difficulty, state.playStyle); state.round = 0;
+  state.mode = 'menu'; state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.listenLevel = settings.listenLevel; state.best = readBest(state.difficulty, state.playStyle, state.listenLevel); state.round = 0;
   state.promptTarget = null; state.wrongTarget = null;
   state.scoped = false; state.recoil = 0; resetInput(); learning.stop();
   $('intro').hidden = false; $('hud').hidden = true; $('pausePanel').hidden = true; $('resultPanel').hidden = true;
@@ -267,8 +285,8 @@ function mainMenu() {
 function finishGame(won, reason = '') {
   state.mode = 'results'; state.scoped = false; resetInput(); learning.stop(); updateScope();
   const newRecord = state.score > state.best;
-  if (newRecord) { state.best = state.score; save(bestKey(state.difficulty, state.playStyle), state.best); }
-  const styleName = isListenMode() ? 'LISTEN & FIND' : isHard() ? 'HARD' : 'RELAXED';
+  if (newRecord) { state.best = state.score; save(bestKey(state.difficulty, state.playStyle, state.listenLevel), state.best); }
+  const styleName = isListenMode() ? `LISTEN & FIND · ${state.listenLevel.toUpperCase()}` : isHard() ? 'HARD' : 'RELAXED';
   if (reason === 'wrong-word') {
     const actual = state.wrongTarget?.lessonItem?.word || 'that target';
     const expected = state.promptTarget?.lessonItem?.word || 'the spoken word';
@@ -368,7 +386,11 @@ function nearestTarget() {
 }
 function hunt() {
   if (state.mode !== 'playing' || state.transitioning) return;
-  if (isListenMode()) { speakPrompt(); return; }
+  if (isListenMode()) {
+    if (isListenEasy()) easyFindPromptTarget();
+    else speakPrompt();
+    return;
+  }
   const t = nearestTarget(); if (!t) return;
   aimTween = { target: t, time: .65 }; state.guideTime = 4;
   if (learning.enabled && t.lessonItem) learning.preview(t.lessonItem);
@@ -378,7 +400,7 @@ function aim(dx, dy) {
   if (state.mode !== 'playing') return;
   aimTween = null;
   let sensitivity = .0025 * settings.sensitivity * (state.scoped ? 1 / state.zoom : 1);
-  if (!isHard() && settings.assist && targetUnderAim && state.scoped) sensitivity *= .65;
+  if (!isHard() && !isListenChallenge() && settings.assist && targetUnderAim && state.scoped) sensitivity *= .65;
   state.yaw -= dx * sensitivity; state.pitch = clamp(state.pitch - dy * sensitivity, -.92, 1.1);
 }
 
@@ -397,18 +419,38 @@ function syncDifficultyUI() {
   $('difficultySettingHint').textContent = pending
     ? `Next run: ${hard ? 'Hard walking patrols' : 'Relaxed'}. Restart from the pause menu to switch.`
     : 'Hard uses walking patrols, a round timer and no aim assist. Difficulty changes apply to your next run.';
-  $('paceLabel').textContent = settings.playStyle === 'listen' ? (hard ? 'LISTEN & FIND · HARD' : 'LISTEN & FIND · SUDDEN DEATH') : hard ? 'HARD · TIMED PATROLS' : settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
-  const best = readBest(settings.difficulty, settings.playStyle);
+  const listening = settings.playStyle === 'listen';
+  $('listenLevelPick').hidden = !listening;
+  $('listenEasyBtn').classList.toggle('active', listening && settings.listenLevel === 'easy');
+  $('listenChallengeBtn').classList.toggle('active', listening && settings.listenLevel === 'challenge');
+  $('listenEasyBtn').setAttribute('aria-pressed', String(listening && settings.listenLevel === 'easy'));
+  $('listenChallengeBtn').setAttribute('aria-pressed', String(listening && settings.listenLevel === 'challenge'));
+  $('listenLevelHint').textContent = settings.listenLevel === 'easy'
+    ? 'Easy: Find centers the correct target and repeats its word.'
+    : 'Challenge: no auto-find. Hear only replays the prompt; search the scene yourself.';
+  $('paceLabel').textContent = listening
+    ? `LISTEN & FIND · ${settings.listenLevel.toUpperCase()}${hard ? ' · MOVING' : ''}`
+    : hard ? 'HARD · TIMED PATROLS' : settings.timed ? 'TIMED CHALLENGE' : 'NO TIME LIMIT';
+  const best = readBest(settings.difficulty, settings.playStyle, settings.listenLevel);
   $('bestIntro').textContent = best ? best.toLocaleString() : '—';
 }
 function setDifficulty(value) {
   settings.difficulty = value === 'hard' ? 'hard' : 'relaxed';
   save('longshot.settings.v1', settings);
   if (state.mode === 'menu' && world) {
-    state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.best = readBest(state.difficulty, state.playStyle); state.round = 0;
+    state.difficulty = settings.difficulty; state.playStyle = settings.playStyle; state.listenLevel = settings.listenLevel; state.best = readBest(state.difficulty, state.playStyle, state.listenLevel); state.round = 0;
     loadTargets(isHard(), isHard() ? hardRounds[0].pads : [0, 1, 2, 3, 4, 5, 6, 7, 8]);
   }
   syncDifficultyUI();
+}
+function setListenLevel(value) {
+  settings.listenLevel = value === 'easy' ? 'easy' : 'challenge';
+  save('longshot.settings.v1', settings);
+  if (state.mode === 'menu') {
+    state.listenLevel = settings.listenLevel;
+    state.best = readBest(settings.difficulty, settings.playStyle, settings.listenLevel);
+  }
+  syncLearning();
 }
 function syncLearning() {
   if (!learning) return;
@@ -424,9 +466,14 @@ function syncLearning() {
   $('wordTranslation').hidden = !settings.showTranslations;
   $('sentenceBtn').hidden = !currentWord?.sentence;
   $('startBtn').firstElementChild.textContent = style === 'listen' ? 'LISTEN & FIND' : learning.enabled ? 'PLAY & LEARN' : 'ENTER THE RANGE';
-  $('huntBtn').querySelector('b').textContent = style === 'listen' ? 'HEAR' : 'FIND';
-  $('huntBtn').setAttribute('aria-label', style === 'listen' ? 'Replay target word' : 'Find next target');
-  $('huntBtn').title = style === 'listen' ? 'Replay target word (H)' : 'Find target (H)';
+  const listenEasy = style === 'listen' && settings.listenLevel === 'easy';
+  $('huntBtn').querySelector('b').textContent = style === 'listen' ? (listenEasy ? 'FIND' : 'HEAR') : 'FIND';
+  $('huntBtn').setAttribute('aria-label', style === 'listen'
+    ? (listenEasy ? 'Find the spoken target' : 'Replay target word')
+    : 'Find next target');
+  $('huntBtn').title = style === 'listen'
+    ? (listenEasy ? 'Easy assist: find spoken target (H)' : 'Replay target word (H)')
+    : 'Find target (H)';
   syncDifficultyUI();
   const languageSelect = $('languageSelect'), code = learning.languages.learningLanguage;
   for (const option of languageSelect.querySelectorAll('option[data-imported]')) if (option.value !== code) option.remove();
@@ -453,8 +500,8 @@ function setPlayStyle(value) {
   learning.setEnabled(settings.playStyle !== 'classic');
   save('longshot.settings.v1', settings);
   if (state.mode === 'menu') {
-    state.playStyle = settings.playStyle;
-    state.best = readBest(settings.difficulty, settings.playStyle);
+    state.playStyle = settings.playStyle; state.listenLevel = settings.listenLevel;
+    state.best = readBest(settings.difficulty, settings.playStyle, settings.listenLevel);
   }
   syncLearning(); assignTargetLessons();
 }
@@ -483,6 +530,8 @@ function bindUI() {
   $('classicMode').addEventListener('click', () => setPlayStyle('classic'));
   $('learningMode').addEventListener('click', () => setPlayStyle('learn'));
   $('listenMode').addEventListener('click', () => setPlayStyle('listen'));
+  $('listenEasyBtn').addEventListener('click', () => setListenLevel('easy'));
+  $('listenChallengeBtn').addEventListener('click', () => setListenLevel('challenge'));
   $('listenPromptBtn').addEventListener('click', speakPrompt);
   $('settingsBtn').addEventListener('click', () => openDialog('settingsDialog'));
   $('pauseSettings').addEventListener('click', () => openDialog('settingsDialog'));
@@ -692,7 +741,7 @@ async function init() {
     window.__gameReady = true; $('startBtn').disabled = false; $('loader').style.opacity = '0'; setTimeout(() => $('loader').hidden = true, 650);
     requestAnimationFrame(frame);
     // Read-only QA state keeps validation separate from gameplay controls.
-    window.longshotStatus = () => ({ mode: state.mode, difficulty: state.difficulty, playStyle: state.playStyle, nextDifficulty: settings.difficulty, nextPlayStyle: settings.playStyle, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), timed: isTimed(), learning: learning.enabled, listenPromptReady: Boolean(state.promptTarget), words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving, kind: t.kind || 'training' })) });
+    window.longshotStatus = () => ({ mode: state.mode, difficulty: state.difficulty, playStyle: state.playStyle, listenLevel: state.listenLevel, nextDifficulty: settings.difficulty, nextPlayStyle: settings.playStyle, nextListenLevel: settings.listenLevel, round: state.round + 1, score: state.score, shots: state.shots, hits: state.totalKills, ammo: state.ammo, reserve: state.reserve, scoped: state.scoped, reloadTime: state.reloadTime, time: Math.round(state.time), timed: isTimed(), learning: learning.enabled, listenPromptReady: Boolean(state.promptTarget), words: learning.getItems().length, renderer: { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }, targets: targets.filter(t => t.alive).map(t => ({ position: t.group.position.toArray(), moving: t.moving, kind: t.kind || 'training' })) });
   } catch (error) {
     console.error(error); $('loader').hidden = true; $('fatal').hidden = false;
     $('fatalText').textContent = 'This game needs WebGL graphics. Try reopening it in an up-to-date Safari or Chrome browser. ' + (error?.message || '');

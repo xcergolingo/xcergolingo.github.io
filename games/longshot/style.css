@@ -118,3 +118,17 @@
 @media(max-width:800px){#listenBar{max-width:calc(100% - 225px)}}
 @media(max-width:600px) and (orientation:portrait){.mode-pick{gap:8px 14px}.mode{font-size:7px}#listenBar{left:50%;bottom:calc(34px + var(--safe-bottom));max-width:calc(100% - 148px)}#listenPromptBtn{min-height:42px;padding:6px 9px;gap:7px}#listenPromptBtn .listen-speaker{width:30px;height:30px;flex-basis:30px;font-size:17px}#listenPromptBtn b{font-size:7px}#listenPromptBtn small{font-size:6px}}
 @media(max-height:540px) and (orientation:landscape){.mode-pick{gap:6px 12px}#listenBar{bottom:calc(14px + var(--safe-bottom));max-width:330px}#listenPromptBtn{min-height:38px;padding:5px 10px}#listenPromptBtn .listen-speaker{width:28px;height:28px;flex-basis:28px}#listenPromptBtn b{font-size:7px}#listenPromptBtn small{font-size:6px}}
+
+
+/* Listen & Find level selector. Challenge is the default. */
+.listen-level-pick{margin:-4px 0 13px;padding:10px;border:1px solid #f0b35f35;border-radius:4px;background:#10232678}
+.listen-level-label{display:block;margin-bottom:7px;font:7px var(--mono);letter-spacing:1.2px;color:#b8c8bd}
+.listen-level-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.listen-level-button{min-width:0;padding:8px 10px;border:1px solid #d9e5cf24;border-radius:3px;background:#142b2d;color:#aebdb3;text-align:left}
+.listen-level-button b{display:block;font:9px var(--mono);letter-spacing:1px}
+.listen-level-button small{display:block;margin-top:4px;font-size:9px;color:#849a8e}
+.listen-level-button.active{border-color:var(--orange);background:#fb714616;color:#f5eadf}
+.listen-level-button.active small{color:#c7d1c8}
+#listenLevelHint{min-height:14px;margin:7px 0 0;font-size:9px;line-height:1.35;color:#aabbb0}
+@media(max-width:600px) and (orientation:portrait){.listen-level-pick{padding:8px;margin-bottom:10px}.listen-level-button{padding:7px 8px}.listen-level-button small{font-size:8px}#listenLevelHint{font-size:8px}}
+@media(max-height:540px) and (orientation:landscape){.listen-level-pick{padding:7px;margin-bottom:7px}.listen-level-label{margin-bottom:5px}.listen-level-button{padding:6px 7px}.listen-level-button b{font-size:7px}.listen-level-button small{font-size:7px}#listenLevelHint{font-size:7px;margin-top:4px}}
