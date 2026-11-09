@@ -180,12 +180,12 @@ function updateScope() {
 function toggleScope() { if (state.mode !== 'playing') return; state.scoped = !state.scoped; tone(250, .04, .025, 'sine', 180); updateScope(); }
 function zoomScope() { state.zoom = state.zoom === 2 ? 4 : state.zoom === 4 ? 8 : 2; if (!state.scoped) state.scoped = true; updateScope(); }
 
-function chooseListenPrompt() {
+function chooseListenPrompt(previousItem = state.promptTarget?.lessonItem || null) {
   if (!isListenMode() || state.mode !== 'playing') return null;
   const alive = targets.filter(target => target.alive && target.lessonItem);
-  if (!alive.length) { state.promptTarget = null; return null; }
-  const different = state.promptTarget && alive.length > 1
-    ? alive.filter(target => !sameLesson(target.lessonItem, state.promptTarget.lessonItem))
+  if (!alive.length) { state.promptTarget = null; learning.stop(); return null; }
+  const different = previousItem && alive.length > 1
+    ? alive.filter(target => !sameLesson(target.lessonItem, previousItem))
     : alive;
   const pool = different.length ? different : alive;
   state.promptTarget = pool[Math.floor(Math.random() * pool.length)];
@@ -336,17 +336,22 @@ function fire() {
     $('hitNotice').textContent = `${precise ? 'PRECISE HIT' : 'TARGET DOWN'}  +${points}  /  ${distance} M`;
     $('hitNotice').style.opacity = '1'; $('hitmark').style.opacity = '1'; hitUntil = performance.now() + 1000;
     setTimeout(() => tone(precise ? 1160 : 820, .13, .055, 'sine', precise ? 1500 : 1000), 65);
+    let previousPromptItem = null;
     if (learning.enabled) {
-      if (isListenMode()) learning.markReviewed(target.lessonItem);
-      else learning.onHit(target.lessonItem);
+      if (isListenMode()) {
+        previousPromptItem = state.promptTarget?.lessonItem || target.lessonItem;
+        learning.stop();
+        learning.markReviewed(target.lessonItem);
+      } else learning.onHit(target.lessonItem);
     }
     state.guideTime = isListenMode() ? 0 : 1.5;
     if (isListenMode()) state.promptTarget = null;
     if (state.kills >= activeRounds()[state.round].count) {
+      if (isListenMode()) learning.stop();
       const bonus = isTimed() ? Math.ceil(state.time) * 10 : 0; state.score += bonus; state.transitioning = 3.2;
       banner(isListenMode() ? 'LISTENING PERFECT' : learning.enabled ? 'WORDS COLLECTED' : 'ROUND CLEAR', bonus ? `+${bonus} TIME BONUS` : state.round === 2 ? 'LESSON COMPLETE' : 'NEXT ROOFTOP TRIAL', 2.8); tone(520, .2, .07);
     } else if (isListenMode()) {
-      setTimeout(() => { if (state.mode === 'playing' && isListenMode() && !state.transitioning && !state.promptTarget) chooseListenPrompt(); }, 260);
+      if (state.mode === 'playing' && !state.transitioning && !state.promptTarget) chooseListenPrompt(previousPromptItem);
     }
   } else {
     $('hitNotice').textContent = nearest?.object.userData.isPatrolCover ? 'COVER BLOCKED · WAIT FOR AN OPENING' : nearest ? 'ADJUST YOUR AIM' : 'SHOT WIDE';
