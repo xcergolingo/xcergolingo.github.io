@@ -134,8 +134,22 @@ function makePlaneModel(type){const root=new THREE.Group();const body=new THREE.
 function worldToScreen(pos){const p=pos.clone().project(camera);return{x:(p.x+1)*.5*innerWidth,y:(1-p.y)*.5*innerHeight,ndcX:p.x,ndcY:p.y}}
 function screenToWorld(x,y,height=0){ndc.set(x/innerWidth*2-1,-y/innerHeight*2+1);raycaster.setFromCamera(ndc,camera);const p=v3(0,0,0);if(raycaster.ray.intersectPlane(worldPlane,p))return p.setY(height);return v3(0,height,0)}
 function safeRect(){const w=innerWidth,h=innerHeight;return {l:Math.max(34,w*.057),r:w-Math.max(34,w*.057),t:Math.min(132,Math.max(95,h*.14)),b:h-Math.min(132,Math.max(100,h*.14))}}
-function resize(){const w=innerWidth,h=innerHeight,aspect=w/Math.max(1,h);const worldWidth=Math.max(106,aspect*105);const worldHeight=worldWidth/aspect;camera.left=-worldWidth/2;camera.right=worldWidth/2;camera.top=worldHeight/2;camera.bottom=-worldHeight/2;camera.updateProjectionMatrix();camera.updateMatrixWorld();renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(w,h);fallbackBackground=null}
-addEventListener('resize',resize,{passive:true});resize();
+function layoutLearningHUD(){
+  // WKWebView safe-area insets can raise the score/control strip by far more
+  // than a normal mobile browser. Measure its actual top edge instead of
+  // relying on a fixed CSS bottom offset for the word/translation panel.
+  const controls=document.querySelector('.bottom'),ribbon=$('lessonRibbon'),hint=$('instruction');
+  if(!controls||!ribbon)return;
+  const bottomOfControls=Math.max(0,innerHeight-controls.getBoundingClientRect().top);
+  const ribbonBottom=Math.ceil(bottomOfControls+12);
+  ribbon.style.bottom=`${ribbonBottom}px`;
+  if(hint)hint.style.bottom=`${Math.ceil(ribbonBottom+ribbon.getBoundingClientRect().height+11)}px`;
+}
+function resize(){const w=innerWidth,h=innerHeight,aspect=w/Math.max(1,h);const worldWidth=Math.max(106,aspect*105);const worldHeight=worldWidth/aspect;camera.left=-worldWidth/2;camera.right=worldWidth/2;camera.top=worldHeight/2;camera.bottom=-worldHeight/2;camera.updateProjectionMatrix();camera.updateMatrixWorld();renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(w,h);fallbackBackground=null;layoutLearningHUD()}
+addEventListener('resize',resize,{passive:true});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',layoutLearningHUD,{passive:true});
+if('ResizeObserver'in window)new ResizeObserver(layoutLearningHUD).observe(document.querySelector('.bottom'));
+resize();
 
 function makeAircraft(type,position,direction){const data=makePlaneModel(type),id=game.nextId++,code=TYPES[type].prefix+'-'+String(100+id).slice(-3);const heading=Math.atan2(-direction.x,-direction.z);
   const label=document.createElement('div');label.className='plane-label';label.innerHTML=`<em style="background:${CSS_COLORS[type]}"></em><b>${code}</b>`;document.body.appendChild(label);
