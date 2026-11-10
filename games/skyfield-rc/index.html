@@ -1,41 +1,144 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07131d">
-<title>Skyfield RC — GoLingo Flight Club</title>
-<link rel="canonical" href="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site">
-<style>
-html,body{margin:0;width:100%;height:100%;background:#07131d;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{display:grid;place-items:center;text-align:center}
-main{padding:24px}
-h1{font-size:24px;margin:0 0 10px}
-p{opacity:.72;margin:0 0 18px}
-a{display:inline-block;color:#07131d;background:#eafcff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:800}
-</style>
-<script>
-(function(){
-  var base="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site";
-  var target=base;
-  if(location.search) target+=location.search;
-  if(location.hash) target+=location.hash;
-  try{ location.replace(target); }catch(e){ location.href=target; }
-})();
-</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#e9e5d7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Skyfield RC">
+  <meta name="description" content="Your own little aircraft. A wide-open sky. Fly RC planes over a scenic countryside airfield, practice landings, race through rings, and learn with GoLingo.">
+  <title>Skyfield RC · GoLingo Flight Club</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css?v=8">
 </head>
-<body>
-<main>
-<h1>Opening Skyfield RC…</h1>
-<p>Using the canonical GoLingo Skyfield RC build.</p>
-<a id="open" href="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site">Open Skyfield RC</a>
-</main>
-<script>
-(function(){
- var a=document.getElementById('open');
- var target="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site"+(location.search||'')+(location.hash||'');
- a.href=target;
-})();
-</script>
+<body class="in-hangar full-view">
+  <canvas id="world" aria-label="3D radio-controlled airplane flying field"></canvas>
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <div id="loading" role="status"><div class="loading-mark">S<span>↗</span></div><p>Opening the airfield…</p><small>SKYFIELD RC · GOLINGO</small></div>
+  <div id="loadError" class="hidden"><h2>The airfield could not open</h2><p id="loadErrorText">Please reload in a browser with WebGL enabled.</p><button onclick="location.reload()">Try again</button></div>
+
+  <header id="masthead">
+    <a class="wordmark" href="#" aria-label="Skyfield RC home"><span class="brand-icon">↗</span><span>SKYFIELD<span class="brand-rc"> RC</span><small>GOLINGO FLIGHT CLUB</small></span></a>
+    <div class="field-status"><i></i> THE FIELD IS YOURS <span class="weather">☀ 18° &nbsp; / &nbsp; LIGHT WINDS</span></div>
+    <label class="launch-camera" for="launchCameraSelect"><span>Camera</span><select id="launchCameraSelect"><optgroup label="Outside the airplane"><option value="ground">Ground controller</option><option value="chase">Chase · follow plane</option></optgroup><optgroup label="On the airplane"><option value="cockpit">Cockpit · pilot view</option><option value="nose">Nose camera</option><option value="leftWing">Left wing camera</option><option value="rightWing">Right wing camera</option><option value="tail">Tail camera</option></optgroup></select></label>
+    <button class="icon-button" id="helpMenu" aria-label="Help and controls" title="Help and controls">?</button>
+  </header>
+
+  <section id="hangar" aria-label="Flight setup">
+    <div class="hangar-copy">
+      <div class="eyebrow"><span class="tiny-rule"></span> A LITTLE PLANE. A BIG ADVENTURE.</div>
+      <h1>Meet your <br>happy <em>altitude.</em></h1>
+      <p class="intro">Slow down. Take off. Find your line.<br>Your own corner of the sky is waiting.</p>
+      <div class="setup-label">01 <span>CHOOSE YOUR AIRCRAFT</span></div>
+      <div class="aircraft-shelf" role="group" aria-label="Aircraft collection">
+        <button id="aircraftPrev" class="aircraft-nav" type="button" aria-label="Previous aircraft" aria-controls="aircraftPicker" aria-describedby="aircraftPosition"><span aria-hidden="true">‹</span></button>
+        <div id="aircraftPicker" class="aircraft-picker" role="group" aria-label="Choose aircraft. Swipe to browse." tabindex="0">
+        <button class="aircraft-card selected" data-plane="trainer" aria-pressed="true"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M48 5h4l3 20 39 9v5L55 35l-2 14 13 5v3l-16-3-16 3v-3l13-5-2-14-39 4v-5l39-9z"/></svg><strong>Scout</strong><small>THE TRAINER</small></button>
+        <button class="aircraft-card" data-plane="sport" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M48 4h4l4 22 33 12v5l-34-6-2 12 12 5v3l-15-3-15 3v-3l12-5-2-12-34 6v-5l33-12z"/></svg><strong>Swift</strong><small>THE SPORT PLANE</small></button>
+        <button class="aircraft-card" data-plane="glider" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M49 4h2l2 17 45 7v4l-45-4-2 23 10 3v3l-11-2-11 2v-3l10-3-2-23L2 32v-4l45-7z"/></svg><strong>Drift</strong><small>THE SAILPLANE</small></button>
+        <button class="aircraft-card" data-plane="jet" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M50 2l5 20 33 17-3 6-25-6 12 13-4 4-13-7-2 6h-6l-2-6-13 7-4-4 12-13-25 6-3-6 33-17z"/><path d="M38 36l5 2-3 13-7 3zm24 0-5 2 3 13 7 3z" opacity=".6"/></svg><strong>Silver Jet</strong><small>THE JET</small></button>
+        <button class="aircraft-card" data-plane="f16" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M45 22 16 40 16 47 45 39 43 48 32 53 32 57 49 52 51 52 68 57 68 53 57 48 55 39 84 47 84 40 55 22Z" fill="#cf433b"/><path d="M50 2 53 10 55 28 55 48 53 54 47 54 45 48 45 28 47 10Z" fill="#f3f1e9" stroke="#929a9f" stroke-width=".7"/><path d="M50 11c-3 0-3 11 0 14 3-3 3-14 0-14Z" fill="#314768"/><path d="M48 27h4l1 24h-6Z" fill="#254e8a"/><path d="M16 40h3v7h-3Zm65 0h3v7h-3Z" fill="#f5efe1"/></svg><strong>F-16 Viper</strong><small>THE FIGHTER</small></button>
+        <button class="aircraft-card" data-plane="yak130" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M44 23 13 37 12 43 42 39 42 47 29 52 29 56 47 52h6l18 4v-4l-13-5v-8l30 4-1-6-31-14Z" fill="#949e9f"/><path d="m50 3 4 7 3 24-2 21H45l-2-21 3-24Z" fill="#c3c9c5" stroke="#818e8d" stroke-width=".7"/><path d="M50 12c-4 0-4 13 0 16 4-3 4-16 0-16Z" fill="#3e5559"/><path d="M44 39h4v15h-5Zm8 0h4l1 15h-5Z" fill="#758181"/><path d="m72 31 1.5 3.6 3.8.3-2.9 2.5.9 3.7-3.3-2-3.3 2 .9-3.7-2.9-2.5 3.8-.3Z" fill="#bb3e35"/><path d="m50 36 2 14h-4Z" fill="#aeb8b4"/></svg><strong>Yak-130</strong><small>THE JET TRAINER</small></button>
+        <button class="aircraft-card" data-plane="rare-bear" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M43 21 15 25Q8 27 8 32v5l35-1 3 10-13 4-3 5 20-2 20 2-3-5-13-4 3-10 35 1v-5q0-5-7-7l-28-4Z" fill="#6d4877"/><path d="m15 25 28-4 1 5-35 7q0-5 6-8Zm42-4 28 4q6 3 6 8l-35-7Z" fill="#f59b42"/><path d="m9 33 35-7v3L9 36Zm47-7 35 7v3l-35-7Z" fill="#edd36e"/><path d="M45 10q5-5 10 0l2 18-4 22h-6l-4-22Z" fill="#f5f0df" stroke="#8a7b85" stroke-width=".7"/><path d="M45 10q5-5 10 0v6H45Z" fill="#ed8b3c"/><path d="M47 18q3-3 6 0v10h-6Z" fill="#4c5263"/><path d="M48 31h4v19h-4Z" fill="#805886"/><path d="M36 8h28" fill="none" stroke="#5a6160" stroke-width="1.5"/><text x="70" y="35" fill="#fff7dc" font-size="8" font-weight="700" font-family="Arial,sans-serif">77</text></svg><strong>Rare Bear 77</strong><small>THE RACER</small></button>
+        <button class="aircraft-card" data-plane="f15" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="M43 21 12 40 12 47 40 39 38 48 28 54 29 57 46 51h8l17 6 1-3-10-6-2-9 28 8v-7L57 21Z" fill="#a8afb0" stroke="#7c898a" stroke-width=".7"/><path d="M50 2 54 13 56 27 59 36 57 53H43l-2-17 3-9 2-14Z" fill="#c4c9c7"/><path d="M50 12c-3 0-4 11 0 14 4-3 3-14 0-14Z" fill="#4b6670"/><path d="M41 32h7v23h-8Zm11 0h7l1 23h-8Z" fill="#879496"/><path d="m38 34 5-3 2 18-7 5Zm24 0-5-3-2 18 7 5Z" fill="#5f777d"/><path d="M45 28h10v4H45Z" fill="#dce0da"/></svg><strong>F-15 Eagle</strong><small>THE TWIN JET</small></button>
+        <button class="aircraft-card" data-plane="falcon" aria-pressed="false"><svg viewBox="0 0 100 58" aria-hidden="true"><path d="m50 2 6 21 35 21-1 6-32-9 4 7 12 6-1 3-20-7h-6l-20 7-1-3 12-6 4-7-32 9-1-6 35-21Z" fill="#303836" stroke="#59645a" stroke-width=".7"/><path d="m44 25-29 20 27-9Zm12 0 29 20-27-9Z" fill="#d9e444"/><path d="m47 12 3-8 3 8-2 19h-2Z" fill="#e4ed55"/><path d="M50 15c-3 0-3 10 0 12 3-2 3-12 0-12Z" fill="#79958b"/><path d="m38 48-8 6 15-5Zm24 0 8 6-15-5Z" fill="#d9e444"/><path d="M48 34h4v17h-4Z" fill="#6e795d"/></svg><strong>Falcon</strong><small>THE SPORT JET</small></button>
+        </div>
+        <button id="aircraftNext" class="aircraft-nav aircraft-nav-next" type="button" aria-label="Next aircraft" aria-controls="aircraftPicker" aria-describedby="aircraftPosition"><span aria-hidden="true">›</span><small id="aircraftPosition" aria-live="polite" aria-atomic="true">1 / 9</small></button>
+      </div>
+      <div class="plane-caption"><span id="aircraftDescription">Steady, friendly, and ready for your first flight.</span><span id="aircraftBadge">EASY TO FLY</span></div>
+      <div class="setup-label second">02 <span>MAKE IT YOUR FLIGHT</span></div>
+      <div class="mode-picker" role="group" aria-label="Flight activity">
+        <button data-mode="free" class="selected" aria-pressed="true"><span>⌁</span> Free flight</button>
+        <button data-mode="rings" aria-pressed="false"><span>◎</span> Ring run</button>
+        <button data-mode="learn" aria-pressed="false"><span>あ</span> Word flight</button>
+      </div>
+    </div>
+    <div class="launch-dock" role="group" aria-label="Launch flight">
+      <div class="launch-origin"><span id="launchPickerLabel">START FROM</span><div id="launchPicker" class="launch-picker" role="group" aria-labelledby="launchPickerLabel"><button type="button" data-launch="runway" aria-pressed="false"><span aria-hidden="true">▥</span> Runway</button><button type="button" data-launch="air" class="selected" aria-pressed="true"><span aria-hidden="true">↗</span> In air</button></div></div>
+      <div class="launch-row"><button id="flyButton" class="primary-button" disabled>Preparing aircraft… <span>↗</span></button><button id="setupButton" class="setup-button" title="Flight settings" aria-label="Flight settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg></button></div>
+      <div class="launch-note"><span>●</span> <span id="launchNote">Ground controller view · Easy flying · Air launch</span></div>
+    </div>
+    <div class="hero-aircraft-note"><span id="planeNumber">01 / SCOUT</span><div></div><small id="planeSpec">HIGH-WING TRAINER · ELECTRIC</small></div>
+    <div class="field-caption"><span>SKYFIELD MEADOWS</span><small>Green hills. Golden light. Room to roam.</small></div>
+    <footer class="hangar-footer"><span>MADE FOR THE JOY OF FLIGHT</span><a href="https://www.golingoapp.com" target="_blank" rel="noopener">GoLingoApp.com <span>↗</span></a></footer>
+  </section>
+
+  <section id="flightHUD" class="hidden" aria-label="Flight instruments">
+    <div class="flight-top">
+      <button id="returnButton" class="hud-button" type="button" aria-label="Return to aircraft selection" title="Return to aircraft selection">← Back</button>
+      <div class="flight-info">
+        <div id="wordCard" class="hidden" role="group" aria-label="Current learning word"><button id="repeatWord" aria-label="Hear the current word" title="Hear the current word">♫</button><div class="word-copy"><div class="word-line"><b id="currentWord">el cielo</b><span id="currentTranslation">the sky</span></div><small id="wordProgress">Fly through the next ring</small></div><span id="languageLabel">ESPAÑOL</span></div>
+        <div class="flight-brand"><b>SKYFIELD<span> RC</span></b><small id="flightModeLabel">FREE FLIGHT</small></div>
+        <div class="mission-bar" id="missionBar"><span id="missionLabel">THE SKY IS YOURS</span><b id="missionProgress">Enjoy the flight</b></div>
+      </div>
+      <div class="flight-actions">
+        <button id="fullscreenButton" class="hud-button" type="button" aria-label="Enter fullscreen" aria-pressed="false" title="Fill the screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span id="fullscreenLabel">Full screen</span></button>
+        <button id="fullViewButton" class="hud-button" title="Show or hide flight information (H)" aria-label="Show flight information" aria-pressed="true"><span id="fullViewLabel">Info</span></button>
+        <button id="cameraButton" class="hud-button" title="Choose camera · C for next view" aria-label="Choose camera view" aria-controls="cameraPanel" aria-expanded="false"><span class="camera-button-title">Camera</span><span id="cameraLabel">Ground</span></button>
+        <button id="soundButton" class="hud-button square" aria-label="Mute sound" title="Sound">♫</button>
+        <button id="pauseButton" class="hud-button square" aria-label="Pause flight" title="Pause (Esc)">Ⅱ</button>
+      </div>
+    </div>
+    <div id="cameraPanel" class="camera-panel hidden" role="group" aria-label="Camera views">
+      <div class="camera-panel-heading"><button id="onboardToggle" type="button" aria-controls="onboardPreview" aria-pressed="true"><span>Small camera<small>Keeps both views visible</small></span><b id="onboardToggleLabel">On</b></button><button id="cameraClose" type="button" aria-label="Close camera views">×</button></div>
+      <div class="camera-main-heading">MAIN VIEW</div>
+      <div class="camera-choices" role="group" aria-label="Main camera view">
+        <button type="button" data-camera="ground" class="selected" aria-pressed="true"><span>Ground</span><small>Controller</small></button>
+        <button type="button" data-camera="chase" aria-pressed="false"><span>Chase</span><small>Follow plane</small></button>
+        <button type="button" data-camera="cockpit" aria-pressed="false"><span>Cockpit</span><small>Pilot view</small></button>
+        <button type="button" data-camera="nose" aria-pressed="false"><span>Nose</span><small>On plane</small></button>
+        <button type="button" data-camera="leftWing" aria-pressed="false"><span>Left wing</span><small>On plane</small></button>
+        <button type="button" data-camera="rightWing" aria-pressed="false"><span>Right wing</span><small>On plane</small></button>
+        <button type="button" data-camera="tail" aria-pressed="false"><span>Tail</span><small>On plane</small></button>
+        <button id="groundZoomButton" class="ground-zoom" type="button" aria-label="Change ground-view zoom" aria-pressed="false"><small>GROUND ZOOM</small><span id="groundZoomLabel">Auto zoom</span></button>
+      </div>
+    </div>
+    <section id="onboardPreview" class="onboard-preview hidden" aria-label="Small onboard camera">
+      <div id="onboardViewport" aria-hidden="true"></div>
+      <div class="onboard-camera-bar"><label class="onboard-camera-control" for="onboardCameraSelect"><span>SMALL CAMERA</span><select id="onboardCameraSelect" aria-label="Small onboard camera position"><option value="cockpit">Cockpit</option><option value="nose">Nose</option><option value="leftWing">Left wing</option><option value="rightWing">Right wing</option><option value="tail">Tail</option></select></label><button id="onboardClose" type="button" aria-label="Hide small onboard camera" title="Hide small camera">×</button></div>
+      <button id="onboardPrev" class="onboard-step" type="button" aria-label="Previous small camera position" title="Previous camera position" aria-controls="onboardViewport">‹</button><button id="onboardNext" class="onboard-step" type="button" aria-label="Next small camera position" title="Next camera position" aria-controls="onboardViewport">›</button>
+    </section>
+    <div class="telemetry"><div><span>AIRSPEED</span><b id="speedValue">0</b><small>km/h</small></div><i></i><div><span>ALTITUDE</span><b id="altitudeValue">0</b><small>m</small></div><i></i><div><span>FLIGHT TIME</span><b id="timeValue">0:00</b><small id="windValue">CALM</small></div></div>
+    <div id="targetMarker" class="hidden" aria-hidden="true"><span>⌄</span><small id="targetDistance">100 m</small></div>
+    <div id="statusMessage" class="hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="hint" class="flight-hint">Pull down to climb. Small movements work best.</div>
+    <aside id="fullscreenNotice" class="fullscreen-notice hidden" role="group" aria-label="Fullscreen options"><p id="fullscreenNoticeText" role="status" aria-live="polite">Fullscreen isn’t available in this app view.</p><div><a id="fullscreenOpen" href="./" target="_blank" rel="noopener">Open game ↗</a><button id="fullscreenNoticeClose" type="button" aria-label="Dismiss fullscreen message">×</button></div></aside>
+    <div class="flight-bottom-center"><button id="resetButton" class="subtle-button" title="Restart flight (R)">↺ Reset</button><span class="separator">·</span><button id="helpFlight" class="subtle-button">? Controls</button><span class="separator">·</span><button id="centerView" class="subtle-button">⌖ Find runway</button></div>
+    <div id="controls">
+      <div class="throttle-panel"><div id="engineReadout" class="engine-readout hidden"><span>ENGINE</span><b id="engineValue">0%</b></div><div class="control-heading">THROTTLE <b id="throttleValue">65%</b></div><div id="throttlePad" role="slider" tabindex="0" aria-label="Throttle" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65"><div class="throttle-track"><div id="throttleFill"></div></div><div class="throttle-ticks"><i></i><i></i><i></i><i></i><i></i></div><div id="throttleKnob"><span></span><span></span><span></span></div><small class="max">MAX</small><small class="min">IDLE</small></div><button id="aeroButton" type="button" class="aero-control" aria-label="Switch to Easy flying" aria-pressed="true" title="Flying style · tap to switch"><span>FLYING</span><b id="aeroLabel">Acro</b></button><button id="brakeButton" type="button" class="ground-brake hidden" aria-label="Hold wheel brakes" aria-pressed="false" title="Hold to brake · Space on keyboard"><span>BRAKE</span><small>HOLD</small></button><button id="gearButton" type="button" class="gear-control hidden" aria-label="Toggle landing gear" aria-pressed="true" title="Landing gear · G on keyboard"><span>GEAR</span><b id="gearLabel">DOWN</b></button><span id="takeoffCue" class="takeoff-cue hidden">Add power, then pull down to lift off.</span></div>
+      <div class="stick-panel"><span class="control-heading">STEER & CLIMB</span><div id="stickPad" role="application" aria-label="Flight stick. Pull down to climb, push up to descend, left or right to bank."><div class="stick-cross x"></div><div class="stick-cross y"></div><span class="stick-guide up" aria-hidden="true"><span class="pitch-arrow">↑</span><span id="pitchUpLabel">DESCEND</span></span><span class="stick-guide left">‹</span><span class="stick-guide right">›</span><span class="stick-guide down" aria-hidden="true"><span class="pitch-arrow">↓</span><span id="pitchDownLabel">CLIMB</span></span><div id="stickKnob"><span>+</span></div></div></div>
+    </div>
+    <div class="map-panel"><canvas id="minimap" width="256" height="256" aria-label="Airfield map"></canvas><span>N</span><small>SKYFIELD</small></div>
+  </section>
+
+  <div id="modalLayer" class="hidden">
+    <section id="pauseModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="eyebrow">TAKE A BREATHER</div><h2 id="pauseTitle">Sky can wait.</h2><p>Your aircraft is right where you left it.</p><button id="resumeButton" class="primary-button">Back to flying <span>↗</span></button><button id="pauseReset" class="pause-reset">↺ Restart flight</button><div class="modal-action-row"><button id="pauseSettings">Flight settings</button><button id="backHangar">Return to hangar</button></div></section>
+
+    <section id="settingsModal" class="modal wide hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><button class="close-modal" data-close aria-label="Close settings">×</button><div class="eyebrow">A FLIGHT THAT FITS YOU</div><h2 id="settingsTitle">Make yourself at home.</h2><div class="settings-grid">
+      <label>Flying style<select id="assistSelect"><option value="assisted">Easy · self-leveling</option><option value="manual">Acro · full rolls and loops</option></select><small>Change Easy / Acro beside the throttle during flight. Acro gives full rotation; Easy helps level the wings.</small></label>
+      <label>Pitch control<select id="pitchSelect" aria-describedby="pitchSettingHelp"><option value="pull" selected>Pull down to climb</option><option value="push">Push up to climb</option></select><small id="pitchSettingHelp">Applies to the touch stick and the ↑ / ↓ or W / S keys.</small></label>
+      <label>Launch from<select id="launchSelect"><option value="air">Already in the air</option><option value="runway">The runway</option></select><small>Every aircraft can start on the runway.</small></label>
+      <label>Main camera view<select id="cameraSelect"><option value="ground">Ground controller</option><option value="chase">Chase</option><option value="cockpit">Cockpit</option><option value="nose">Nose</option><option value="leftWing">Left wing</option><option value="rightWing">Right wing</option><option value="tail">Tail</option></select><small>Tap Camera during flight to switch the large view.</small></label>
+      <label>Small onboard camera<select id="onboardSettingsSelect"><option value="off">Off</option><option value="cockpit" selected>Cockpit</option><option value="nose">Nose</option><option value="leftWing">Left wing</option><option value="rightWing">Right wing</option><option value="tail">Tail</option></select><small>Shows the plane’s camera beside your main view.</small></label>
+      <label>Wind<select id="windSelect"><option value="0">Calm</option><option value="2">Light breeze · 2 m/s</option><option value="5">Fresh breeze · 5 m/s</option></select></label>
+      <label>Light<select id="lightSelect"><option value="golden">Golden afternoon</option><option value="day">Clear daylight</option></select></label>
+      <label>Learn a language<select id="languageSelect"><option value="es">Spanish · Español</option><option value="ja">Japanese · 日本語</option><option value="zh">Chinese · 中文</option><option value="fr">French · Français</option><option value="en">English</option></select></label>
+      <div class="checkboxes"><label><input id="repeatCheckbox" type="checkbox" checked> Repeat until the next word</label><label><input id="translationCheckbox" type="checkbox" checked> Show translation</label><label><input id="sentenceCheckbox" type="checkbox" checked> Speak example at each gate</label></div>
+    </div><details class="import-details"><summary>Bring your own words from GoLingo <span>+</span></summary><p>Paste <b>word | translation</b>, one pair per line, or a GoLingo JSON list with words or sentences.</p><textarea id="importText" spellcheck="false" placeholder="el avión | the airplane&#10;el cielo | the sky"></textarea><div class="import-actions"><button id="importButton">Load my words</button><button id="exportButton">Export collected words</button></div><small id="importStatus" role="status"></small></details><button id="saveSettings" class="primary-button">Ready to fly <span>✓</span></button></section>
+
+    <section id="helpModal" class="modal wide hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><button class="close-modal" data-close aria-label="Close controls">×</button><div class="eyebrow">A FEW LITTLE POINTERS</div><h2 id="helpTitle">Find your wings.</h2><div class="help-grid"><div><h3>On your phone</h3><p>Hold your phone sideways. Slide the <b>left throttle</b> up for power. <span id="pitchTouchHelp">Pull the <b>right control</b> down to climb; push it up to descend.</span> Move left or right to bank. Change this in Flight settings → Pitch control.</p><p>Tap <b>Acro / Easy</b> beside the throttle while flying. In <b>Acro</b>, hold left or right for a complete roll. With enough speed and height, hold a pitch input for a loop; ease off to stop rotating. In <b>Easy</b>, release the control to help level the wings.</p><p>Hold <b>Brake</b> to slow down on the ground. On aircraft with retractable wheels, tap <b>Gear</b> in flight to raise or lower them.</p></div><div><h3>With a keyboard</h3><p><span id="pitchKeyboardHelp">S / ↓ raise the nose · W / ↑ lower the nose</span><br><kbd>A</kbd><kbd>D</kbd> bank left / right<br><kbd>Q</kbd><kbd>E</kbd> rudder<br><kbd>+</kbd><kbd>−</kbd> throttle<br><kbd>G</kbd> landing gear<br><kbd>C</kbd> next main camera · <kbd>R</kbd> reset<br><kbd>[</kbd><kbd>]</kbd> previous / next small camera<br><kbd>M</kbd> Easy / Acro · <kbd>F</kbd> fullscreen<br><kbd>H</kbd> show / hide information<br><kbd>Esc</kbd> pause · <kbd>Space</kbd> brakes</p></div><div><h3>Choose your viewpoint</h3><p>Choose <b>Camera</b> before you start to set the large view. While flying, tap <b>Camera → Main view</b> for <b>Ground controller</b>, <b>Chase</b>, <b>Cockpit</b>, <b>Nose</b>, either <b>Wing</b>, or <b>Tail</b>. You can switch without pausing.</p><p>The <b>Small camera</b> window shows a live view from the plane. Tap its <b>‹ / ›</b> arrows to change position during flight, or choose from its dropdown. Tap <b>×</b> to hide it, and <b>Camera → Small camera</b> to show it again. Changing this window leaves the main view where it is.</p><p>Tap <b>Full screen</b> to fill the screen when your browser allows it. An embedded app may require <b>Open game</b>. <b>Info</b> shows or hides instruments and the small word card; words in the flight rings stay visible. Ground controller offers <b>Auto zoom</b> or <b>Wide view</b> in the Camera menu. Tap <b>← Back</b> at the top left to return directly to aircraft selection.</p></div><div><h3>Take off &amp; fly a jet</h3><p>Select <b>Runway</b> above Start flight. Add throttle, let the plane build speed, then gently raise the nose. Choose <b>In air</b> for an immediate flying start.</p><p><b>Turbine thrust builds gradually.</b> The Engine readout shows the power delivered. Change throttle early on approach and allow more room for faster passes and turns.</p><p>To land, lower the gear, line up with the white centerline, reduce power and descend gently. Hold Brake after touchdown. Crashes are recoverable with a restart.</p></div></div><p class="help-footnote">An original browser RC game inspired by the joy of model flying. Its simplified flight model is designed for play.</p><button id="helpDone" class="primary-button">Let’s fly <span>↗</span></button></section>
+
+    <section id="crashModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="crashTitle"><div class="eyebrow">A LITTLE ROUGH AROUND THE LANDING</div><h2 id="crashTitle">Another go?</h2><p id="crashDescription">Every good pilot started somewhere.</p><div class="flight-summary"><span>TIME ALOFT<b id="summaryTime">0:00</b></span><span>GATES PASSED<b id="summaryGates">0</b></span></div><button id="retryButton" class="primary-button">Back in the air <span>↗</span></button><button id="crashHangar" class="text-button">Return to hangar</button></section>
+    <section id="completeModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="completeTitle"><div class="eyebrow">A BEAUTIFUL LITTLE FLIGHT</div><h2 id="completeTitle">Nicely flown.</h2><p id="completeText">You found your line through every ring.</p><div class="flight-summary"><span>YOUR TIME<b id="completeTime">0:00</b></span><span>PERSONAL BEST<b id="bestTime">0:00</b></span></div><button id="againButton" class="primary-button">Fly another lap <span>↗</span></button><button id="continueButton" class="text-button">Keep exploring</button></section>
+  </div>
+
+  <div id="rotatePrompt"><div class="rotate-device">↻</div><h2>A little more horizon.</h2><p>Turn your phone sideways to fly.</p><button id="rotateHangar">Back to hangar</button></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js?v=8"></script>
+  <script>setTimeout(()=>{if(!window.skyfieldReady&&!window.skyfieldFailed){document.getElementById('loading').classList.add('hidden');document.getElementById('loadError').classList.remove('hidden');document.getElementById('loadErrorText').textContent='The game is taking longer than expected. Check your connection, then try again.'}},25000);</script>
 </body>
 </html>

@@ -1,0 +1,457 @@
+:root{--ink:#273e34;--muted:#6b7568;--paper:#f5f1e5;--line:rgba(45,65,46,.17);--orange:#c45b35;--glass:rgba(248,246,235,.87);font-family:"Avenir Next",Avenir,"Segoe UI",sans-serif;color:var(--ink);font-synthesis:none}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{-webkit-user-select:none;user-select:none;overscroll-behavior:none;background:#b3c0a6}button,a,input,select,textarea{font:inherit}button{cursor:pointer;border:0;color:inherit}button:disabled{cursor:wait;opacity:.6}button:focus-visible,a:focus-visible,select:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid #cb704b;outline-offset:4px}button,a{-webkit-touch-callout:none;touch-action:manipulation}button{transition:background .2s,transform .2s,box-shadow .2s}button:active{transform:translateY(1px)}a{color:inherit;text-decoration:none}button svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.6;fill:none}input,textarea{user-select:text;-webkit-user-select:text}canvas#world{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}.hidden{display:none!important}.film-grain{position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.12' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.13;mix-blend-mode:multiply;z-index:1}#loading{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;flex-direction:column;background:var(--paper);z-index:100}#loading p{font-size:18px}#loading small{font-size:10px;letter-spacing:3px;opacity:.5}.loading-mark{border:1px solid var(--line);width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:italic 54px Georgia}.loading-mark span{font:24px sans-serif;align-self:flex-start;margin-top:8px;animation:glide 1.5s infinite ease-in-out}@keyframes glide{50%{transform:translate(4px,-4px)}}#loadError{position:fixed;inset:0;z-index:101;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}#loadError h2{font:36px Georgia}#loadError button{padding:16px 30px;background:var(--ink);color:var(--paper);border-radius:6px}#masthead{position:absolute;z-index:4;left:40px;right:40px;top:max(28px,env(safe-area-inset-top));display:flex;align-items:center;gap:26px}.wordmark{display:flex;align-items:center;gap:11px;letter-spacing:2.2px;font-weight:750;font-size:21px}.brand-icon{font-size:28px;border:1.5px solid var(--ink);width:39px;height:39px;border-radius:50%;text-align:center;line-height:36px;letter-spacing:0}.brand-rc{font-weight:400}.wordmark small{display:block;font-size:8px;letter-spacing:2.9px;line-height:1.5;margin-top:3px;font-weight:600}.field-status{margin-left:auto;display:flex;align-items:center;font-size:9px;font-weight:650;letter-spacing:1.4px;gap:8px;background:#f5f1e540;padding:9px 13px;border-radius:30px}.field-status i{width:5px;height:5px;border-radius:50%;background:#4d7045}.weather{margin-left:18px;font-weight:400}.icon-button{border:1px solid #273e3430;background:#f4f0e66e;border-radius:50%;height:34px;width:34px;font-family:Georgia;font-size:18px}#hangar{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,#f5f1e5f5 0%,#f5f1e5eb 25%,#f5f1e5b8 38%,#f5f1e500 63%);pointer-events:none}#hangar button,#hangar a{pointer-events:auto}.hangar-copy{position:absolute;left:5.3%;top:17%;width:410px;max-width:43%}.eyebrow{font-size:9px;font-weight:650;letter-spacing:2.1px;display:flex;align-items:center;gap:10px}.tiny-rule{width:27px;height:1px;background:currentColor}h1{font:400 clamp(44px,4.9vw,80px)/1.01 Georgia,"Times New Roman",serif;letter-spacing:-3px;margin:22px 0 18px}h1 em{font-weight:400;color:#72816a}.intro{font-size:13px;line-height:1.8;color:var(--muted);margin-bottom:30px}.setup-label{font-size:9px;letter-spacing:1px;color:#9a9e8d;margin-bottom:12px}.setup-label span{color:var(--ink);font-weight:650;letter-spacing:1.8px;margin-left:12px}.aircraft-picker{display:flex;gap:8px}.aircraft-card{width:33.333%;border:1px solid var(--line);background:#f8f5e83f;text-align:left;border-radius:8px;position:relative;padding:10px 13px 13px}.aircraft-card svg{height:45px;width:100%;fill:#8a8e7c;stroke:none;margin-bottom:3px}.aircraft-card strong{font-size:14px;font-weight:650;display:block}.aircraft-card small{font-size:7px;letter-spacing:1.1px;display:block;margin-top:4px;white-space:nowrap}.aircraft-card.selected{background:#2e4337;color:var(--paper);border-color:#2e4337;box-shadow:0 5px 15px #233f3320}.aircraft-card.selected svg{fill:#e6c391}.aircraft-card.selected:after{content:"✓";position:absolute;right:8px;top:6px;font-size:10px;color:#c4cead}.aircraft-card:not(.selected):hover{background:#f8f4e9}.plane-caption{display:flex;align-items:center;justify-content:space-between;gap:5px;margin:10px 0 23px}.plane-caption span:first-child{font-size:10px;line-height:1.4;color:var(--muted)}#aircraftBadge{font-size:6.5px;letter-spacing:.8px;border:1px solid #74856642;padding:4px 5px;border-radius:3px;white-space:nowrap}.mode-picker{display:flex;gap:6px}.mode-picker button{border:1px solid var(--line);border-radius:30px;background:transparent;font-size:11px;padding:9px 13px;white-space:nowrap}.mode-picker button span{font-size:16px;vertical-align:middle;margin-right:5px}.mode-picker button.selected{background:#e8dfc9;border-color:#c7bba1}.mode-picker button:hover{background:#e6e3d7}.launch-row{display:flex;gap:10px;margin-top:24px}.primary-button{background:var(--orange);color:#fffaf0;border:1px solid transparent;display:flex;align-items:center;justify-content:space-between;gap:30px;padding:15px 20px;border-radius:6px;font-size:13px;font-weight:600;text-align:left;min-height:50px;box-shadow:0 3px 7px #793f2013}.primary-button:hover{background:#ae4a28;box-shadow:0 5px 14px #793f2029}.primary-button span{font-size:22px;font-weight:400}.launch-row .primary-button{flex:1}.setup-button{width:52px;border:1px solid var(--line);border-radius:6px;background:#f4f0e68c}.setup-button:hover{background:#e6e2d5}.launch-note{display:flex;gap:7px;align-items:center;font-size:9px;color:var(--muted);margin-top:12px}.launch-note>span:first-child{color:#789369;font-size:6px}.hero-aircraft-note{position:absolute;right:8%;top:56%;font-size:10px;text-shadow:0 1px 10px #fff7e7;color:#263b30}.hero-aircraft-note span{letter-spacing:2px;font-weight:700}.hero-aircraft-note div{height:1px;width:210px;background:linear-gradient(90deg,#52634170,transparent);margin:10px 0}.hero-aircraft-note small{font-size:8px;letter-spacing:1.2px}.field-caption{position:absolute;right:4%;bottom:11%;text-align:right;text-shadow:0 1px 12px #fff9df}.field-caption span{font-size:10px;letter-spacing:3px;font-weight:700}.field-caption small{display:block;font:italic 16px Georgia;margin-top:7px}.hangar-footer{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));left:40px;right:40px;border-top:1px solid #263d3320;padding-top:17px;display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.8px}.hangar-footer a{letter-spacing:.5px;font-size:10px}.hangar-footer a span{margin-left:10px}body.flying #masthead{display:none}#flightHUD{position:absolute;inset:0;z-index:3;pointer-events:none}#flightHUD button,#controls>div,#wordCard{pointer-events:auto}.flight-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px max(24px,env(safe-area-inset-right)) 0 max(24px,env(safe-area-inset-left));color:#293e32}.flight-brand{background:var(--glass);padding:10px 14px;border:1px solid #ffffff5c;border-radius:7px;box-shadow:0 3px 15px #17371708}.flight-brand b{font-size:15px;letter-spacing:1.7px}.flight-brand b span{font-weight:350}.flight-brand small{display:block;font-size:8px;letter-spacing:2px;margin-top:4px}.mission-bar{position:absolute;left:50%;transform:translateX(-50%);text-align:center;background:var(--glass);border-radius:40px;padding:9px 24px;box-shadow:0 2px 12px #244a1810}.mission-bar span{display:block;font-size:7px;letter-spacing:1.9px;margin-bottom:4px;color:#7a816c}.mission-bar b{font-size:11px;font-weight:600}.flight-actions{display:flex;gap:7px}.hud-button{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;min-height:39px;background:var(--glass);border-radius:7px;font-size:11px;box-shadow:0 3px 12px #2640160b;border:1px solid #ffffff75}.hud-button.square{min-width:39px;font-size:17px;padding:7px}.hud-button:hover{background:#fffaf0}.telemetry{display:flex;gap:15px;align-items:center;position:absolute;left:max(24px,env(safe-area-inset-left));top:94px;background:var(--glass);padding:12px 16px;border-radius:7px}.telemetry div{display:grid;grid-template-columns:auto auto;align-items:baseline;gap:2px 5px}.telemetry span{grid-column:1/-1;font-size:7px;letter-spacing:1.5px;color:#7a816c}.telemetry b{font-size:24px;font-weight:450;font-variant-numeric:tabular-nums}.telemetry small{font-size:8px}.telemetry i{height:31px;width:1px;background:var(--line)}#timeValue{font-size:18px}#windValue{display:none}#controls{position:absolute;inset:0;pointer-events:none;touch-action:none}.throttle-panel{position:absolute;left:max(30px,env(safe-area-inset-left));bottom:max(35px,env(safe-area-inset-bottom));width:100px}.control-heading{display:flex;align-items:center;justify-content:space-between;font-size:8px;letter-spacing:1.5px;font-weight:650;text-shadow:0 1px 5px #fff;margin:0 0 10px}.control-heading b{font-size:11px;letter-spacing:0}#throttlePad{height:166px;position:relative;background:#f6f3e4c9;border:1px solid #fffffd91;border-radius:12px;touch-action:none;cursor:ns-resize;box-shadow:0 3px 20px #263c3020}#throttlePad:active{transform:none}.throttle-track{position:absolute;left:45px;top:16px;bottom:16px;width:10px;background:#6b795028;border-radius:6px;overflow:hidden}#throttleFill{position:absolute;bottom:0;left:0;right:0;height:65%;background:#8c9a7194;border-radius:6px}.throttle-ticks{position:absolute;inset:17px 19px;display:flex;flex-direction:column;justify-content:space-between}.throttle-ticks i{height:1px;background:#3f563742;width:10px;display:block}.throttle-ticks i:after{content:"";display:block;position:relative;left:53px;width:10px;height:1px;background:#3f563742}#throttleKnob{position:absolute;left:24px;top:37%;width:51px;height:29px;background:#334c3c;border:1px solid #839075;border-radius:6px;transform:translateY(-50%);box-shadow:0 2px 6px #192d3240;display:flex;align-items:center;justify-content:center;gap:3px}#throttleKnob span{width:1px;height:11px;background:#bcc5a888}#throttlePad small{position:absolute;font-size:6px;left:5px;letter-spacing:.5px;color:#6f7d60}#throttlePad small.max{top:3px}#throttlePad small.min{bottom:3px}.stick-panel{position:absolute;right:max(30px,env(safe-area-inset-right));bottom:max(28px,env(safe-area-inset-bottom));width:168px}.stick-panel .control-heading{justify-content:center}#stickPad{width:168px;height:168px;border-radius:50%;background:#f6f3e4ab;border:1px solid #fffffa82;box-shadow:inset 0 0 0 14px #faf8ef26,0 3px 20px #263c3020;position:relative;touch-action:none;cursor:grab}#stickPad:before{content:"";position:absolute;inset:22px;border:1px solid #5d73591c;border-radius:50%}.stick-cross{position:absolute;background:#556d542e;pointer-events:none}.stick-cross.x{left:26px;right:26px;top:50%;height:1px}.stick-cross.y{top:26px;bottom:26px;left:50%;width:1px}.stick-guide{position:absolute;color:#405c448a;font-size:16px}.stick-guide.up{top:3px;left:50%;transform:translateX(-50%);font-size:12px}.stick-guide.down{bottom:3px;left:50%;transform:translateX(-50%);font-size:12px}.stick-guide.left{left:8px;top:50%;transform:translateY(-50%)}.stick-guide.right{right:8px;top:50%;transform:translateY(-50%)}#stickKnob{position:absolute;left:50%;top:50%;width:59px;height:59px;margin:-29.5px;background:linear-gradient(140deg,#4e6652,#283e32);box-shadow:0 5px 10px #17332840,inset 0 1px 1px #ffffff4d;border:1px solid #92a388;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#c1c9ad;font-size:21px;touch-action:none}#stickKnob span{opacity:.65}#wordCard{position:absolute;left:50%;top:92px;transform:translateX(-50%);min-width:210px;max-width:340px;padding:10px 17px 12px;border:1px solid #fff7de99;background:#f7f0e2ed;border-radius:8px;text-align:center;box-shadow:0 4px 24px #32402516}.word-label{display:flex;justify-content:space-between;align-items:center;font-size:7px;letter-spacing:1.5px;color:#7d806d}.word-label button{background:#e6dfc7;color:#4e6147;border-radius:50%;width:23px;height:23px;font-size:15px}#currentWord{display:block;font:500 23px/1.2 Georgia,serif;margin:2px 0;overflow-wrap:anywhere}#currentTranslation{display:block;font-size:11px;color:#6f7665;max-height:3em;overflow:auto;margin-top:5px}#wordProgress{display:block;font-size:7px;letter-spacing:.3px;margin-top:9px;color:#94957d}#targetMarker{position:absolute;left:50%;top:35%;display:flex;flex-direction:column;align-items:center;color:#fff8cf;text-shadow:0 2px 7px #153d2c}#targetMarker>span{font-size:32px;line-height:22px}#targetMarker small{font-size:10px;background:#294c3b9c;border:1px solid #ffffff36;padding:3px 7px;border-radius:10px}.flight-hint{position:absolute;left:50%;bottom:95px;transform:translateX(-50%);border-radius:20px;font-size:10px;background:#fbf6e1da;padding:9px 16px;text-align:center;max-width:45%;color:#496044;transition:opacity 1s}.flight-bottom-center{position:absolute;bottom:max(25px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;background:#f6f2e3c9;padding:7px 11px;border:1px solid #ffffff36;border-radius:30px;white-space:nowrap}.subtle-button{font-size:9px;padding:4px 3px;background:transparent}.subtle-button:hover{color:var(--orange)}.separator{font-size:10px;color:#919b7c}.map-panel{position:absolute;right:24px;top:84px;width:133px;height:133px;background:#f7f2e3df;border:1px solid #ffffffaa;border-radius:50%;box-shadow:0 2px 15px #1c3d1720;overflow:hidden}#minimap{width:100%;height:100%;opacity:.9}.map-panel>span{position:absolute;left:calc(50% - 3px);top:5px;font-size:7px;font-weight:700}.map-panel>small{position:absolute;bottom:11px;left:50%;transform:translateX(-50%);font-size:6px;letter-spacing:1.3px;color:#667856}#statusMessage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font:italic 34px Georgia;color:#fff2d9;text-shadow:0 2px 12px #333c2799;text-align:center}#modalLayer{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#233b365c;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:25px}.modal{background:var(--paper);border:1px solid #fff8e8;border-radius:14px;padding:36px;position:relative;width:440px;max-width:100%;max-height:92dvh;overflow:auto;box-shadow:0 18px 90px #102e332b}.modal.wide{width:670px}.modal h2{font:400 39px/1.05 Georgia;letter-spacing:-1.2px;margin:17px 0}.modal>p{font-size:12px;line-height:1.7;color:var(--muted)}.modal>.primary-button{margin-top:25px;width:100%}.modal .eyebrow{font-size:8px;color:#76816b}.modal-action-row{display:flex;justify-content:space-between;margin-top:19px}.modal-action-row button,.text-button{background:transparent;text-decoration:underline;text-underline-offset:3px;font-size:11px;color:#6b7964}.text-button{display:block;margin:20px auto 0}.close-modal{position:absolute;right:16px;top:12px;border:1px solid var(--line);background:transparent;border-radius:50%;width:28px;height:28px;font-size:20px;line-height:1}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin-top:26px}.settings-grid>label{font-size:11px;font-weight:600}.settings-grid select{display:block;width:100%;margin-top:7px;border:1px solid var(--line);border-radius:5px;padding:10px 7px;background:#fcf9ed;color:var(--ink);font-size:12px}.settings-grid small{display:block;font-size:9px;line-height:1.4;font-weight:400;color:var(--muted);margin-top:5px}.checkboxes{display:flex;flex-direction:column;justify-content:center;gap:7px}.checkboxes label{font-size:10px;display:flex;align-items:center;gap:5px;cursor:pointer}.checkboxes input{accent-color:var(--ink);width:14px;height:14px}.import-details{margin-top:25px;border-top:1px solid var(--line);padding-top:16px;font-size:11px}.import-details summary{display:flex;justify-content:space-between;cursor:pointer;list-style:none;font-weight:600}.import-details p{font-size:10px;color:var(--muted);line-height:1.6}.import-details textarea{resize:vertical;display:block;min-height:85px;width:100%;font-size:12px;line-height:1.5;padding:10px;border-radius:5px;background:#fffcf2;border:1px solid var(--line);color:var(--ink)}.import-actions{display:flex;gap:8px;margin:10px 0}.import-actions button{padding:8px 11px;font-size:10px;border:1px solid var(--line);background:#e7e1cd;border-radius:4px}#importStatus{font-size:10px;color:#71855d}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 25px}.help-grid h3{font-size:12px;margin:15px 0 7px}.help-grid p{font-size:11px;color:var(--muted);line-height:1.75;margin:0}.help-grid b{font-weight:600;color:#3b5141}kbd{display:inline-block;min-width:16px;text-align:center;padding:1px 4px;border:1px solid #4d604326;border-radius:3px;background:#ebe6d7;color:#3f573f;font-size:9px;margin:2px}.help-footnote{font-size:10px!important;border-top:1px solid var(--line);padding-top:14px;margin-top:18px}.flight-summary{display:flex;gap:45px;margin-top:28px;padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.flight-summary span{font-size:7px;letter-spacing:1.4px;color:#77836b}.flight-summary b{display:block;margin-top:7px;font-size:24px;letter-spacing:0;color:var(--ink);font-weight:500}#toast{position:fixed;bottom:25px;left:50%;transform:translate(-50%,15px);background:#294234f2;color:#fff5dd;border:1px solid #d9e7ad31;border-radius:30px;padding:12px 22px;font-size:12px;z-index:80;max-width:90vw;opacity:0;pointer-events:none;transition:.25s;text-align:center}#toast.visible{opacity:1;transform:translate(-50%,0)}#rotatePrompt{display:none;position:fixed;inset:0;z-index:50;background:#f2eddb;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}#rotatePrompt h2{font:32px Georgia;margin-bottom:4px}#rotatePrompt p{font-size:12px;color:var(--muted)}.rotate-device{width:90px;height:50px;border:2px solid #82936d;border-radius:9px;font-size:39px;line-height:44px;animation:tilt 3s infinite ease-in-out}#rotatePrompt button{background:transparent;border-bottom:1px solid #adb79a;margin-top:35px;font-size:11px;padding:7px}@keyframes tilt{0%,25%,100%{transform:rotate(-90deg)}45%,80%{transform:rotate(0)}}
+@media(min-width:1500px){.hangar-copy{width:450px}.intro{font-size:15px}.aircraft-card{padding:16px}.aircraft-card svg{height:55px}.mode-picker button{padding:10px 16px;font-size:12px}.plane-caption span:first-child{font-size:11px}.primary-button{min-height:56px}.hero-aircraft-note{right:12%}}
+@media(max-height:780px) and (min-width:851px){.hangar-copy{top:14%;width:380px}h1{font-size:60px;margin:17px 0 12px}.intro{margin-bottom:21px;font-size:12px}.aircraft-card{padding:7px 12px 9px}.aircraft-card svg{height:35px}.plane-caption{margin:8px 0 17px}.launch-row{margin-top:17px}.primary-button{min-height:45px;padding:11px 17px}.setup-label{margin-bottom:9px}}
+@media(max-height:620px) and (min-width:851px){#masthead{top:18px}.hangar-copy{top:16%;width:350px}h1{font-size:47px;margin:10px 0}.intro{font-size:11px;margin:10px 0 16px}.aircraft-card svg{height:29px}.aircraft-card strong{font-size:12px}.aircraft-card small{font-size:6px}.plane-caption{margin-bottom:14px}.plane-caption span:first-child{font-size:9px}.mode-picker button{padding:7px 11px;font-size:10px}.setup-label.second{display:none}.launch-row{margin-top:14px}.launch-note{margin-top:8px;font-size:8px}.hangar-footer{bottom:12px;padding-top:9px}.field-caption{bottom:10%}}
+@media(max-width:850px) and (orientation:landscape){#masthead{top:14px;left:max(22px,env(safe-area-inset-left));right:max(22px,env(safe-area-inset-right))}.wordmark{font-size:15px}.wordmark small{font-size:6px;letter-spacing:2px}.brand-icon{width:28px;height:28px;font-size:23px;line-height:25px}.field-status{font-size:7px}.weather{display:none}.icon-button{width:27px;height:27px;font-size:15px}.hangar-copy{left:max(27px,env(safe-area-inset-left));top:20%;width:310px;max-width:45%}.eyebrow{font-size:6px;letter-spacing:1.2px}h1{font-size:39px;letter-spacing:-1.7px;margin:9px 0}.intro{display:none}.setup-label{font-size:7px;margin:11px 0 6px}.setup-label span{letter-spacing:1.3px;margin-left:8px}.aircraft-card{padding:4px 9px 7px}.aircraft-card svg{height:24px;margin-bottom:0}.aircraft-card strong{font-size:10px}.aircraft-card small{font-size:5px;letter-spacing:.6px}.aircraft-picker{gap:5px}.plane-caption{display:none}.setup-label.second{display:none}.mode-picker{gap:5px;margin-top:11px}.mode-picker button{font-size:9px;padding:6px 9px}.mode-picker button span{font-size:11px;margin-right:3px}.launch-row{margin-top:10px;gap:7px}.primary-button{padding:7px 13px;min-height:37px;font-size:11px}.setup-button{width:40px}.launch-note{font-size:7px;margin-top:7px}.launch-note>span:first-child{font-size:4px}.hangar-footer{left:24px;right:24px;bottom:10px;padding-top:8px;font-size:6px}.hangar-footer a{font-size:8px}.hero-aircraft-note{right:7%;top:58%;font-size:8px}.hero-aircraft-note small{font-size:6px}.hero-aircraft-note div{width:150px;margin:6px 0}.field-caption{bottom:13%;right:5%}.field-caption span{font-size:7px;letter-spacing:2px}.field-caption small{font-size:11px}.flight-top{padding-top:9px;gap:8px}.flight-brand{padding:7px 9px}.flight-brand b{font-size:11px}.flight-brand small{font-size:6px;letter-spacing:1px}.flight-actions{gap:5px}.hud-button{min-height:31px;padding:5px 9px;font-size:9px}.hud-button.square{min-width:31px;font-size:15px}.mission-bar{padding:7px 18px}.mission-bar span{font-size:6px}.mission-bar b{font-size:9px}.telemetry{top:65px;padding:8px 10px;gap:10px}.telemetry span{font-size:6px}.telemetry b{font-size:19px}.telemetry small{font-size:7px}#timeValue{font-size:15px}.telemetry i{height:23px}.map-panel{top:58px;width:83px;height:83px;right:max(24px,env(safe-area-inset-right))}.map-panel>small{font-size:5px;bottom:6px}.map-panel>span{top:3px;font-size:6px}.throttle-panel{bottom:21px;width:78px}.control-heading{font-size:6px;letter-spacing:1.1px;margin-bottom:6px}.control-heading b{font-size:8px}#throttlePad{height:121px;border-radius:10px}.throttle-track{left:34px;top:13px;bottom:13px;width:8px}.throttle-ticks{inset:14px 13px}.throttle-ticks i{width:8px}.throttle-ticks i:after{left:41px;width:8px}#throttleKnob{left:17px;width:43px;height:24px}#throttlePad small{font-size:5px}.stick-panel{bottom:15px;width:125px}#stickPad{width:125px;height:125px}#stickKnob{width:46px;height:46px;margin:-23px;font-size:18px}.flight-hint{font-size:8px;bottom:64px;padding:6px 11px;max-width:45%}.flight-bottom-center{bottom:17px;padding:4px 9px;gap:6px}.subtle-button{font-size:8px}.separator{font-size:8px}#wordCard{top:62px;min-width:180px;padding:6px 12px;max-width:260px}#currentWord{font-size:18px}.word-label{font-size:6px}.word-label button{height:18px;width:18px;font-size:11px}#currentTranslation{font-size:9px}#wordProgress{font-size:6px;margin-top:6px}.modal{padding:24px;max-height:92dvh}.modal h2{font-size:30px;margin:12px 0}.settings-grid{gap:12px 20px;margin-top:15px}.settings-grid select{padding:7px}.help-grid{gap:8px 22px}.modal>.primary-button{margin-top:17px}.flight-summary{padding:12px 0;margin-top:18px}.hero-aircraft-note{display:none}#toast{font-size:10px;padding:9px 16px;bottom:15px}}
+@media(orientation:portrait){body.in-hangar{overflow:hidden}body.in-hangar #hangar{min-height:0;background:linear-gradient(180deg,#f5f1e520 0%,#f5f1e500 14%,#f5f1e5d9 32%,#f5f1e5f9 43%,#f5f1e5 100%)}#masthead{left:22px;right:22px;top:max(20px,env(safe-area-inset-top))}.wordmark{font-size:17px}.wordmark small{font-size:6px;letter-spacing:2.4px}.brand-icon{width:32px;height:32px;line-height:29px;font-size:25px}.field-status{display:none}.icon-button{margin-left:auto}.hangar-copy{top:285px;left:7%;width:86%;max-width:440px}.eyebrow{font-size:7px}h1{font-size:49px;letter-spacing:-2px;margin:14px 0}.intro{font-size:12px;margin:10px 0 22px}.setup-label{font-size:8px}.aircraft-card{padding:9px 12px}.aircraft-card svg{height:34px}.aircraft-card strong{font-size:12px}.aircraft-card small{font-size:6px}.plane-caption{margin:9px 0 19px}.plane-caption span:first-child{font-size:9px}#aircraftBadge{font-size:6px}.mode-picker button{font-size:10px;padding:8px 11px}.mode-picker button span{font-size:14px}.launch-row{margin-top:18px}.launch-note{font-size:8px}.hero-aircraft-note{top:224px;right:8%;font-size:8px}.hero-aircraft-note small{font-size:6px}.hero-aircraft-note div{width:150px;margin:6px 0}.field-caption{display:none}.hangar-footer{left:7%;right:7%;bottom:20px;font-size:6px;padding-top:13px}.hangar-footer a{font-size:8px}body.flying #rotatePrompt{display:flex}.modal{padding:28px 23px}.modal h2{font-size:33px}.settings-grid{grid-template-columns:1fr;gap:14px}.help-grid{grid-template-columns:1fr;gap:7px}.help-grid p{font-size:11px}.modal.wide{max-width:410px}.settings-grid select{font-size:13px}.checkboxes{gap:9px;margin-top:3px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@media(max-height:360px) and (orientation:landscape){.hangar-copy{top:18%}h1{font-size:32px;margin:7px 0}.aircraft-card{padding:3px 8px 5px}.aircraft-card svg{height:20px}.mode-picker{margin-top:8px}.launch-row{margin-top:8px}.launch-row .primary-button{min-height:33px}.launch-note{display:none}.hangar-footer{padding-top:6px;font-size:5px}}
+
+
+/* Keep flight setup and its launch action inside the visible, safe viewport. */
+body.in-hangar{position:fixed;inset:0;height:100vh;height:100dvh;overflow:hidden}
+#hangar{
+  --hangar-side:clamp(24px,5.3vw,80px);
+  position:fixed;inset:0;height:100vh;height:100dvh;min-height:0;overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,min(410px,43vw)) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr) auto auto;row-gap:20px;
+  padding-top:max(100px,calc(env(safe-area-inset-top) + 76px));
+  padding-right:max(var(--hangar-side),calc(env(safe-area-inset-right) + 14px));
+  padding-bottom:max(22px,calc(env(safe-area-inset-bottom) + 14px));
+  padding-left:max(var(--hangar-side),calc(env(safe-area-inset-left) + 14px));
+}
+#hangar .hangar-copy{position:static;grid-column:1;grid-row:1;align-self:center;width:100%;max-width:none;min-width:0;min-height:0}
+#hangar .launch-dock{grid-column:1;grid-row:2;min-width:0;position:relative;z-index:3}
+#hangar .launch-row{margin-top:0;gap:10px}
+#hangar .launch-row .primary-button{min-height:50px;padding:13px 18px;font-size:13px}
+#hangar .setup-button{width:50px;min-width:50px;min-height:50px}
+#hangar .launch-note{margin-top:8px;font-size:9px;line-height:1.35}
+#hangar .hangar-footer{position:static;grid-column:1 / -1;grid-row:3;padding-top:12px;min-width:0}
+#hangar .mode-picker button{min-height:44px;flex:1;min-width:0;padding:9px 8px}
+#hangar .aircraft-card{min-width:0}
+#masthead #helpMenu{min-width:44px;min-height:44px;flex-shrink:0}
+
+/* A wide phone can be short: height, rather than device width, controls density. */
+@media(orientation:landscape) and (max-height:700px){
+  #hangar{grid-template-columns:minmax(0,min(370px,46vw)) minmax(0,1fr);row-gap:14px;padding-top:max(74px,calc(env(safe-area-inset-top) + 60px));padding-bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px))}
+  #hangar h1{font-size:clamp(34px,8dvh,50px);line-height:1.01;letter-spacing:-1.8px;margin:12px 0 16px}
+  #hangar .intro{display:none}
+  #hangar .eyebrow{font-size:8px;letter-spacing:1.4px}
+  #hangar .setup-label{font-size:8px;margin-bottom:8px}
+  #hangar .setup-label span{letter-spacing:1.2px;margin-left:8px}
+  #hangar .aircraft-card{min-height:78px;padding:7px 10px 8px}
+  #hangar .aircraft-card svg{height:28px;margin-bottom:2px}
+  #hangar .aircraft-card strong{font-size:12px}
+  #hangar .aircraft-card small{font-size:6px;letter-spacing:.8px}
+  #hangar .plane-caption{margin:8px 0 14px}
+  #hangar .mode-picker button{font-size:10px}
+  #hangar .mode-picker button span{font-size:14px;margin-right:4px}
+  #hangar .launch-note{font-size:8px;margin-top:6px}
+  #hangar .hangar-footer{padding-top:8px;font-size:7px}
+}
+@media(orientation:landscape) and (max-height:540px){
+  #masthead{top:max(10px,env(safe-area-inset-top));left:max(24px,calc(env(safe-area-inset-left) + 14px));right:max(24px,calc(env(safe-area-inset-right) + 14px))}
+  #masthead .wordmark{font-size:16px}
+  #masthead .wordmark small{font-size:6px;letter-spacing:2px}
+  #masthead .brand-icon{width:30px;height:30px;font-size:24px;line-height:27px}
+  #masthead .field-status{font-size:7px}
+  #masthead .weather{display:none}
+  #hangar{grid-template-rows:minmax(0,1fr) auto;row-gap:10px;padding-top:max(64px,calc(env(safe-area-inset-top) + 54px));padding-bottom:max(12px,calc(env(safe-area-inset-bottom) + 10px))}
+  #hangar h1{font-size:clamp(30px,8dvh,42px);margin:7px 0 8px}
+  #hangar .eyebrow{font-size:7px;letter-spacing:1.2px}
+  #hangar .aircraft-card{min-height:72px;padding:6px 9px}
+  #hangar .aircraft-card svg{height:24px}
+  #hangar .plane-caption,#hangar .setup-label.second,#hangar .hangar-footer{display:none}
+  #hangar .mode-picker{margin-top:12px;gap:6px}
+  #hangar .mode-picker button{padding:7px 6px}
+  #hangar .hero-aircraft-note{display:none}
+  #hangar .field-caption{bottom:max(30px,calc(env(safe-area-inset-bottom) + 20px))}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #hangar h1{font-size:32px;margin:4px 0 6px}
+  #hangar .eyebrow{display:none}
+  #hangar .setup-label{margin-bottom:6px;font-size:7px}
+  #hangar .aircraft-card{min-height:64px;padding:4px 9px 5px}
+  #hangar .aircraft-card svg{height:21px;margin-bottom:0}
+  #hangar .mode-picker{margin-top:8px}
+  #hangar .mode-picker button{font-size:10px}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #masthead{top:max(6px,env(safe-area-inset-top))}
+  #masthead .wordmark small,#masthead .field-status{display:none}
+  #hangar{row-gap:8px;padding-top:max(56px,calc(env(safe-area-inset-top) + 50px));padding-bottom:max(8px,calc(env(safe-area-inset-bottom) + 8px))}
+  #hangar h1{font-size:26px;line-height:1.03;letter-spacing:-1px;margin:0 0 6px;white-space:nowrap}
+  #hangar h1 br{display:none}
+  #hangar .aircraft-card{min-height:50px;padding:4px 8px}
+  #hangar .aircraft-card svg{height:17px}
+  #hangar .aircraft-card strong{font-size:11px}
+  #hangar .aircraft-card small,#hangar .launch-note{display:none}
+  #hangar .mode-picker{margin-top:8px}
+  #hangar .launch-row .primary-button{min-height:44px;padding:8px 14px;font-size:12px}
+  #hangar .setup-button{width:44px;min-width:44px;min-height:44px}
+  #hangar .field-caption small{display:none}
+}
+@media(orientation:landscape) and (max-height:280px){
+  #hangar h1,#hangar .setup-label,#hangar .aircraft-card svg{display:none}
+  #hangar .aircraft-card{min-height:44px}
+}
+
+@media(orientation:portrait){
+  #hangar{--hangar-side:22px;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;row-gap:14px;padding-top:clamp(140px,26dvh,250px);padding-bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px))}
+  #hangar .hangar-copy{align-self:end;justify-self:center;width:100%;max-width:440px}
+  #hangar .launch-dock{justify-self:center;width:100%;max-width:440px}
+  #hangar .intro,#hangar .hangar-footer{display:none}
+  #hangar h1{font-size:44px;line-height:1.01;letter-spacing:-1.8px;margin:12px 0 14px}
+  #hangar .eyebrow{font-size:7px;letter-spacing:1.3px}
+  #hangar .setup-label{font-size:8px;margin-bottom:8px}
+  #hangar .setup-label span{letter-spacing:1.2px;margin-left:8px}
+  #hangar .aircraft-picker{gap:7px}
+  #hangar .aircraft-card{min-height:86px;padding:8px 10px}
+  #hangar .aircraft-card svg{height:31px;margin-bottom:2px}
+  #hangar .aircraft-card strong{font-size:12px}
+  #hangar .aircraft-card small{font-size:6px;letter-spacing:.7px}
+  #hangar .plane-caption{margin:8px 0 14px}
+  #hangar .mode-picker{gap:6px}
+  #hangar .mode-picker button{font-size:10px;padding:8px 6px}
+  #hangar .mode-picker button span{font-size:14px;margin-right:3px}
+  #hangar .launch-note{font-size:8px;line-height:1.3;margin-top:7px}
+  #hangar .hero-aircraft-note{top:clamp(105px,25dvh,215px);right:7%}
+}
+@media(orientation:portrait) and (max-height:700px){
+  #hangar{row-gap:12px;padding-top:clamp(124px,24dvh,168px)}
+  #hangar h1{font-size:36px;margin:9px 0 11px}
+  #hangar .aircraft-card{min-height:74px;padding:6px 9px}
+  #hangar .aircraft-card svg{height:25px}
+  #hangar .plane-caption,#hangar .setup-label.second{display:none}
+  #hangar .mode-picker{margin-top:11px}
+  #hangar .hero-aircraft-note{display:none}
+}
+@media(orientation:portrait) and (max-height:600px){
+  #hangar h1{font-size:32px;margin:5px 0 10px}
+  #hangar .eyebrow{display:none}
+  #hangar .aircraft-card{min-height:66px;padding:5px 9px}
+  #hangar .aircraft-card svg{height:20px}
+  #hangar .setup-label{font-size:7px;margin-bottom:7px}
+  #hangar .mode-picker{margin-top:10px}
+}
+@media(orientation:portrait) and (max-width:350px){
+  #hangar{--hangar-side:16px}
+  #hangar .mode-picker button span{display:none}
+  #hangar .aircraft-card small{font-size:5.5px}
+}
+
+/* Flight information stays at the edges; Full view leaves only the controls. */
+#flightHUD{
+  --hud-top:max(12px,calc(env(safe-area-inset-top) + 8px));
+  --hud-left:max(20px,calc(env(safe-area-inset-left) + 12px));
+  --hud-right:max(20px,calc(env(safe-area-inset-right) + 12px));
+  --hud-bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px));
+}
+#flightHUD .flight-top{position:absolute;inset:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:var(--hud-top) var(--hud-right) 0 var(--hud-left);pointer-events:none}
+#flightHUD .flight-info{display:flex;align-items:center;gap:8px;flex:0 1 440px;min-width:0;pointer-events:none}
+#flightHUD .flight-actions{margin-left:auto;flex:0 0 auto;gap:6px;pointer-events:none}
+#flightHUD .hud-button{min-width:44px;min-height:44px;padding:9px 12px;font-size:11px;white-space:nowrap;pointer-events:auto}
+#flightHUD .hud-button.square{width:44px;padding:7px;font-size:17px}
+#flightHUD #fullViewButton[aria-pressed="true"]{background:#f8f4e7e8}
+#flightHUD .flight-brand{flex:0 0 auto;padding:8px 11px;min-height:44px}
+#flightHUD .flight-brand b{font-size:12px;letter-spacing:1.4px}
+#flightHUD .flight-brand small{font-size:6px;letter-spacing:1.1px;margin-top:3px}
+#flightHUD .mission-bar{position:static;left:auto;transform:none;flex:1;min-width:0;max-width:260px;min-height:44px;text-align:left;border-radius:7px;padding:8px 12px}
+#flightHUD .mission-bar span{font-size:6px;letter-spacing:1.2px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flightHUD .mission-bar b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flightHUD #wordCard{position:static;left:auto;top:auto;transform:none;display:flex;align-items:center;gap:8px;width:100%;min-width:0;max-width:none;min-height:46px;padding:0 10px 0 0;border-radius:7px;text-align:left;pointer-events:none}
+#flightHUD #wordCard:not(.hidden) ~ .flight-brand,#flightHUD #wordCard:not(.hidden) ~ .mission-bar{display:none}
+#flightHUD #repeatWord{align-self:stretch;flex:0 0 44px;min-height:44px;border-right:1px solid var(--line);border-radius:6px 0 0 6px;background:#e9e3d0;color:var(--ink);font-size:17px;padding:0;pointer-events:auto}
+#flightHUD .word-copy{flex:1;min-width:0;padding:4px 0}
+#flightHUD .word-line{display:flex;align-items:baseline;gap:8px;min-width:0}
+#flightHUD #currentWord{flex:1;min-width:0;margin:0;font:500 17px/1.15 Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;pointer-events:auto;cursor:pointer}
+#flightHUD #currentTranslation{flex:0 1 auto;min-width:0;max-width:44%;max-height:none;margin:0;font-size:10px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flightHUD #wordProgress{margin-top:2px;font-size:8px;line-height:1.25;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#747b65}
+#flightHUD #languageLabel{display:none}
+#flightHUD .telemetry{left:var(--hud-left);top:calc(var(--hud-top) + 56px);gap:12px;padding:8px 11px;border-radius:6px}
+#flightHUD .telemetry span{font-size:6px;letter-spacing:1px}
+#flightHUD .telemetry b{font-size:19px}
+#flightHUD .telemetry small{font-size:7px}
+#flightHUD .telemetry i{height:25px}
+#flightHUD #timeValue{font-size:15px}
+#flightHUD .map-panel{top:calc(var(--hud-top) + 56px);right:var(--hud-right);width:104px;height:104px}
+#flightHUD .map-panel>small{font-size:5px;bottom:8px}
+#flightHUD .map-panel>span{font-size:6px;top:4px}
+#flightHUD #statusMessage,#flightHUD .flight-hint{position:absolute;top:calc(var(--hud-top) + 112px);left:var(--hud-left);right:auto;bottom:auto;transform:none;width:max-content;max-width:min(360px,38vw);margin:0;padding:6px 10px;border:1px solid #ffffff65;border-radius:6px;background:var(--glass);color:var(--ink);font:500 11px/1.4 "Avenir Next",Avenir,"Segoe UI",sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;text-shadow:none;pointer-events:none}
+#flightHUD #statusMessage:not(.hidden) + .flight-hint{display:none}
+#flightHUD #targetMarker>span{font-size:22px;line-height:18px}
+#flightHUD #targetMarker small{font-size:8px;padding:2px 6px}
+#flightHUD .flight-bottom-center{bottom:var(--hud-bottom);padding:0 9px;gap:4px}
+#flightHUD .subtle-button{min-height:44px;padding:10px 6px;font-size:10px}
+#flightHUD .throttle-panel{left:var(--hud-left);bottom:var(--hud-bottom)}
+#flightHUD .stick-panel{right:var(--hud-right);bottom:var(--hud-bottom)}
+#flightHUD .stick-guide.up,#flightHUD .stick-guide.down{display:flex;align-items:center;gap:3px;font-size:8px;line-height:12px;letter-spacing:.35px;font-weight:650;color:#405941;pointer-events:none;white-space:nowrap}
+#flightHUD .stick-guide.up{top:5px}
+#flightHUD .stick-guide.down{bottom:5px}
+#flightHUD .pitch-arrow{font-size:11px;line-height:12px}
+body.full-view #wordCard,body.full-view .telemetry,body.full-view .map-panel,body.full-view .mission-bar,body.full-view .flight-brand,body.full-view .flight-hint,body.full-view #statusMessage,body.full-view #targetMarker,body.full-view .flight-bottom-center,body.full-view .flight-info{display:none!important}
+
+#pauseModal .pause-reset{display:block;width:100%;min-height:44px;margin-top:9px;padding:10px 14px;border:1px solid var(--line);border-radius:6px;background:#e9e4d3;color:var(--ink);font-size:12px}
+#pauseModal .modal-action-row{gap:10px;margin-top:10px}
+#pauseModal .modal-action-row button{min-height:44px;padding:8px 2px}
+#settingsModal select{min-height:44px}
+
+@media(orientation:landscape) and (max-height:540px){
+  #flightHUD{--hud-top:max(8px,calc(env(safe-area-inset-top) + 6px));--hud-left:max(16px,calc(env(safe-area-inset-left) + 10px));--hud-right:max(16px,calc(env(safe-area-inset-right) + 10px));--hud-bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}
+  #flightHUD .flight-info{flex-basis:360px}
+  #flightHUD .flight-brand{display:none}
+  #flightHUD .flight-top{gap:12px}
+  #flightHUD .mission-bar{max-width:260px}
+  #flightHUD .telemetry{gap:10px;padding:6px 10px}
+  #flightHUD .telemetry b{font-size:17px}
+  #flightHUD .telemetry i{height:23px}
+  #flightHUD .map-panel{width:80px;height:80px}
+  #flightHUD #statusMessage,#flightHUD .flight-hint{top:calc(var(--hud-top) + 104px);max-width:min(330px,38vw);font-size:10px;padding:5px 8px}
+  #flightHUD .throttle-panel{width:78px}
+  #flightHUD .control-heading{font-size:7px;letter-spacing:1px;margin-bottom:6px}
+  #flightHUD .control-heading b{font-size:9px}
+  #flightHUD #throttlePad{height:121px;border-radius:10px}
+  #flightHUD .throttle-track{left:calc(50% - 4px);top:13px;bottom:13px;width:8px}
+  #flightHUD .throttle-ticks{inset:14px 13px}
+  #flightHUD .throttle-ticks i{width:8px}
+  #flightHUD .throttle-ticks i:after{left:41px;width:8px}
+  #flightHUD #throttleKnob{left:calc(50% - 22px);width:44px;height:26px}
+  #flightHUD #throttlePad small{font-size:6px}
+  #flightHUD .stick-panel,#flightHUD #stickPad{width:136px}
+  #flightHUD #stickPad{height:136px}
+  #flightHUD #stickKnob{width:48px;height:48px;margin:-24px;font-size:18px}
+  #pauseModal{padding:22px 26px}
+  #pauseModal .eyebrow{font-size:7px}
+  #pauseModal h2{font-size:28px;margin:9px 0}
+  #pauseModal>p{font-size:11px;margin:8px 0}
+  #pauseModal>.primary-button{min-height:44px;margin-top:13px}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #flightHUD .throttle-panel{width:72px}
+  #flightHUD #throttlePad{height:114px}
+  #flightHUD .throttle-ticks i:after{left:35px}
+  #flightHUD .stick-panel,#flightHUD #stickPad{width:124px}
+  #flightHUD #stickPad{height:124px}
+  #flightHUD #stickKnob{width:46px;height:46px;margin:-23px}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #flightHUD{--hud-bottom:max(8px,calc(env(safe-area-inset-bottom) + 6px))}
+  #flightHUD .control-heading{display:none}
+  #flightHUD .stick-panel,#flightHUD #stickPad{width:116px}
+  #flightHUD #stickPad{height:116px}
+  #flightHUD #throttlePad{height:104px}
+  #flightHUD #stickKnob{width:44px;height:44px;margin:-22px}
+  #pauseModal .eyebrow,#pauseModal>p{display:none}
+}
+@media(max-width:700px){
+  #flightHUD .hud-button{font-size:10px;padding:9px}
+  #flightHUD #cameraButton>span:first-child{display:block}
+  #flightHUD .flight-top{gap:8px}
+  #flightHUD .word-line{gap:5px}
+  #flightHUD #currentWord{font-size:15px}
+  #flightHUD #currentTranslation{font-size:9px}
+}
+
+/* The collection scrolls sideways; launch controls stay in their fixed dock. */
+#hangar .aircraft-shelf{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px;min-width:0;align-items:stretch}
+#hangar .aircraft-picker{display:flex;gap:7px;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding-inline:0;scrollbar-width:none;overscroll-behavior-inline:contain;touch-action:pan-x;pointer-events:auto;outline-offset:-3px}
+#hangar .aircraft-picker::-webkit-scrollbar{display:none}
+#hangar .aircraft-card{flex:0 0 112px;width:112px;min-width:112px;padding-left:8px;padding-right:8px;scroll-snap-align:center;outline-offset:-3px;touch-action:pan-x}
+#hangar .aircraft-card strong{white-space:nowrap}
+#hangar .aircraft-card small{font-size:6px;letter-spacing:.35px;white-space:nowrap}
+#hangar .aircraft-nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;align-self:stretch;min-width:44px;min-height:44px;padding:4px 3px;border:1px solid #435b3d29;border-radius:8px;background:#f4efdfcc;color:#40553f;pointer-events:auto;touch-action:manipulation}
+#hangar .aircraft-nav:hover{background:#e6dfcd;border-color:#7782676b}
+#hangar .aircraft-nav>span{font-family:Georgia,serif;font-size:28px;font-weight:400;line-height:24px}
+#hangar .aircraft-nav-next>span{line-height:20px}
+#hangar #aircraftPosition{display:block;font-size:10px;line-height:13px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap;color:#40553f}
+#hangar .launch-origin{display:flex;align-items:center;gap:10px;margin-bottom:8px;min-width:0}
+#hangar #launchPickerLabel{flex:0 0 auto;font-size:8px;line-height:1.3;letter-spacing:1px;font-weight:650;color:var(--muted)}
+#hangar .launch-picker{display:flex;gap:6px;flex:1;min-width:0}
+#hangar .launch-picker button{flex:1;min-width:0;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#f7f3e8b8;font-size:11px;font-weight:550;white-space:nowrap}
+#hangar .launch-picker button>span{margin-right:5px;font-size:14px;vertical-align:middle}
+#hangar .launch-picker button:hover{background:#e9e3d3}
+#hangar .launch-picker button.selected,#hangar .launch-picker button[aria-pressed="true"]{background:#2e4337;border-color:#2e4337;color:var(--paper)}
+
+@media(orientation:landscape) and (max-height:540px){
+  #hangar .hangar-copy{align-self:end}
+  #hangar .launch-picker button{font-size:10px;padding:8px 6px}
+  #hangar .launch-origin{gap:8px}
+  #hangar #launchPickerLabel{font-size:7px;letter-spacing:.8px}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #hangar h1{font-size:27px;line-height:1.03;letter-spacing:-1px;margin:0 0 8px;white-space:nowrap}
+  #hangar h1 br{display:none}
+  #hangar .aircraft-card strong{font-size:11px}
+}
+@media(orientation:landscape) and (max-height:390px){
+  #hangar h1{display:none}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #hangar .setup-label{display:none}
+  #hangar .mode-picker{margin-top:6px}
+  #hangar .aircraft-picker{gap:5px}
+  #hangar .aircraft-card{padding-left:5px;padding-right:5px}
+  #hangar .launch-note{display:none}
+}
+@media(orientation:landscape) and (max-height:280px){
+  #hangar{padding-top:max(50px,calc(env(safe-area-inset-top) + 46px));row-gap:6px}
+}
+@media(orientation:portrait) and (max-width:400px){
+  #hangar .aircraft-card strong{font-size:11px}
+}
+@media(orientation:portrait) and (max-height:520px){
+  #hangar{padding-top:max(88px,calc(env(safe-area-inset-top) + 66px));row-gap:10px}
+  #hangar h1{font-size:26px;line-height:1.03;margin:0 0 9px;white-space:nowrap}
+  #hangar h1 br{display:none}
+  #hangar .aircraft-card{min-height:60px}
+}
+
+/* Camera choices are a temporary edge panel; switching does not cover a stick. */
+#flightHUD .camera-panel{position:absolute;z-index:8;top:calc(var(--hud-top) + 52px);right:var(--hud-right);width:min(430px,calc(100vw - var(--hud-left) - var(--hud-right)));max-height:calc(100dvh - var(--hud-top) - var(--hud-bottom) - 62px);overflow:auto;padding:4px 10px 10px;background:#f5f0e4f5;border:1px solid #fff9e7;border-radius:10px;box-shadow:0 9px 36px #17372c30;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:auto}
+#flightHUD .camera-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding-left:2px}
+#flightHUD .camera-panel-heading>span{font-size:8px;letter-spacing:1.6px;font-weight:650;color:#6c7864}
+#flightHUD #cameraClose{width:44px;min-height:44px;flex:0 0 44px;background:transparent;border-radius:6px;font-size:24px;font-weight:300;line-height:1;touch-action:manipulation}
+#flightHUD #cameraClose:hover{background:#e9e2d1}
+#flightHUD .camera-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+#flightHUD .camera-choices>button{min-width:0;min-height:44px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:#fffbf0;color:var(--ink);font-size:11px;line-height:1.25;white-space:normal;touch-action:manipulation}
+#flightHUD .camera-choices>button:hover{background:#e9e3d2}
+#flightHUD .camera-choices>button.selected,#flightHUD .camera-choices>button[aria-pressed="true"]{background:#304b3b;border-color:#304b3b;color:#fff8e7}
+#flightHUD .camera-choices>.ground-zoom{border-style:dashed;background:#ece5d3}
+#flightHUD .ground-zoom small{display:block;font-size:6px;line-height:1.2;letter-spacing:.5px;margin-bottom:3px;opacity:.8}
+#flightHUD .ground-zoom>span{font-size:10px}
+
+/* Ground brakes and airborne gear share one reachable slot by the throttle. */
+#flightHUD .ground-brake,#flightHUD .gear-control{position:absolute;left:calc(100% + 10px);bottom:0;min-height:44px;width:64px;padding:7px 6px;border:1px solid #fff8e6aa;border-radius:7px;background:#f6f2e4dc;color:var(--ink);box-shadow:0 3px 12px #243b2a16;touch-action:none;pointer-events:auto}
+#flightHUD .ground-brake>span{display:block;font-size:9px;font-weight:700;letter-spacing:.5px}
+#flightHUD .ground-brake>small{display:block;font-size:6px;letter-spacing:1px;margin-top:2px;opacity:.7}
+#flightHUD .ground-brake[aria-pressed="true"],#flightHUD .ground-brake.held{background:var(--orange);border-color:var(--orange);color:#fff8e9;transform:none}
+#flightHUD .gear-control{padding:6px;touch-action:manipulation}
+#flightHUD .gear-control>span{display:block;font-size:7px;font-weight:650;letter-spacing:1px;line-height:10px;opacity:.8}
+#flightHUD .gear-control>b{display:block;margin-top:2px;font-size:11px;font-weight:700;line-height:14px;letter-spacing:.3px}
+#flightHUD .gear-control[aria-pressed="false"]{background:#304b3be8;border-color:#a5b3919c;color:#fff7e7}
+#flightHUD .gear-control.moving{background:#eee1bce8;border-color:#ad8b4866;color:#6c5225}
+#flightHUD .engine-readout{position:absolute;left:0;bottom:calc(100% + 6px);display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;min-height:24px;padding:4px 6px;border:1px solid #fff8e6a6;border-radius:6px;background:#f6f2e4de;color:var(--ink);pointer-events:none}
+#flightHUD .engine-readout>span{font-size:7px;font-weight:650;letter-spacing:.6px;line-height:12px;color:#627057}
+#flightHUD .engine-readout>b{font-size:11px;font-weight:650;font-variant-numeric:tabular-nums;line-height:12px;white-space:nowrap}
+#flightHUD .takeoff-cue{position:absolute;left:calc(100% + 10px);bottom:53px;width:124px;max-width:28vw;padding:6px 8px;border-radius:6px;background:#f7f1dfd9;color:#40583f;font-size:10px;line-height:1.35;text-align:left;pointer-events:none}
+@media(orientation:landscape) and (max-height:540px){
+  #flightHUD .camera-panel{right:calc(var(--hud-right) + 148px);width:min(430px,calc(100vw - var(--hud-left) - var(--hud-right) - 238px))}
+  #flightHUD .camera-choices>button{font-size:10px;padding:6px 5px}
+  #flightHUD .takeoff-cue{font-size:9px;width:116px}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #flightHUD .camera-panel{right:calc(var(--hud-right) + 136px);width:min(430px,calc(100vw - var(--hud-left) - var(--hud-right) - 220px))}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #flightHUD .camera-panel{right:calc(var(--hud-right) + 128px);width:min(430px,calc(100vw - var(--hud-left) - var(--hud-right) - 212px))}
+}
+@media(orientation:landscape) and (max-width:520px){
+  #flightHUD .camera-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #flightHUD .camera-panel{padding:3px 7px 7px}
+}
+
+/* Camera choices are visible before launch and stay named while flying. */
+#masthead{column-gap:18px}
+#masthead .launch-camera{display:flex;align-items:center;gap:8px;flex:0 1 230px;min-width:0;margin-left:auto;font-size:11px;font-weight:650}
+#masthead .launch-camera>span{flex:0 0 auto}
+#masthead #launchCameraSelect{flex:1;min-width:0;width:170px;min-height:44px;padding:9px 7px;border:1px solid #435b3d36;border-radius:7px;background:#f8f4e7e8;color:var(--ink);font-size:11px;font-weight:500;touch-action:manipulation}
+#masthead #helpMenu{flex:0 0 44px}
+#flightHUD #returnButton{flex:0 0 auto;padding:9px 10px;font-weight:600}
+#flightHUD #cameraButton{flex-direction:column;gap:1px;min-width:76px;padding:5px 10px;border-color:#8c9a7566;background:#f8f4e7f2}
+#flightHUD #cameraButton>span.camera-button-title{display:block;font-size:12px;font-weight:700;line-height:14px}
+#flightHUD #cameraLabel{display:block;max-width:84px;font-size:9px;font-weight:450;line-height:12px;color:#5e7058;overflow:hidden;text-overflow:ellipsis}
+#flightHUD .camera-choices>button[data-camera]>span{display:block;font-weight:600}
+#flightHUD .camera-choices>button[data-camera]>small{display:block;margin-top:2px;font-size:8px;font-weight:400;line-height:10px;opacity:.75}
+@media(max-width:1000px){
+  #masthead .field-status{display:none}
+  #masthead{column-gap:12px}
+}
+@media(orientation:portrait) and (max-width:640px){
+  #masthead{flex-wrap:wrap;gap:8px 12px}
+  #masthead .wordmark{order:0}
+  #masthead #helpMenu{order:1;margin-left:auto}
+  #masthead .launch-camera{order:2;flex-basis:100%;width:100%;margin-left:0}
+  #masthead #launchCameraSelect{width:auto}
+}
+
+/* A second live view fits between the top actions and the steering control. */
+#flightHUD{--onboard-controls-clearance:198px}
+#flightHUD .onboard-preview{position:absolute;z-index:4;top:calc(var(--hud-top) + 56px);right:var(--hud-right);width:min(280px,34vw,max(0px,calc((100dvh - var(--hud-top) - 56px - var(--hud-bottom) - var(--onboard-controls-clearance)) * 1.777778)));aspect-ratio:16/9;border:2px solid #f8f3e4df;border-radius:2px;background:transparent;box-shadow:0 3px 18px #193c3033;overflow:hidden;pointer-events:none}
+#flightHUD #onboardViewport{position:absolute;inset:0;background:transparent;pointer-events:none}
+#flightHUD .onboard-camera-bar{position:absolute;inset:0 0 auto;display:flex;align-items:stretch;min-height:44px;background:linear-gradient(180deg,#18392ca6,#18392c40 70%,#18392c00)}
+#flightHUD .onboard-camera-control{position:relative;flex:1;min-width:0;display:block;pointer-events:auto}
+#flightHUD .onboard-camera-control>span{position:absolute;top:5px;left:9px;font-size:7px;line-height:9px;letter-spacing:1.1px;font-weight:650;color:#fff8e7;text-shadow:0 1px 3px #102a20;pointer-events:none}
+#flightHUD #onboardCameraSelect{display:block;width:100%;height:44px;min-height:44px;padding:14px 8px 3px;border:0;border-radius:0;background:transparent;color:#fff8e7;text-shadow:0 1px 3px #102a20;font-size:11px;font-weight:650;line-height:15px;touch-action:manipulation;pointer-events:auto}
+#flightHUD #onboardCameraSelect option{background:#f8f3e5;color:var(--ink);text-shadow:none}
+#flightHUD #onboardClose{flex:0 0 44px;width:44px;min-height:44px;border-left:1px solid #fff8e72b;background:transparent;color:#fff8e7;text-shadow:0 1px 3px #102a20;font-size:24px;font-weight:300;line-height:1;padding:0;touch-action:manipulation;pointer-events:auto}
+#flightHUD #onboardClose:hover{background:#18392c55}
+#flightHUD #onboardCameraSelect:focus-visible,#flightHUD #onboardClose:focus-visible{outline-offset:-3px}
+#flightHUD.has-onboard-view .map-panel{display:none}
+#flightHUD #onboardToggle{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:1;min-width:0;min-height:44px;padding:6px 9px;border:1px solid #435b3d29;border-radius:6px;background:#e9e4d4;color:var(--ink);text-align:left;touch-action:manipulation}
+#flightHUD #onboardToggle>span{font-size:11px;font-weight:650;line-height:13px}
+#flightHUD #onboardToggle small{display:block;margin-top:2px;font-size:8px;font-weight:400;line-height:11px;color:#62705b}
+#flightHUD #onboardToggleLabel{flex:0 0 auto;min-width:32px;padding:4px 6px;border-radius:12px;background:#d0d3c1;color:#56654e;text-align:center;font-size:10px;font-weight:650;line-height:14px}
+#flightHUD #onboardToggle[aria-pressed="true"] #onboardToggleLabel{background:#304b3b;color:#fff8e7}
+#flightHUD #onboardToggle:hover{background:#e1dccb}
+#flightHUD .camera-main-heading{margin:7px 2px 6px;font-size:7px;font-weight:650;line-height:9px;letter-spacing:1.4px;color:#6c7864}
+@media(orientation:landscape) and (max-height:540px){
+  #flightHUD{--onboard-controls-clearance:160px}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #flightHUD{--onboard-controls-clearance:148px}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #flightHUD{--onboard-controls-clearance:124px}
+}
+
+/* Screen size, information and flying style are separate, reachable controls. */
+body.flying{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;overflow:hidden}
+body.flying #flightHUD{position:fixed;inset:0;width:100%;height:100vh;height:100dvh}
+html:fullscreen,html:fullscreen body{width:100%;height:100%;margin:0;overflow:hidden}
+html:-webkit-full-screen,html:-webkit-full-screen body{width:100%;height:100%;margin:0;overflow:hidden}
+#flightHUD #fullscreenButton{flex:0 0 52px;width:52px;min-width:52px;flex-direction:column;gap:1px;padding:4px 2px;border-color:#8c9a7566}
+#flightHUD #fullscreenButton svg{width:19px;height:19px;stroke-width:1.7}
+#flightHUD #fullscreenLabel{display:block;font-size:8px;font-weight:600;line-height:10px;white-space:nowrap}
+#flightHUD #fullscreenButton[aria-pressed="true"]{background:#304b3be8;color:#fff8e7;border-color:#b2bea29c}
+#flightHUD #fullViewButton{min-width:44px;padding:8px 7px}
+#flightHUD #fullViewButton[aria-pressed="false"]{background:#304b3be8;color:#fff8e7;border-color:#b2bea29c}
+#flightHUD .aero-control{position:absolute;left:calc(100% + 10px);bottom:54px;min-height:44px;width:64px;padding:6px;border:1px solid #fff8e6aa;border-radius:7px;background:#f6f2e4e8;color:var(--ink);box-shadow:0 3px 12px #243b2a16;touch-action:manipulation;pointer-events:auto}
+#flightHUD .aero-control>span{display:block;font-size:7px;font-weight:600;line-height:10px;letter-spacing:.8px;opacity:.8}
+#flightHUD .aero-control>b{display:block;margin-top:2px;font-size:12px;font-weight:700;line-height:14px}
+#flightHUD .aero-control[aria-pressed="true"]{background:#aa5230ed;color:#fff8e7;border-color:#f5c6a282}
+#flightHUD .takeoff-cue{bottom:108px}
+
+/* Large tap targets change only the small camera, without opening a menu. */
+#flightHUD .onboard-step{position:absolute;bottom:0;z-index:2;display:flex;align-items:center;justify-content:center;width:44px;min-height:44px;padding:0;background:#18392c45;border-top:1px solid #fff8e72b;color:#fff8e7;text-shadow:0 1px 3px #102a20;font:400 28px/1 Georgia,serif;touch-action:manipulation;pointer-events:auto}
+#flightHUD #onboardPrev{left:0;border-right:1px solid #fff8e72b;border-radius:0 5px 0 0}
+#flightHUD #onboardNext{right:0;border-left:1px solid #fff8e72b;border-radius:5px 0 0 0}
+#flightHUD .onboard-step:hover{background:#18392c80}
+#flightHUD .onboard-step:focus-visible{outline-offset:-3px}
+
+/* A failed fullscreen request gives an optional link, never a blocking modal. */
+#flightHUD{--notice-left-clearance:186px;--notice-right-clearance:180px}
+#flightHUD .fullscreen-notice{position:absolute;z-index:9;left:calc(var(--hud-left) + var(--notice-left-clearance));right:calc(var(--hud-right) + var(--notice-right-clearance));bottom:var(--hud-bottom);width:auto;max-width:360px;margin:0 auto;padding:10px 12px 6px;border:1px solid #fff8e6bb;border-radius:8px;background:#f6f2e4f2;box-shadow:0 4px 22px #17372c30;color:var(--ink);pointer-events:auto}
+#flightHUD .fullscreen-notice p{margin:0;font-size:11px;line-height:1.4}
+#flightHUD .fullscreen-notice>div{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:3px}
+#flightHUD #fullscreenOpen{display:flex;align-items:center;min-height:44px;min-width:0;font-size:11px;font-weight:650;text-decoration:underline;text-underline-offset:3px}
+#flightHUD #fullscreenNoticeClose{flex:0 0 44px;width:44px;min-height:44px;padding:0;border-radius:5px;background:transparent;font-size:24px;font-weight:300;line-height:1}
+#flightHUD #fullscreenNoticeClose:hover{background:#e9e2d1}
+#flightHUD #fullscreenNotice:not(.hidden)~.flight-bottom-center{display:none}
+#flightHUD #fullscreenNotice:not(.hidden)~#controls .takeoff-cue{visibility:hidden}
+@media(orientation:landscape) and (max-height:540px){
+  #flightHUD{--notice-left-clearance:164px;--notice-right-clearance:148px}
+  #flightHUD .camera-panel{left:calc(var(--hud-left) + var(--notice-left-clearance));right:calc(var(--hud-right) + var(--notice-right-clearance));width:auto;max-width:430px;margin-left:auto}
+}
+@media(orientation:landscape) and (max-height:430px){
+  #flightHUD{--notice-left-clearance:158px;--notice-right-clearance:136px}
+}
+@media(orientation:landscape) and (max-height:360px){
+  #flightHUD{--notice-left-clearance:158px;--notice-right-clearance:128px}
+}
+@media(orientation:landscape) and (max-width:700px){
+  #flightHUD .camera-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #flightHUD .camera-panel{padding:4px 7px 7px}
+  #flightHUD #onboardToggle{gap:4px;padding:6px 7px}
+  #flightHUD #onboardToggle>span{font-size:10px}
+  #flightHUD #onboardToggle small{font-size:7px}
+}

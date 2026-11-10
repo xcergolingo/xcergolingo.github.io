@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "Skyfield RC — GoLingo Flight Club",
+  "short_name": "Skyfield RC",
+  "description": "Fly RC planes, practice aerobatics and learn words in the sky.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#b3c0a6",
+  "theme_color": "#273e34",
+  "icons": [{"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]
+}
