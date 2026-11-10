@@ -52,9 +52,9 @@
       <div class="plane-caption"><span id="aircraftDescription">Steady, friendly, and ready for your first flight.</span><span id="aircraftBadge">EASY TO FLY</span></div>
       <div class="setup-label second">02 <span>MAKE IT YOUR FLIGHT</span></div>
       <div class="mode-picker" role="group" aria-label="Flight activity">
-        <button data-mode="free" class="selected" aria-pressed="true"><span>⌁</span> Free flight</button>
+        <button data-mode="free" aria-pressed="false"><span>⌁</span> Free flight</button>
         <button data-mode="rings" aria-pressed="false"><span>◎</span> Ring run</button>
-        <button data-mode="learn" aria-pressed="false"><span>あ</span> Word flight</button>
+        <button data-mode="learn" class="selected" aria-pressed="true"><span>あ</span> Word flight</button>
       </div>
     </div>
     <div class="launch-dock" role="group" aria-label="Launch flight">
@@ -138,7 +138,7 @@
 
   <div id="rotatePrompt"><div class="rotate-device">↻</div><h2>A little more horizon.</h2><p>Turn your phone sideways to fly.</p><button id="rotateHangar">Back to hangar</button></div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=8"></script>
+  <script type="module" src="./app.js?v=9"></script>
   <script>setTimeout(()=>{if(!window.skyfieldReady&&!window.skyfieldFailed){document.getElementById('loading').classList.add('hidden');document.getElementById('loadError').classList.remove('hidden');document.getElementById('loadErrorText').textContent='The game is taking longer than expected. Check your connection, then try again.'}},25000);</script>
 </body>
 </html>

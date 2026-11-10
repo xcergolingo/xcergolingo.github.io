@@ -11,7 +11,11 @@ const clockText = s => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padSta
 const safeLoad = (key,fallback) => {try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;}};
 const safeSave = (key,value) => {try{localStorage.setItem(key,JSON.stringify(value));}catch{}};
 const saved = safeLoad('skyfield-settings-v1',{});
-const settings = {aircraft:'trainer',mode:'free',assisted:true,launch:'air',wind:0,light:'golden',repeat:true,translation:true,sentence:true,muted:false,pitchControl:'pull',fullView:true,camera:'ground',groundZoom:'auto',onboardEnabled:true,onboardCamera:'cockpit',...saved};
+const settings = {aircraft:'trainer',mode:'learn',assisted:true,launch:'air',wind:0,light:'golden',repeat:true,translation:true,sentence:true,muted:false,pitchControl:'pull',fullView:true,camera:'ground',groundZoom:'auto',onboardEnabled:true,onboardCamera:'cockpit',...saved};
+// Language learning is the starting activity on every visit, including for
+// returning players who previously chose another mode. They can still switch
+// to Free flight or Ring run from the hangar during this session.
+settings.mode='learn';
 // Existing players get both requested perspectives on their first visit after
 // this update. Keep their previous onboard choice in the new small window.
 if(!Object.prototype.hasOwnProperty.call(saved,'onboardEnabled')){
@@ -19,7 +23,7 @@ if(!Object.prototype.hasOwnProperty.call(saved,'onboardEnabled')){
   settings.camera='ground';
 }
 if(!AIRCRAFT[settings.aircraft]) settings.aircraft='trainer';
-if(!['free','rings','learn'].includes(settings.mode)) settings.mode='free';
+if(!['free','rings','learn'].includes(settings.mode)) settings.mode='learn';
 settings.wind=clamp(Number(settings.wind)||0,0,5);
 if(!['pull','push'].includes(settings.pitchControl))settings.pitchControl='pull';
 settings.fullView=settings.fullView!==false;
