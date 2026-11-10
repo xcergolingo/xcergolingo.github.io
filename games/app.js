@@ -59,6 +59,48 @@
   });
   const cards = [...document.querySelectorAll('.game-card')];
   document.getElementById('hub-count').textContent = cards.length + ' games';
+  // Browser-local reactions. No server-wide vote count is implied.
+  const likesKey = 'golingo:liked-games:v1';
+  let liked = {};
+  try { liked = JSON.parse(localStorage.getItem(likesKey) || '{}') || {}; } catch { liked = {}; }
+  const grid = document.querySelector('.game-grid');
+  const sortControl = document.getElementById('game-sort');
+  const originalOrder = new Map(cards.map((card, i) => [card, i]));
+  function renderLike(card) {
+    const button = card.querySelector('.game-like');
+    const isLiked = !!liked[card.id];
+    button.setAttribute('aria-pressed', String(isLiked));
+    button.setAttribute('aria-label', (isLiked ? 'Unlike ' : 'Like ') + (card.querySelector('h3')?.textContent || card.id));
+    button.innerHTML = (isLiked ? '👍 Liked' : '👍 Like') + ' <span aria-hidden="true">' + (isLiked ? '1' : '0') + '</span>';
+  }
+  function sortGames() {
+    const mode = sortControl?.value || 'default';
+    const sorted = cards.slice().sort((a,b) => mode === 'likes'
+      ? Number(!!liked[b.id]) - Number(!!liked[a.id]) || originalOrder.get(a)-originalOrder.get(b)
+      : mode === 'name'
+      ? (a.querySelector('h3')?.textContent || '').localeCompare(b.querySelector('h3')?.textContent || '')
+      : originalOrder.get(a)-originalOrder.get(b));
+    sorted.forEach(card => grid.appendChild(card));
+  }
+  cards.forEach(card => {
+    if (!card.id) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'game-like';
+    const copy = card.querySelector('.game-copy');
+    const tags = copy?.querySelector('.tags');
+    if (tags) tags.insertAdjacentElement('afterend', button);
+    else copy?.appendChild(button);
+    button.addEventListener('click', () => {
+      if (liked[card.id]) delete liked[card.id]; else liked[card.id] = true;
+      try { localStorage.setItem(likesKey, JSON.stringify(liked)); } catch {}
+      renderLike(card);
+      sortGames();
+    });
+    renderLike(card);
+  });
+  sortControl?.addEventListener('change', sortGames);
+
   document.querySelectorAll('[data-filter]').forEach(chip => chip.addEventListener('click', () => {
     const tag = chip.dataset.filter;
     let count = 0;
