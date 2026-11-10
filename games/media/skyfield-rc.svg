@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#71b5d8"/><stop offset="1" stop-color="#dff0d5"/></linearGradient><linearGradient id="r" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#555b5e"/><stop offset="1" stop-color="#34383a"/></linearGradient></defs>
+<rect width="1200" height="750" fill="url(#s)"/><path d="M0 480 Q260 390 500 470 T1200 430 V750 H0Z" fill="#6f9455"/>
+<path d="M510 750 L555 355 L645 355 L700 750Z" fill="url(#r)"/><path d="M596 710v-70M600 590v-70M603 470v-70" stroke="#fff" stroke-width="8" stroke-dasharray="26 22"/>
+<g transform="translate(635 305) rotate(-8)"><path d="M-145 0 L-25 -28 L95 -18 L150 0 L95 18 L-25 28Z" fill="#b7c1c9"/><path d="M-35 -12 L-115 -90 L-35 -58 L40 -10Z" fill="#98a5ad"/><path d="M-35 12 L-115 90 L-35 58 L40 10Z" fill="#98a5ad"/><ellipse cx="26" cy="-3" rx="27" ry="13" fill="#4b88a6"/></g>
+<circle cx="370" cy="278" r="72" fill="none" stroke="#78efff" stroke-width="14"/><text x="370" y="289" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#fff">volar</text>
+<g transform="translate(930 130)"><rect width="225" height="130" rx="18" fill="#07131dcc" stroke="#ffffff80"/><text x="20" y="34" fill="#fff" font-family="Arial" font-weight="700" font-size="20">ONBOARD · NOSE</text><path d="M20 95 Q110 45 205 88" fill="none" stroke="#7ee7ff" stroke-width="7"/><text x="145" y="118" fill="#fff" font-family="Arial" font-size="16">186 m</text></g>
+<rect x="38" y="38" width="365" height="95" rx="18" fill="#07131dcc"/><text x="62" y="81" fill="#fff" font-family="Arial,sans-serif" font-weight="900" font-size="36">SKYFIELD RC</text><text x="62" y="111" fill="#7ee7ff" font-family="Arial,sans-serif" font-weight="700" font-size="20">GROUND CONTROLLER · JETS · WORD RINGS</text>
+<rect x="50" y="645" width="320" height="54" rx="27" fill="#07131dcc"/><text x="210" y="680" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="700" font-size="20">DIST 186 m · ↑ AWAY</text>
+</svg>
