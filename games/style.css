@@ -33,3 +33,12 @@
 @media(max-width:600px){.lesson-panel{padding:16px}.hub-chip{padding:9px 13px;font-size:11px}.lesson-panel textarea{font-size:12px}}
 
 .ski-cover{background:#17374b}.ski-dot{background:#50cddd}
+
+/* Game reactions and sorting */
+.hub-sort{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;color:#315341;font-size:13px}
+.hub-sort label{font-weight:750}
+.hub-sort select{border:1px solid #cbd7c5;border-radius:12px;background:#fffefa;color:#18362d;padding:11px 14px;font:inherit;max-width:100%}
+.like-note{font-size:11px;color:#647766}
+.game-like{display:inline-flex;align-items:center;gap:7px;margin:14px 0 4px;padding:9px 15px;border:1px solid #bdceba;border-radius:24px;background:#f0f4ea;color:#214c38;font:700 13px/1.2 inherit;cursor:pointer;min-height:42px}
+.game-like[aria-pressed="true"]{background:#d8edc5;border-color:#5c8b4c}
+.game-like:focus-visible,.hub-sort select:focus-visible{outline:3px solid #3e8562;outline-offset:3px}
