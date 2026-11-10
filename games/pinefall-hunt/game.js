@@ -2,8 +2,8 @@ import * as THREE from './vendor/three.module.js';
 import { createEnvironment } from './environment.js';
 import { createDeer, createRifle } from './models.js';
 import { HuntAudio } from './audio.js';
-import { PinefallLearning } from './learning.js';
-import { LearningUI } from './learning-ui.js';
+import { PinefallLearning } from './learning.js?v=3';
+import { LearningUI } from './learning-ui.js?v=3';
 
 const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
@@ -59,7 +59,7 @@ function init(){
     for(let i=0;i<spawnPoints.length;i++) addAnimal(i);
     assignLearningTargets();
     applySettings();resize();bindControls();
-    $('start-label').textContent='BEGIN WORD HUNT';$('start').disabled=false;
+    setLearningModeUI();$('start').disabled=false;
     if(touch) $('start-hint').textContent='Left wheel to walk · drag the forest to look';
     else $('controls').classList.add('desktop');
     $('world').addEventListener('webglcontextlost',e=>{e.preventDefault();pauseGame();fatal('The 3D scene was interrupted. Tap Try again to reload the forest.');});
@@ -78,7 +78,7 @@ function setupLearning(){
       if(animals.length){
         assignLearningTargets();
         // A replacement lesson begins a new word trail without resetting the forest.
-        if(state.hits>0&&learning.learnedCount===0&&state.mode==='calm'&&!state.freeRoam){Object.assign(state,{hits:0,shots:0,score:0,bestShot:0,finishDelay:0,finishWait:0});state.reserve=Math.max(state.reserve,learning.total*3);}
+        if(state.hits>0&&learning.learnedCount===0&&(state.mode==='calm'||state.mode==='translation')&&!state.freeRoam){Object.assign(state,{hits:0,shots:0,score:0,bestShot:0,finishDelay:0,finishWait:0});state.reserve=Math.max(state.reserve,learning.total*3);}
         updateHUD();
       }
       const count=learning.entries.length;
@@ -100,6 +100,7 @@ function setupLearning(){
     },
     onTrack:trackDeer
   });
+  learningUI.setPromptMode?.('word');
   learningUI.setPlaying(false);
   $('mode-calm').querySelector('span').textContent=learning.entries.length+' words / phrases · your own pace';
 }
@@ -117,7 +118,7 @@ function labelLines(ctx,text,maxWidth,maxLines=3){
 function updateAnimalLabel(a){
   if(!a.lessonEntry){if(a.wordLabel)a.wordLabel.visible=false;return;}
   const entry=a.lessonEntry;
-  const showTranslation=learning.preferences.showTranslation;
+  const showTranslation=state.mode!=='translation'&&learning.preferences.showTranslation;
   const signature=entry.key+'|'+entry.word+'|'+entry.translation+'|'+showTranslation;
   if(a.labelSignature!==signature){
     const c=document.createElement('canvas');c.width=768;c.height=256;const ctx=c.getContext('2d');
@@ -136,7 +137,7 @@ function updateAnimalLabel(a){
     else{a.wordLabel.material.map?.dispose();a.wordLabel.material.map=texture;a.wordLabel.material.needsUpdate=true;}
     a.labelSignature=signature;
   }
-  a.wordLabel.visible=a.alive&&!!learning.preferences.showLabels&&state.phase!=='intro';
+  a.wordLabel.visible=a.alive&&(state.mode==='translation'||!!learning.preferences.showLabels)&&state.phase!=='intro';
 }
 function assignLearningTargets(){
   if(!learning||!animals.length)return;
@@ -156,7 +157,31 @@ function assignLearningTargets(){
   }
   for(const a of animals)if(!a.alive&&a.wordLabel)a.wordLabel.visible=false;
 }
-function syncLearningAudio(){learning?.setVolume?.(settings.muted?0:settings.volume);learning?.setActive(state.phase==='playing'&&!settings.muted&&settings.volume>0);}
+function translationPromptEntry(entry=learning?.current){
+  if(!entry)return null;
+  const phrase=String(entry.translation||'').trim();
+  if(!phrase)return null;
+  return {...entry,word:phrase,translation:'',audioUrl:'',sentence:'',sentenceTranslation:'',sentenceAudioUrl:'',learningLanguage:learning.lesson.primaryLanguage,primaryLanguage:learning.lesson.learningLanguage};
+}
+function playCurrentPrompt(){
+  if(state.mode!=='translation'||state.phase!=='playing')return;
+  const prompt=translationPromptEntry();
+  if(!prompt){hint('This item has no translation. Add a translation in Lesson to use Translation Hunt.',4);return;}
+  learning.replay(prompt);
+}
+function setLearningModeUI(){
+  const translation=state.mode==='translation';
+  learningUI?.setPromptMode?.(translation?'translation':'word');
+  const start=$('start-label');
+  if(start)start.textContent=translation?'BEGIN TRANSLATION HUNT':state.mode==='timed'?'BEGIN TIMED TRAIL':'BEGIN WORD HUNT';
+  const findLabel=$('find')?.querySelector('span');
+  if(findLabel)findLabel.textContent=translation?'LISTEN':'TRACK';
+}
+function syncLearningAudio(){
+  learning?.setVolume?.(settings.muted?0:settings.volume);
+  const automatic=state.phase==='playing'&&state.mode!=='translation'&&!settings.muted&&settings.volume>0;
+  learning?.setActive(automatic);
+}
 
 function makeMuzzle(){
   const c=document.createElement('canvas');c.width=c.height=64;
@@ -191,16 +216,16 @@ function startGame(){
   Object.assign(state,{scoped:false,zoom:4,crouched:false,steady:false,breath:1,ammo:5,reserve:30,reload:0,recoil:0,shots:0,hits:0,score:0,bestShot:0,elapsed:0,cooldown:0,freeRoam:false,toast:0,hint:0,tutorial:16,finishDelay:0,finishWait:0,trackTurn:null});
   Object.assign(player,{x:0,z:18,y:environment.heightAt(0,18)+1.75,yaw:0,pitch:-.018,stance:1.75});
   resetInputs();resetAnimals();
-  learning.begin();learning.unlock();assignLearningTargets();learningUI.setPlaying(true);syncLearningAudio();
+  learning.begin();learning.unlock();assignLearningTargets();setLearningModeUI();learningUI.setPlaying(true);syncLearningAudio();if(state.mode==='translation')playCurrentPrompt();
   state.reserve=Math.max(30,learning.total*3);
   $('welcome').classList.add('hidden');$('masthead').classList.add('hidden');
   $('results').classList.add('hidden');$('pause-screen').classList.add('hidden');$('settings').classList.add('hidden');
   $('hud').classList.remove('hidden');$('controls').classList.remove('hidden');
   $('tutorial').classList.remove('hidden');$('shot-toast').classList.add('hidden');$('hint-toast').classList.add('hidden');
   $('reload-progress').classList.add('hidden');$('target-tag').classList.add('hidden');$('hit-marker').classList.remove('show');
-  $('mission-label').textContent=state.mode==='timed'?'TIMED WORD TRAIL':'WORD HUNT';
+  $('mission-label').textContent=state.mode==='timed'?'TIMED WORD TRAIL':state.mode==='translation'?'TRANSLATION HUNT':'WORD HUNT';
   $('goal').textContent=state.mode==='timed'?'∞':learning.total;$('timer').classList.toggle('hidden',state.mode!=='timed');
-  $('tutorial-text').textContent='Listen to your word. Find the deer carrying it, then scope and fire. Track guides you to the current word. Tap Hide to clear the word card.';
+  $('tutorial-text').textContent=state.mode==='translation'?'Listen to the translation. Read the word labels over the deer and shoot the matching word. Listen repeats the translation without revealing the answer.':'Listen to your word. Find the deer carrying it, then scope and fire. Track guides you to the current word. Tap Hide to clear the word card.';
   rifle.group.visible=true;applyScope();updateHUD();
 }
 function pauseGame(){
@@ -214,7 +239,7 @@ function pauseGame(){
 function resumeGame(){
   state.phase='playing';$('pause-screen').classList.add('hidden');$('controls').classList.remove('hidden');
   audio?.setMuted(settings.muted);audio?.unlock();
-  learningUI?.setPlaying(true);learning?.unlock();syncLearningAudio();
+  learningUI?.setPlaying(true);learning?.unlock();setLearningModeUI();syncLearningAudio();if(state.mode==='translation')playCurrentPrompt();
 }
 function returnToIntro(){
   state.phase='intro';resetInputs();state.scoped=false;state.steady=false;applyScope();
@@ -238,7 +263,7 @@ function finishHunt(){
   learning?.setActive(false);learningUI?.setPlaying(false);
   if(document.pointerLockElement)document.exitPointerLock?.();
   $('controls').classList.add('hidden');$('results').classList.remove('hidden');
-  $('result-eyebrow').textContent=state.mode==='timed'?'WORD TRAIL COMPLETE':'LESSON COMPLETE';
+  $('result-eyebrow').textContent=state.mode==='timed'?'WORD TRAIL COMPLETE':state.mode==='translation'?'TRANSLATION HUNT COMPLETE':'LESSON COMPLETE';
   $('result-title').innerHTML=state.hits>0?'A morning<br>well spent.':'The forest<br>has more to give.';
   $('result-score').textContent=state.score.toLocaleString();$('result-count').textContent=state.hits;
   $('result-accuracy').textContent=(state.shots?Math.round(state.hits/state.shots*100):0)+'%';
@@ -250,7 +275,7 @@ function continueRoam(){
   state.reserve=Math.max(state.reserve,30);state.ammo=Math.max(state.ammo,5);
   $('results').classList.add('hidden');$('controls').classList.remove('hidden');$('timer').classList.add('hidden');
   $('mission-label').textContent='KEEP PRACTICING';$('goal').textContent='∞';
-  if(learning.complete)learning.begin();assignLearningTargets();learningUI.setPlaying(true);learning.unlock();syncLearningAudio();
+  if(learning.complete)learning.begin();assignLearningTargets();setLearningModeUI();learningUI.setPlaying(true);learning.unlock();syncLearningAudio();if(state.mode==='translation')playCurrentPrompt();
   audio?.unlock();hint('Keep exploring and collecting words for review.');
 }
 
@@ -339,12 +364,19 @@ function fire(){
       $('toast-detail').textContent=entry.word+(learning.preferences.showTranslation&&entry.translation?' · '+entry.translation:'');
       $('shot-toast').classList.remove('hidden');$('hit-marker').classList.add('show');
       setTimeout(()=>$('hit-marker').classList.remove('show'),200);
-      if(result.complete&&state.mode==='calm'&&!state.freeRoam){state.finishDelay=4;state.finishWait=45;}
+      const finiteLesson=state.mode==='calm'||state.mode==='translation';
+      if(result.complete&&finiteLesson&&!state.freeRoam){state.finishDelay=state.mode==='translation'?1.8:4;state.finishWait=45;}
       else if(result.complete)learning.begin();
       assignLearningTargets();
+      if(state.mode==='translation'&&!state.finishDelay)playCurrentPrompt();
     }else{
-      hint('Find “'+(learning.current?.word||'your current word')+'”. Tap Track for a hint.',3);
-      learning.replay();
+      if(state.mode==='translation'){
+        hint('Wrong word. Listen again and find the word that matches the translation.',3);
+        playCurrentPrompt();
+      }else{
+        hint('Find “'+(learning.current?.word||'your current word')+'”. Tap Track for a hint.',3);
+        learning.replay();
+      }
     }
   }else{
     if(obstacle)end.copy(obstacle.point);
@@ -399,7 +431,7 @@ function updateAnimals(dt){
     a.grazing=mix(a.grazing,a.wait>1&&a.alert===0?.8:0,1-Math.exp(-dt*2));
     a.group.position.set(a.x,environment.heightAt(a.x,a.z),a.z);a.group.rotation.y=a.yaw;
     a.animate(worldTime+a.id*1.7,a.pace,a.alert>0?1:0,a.grazing);
-    if(a.wordLabel)a.wordLabel.visible=state.phase!=='intro'&&learning.preferences.showLabels&&a.alive;
+    if(a.wordLabel)a.wordLabel.visible=state.phase!=='intro'&&(state.mode==='translation'||learning.preferences.showLabels)&&a.alive;
   }
 }
 function nearestDeer(){
@@ -410,6 +442,7 @@ function nearestDeer(){
 }
 function trackDeer(){
   if(state.phase!=='playing')return;
+  if(state.mode==='translation'){playCurrentPrompt();hint('Translation repeated. Find the matching word on your own.',2.5);return;}
   const {animal:a,distance}=nearestDeer();
   if(!a){hint('The clearing is quiet. More deer will return soon.');return;}
   const target=animalAimPoint(a,v1);
@@ -468,13 +501,17 @@ function updateHUD(){
   $('rifle-state').textContent=state.reload>0?'RELOADING':state.ammo===0?'RELOAD YOUR RIFLE':'BOLT-ACTION · READY';
   $('stance-label').textContent=state.crouched?'CROUCHING':state.move>.05?'WALKING':'STANDING';
   const {animal:a,distance}=nearestDeer();
-  $('track-distance').textContent=a?Math.round(distance)+' m':'—';
-  $('track-title').textContent=a?'CURRENT WORD':'WORD RETURNING';
-  if(a){const bearing=Math.atan2(player.x-a.x,player.z-a.z);const relative=-angleDiff(bearing,player.yaw);$('track-direction').style.transform='rotate('+relative+'rad)';}
+  if(state.mode==='translation'){
+    $('track-distance').textContent='TAP';$('track-title').textContent='REPLAY TRANSLATION';$('track-direction').textContent='♪';$('track-direction').style.transform='none';
+  }else{
+    $('track-distance').textContent=a?Math.round(distance)+' m':'—';
+    $('track-title').textContent=a?'CURRENT WORD':'WORD RETURNING';$('track-direction').textContent='↑';
+    if(a){const bearing=Math.atan2(player.x-a.x,player.z-a.z);const relative=-angleDiff(bearing,player.yaw);$('track-direction').style.transform='rotate('+relative+'rad)';}
+  }
   $('awareness').textContent=a&&a.alert>0?'DEER ARE ALERT':state.crouched?'QUIET APPROACH':'MOVE QUIETLY';
   $('awareness').style.color=a&&a.alert>0?'#f0c18b':'';
-  $('mission-sub').textContent=state.freeRoam?'Keep collecting words':state.mode==='calm'?Math.max(0,(learning?.total||0)-state.hits)+' words / phrases to collect':'Listen, find, and remember';
-  if(state.mode==='calm'&&!state.freeRoam)$('goal').textContent=learning?.total||0;
+  $('mission-sub').textContent=state.freeRoam?'Keep collecting words':state.mode==='translation'?'Hear the translation · shoot the matching word':state.mode==='calm'?Math.max(0,(learning?.total||0)-state.hits)+' words / phrases to collect':'Listen, find, and remember';
+  if((state.mode==='calm'||state.mode==='translation')&&!state.freeRoam)$('goal').textContent=learning?.total||0;
   const degrees=((Math.round(-player.yaw*180/Math.PI)%360)+360)%360;
   const headings=['N','NE','E','SE','S','SW','W','NW'];const index=Math.round(degrees/45)%8;
   $('compass-main').textContent=headings[index];$('compass-left').textContent=headings[(index+7)%8];$('compass-right').textContent=headings[(index+1)%8];$('heading').textContent=String(degrees).padStart(3,'0')+'°';
@@ -553,8 +590,8 @@ function bindControls(){
   $('fire').addEventListener('click',e=>{if(e.detail===0)fire();});
   $('zoom').addEventListener('click',()=>{state.zoom=state.zoom===4?8:state.zoom===8?2:4;applyScope();});
   $('dismiss-tutorial').addEventListener('click',()=>{state.tutorial=0;$('tutorial').classList.add('hidden');});
-  document.querySelectorAll('[data-mode]').forEach(el=>el.addEventListener('click',()=>{state.mode=el.dataset.mode;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('selected',b===el);b.setAttribute('aria-pressed',String(b===el));});}));
-  $('sound').addEventListener('click',()=>{settings.muted=!settings.muted;audio?.unlock();applySettings();saveSettings();});
+  document.querySelectorAll('[data-mode]').forEach(el=>el.addEventListener('click',()=>{state.mode=el.dataset.mode;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('selected',b===el);b.setAttribute('aria-pressed',String(b===el));});setLearningModeUI();}));
+  $('sound').addEventListener('click',()=>{settings.muted=!settings.muted;audio?.unlock();applySettings();saveSettings();if(!settings.muted&&state.mode==='translation'&&state.phase==='playing')playCurrentPrompt();});
   $('sensitivity').addEventListener('input',e=>{settings.sensitivity=Number(e.target.value);saveSettings();});
   $('volume').addEventListener('input',e=>{settings.volume=Number(e.target.value);audio?.unlock();audio?.setVolume(settings.volume);syncLearningAudio();saveSettings();});
   $('aim-assist').addEventListener('change',e=>{settings.assist=e.target.checked;saveSettings();});
