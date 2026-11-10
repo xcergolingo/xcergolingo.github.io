@@ -2,329 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07131d">
 <title>Skyfield RC — GoLingo Flight Club</title>
+<link rel="canonical" href="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site">
 <style>
-:root{--glass:rgba(4,15,24,.62);--line:rgba(255,255,255,.22);--text:#f7fbff;--accent:#7ee7ff;--warn:#ffbe62}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07131d;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
-button,select,input{font:inherit;color:inherit}
-button,select{background:rgba(8,24,36,.72);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-button:active{transform:scale(.97)}
-#view{display:block;width:100%;height:100%}
-#boot{position:fixed;inset:0;display:grid;place-items:center;background:#07131d;z-index:200;font-weight:800;letter-spacing:.08em}
-#menu{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:linear-gradient(90deg,rgba(3,14,22,.88),rgba(3,14,22,.28) 65%,rgba(3,14,22,.06))}
-#menu.hidden,#hud.hidden{display:none}
-.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.08em}.brand b{font-size:20px}.brand span{font-size:11px;opacity:.75}
-.menu-main{width:min(690px,100%);display:flex;flex-direction:column;gap:11px}
-.menu-main h1{margin:0;font-size:clamp(30px,7vw,64px);line-height:.9}.menu-main p{margin:0;max-width:620px;font-size:13px;opacity:.8}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.aircraft-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}.aircraft-strip::-webkit-scrollbar{display:none}
-.aircraft-card{min-width:118px;text-align:left;padding:9px}.aircraft-card strong{display:block;font-size:12px}.aircraft-card small{display:block;font-size:9px;opacity:.65;margin-top:3px}.aircraft-card.active{border-color:var(--accent);box-shadow:0 0 0 1px rgba(126,231,255,.3) inset}
-.choice.active{border-color:var(--accent);background:rgba(33,116,145,.35)}
-#startBtn{min-height:48px;padding:12px 22px;background:#eafcff;color:#09202b;border:0;font-weight:900}
-.tip{font-size:10px;opacity:.68}
-#hud{position:fixed;inset:0;z-index:30;pointer-events:none}
-.topbar{position:absolute;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.toolbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.toolbar button{pointer-events:auto;min-height:38px;font-size:10px;padding:7px 9px}
-#backBtn{pointer-events:auto;min-height:38px;font-size:11px}
-#rangeHUD{position:absolute;top:max(54px,calc(env(safe-area-inset-top) + 44px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--glass);font-weight:800;font-size:11px;letter-spacing:.03em;text-shadow:0 1px 4px #000;white-space:nowrap}
-#rangeHUD .far{display:none;color:#ffd68b;border:1px solid rgba(255,190,98,.65);border-radius:999px;padding:2px 5px;font-size:9px}#rangeHUD.is-far .far{display:inline}
-#status{position:absolute;left:max(14px,env(safe-area-inset-left));top:72px;padding:7px 9px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,.12);font-size:10px;line-height:1.5}
-#status b{font-size:14px}
-#wordToast{position:absolute;left:50%;top:105px;transform:translateX(-50%);background:rgba(6,20,29,.72);border:1px solid var(--line);padding:7px 10px;border-radius:12px;font-size:11px;opacity:0;transition:opacity .2s;max-width:55vw;text-align:center}#wordToast.show{opacity:1}
-#throttleWrap{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:70px;height:205px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto}
-#throttleTrack{position:relative;width:52px;flex:1;border:1px solid var(--line);border-radius:26px;background:var(--glass)}
-#throttleFill{position:absolute;left:0;right:0;bottom:0;border-radius:25px;background:linear-gradient(#77eeff,#2c9ec8);height:45%}
-#throttleThumb{position:absolute;left:6px;right:6px;height:11px;border-radius:8px;background:white;bottom:calc(45% - 5px);box-shadow:0 1px 8px #000}
-#throttleLabel{font-size:9px;font-weight:800}
-#stickWrap{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:150px;height:150px;pointer-events:auto}
-#stickBase{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line);background:rgba(7,20,30,.42)}
-#stickBase:before,#stickBase:after{content:"";position:absolute;background:rgba(255,255,255,.15)}#stickBase:before{width:1px;top:15%;bottom:15%;left:50%}#stickBase:after{height:1px;left:15%;right:15%;top:50%}
-#stick{position:absolute;width:48px;height:48px;border-radius:50%;background:#effcff;border:5px solid rgba(126,231,255,.45);left:51px;top:51px;box-shadow:0 4px 12px #0008}
-.stickHint{position:absolute;right:0;left:0;bottom:-14px;text-align:center;font-size:8px;opacity:.75}
-#leftActions{position:absolute;left:92px;bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:6px;pointer-events:auto}#leftActions button{font-size:9px;min-height:38px}
-#pipFrame{position:absolute;right:max(12px,env(safe-area-inset-right));top:58px;width:min(31vw,320px);aspect-ratio:16/9;border:1px solid rgba(255,255,255,.52);border-radius:13px;overflow:hidden;box-shadow:0 8px 28px #0007;pointer-events:none;background:rgba(0,0,0,.1)}
-#pipFrame.hidden{display:none}
-#pipLabel{position:absolute;left:6px;top:6px;padding:3px 6px;border-radius:999px;background:rgba(0,0,0,.55);font-size:9px;font-weight:800}
-#pipRange{position:absolute;right:6px;top:6px;padding:3px 6px;border-radius:999px;background:rgba(0,0,0,.55);font-size:9px;font-weight:800}
-#pipControls{position:absolute;left:6px;right:6px;bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:4px;pointer-events:auto}
-#pipControls button{padding:4px 8px;border-radius:8px;min-height:28px;font-size:10px}#pipControls span{padding:4px 7px;border-radius:8px;background:rgba(0,0,0,.55);font-size:9px}
-#portrait{display:none;position:fixed;inset:0;z-index:250;background:#07131d;place-items:center;text-align:center;padding:30px}#portrait b{font-size:26px}#portrait p{opacity:.72}
-@media(orientation:portrait) and (max-width:850px){#portrait{display:grid}}
-@media(max-height:500px) and (orientation:landscape){
-#menu{padding:8px 12px}.menu-main{gap:6px}.menu-main h1{font-size:31px}.menu-main p{display:none}.aircraft-card{min-width:103px;padding:6px}.aircraft-card small{display:none}#startBtn{min-height:42px;padding:9px 18px}
-#rangeHUD{top:max(46px,calc(env(safe-area-inset-top) + 38px));font-size:10px;padding:5px 8px}
-#status{top:50px;font-size:9px;padding:5px 7px}#status b{font-size:12px}
-#throttleWrap{height:150px;width:58px;bottom:9px}#stickWrap{width:118px;height:118px;bottom:9px}#stick{width:40px;height:40px;left:39px;top:39px}
-#leftActions{left:82px;bottom:10px}#leftActions button{min-height:32px;padding:5px 7px}
-#pipFrame{top:49px;width:min(30vw,250px)}.toolbar button,#backBtn{min-height:32px;padding:5px 7px}
-}
-.info-hidden #status,.info-hidden #wordToast{display:none}
+html,body{margin:0;width:100%;height:100%;background:#07131d;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{display:grid;place-items:center;text-align:center}
+main{padding:24px}
+h1{font-size:24px;margin:0 0 10px}
+p{opacity:.72;margin:0 0 18px}
+a{display:inline-block;color:#07131d;background:#eafcff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:800}
 </style>
-</head>
-<body>
-<canvas id="view"></canvas>
-<div id="boot">PREPARING SKYFIELD RC…</div>
-<div id="portrait"><div><b>Rotate to landscape</b><p>Skyfield RC is designed like a real transmitter: wide screen, throttle left, flight stick right.</p></div></div>
-
-<section id="menu">
-  <div class="brand"><b>GoLingo · SKYFIELD RC</b><span>RC FLIGHT CLUB</span></div>
-  <div class="menu-main">
-    <div><h1>Fly it<br>from the field.</h1><p>Ground-controller flying, onboard camera, aerobatics, word rings, runway takeoffs, and live range from you to the aircraft.</p></div>
-    <div class="aircraft-strip" id="aircraftStrip"></div>
-    <div class="row" id="modeChoices">
-      <button class="choice active" data-mode="word">Word flight</button>
-      <button class="choice" data-mode="free">Free flight</button>
-      <button class="choice" data-mode="rings">Ring run</button>
-    </div>
-    <div class="row" id="startChoices">
-      <button class="choice active" data-start="runway">Runway</button>
-      <button class="choice" data-start="air">In air</button>
-      <button class="choice active" id="pitchChoice">Pull down to climb</button>
-    </div>
-    <div class="row"><button id="startBtn">START FLIGHT →</button><span class="tip" id="lessonInfo">Default vocabulary loaded</span></div>
-  </div>
-  <div class="tip">Touch: throttle left · stick right · Acro for rolls & loops · onboard inset stays independent</div>
-</section>
-
-<section id="hud" class="hidden">
-  <div class="topbar">
-    <button id="backBtn">← Back</button>
-    <div class="toolbar">
-      <button id="mainCamBtn">Camera · Controller</button>
-      <button id="pipToggle">Small camera</button>
-      <button id="infoBtn">Info</button>
-      <button id="fullBtn">Full screen</button>
-    </div>
-  </div>
-  <div id="rangeHUD"><span id="rangeValue">DIST 0 m</span><span id="rangeTrend">— HOLDING</span><span class="far">FAR</span></div>
-  <div id="status"><b id="planeName">SCOUT</b><br><span id="speedText">0 km/h</span> · <span id="altText">0 m</span><br><span id="gearText">GEAR DOWN</span></div>
-  <div id="wordToast"></div>
-
-  <div id="pipFrame">
-    <span id="pipLabel">COCKPIT</span><span id="pipRange">0 m</span>
-    <div id="pipControls"><button id="pipPrev">‹</button><span id="pipName">Cockpit</span><button id="pipNext">›</button></div>
-  </div>
-
-  <div id="throttleWrap"><div id="throttleTrack"><div id="throttleFill"></div><div id="throttleThumb"></div></div><div id="throttleLabel">THROTTLE 45%</div></div>
-  <div id="leftActions"><button id="acroBtn">Easy</button><button id="gearBtn">Gear</button><button id="speakBtn">Speak</button></div>
-  <div id="stickWrap"><div id="stickBase"></div><div id="stick"></div><div class="stickHint">PULL DOWN = CLIMB</div></div>
-</section>
-
-<script>
-window.addEventListener('error',function(e){
-  var b=document.getElementById('boot');
-  if(b){b.style.display='grid';b.innerHTML='<div style="max-width:70vw;text-align:center"><b>SKYFIELD RC COULD NOT START</b><br><small style="display:block;margin-top:10px;opacity:.7">'+String(e.message||'Unknown startup error').replace(/[<>]/g,'')+'</small><br><button onclick="location.reload()" style="margin-top:14px;padding:9px 14px;border-radius:10px;border:1px solid #ffffff55;background:#163146;color:white">RELOAD</button></div>';}
-});
-if(window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect){
-  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
-    r=Array.isArray(r)?r[0]:r; r=Math.max(0,Math.min(Number(r)||0,Math.min(Math.abs(w),Math.abs(h))/2));
-    this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);
-    this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-    this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);
-    this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath();return this;
-  };
-}
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 (function(){
-'use strict';
-var T=window.THREE;if(!T){throw new Error('Three.js failed to load. Check the network connection and reload.');}var clamp=T.MathUtils.clamp, lerp=T.MathUtils.lerp;
-var canvas=document.getElementById('view'), renderer=new T.WebGLRenderer({canvas:canvas,antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
-var scene=new T.Scene();scene.background=new T.Color(0x91bad0);scene.fog=new T.Fog(0x91bad0,220,1050);
-var mainCam=new T.PerspectiveCamera(42,1,.1,1800), pipCam=new T.PerspectiveCamera(65,16/9,.1,1800);
-var hemi=new T.HemisphereLight(0xd9efff,0x506b3d,1.7);scene.add(hemi);
-var sun=new T.DirectionalLight(0xfff4dc,2.8);sun.position.set(-120,220,110);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-400;sun.shadow.camera.right=400;sun.shadow.camera.top=400;sun.shadow.camera.bottom=-400;scene.add(sun);
-
-function mat(c,rough){return new T.MeshStandardMaterial({color:c,roughness:rough==null?.65:rough,metalness:.08})}
-function mesh(g,m,p){var o=new T.Mesh(g,m);if(p)o.position.set(p[0],p[1],p[2]);o.castShadow=o.receiveShadow=true;return o}
-var ground=mesh(new T.PlaneGeometry(1700,1700),mat(0x6f9257),[0,0,0]);ground.rotation.x=-Math.PI/2;scene.add(ground);
-var runway=mesh(new T.PlaneGeometry(34,440),mat(0x42474a),[0,.02,-70]);runway.rotation.x=-Math.PI/2;scene.add(runway);
-for(var z=130;z>-280;z-=28){var stripe=mesh(new T.PlaneGeometry(1.1,13),mat(0xf4f4ef),[0,.035,z]);stripe.rotation.x=-Math.PI/2;scene.add(stripe)}
-for(var s of [-1,1]){var edge=mesh(new T.PlaneGeometry(1,440),mat(0xeceadf),[s*16.5,.035,-70]);edge.rotation.x=-Math.PI/2;scene.add(edge)}
-function box(x,y,z,c,px,py,pz){var o=mesh(new T.BoxGeometry(x,y,z),mat(c),[px,py,pz]);scene.add(o);return o}
-box(60,22,40,0xbeb5a8,-95,11,80);box(44,15,30,0xd8d1c5,90,7.5,100);
-for(var i=0;i<80;i++){var a=i*2.399, r=230+(i%9)*38, x=Math.cos(a)*r, z=Math.sin(a)*r-80;if(Math.abs(x)<50&&z<160&&z>-330)continue;var trunk=mesh(new T.CylinderGeometry(.8,1.3,10,7),mat(0x68513b),[x,5,z]);scene.add(trunk);var crown=mesh(new T.ConeGeometry(7+(i%3),20,8),mat(i%2?0x365e3b:0x456f45),[x,18,z]);scene.add(crown)}
-var lake=mesh(new T.CircleGeometry(90,64),new T.MeshStandardMaterial({color:0x4d91ad,roughness:.22,metalness:.05,transparent:true,opacity:.9}),[250,.04,-180]);lake.rotation.x=-Math.PI/2;scene.add(lake);
-
-var planes=[
-{id:'scout',name:'Scout',kind:'prop',color:0xf3eee2,max:38,takeoff:18,turn:1.0,desc:'Trainer · forgiving'},
-{id:'swift',name:'Swift',kind:'prop',color:0xe75a45,max:53,takeoff:22,turn:1.18,desc:'Sport · quick rolls'},
-{id:'drift',name:'Drift',kind:'glider',color:0xe9f5f7,max:31,takeoff:15,turn:.82,desc:'Glider · long wing'},
-{id:'silver',name:'Silver Jet',kind:'jet',color:0xb9c1c7,max:82,takeoff:32,turn:1.18,desc:'Jet · smooth'},
-{id:'f16',name:'F-16 Viper',kind:'jet',color:0x9da4a7,max:94,takeoff:35,turn:1.42,desc:'Jet · crisp'},
-{id:'yak',name:'Yak-130',kind:'jet',color:0xd2d7d9,max:78,takeoff:31,turn:1.12,desc:'Jet · trainer'},
-{id:'rare',name:'Rare Bear 77',kind:'jet',color:0xe0c54f,max:100,takeoff:36,turn:1.38,desc:'Racer · fast'},
-{id:'f15',name:'F-15 Eagle',kind:'jet',color:0x8d979e,max:91,takeoff:36,turn:1.20,desc:'Jet · powerful'},
-{id:'falcon',name:'Falcon',kind:'jet',color:0xd9dde0,max:88,takeoff:34,turn:1.34,desc:'Jet · precise'}
-];
-var planeIndex=0, mode='word', startMode='runway', invertPitch=false, easy=true, gearDown=true, mainCamMode=0, pipMode=0, pipVisible=true;
-var mainModes=['Controller','Chase','Cockpit','Nose','Left wing','Right wing','Tail'];
-var pipModes=['Cockpit','Nose','Left wing','Right wing','Tail'];
-var aircraftStrip=document.getElementById('aircraftStrip');
-planes.forEach(function(p,i){var b=document.createElement('button');b.className='aircraft-card'+(i===0?' active':'');b.innerHTML='<strong>'+p.name+'</strong><small>'+p.desc+'</small>';b.onclick=function(){planeIndex=i;document.querySelectorAll('.aircraft-card').forEach(function(x,j){x.classList.toggle('active',j===i)})};aircraftStrip.appendChild(b)});
-document.querySelectorAll('#modeChoices .choice').forEach(function(b){b.onclick=function(){mode=b.dataset.mode;document.querySelectorAll('#modeChoices .choice').forEach(function(x){x.classList.toggle('active',x===b)})}});
-document.querySelectorAll('#startChoices [data-start]').forEach(function(b){b.onclick=function(){startMode=b.dataset.start;document.querySelectorAll('#startChoices [data-start]').forEach(function(x){x.classList.toggle('active',x===b)})}});
-document.getElementById('pitchChoice').onclick=function(){invertPitch=!invertPitch;this.textContent=invertPitch?'Push up to climb':'Pull down to climb';document.querySelector('.stickHint').textContent=invertPitch?'PUSH UP = CLIMB':'PULL DOWN = CLIMB'};
-
-var defaultLesson={learningLanguage:'es',primaryLanguage:'en',words:[
-{word:'el avión',translation:'airplane',sentence:'El avión vuela sobre el campo.'},{word:'el cielo',translation:'sky',sentence:'El cielo está despejado.'},{word:'la nube',translation:'cloud',sentence:'Veo una nube.'},{word:'volar',translation:'to fly',sentence:'Me gusta volar.'},{word:'la pista',translation:'runway',sentence:'La pista está delante.'},{word:'el viento',translation:'wind',sentence:'El viento es suave.'},{word:'la montaña',translation:'mountain',sentence:'La montaña está lejos.'},{word:'regresar',translation:'to return',sentence:'Es hora de regresar.'}
-]};
-var lesson=defaultLesson;
-try{if(location.hash.indexOf('#golingoLesson=')===0){lesson=JSON.parse(decodeURIComponent(location.hash.slice(15)));history.replaceState(null,'',location.pathname);}}catch(e){}
-if(!Array.isArray(lesson.words)||!lesson.words.length)lesson=defaultLesson;
-document.getElementById('lessonInfo').textContent=lesson.words.length+' learning items loaded';
-
-function buildPlane(spec){
- var g=new T.Group(), bodyM=mat(spec.color,.38), dark=mat(0x202b33,.35), glass=new T.MeshStandardMaterial({color:0x68a9c8,roughness:.08,metalness:.15,transparent:true,opacity:.72});
- var body=mesh(new T.CapsuleGeometry(spec.kind==='jet'?1.1:.75,spec.kind==='jet'?7.2:5.2,8,14),bodyM,[0,.1,0]);body.rotation.x=Math.PI/2;g.add(body);
- var nose=mesh(new T.ConeGeometry(spec.kind==='jet'?1.1:.75,spec.kind==='jet'?3.5:2.1,16),bodyM,[0,.1,-5.3]);nose.rotation.x=-Math.PI/2;g.add(nose);
- var span=spec.kind==='glider'?15:spec.kind==='jet'?8.8:9.8, chord=spec.kind==='jet'?5.8:3.6;
- var wingGeo=new T.BufferGeometry();var v=new Float32Array([0,0,-1.8,-span/2,0,chord/2,-span/2,0,-chord/2,0,0,-1.8,span/2,0,-chord/2,span/2,0,chord/2]);wingGeo.setAttribute('position',new T.BufferAttribute(v,3));wingGeo.computeVertexNormals();
- var wings=mesh(wingGeo,bodyM,[0,.1,0]);g.add(wings);
- var tail=mesh(new T.BoxGeometry(spec.kind==='jet'?5.4:4.6,.18,1.5),bodyM,[0,.35,4.1]);g.add(tail);
- if(spec.kind==='jet'&&spec.id==='f15'){for(var x of [-1.2,1.2]){var fin=mesh(new T.BoxGeometry(.16,2.6,2),bodyM,[x,1.5,3.7]);fin.rotation.x=.12;g.add(fin)}}
- else{var fin=mesh(new T.BoxGeometry(.18,2.5,2),bodyM,[0,1.45,3.7]);fin.rotation.x=.08;g.add(fin)}
- var canopy=mesh(new T.SphereGeometry(spec.kind==='jet'?1.0:.65,16,8,0,Math.PI*2,0,Math.PI/2),glass,[0,.72,-1.9]);canopy.scale.z=1.7;g.add(canopy);
- if(spec.kind!=='jet'){var prop=mesh(new T.BoxGeometry(.14,4.6,.22),dark,[0,.1,-6.6]);g.add(prop);g.userData.prop=prop}
- if(spec.kind==='jet'){for(var x of spec.id==='f15'?[-.8,.8]:[0]){var ex=mesh(new T.CylinderGeometry(.62,.48,1.4,14),dark,[x,.15,4.55]);ex.rotation.x=Math.PI/2;g.add(ex)}}
- var gear=new T.Group();for(var q of [[0,-1,-3.8],[-2.4,-1,2],[2.4,-1,2]]){var strut=mesh(new T.CylinderGeometry(.07,.07,1.4,8),dark,[q[0],q[1]+.45,q[2]]);var wheel=mesh(new T.TorusGeometry(.34,.11,8,12),dark,[q[0],q[1],q[2]]);wheel.rotation.y=Math.PI/2;gear.add(strut,wheel)}g.add(gear);g.userData.gear=gear;
- g.scale.set(.85,.85,.85);return g;
-}
-
-var plane=null, currentSpec=planes[0], pos=new T.Vector3(), yaw=0,pitch=0,roll=0,speed=0,throttle=.45,engine=.45,onGround=true, flying=false;
-var controllerPos=new T.Vector3(-24,1.75,78), lastRange=null,smoothRange=null,rangeRate=0,rangeTrend='— HOLDING';
-var stickX=0,stickY=0, throttlePointer=null, stickPointer=null;
-var tmpQ=new T.Quaternion(), tmpE=new T.Euler(0,0,0,'YXZ'), forward=new T.Vector3(), up=new T.Vector3(0,1,0);
-
-var rings=[],activeRing=0;
-var ringPos=[[0,24,-85],[80,34,-155],[150,46,-260],[70,55,-380],[-70,48,-400],[-155,38,-290],[-125,30,-160],[-45,25,-70]];
-function makeWordSprite(text){
- var c=document.createElement('canvas');c.width=512;c.height=160;var x=c.getContext('2d');x.clearRect(0,0,512,160);x.font='700 54px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='rgba(2,12,18,.55)';x.strokeStyle='rgba(255,255,255,.22)';x.lineWidth=4;x.roundRect(16,25,480,110,28);x.fill();x.stroke();x.fillStyle='#fff';x.fillText(text,256,80,440);var tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;var s=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.scale.set(18,5.6,1);return s;
-}
-function buildRings(){
- rings.forEach(function(r){scene.remove(r.group)});rings=[];activeRing=0;
- ringPos.forEach(function(p,i){var g=new T.Group();g.position.set(p[0],p[1],p[2]);var tor=new T.Mesh(new T.TorusGeometry(10,1.0,12,48),new T.MeshStandardMaterial({color:i===0?0x7ef0ff:0x7b9aa7,emissive:i===0?0x164d5c:0x07151d,emissiveIntensity:1.3,roughness:.35}));g.add(tor);if(mode==='word'){var w=lesson.words[i%lesson.words.length];var spr=makeWordSprite(w.word||w.text||('Word '+(i+1)));g.add(spr)}else if(mode==='rings'){g.add(makeWordSprite(String(i+1)))}scene.add(g);rings.push({group:g,tor:tor})});
-}
-function updateRingStyle(){rings.forEach(function(r,i){var active=i===activeRing;r.tor.material.color.setHex(active?0x7ef0ff:0x667a82);r.tor.material.emissive.setHex(active?0x164d5c:0x07151d)})}
-function speakCurrent(){
- if(!window.speechSynthesis||mode!=='word')return;var w=lesson.words[(Math.max(0,activeRing-1))%lesson.words.length];var u=new SpeechSynthesisUtterance(w.word||w.text||'');u.lang=lesson.learningLanguage||'es';u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u);
-}
-function showToast(text){var el=document.getElementById('wordToast');el.textContent=text;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show')},1800)}
-function checkRing(){
- if(!rings.length||mode==='free')return;var r=rings[activeRing];if(!r)return;if(pos.distanceTo(r.group.position)<12){if(mode==='word'){var w=lesson.words[activeRing%lesson.words.length];showToast((w.word||'')+(w.translation?' · '+w.translation:''));activeRing++;speakCurrent()}else{showToast('Ring '+(activeRing+1));activeRing++}if(activeRing>=rings.length){activeRing=0;showToast('Course complete · new lap')}updateRingStyle()}
-}
-
-function resetFlight(){
- currentSpec=planes[planeIndex];if(plane)scene.remove(plane);plane=buildPlane(currentSpec);scene.add(plane);
- yaw=0;pitch=0;roll=0;throttle=.35;engine=currentSpec.kind==='jet'?.25:.35;gearDown=startMode==='runway';onGround=startMode==='runway';speed=startMode==='runway'?0:currentSpec.max*.58;
- pos.set(0,startMode==='runway'?1.3:42,startMode==='runway'?125:20);plane.position.copy(pos);plane.userData.gear.visible=gearDown;
- smoothRange=null;lastRange=null;rangeRate=0;buildRings();updateRingStyle();
- document.getElementById('planeName').textContent=currentSpec.name.toUpperCase();document.getElementById('gearText').textContent=gearDown?'GEAR DOWN':'GEAR UP';
-}
-function setScreen(inFlight){flying=inFlight;document.getElementById('menu').classList.toggle('hidden',inFlight);document.getElementById('hud').classList.toggle('hidden',!inFlight)}
-document.getElementById('startBtn').onclick=function(){resetFlight();setScreen(true)};
-document.getElementById('backBtn').onclick=function(){setScreen(false);if(window.speechSynthesis)speechSynthesis.cancel()};
-document.getElementById('acroBtn').onclick=function(){easy=!easy;this.textContent=easy?'Easy':'Acro'};
-document.getElementById('gearBtn').onclick=function(){if(onGround)return;gearDown=!gearDown;plane.userData.gear.visible=gearDown;document.getElementById('gearText').textContent=gearDown?'GEAR DOWN':'GEAR UP'};
-document.getElementById('speakBtn').onclick=speakCurrent;
-document.getElementById('infoBtn').onclick=function(){document.getElementById('hud').classList.toggle('info-hidden')};
-document.getElementById('fullBtn').onclick=function(){var el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen().catch(function(){});else if(document.exitFullscreen)document.exitFullscreen()};
-document.getElementById('mainCamBtn').onclick=function(){mainCamMode=(mainCamMode+1)%mainModes.length;this.textContent='Camera · '+mainModes[mainCamMode]};
-document.getElementById('pipToggle').onclick=function(){pipVisible=!pipVisible;document.getElementById('pipFrame').classList.toggle('hidden',!pipVisible)};
-function setPip(d){pipMode=(pipMode+d+pipModes.length)%pipModes.length;document.getElementById('pipLabel').textContent=pipModes[pipMode].toUpperCase();document.getElementById('pipName').textContent=pipModes[pipMode]}
-document.getElementById('pipPrev').onclick=function(){setPip(-1)};document.getElementById('pipNext').onclick=function(){setPip(1)};
-
-var throttleTrack=document.getElementById('throttleTrack');
-function throttleFromY(y){var r=throttleTrack.getBoundingClientRect();throttle=clamp(1-(y-r.top)/r.height,0,1);syncThrottle()}
-function syncThrottle(){var pct=Math.round(throttle*100);document.getElementById('throttleFill').style.height=pct+'%';document.getElementById('throttleThumb').style.bottom='calc('+pct+'% - 5px)';document.getElementById('throttleLabel').textContent='THROTTLE '+pct+'%'}
-throttleTrack.addEventListener('pointerdown',function(e){throttlePointer=e.pointerId;throttleTrack.setPointerCapture(e.pointerId);throttleFromY(e.clientY)});
-throttleTrack.addEventListener('pointermove',function(e){if(e.pointerId===throttlePointer)throttleFromY(e.clientY)});
-throttleTrack.addEventListener('pointerup',function(e){if(e.pointerId===throttlePointer)throttlePointer=null});
-
-var stickBase=document.getElementById('stickBase'), stick=document.getElementById('stick');
-function setStick(x,y){var r=stickBase.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2),rad=r.width*.34,len=Math.hypot(dx,dy)||1;if(len>rad){dx*=rad/len;dy*=rad/len}stickX=dx/rad;stickY=dy/rad;stick.style.transform='translate('+dx+'px,'+dy+'px)'}
-stickBase.addEventListener('pointerdown',function(e){stickPointer=e.pointerId;stickBase.setPointerCapture(e.pointerId);setStick(e.clientX,e.clientY)});
-stickBase.addEventListener('pointermove',function(e){if(e.pointerId===stickPointer)setStick(e.clientX,e.clientY)});
-function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;stickX=stickY=0;stick.style.transform='translate(0,0)'}
-stickBase.addEventListener('pointerup',releaseStick);stickBase.addEventListener('pointercancel',releaseStick);
-
-var keys={};addEventListener('keydown',function(e){keys[e.code]=true;if(e.code==='KeyG')document.getElementById('gearBtn').click();if(e.code==='KeyC')document.getElementById('mainCamBtn').click()});addEventListener('keyup',function(e){keys[e.code]=false});
-function inputX(){return clamp(stickX+(keys.ArrowRight||keys.KeyD?1:0)-(keys.ArrowLeft||keys.KeyA?1:0),-1,1)}
-function inputY(){var y=stickY+(keys.ArrowDown||keys.KeyS?1:0)-(keys.ArrowUp||keys.KeyW?1:0);return clamp(invertPitch?-y:y,-1,1)}
-
-function updatePhysics(dt){
- if(!flying)return;
- var jet=currentSpec.kind==='jet', engineRate=jet?(.6+(.35*throttle)):2.6;engine+=clamp(throttle-engine,-engineRate*dt,engineRate*dt);
- var target=currentSpec.max*(.1+.9*engine)*(gearDown?.88:1), accel=jet?7:12;speed+=clamp(target-speed,-accel*dt,accel*dt);
- var ix=inputX(),iy=inputY();
- if(onGround){
-  yaw-=ix*dt*.45;pitch=lerp(pitch,iy*.16,1-Math.exp(-dt*5));roll=lerp(roll,0,1-Math.exp(-dt*6));
-  if(speed>currentSpec.takeoff&&pitch>.035)onGround=false;
- }else if(easy){
-  roll=lerp(roll,-ix*1.02,1-Math.exp(-dt*4.1*currentSpec.turn));pitch=lerp(pitch,iy*.48,1-Math.exp(-dt*3.5));
-  yaw+=Math.sin(-roll)*dt*.72*(.5+speed/currentSpec.max);
-  if(Math.abs(ix)<.05)roll=lerp(roll,0,1-Math.exp(-dt*1.8));
-  if(Math.abs(iy)<.05)pitch=lerp(pitch,0,1-Math.exp(-dt*1.25));
- }else{
-  roll-=ix*dt*2.55*currentSpec.turn;pitch+=iy*dt*1.75*currentSpec.turn;yaw+=Math.sin(-roll)*dt*.28;
- }
- tmpE.set(pitch,yaw,roll,'YXZ');tmpQ.setFromEuler(tmpE);forward.set(0,0,-1).applyQuaternion(tmpQ).normalize();
- pos.addScaledVector(forward,speed*dt);
- if(!onGround){
-  var lift=clamp((speed/currentSpec.takeoff)-.55,0,1.8);
-  pos.y+=(-5.6+lift*4.2)*dt;
-  if(pos.y<1.3){pos.y=1.3;if(speed<currentSpec.takeoff*1.15){onGround=true;pitch=0;roll=0}else{speed*=.72;pitch*=.4;roll*=.4;showToast('Hard landing')}}
- }else pos.y=1.3;
- plane.position.copy(pos);plane.quaternion.copy(tmpQ);plane.userData.gear.visible=gearDown;
- if(plane.userData.prop)plane.userData.prop.rotation.z+=speed*dt*1.3;
- checkRing();
-}
-function localPoint(arr){var v=new T.Vector3(arr[0],arr[1],arr[2]);return plane.localToWorld(v)}
-function setOnboard(cam,mode){
- var name=(typeof mode==='number'?mainModes[mode]:mode), eye,target;
- if(name==='Cockpit'){eye=localPoint([0,.85,-1.8]);target=localPoint([0,.65,-25])}
- else if(name==='Nose'){eye=localPoint([0,.35,-5.4]);target=localPoint([0,.2,-30])}
- else if(name==='Left wing'){eye=localPoint([-4.2,.45,-.4]);target=localPoint([-2,.3,-26])}
- else if(name==='Right wing'){eye=localPoint([4.2,.45,-.4]);target=localPoint([2,.3,-26])}
- else if(name==='Tail'){eye=localPoint([0,1.25,5.1]);target=localPoint([0,.25,-22])}
- else {eye=localPoint([0,3.2,10]);target=localPoint([0,0,-8])}
- cam.position.copy(eye);cam.up.set(0,1,0).applyQuaternion(plane.quaternion);cam.lookAt(target);
-}
-function updateCameras(){
- if(mainCamMode===0){
-  mainCam.position.copy(controllerPos);
-  var d=controllerPos.distanceTo(pos);mainCam.fov=clamp(30+d*.025,30,55);mainCam.updateProjectionMatrix();mainCam.up.set(0,1,0);mainCam.lookAt(pos);
- }else if(mainCamMode===1){setOnboard(mainCam,'Chase');mainCam.fov=58;mainCam.updateProjectionMatrix()}
- else {setOnboard(mainCam,mainModes[mainCamMode]);mainCam.fov=66;mainCam.updateProjectionMatrix()}
- setOnboard(pipCam,pipModes[pipMode]);pipCam.fov=68;pipCam.updateProjectionMatrix();
-}
-function updateRange(dt){
- var raw=controllerPos.distanceTo(pos),a=1-Math.exp(-dt*8);smoothRange=smoothRange==null?raw:smoothRange+(raw-smoothRange)*a;
- if(lastRange==null)lastRange=smoothRange;var inst=(smoothRange-lastRange)/Math.max(dt,.001),ra=1-Math.exp(-dt*3.5);rangeRate+=(inst-rangeRate)*ra;lastRange=smoothRange;
- rangeTrend=rangeRate>.8?'↑ AWAY':rangeRate<-.8?'↓ RETURNING':'— HOLDING';var m=Math.max(0,Math.round(smoothRange)),far=smoothRange>=450;
- document.getElementById('rangeValue').textContent='DIST '+m+' m';document.getElementById('rangeTrend').textContent=rangeTrend;document.getElementById('rangeHUD').classList.toggle('is-far',far);document.getElementById('pipRange').textContent=m+' m'+(far?' · FAR':'');
-}
-function updateHUD(){
- document.getElementById('speedText').textContent=Math.round(speed*3.6)+' km/h';document.getElementById('altText').textContent=Math.round(Math.max(0,pos.y-1.3))+' m';document.getElementById('gearText').textContent=gearDown?'GEAR DOWN':'GEAR UP';
-}
-function render(){
- var w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);mainCam.aspect=w/h;mainCam.updateProjectionMatrix();
- renderer.setScissorTest(false);renderer.setViewport(0,0,w,h);renderer.render(scene,mainCam);
- if(flying&&pipVisible){
-  var pw=Math.min(w*.31,320),ph=pw*9/16,px=w-pw-Math.max(12,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--x'))||12),py=h-(58+ph);
-  var frame=document.getElementById('pipFrame'),fr=frame.getBoundingClientRect();px=fr.left;pw=fr.width;ph=fr.height;py=h-fr.bottom;
-  renderer.setScissorTest(true);renderer.setScissor(px,py,pw,ph);renderer.setViewport(px,py,pw,ph);pipCam.aspect=pw/ph;pipCam.updateProjectionMatrix();renderer.render(scene,pipCam);renderer.setScissorTest(false);
- }
-}
-var clock=new T.Clock();
-function frame(){requestAnimationFrame(frame);var dt=Math.min(clock.getDelta(),.04);if(flying){updatePhysics(dt);updateCameras();updateRange(dt);updateHUD()}render()}
-addEventListener('resize',render);
-resetFlight();setScreen(false);syncThrottle();document.getElementById('boot').style.display='none';frame();
+  var base="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site";
+  var target=base;
+  if(location.search) target+=location.search;
+  if(location.hash) target+=location.hash;
+  try{ location.replace(target); }catch(e){ location.href=target; }
+})();
+</script>
+</head>
+<body>
+<main>
+<h1>Opening Skyfield RC…</h1>
+<p>Using the canonical GoLingo Skyfield RC build.</p>
+<a id="open" href="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site">Open Skyfield RC</a>
+</main>
+<script>
+(function(){
+ var a=document.getElementById('open');
+ var target="https://golingo-skyfield-rc.ppscreator822922.chatgpt.site"+(location.search||'')+(location.hash||'');
+ a.href=target;
 })();
 </script>
 </body>
