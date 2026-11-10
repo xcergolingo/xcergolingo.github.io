@@ -1,4 +1,4 @@
-import { LANGUAGES } from './learning.js';
+import { LANGUAGES } from './learning.js?v=3';
 
 const ICONS = {
   book: '<path d="M3 4h6a4 4 0 0 1 3 1.3A4 4 0 0 1 15 4h6v15h-6a4 4 0 0 0-3 1.3A4 4 0 0 0 9 19H3Z"/><path d="M12 5.3v15"/>',
@@ -39,6 +39,7 @@ export class LearningUI {
     this.onClose = onClose;
     this.onTrack = onTrack;
     this.playing = false;
+    this.promptMode = 'word';
     this.mode = null;
     this.busy = false;
     this.lastReviewSignature = '';
@@ -97,7 +98,7 @@ export class LearningUI {
     this.translationToggle = button('Translation', 'learning-text-toggle', () => this.preference('showTranslation', !this.learning.preferences.showTranslation));
     this.translationToggle.setAttribute('aria-pressed', 'true');
     foot.append(this.translationToggle);
-    if (this.onTrack) foot.append(button('Find word', 'learning-quiet-button learning-track-button', () => this.onTrack(), 'arrow'));
+    if (this.onTrack) { this.trackButton = button('Find word', 'learning-quiet-button learning-track-button', () => this.onTrack(), 'arrow'); foot.append(this.trackButton); }
     this.card.append(head, content, foot);
     this.showCard = button('Show word', 'learning-show-card', () => this.preference('showCard', true), 'eye');
     this.cardWrap.append(this.card, this.showCard);
@@ -283,6 +284,11 @@ export class LearningUI {
     return panel;
   }
 
+  setPromptMode(mode) {
+    this.promptMode = mode === 'translation' ? 'translation' : 'word';
+    this.render();
+  }
+
   setPlaying(playing) {
     this.playing = Boolean(playing);
     this.render();
@@ -290,6 +296,7 @@ export class LearningUI {
 
   render() {
     const current = this.learning.current;
+    const translationPrompt = this.promptMode === 'translation';
     const preferences = this.learning.preferences || {};
     const total = Number(this.learning.total) || this.learning.entries?.length || 0;
     const count = Number(this.learning.learnedCount) || 0;
@@ -297,21 +304,26 @@ export class LearningUI {
     this.cardWrap.hidden = !this.playing || !!this.mode;
     this.card.hidden = preferences.showCard === false;
     this.showCard.hidden = preferences.showCard !== false;
-    this.cardProgress.textContent = this.learning.complete ? `LESSON COMPLETE · ${count}/${total}` : `FIND THIS WORD · ${count}/${total}`;
-    this.currentWord.textContent = current?.word || (this.learning.complete ? 'Well explored.' : 'Ready for a word hunt?');
-    this.currentWord.lang = this.learning.lesson?.learningLanguage || '';
-    this.currentWord.title = current?.word || '';
-    this.currentWord.classList.toggle('learning-long-word', (current?.word?.length || 0) > 20);
+    this.cardProgress.textContent = this.learning.complete ? `LESSON COMPLETE · ${count}/${total}` : translationPrompt ? `HEAR THE TRANSLATION · ${count}/${total}` : `FIND THIS WORD · ${count}/${total}`;
+    const promptText = translationPrompt ? current?.translation : current?.word;
+    this.currentWord.textContent = promptText || (this.learning.complete ? 'Well explored.' : translationPrompt ? 'This item needs a translation.' : 'Ready for a word hunt?');
+    this.currentWord.lang = translationPrompt ? (this.learning.lesson?.primaryLanguage || '') : (this.learning.lesson?.learningLanguage || '');
+    this.currentWord.title = promptText || '';
+    this.currentWord.classList.toggle('learning-long-word', (promptText?.length || 0) > 20);
     this.currentWord.dir = 'auto';
     this.currentTranslation.dir = 'auto';
-    this.currentTranslation.textContent = current?.translation || '';
+    this.currentTranslation.textContent = translationPrompt ? '' : (current?.translation || '');
     this.currentTranslation.lang = this.learning.lesson?.primaryLanguage || '';
-    this.currentTranslation.hidden = preferences.showTranslation === false || !current?.translation;
+    this.currentTranslation.hidden = translationPrompt || preferences.showTranslation === false || !current?.translation;
+    this.translationToggle.hidden = translationPrompt;
     this.translationToggle.classList.toggle('is-on', preferences.showTranslation !== false);
     this.translationToggle.setAttribute('aria-pressed', String(preferences.showTranslation !== false));
     this.translationToggle.setAttribute('aria-label', preferences.showTranslation !== false ? 'Hide translation' : 'Show translation');
-    this.listen.disabled = !current?.word;
-    this.listen.title = current?.word ? `Listen to ${current.word}` : 'No current word';
+    this.listen.disabled = translationPrompt ? !current?.translation : !current?.word;
+    this.listen.title = promptText ? `Listen to ${promptText}` : 'No current prompt';
+    this.listen.setAttribute('aria-label', translationPrompt ? 'Listen to the translation again' : 'Listen to current word');
+    const showLabel = this.showCard.querySelector('span:last-child'); if (showLabel) showLabel.textContent = translationPrompt ? 'Show prompt' : 'Show word';
+    if (this.trackButton) { const trackLabel = this.trackButton.querySelector('span:last-child'); if (trackLabel) trackLabel.textContent = translationPrompt ? 'Hear translation' : 'Find word'; }
     if (this.reviewButton) {
       this.reviewButton.querySelector('span:last-child').textContent = `Words${basketCount ? ` ${basketCount}` : ''}`;
       this.reviewButton.setAttribute('aria-label', `Review ${basketCount} collected words`);
@@ -384,6 +396,8 @@ export class LearningUI {
     if (!selected) return;
     if (sentence) {
       this.learning.replay({ ...selected, word: selected.sentence, translation: selected.sentenceTranslation || '', audioUrl: selected.sentenceAudioUrl || '', sentence: '', sentenceTranslation: '' });
+    } else if (!entry && this.promptMode === 'translation' && selected.translation) {
+      this.learning.replay({ ...selected, word: selected.translation, translation: '', audioUrl: '', sentence: '', sentenceTranslation: '', sentenceAudioUrl: '', learningLanguage: this.learning.lesson?.primaryLanguage || selected.learningLanguage });
     } else this.learning.replay(selected);
   }
 
