@@ -4,8 +4,11 @@ import {AIRCRAFT, FlightModel} from './flight.js?v=8';
 import {LearningEngine} from './learning.js';
 import {CAMERA_VIEWS, CAMERA_IDS, ONBOARD_CAMERA_IDS, FlightCameraRig, createAirfieldEnvironment} from './cameras.js?v=7';
 import {createGateWordLabel} from './gate-labels.js?v=8';
+import {isVirtualLandscape, gameSize, pointerInElement, rectInGame} from './layout.js?v=1';
 
 const $ = id => document.getElementById(id);
+const shell = $('game-shell');
+const size = () => gameSize(shell);
 const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
 const clockText = s => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
 const safeLoad = (key,fallback) => {try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;}};
@@ -152,13 +155,14 @@ function syncLearning(state){
 
 function initialize(){
   scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(47,innerWidth/innerHeight,.12,6500);
+  const {width,height}=size();
+  camera=new THREE.PerspectiveCamera(47,width/height,.12,6500);
   cameraRig=new FlightCameraRig(camera);
   onboardCamera=new THREE.PerspectiveCamera(70,16/9,.025,6500);
   onboardRig=new FlightCameraRig(onboardCamera);
   renderer=new THREE.WebGLRenderer({canvas:$('world'),antialias:true,powerPreference:'high-performance',alpha:false});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<1000?1.6:1.8));
-  renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,width<1000?1.6:1.8));
+  renderer.setSize(width,height,false);renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   scene.environment=createAirfieldEnvironment();
@@ -251,9 +255,10 @@ function revealSelectedAircraft(smooth=false){
   const rail=document.querySelector('.aircraft-picker'),card=rail?.querySelector(`[data-plane="${settings.aircraft}"]`);
   if(!rail||!card||!rail.clientWidth)return;
   const railRect=rail.getBoundingClientRect(),cardRect=card.getBoundingClientRect();
+  const start=isVirtualLandscape()?'top':'left',end=isVirtualLandscape()?'bottom':'right';
   let left=rail.scrollLeft;
-  if(cardRect.left<railRect.left+2)left+=cardRect.left-railRect.left-2;
-  else if(cardRect.right>railRect.right-2)left+=cardRect.right-railRect.right+2;
+  if(cardRect[start]<railRect[start]+2)left+=cardRect[start]-railRect[start]-2;
+  else if(cardRect[end]>railRect[end]-2)left+=cardRect[end]-railRect[end]+2;
   if(Math.abs(left-rail.scrollLeft)>.5)rail.scrollTo({left,behavior:smooth?'smooth':'auto'});
 }
 function chooseAircraft(id){
@@ -502,7 +507,7 @@ function bindUI(){
   $('helpDone').onclick=closeModal;document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
   $('pauseButton').onclick=()=>setPaused(true);$('resumeButton').onclick=()=>setPaused(false);
   $('pauseReset').onclick=()=>startFlight();
-  $('backHangar').onclick=returnHangar;$('crashHangar').onclick=returnHangar;$('rotateHangar').onclick=returnHangar;$('returnButton').onclick=returnHangar;
+  $('backHangar').onclick=returnHangar;$('crashHangar').onclick=returnHangar;$('returnButton').onclick=returnHangar;
   $('retryButton').onclick=()=>startFlight();$('resetButton').onclick=()=>{startFlight();toast('A fresh start. The sky is yours.');};
   $('againButton').onclick=()=>startFlight();$('continueButton').onclick=()=>{activeMode='free';updateGates();setPaused(false);};
   $('cameraButton').onclick=toggleCameraPanel;
@@ -542,7 +547,8 @@ function bindUI(){
   const stickPad=$('stickPad');
   function moveStick(e){
     if(stick.pointer!==e.pointerId)return;e.preventDefault();
-    const r=stickPad.getBoundingClientRect(),range=r.width*.35;let x=(e.clientX-r.left-r.width/2)/range,y=(e.clientY-r.top-r.height/2)/range;
+    const r=pointerInElement(e,stickPad,isVirtualLandscape()),range=r.width*.35;
+    let x=(r.x-r.width/2)/range,y=(r.y-r.height/2)/range;
     const len=Math.hypot(x,y);if(len>1){x/=len;y/=len;}stick.x=Math.abs(x)<.035?0:x;stick.y=Math.abs(y)<.035?0:y;
     $('stickKnob').style.transform=`translate(${x*range}px,${y*range}px)`;
   }
@@ -551,7 +557,7 @@ function bindUI(){
   const releaseStick=e=>{if(e.pointerId!==stick.pointer)return;stick.pointer=null;stick.x=0;stick.y=0;$('stickKnob').style.transform='translate(0px,0px)';};
   ['pointerup','pointercancel','lostpointercapture'].forEach(n=>stickPad.addEventListener(n,releaseStick));
   const throttle=$('throttlePad');let throttlePointer=null;
-  function moveThrottle(e){if(e.pointerId!==throttlePointer)return;e.preventDefault();const r=throttle.getBoundingClientRect();setThrottle(1-(e.clientY-r.top-16)/(r.height-32));}
+  function moveThrottle(e){if(e.pointerId!==throttlePointer)return;e.preventDefault();const r=pointerInElement(e,throttle,isVirtualLandscape());setThrottle(1-(r.y-16)/(r.height-32));}
   throttle.addEventListener('pointerdown',e=>{if(paused)return;e.preventDefault();e.stopPropagation();throttlePointer=e.pointerId;throttle.setPointerCapture(e.pointerId);moveThrottle(e);});
   throttle.addEventListener('pointermove',moveThrottle);['pointerup','pointercancel','lostpointercapture'].forEach(n=>throttle.addEventListener(n,e=>{if(e.pointerId===throttlePointer)throttlePointer=null;}));
   throttle.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();e.stopPropagation();setThrottle(input.throttle+(e.key==='ArrowUp'?.05:-.05));}});
@@ -591,8 +597,9 @@ function toggleControllerZoom(){
   settings.groundZoom=settings.groundZoom==='auto'?'wide':'auto';syncCameraUI();safeSave('skyfield-settings-v1',settings);
 }
 function resize(){
-  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);
-  const portrait=innerHeight>innerWidth&&screen==='flight';
+  const {width,height}=size();
+  camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(width,height,false);
+  const portrait=height>width&&screen==='flight';
   if(portrait!==resizePause){resizePause=portrait;clearControls();learning?.setActive(!paused&&!resizePause&&screen==='flight'&&activeMode==='learn');updateAudio();}
   if(screen==='hangar')updateMenuCamera(0);else camera.clearViewOffset();cameraSnap=true;onboardSnap=true;
   syncOnboardUI();
@@ -600,12 +607,12 @@ function resize(){
 }
 function updateMenuCamera(dt){
   aircraft.visible=true;aircraft.position.set(0,aircraft.userData.groundClearance||.61,100);aircraft.rotation.set(0,.04*Math.sin(sceneTime*.12),0);
-  const portrait=innerHeight>innerWidth;
+  const {width,height}=size(),portrait=height>width;
   camera.fov=portrait?44:42;camera.near=.12;camera.up.set(0,1,0);
   const fit=Math.max(1,(aircraft.userData.length||2.7)/2.7,(aircraft.userData.span||3.45)/(portrait?3.25:4.1));
   const focusY=(aircraft.userData.groundClearance||.61)+.12;
-  if(portrait){camera.clearViewOffset();camera.position.set(5*fit,focusY+1.85*fit,100-6.6*fit);camera.lookAt(0,focusY,100);camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*.29,innerWidth,innerHeight);}
-  else{const widthBias=innerWidth<1000?.21:.19;camera.position.set((5.7+Math.sin(sceneTime*.11)*.28)*fit,focusY+1.8*fit,100-6.8*fit);camera.lookAt(0,focusY,100);camera.setViewOffset(innerWidth,innerHeight,-innerWidth*widthBias,0,innerWidth,innerHeight);}
+  if(portrait){camera.clearViewOffset();camera.position.set(5*fit,focusY+1.85*fit,100-6.6*fit);camera.lookAt(0,focusY,100);camera.setViewOffset(width,height,0,height*.29,width,height);}
+  else{const widthBias=width<1000?.21:.19;camera.position.set((5.7+Math.sin(sceneTime*.11)*.28)*fit,focusY+1.8*fit,100-6.8*fit);camera.lookAt(0,focusY,100);camera.setViewOffset(width,height,-width*widthBias,0,width,height);}
   camera.updateProjectionMatrix();
   const prop=aircraft.userData.propeller;if(prop)prop.rotation.z+=dt*5;
   aircraft.userData.animate?.(dt,{throttle:0,enginePower:0,speed:0,grounded:true,yaw:0,gear:1});
@@ -630,9 +637,9 @@ function updateCamera(dt){
 function getOnboardViewport(){
   if(screen!=='flight'||!settings.onboardEnabled||resizePause)return null;
   if(!onboardViewportRect){
-    const rect=$('onboardViewport').getBoundingClientRect();
+    const rect=rectInGame($('onboardViewport'),shell,isVirtualLandscape());
     if(rect.width<2||rect.height<2)return null;
-    onboardViewportRect={x:rect.left,y:innerHeight-rect.bottom,width:rect.width,height:rect.height};
+    onboardViewportRect={x:rect.x,y:size().height-rect.y-rect.height,width:rect.width,height:rect.height};
   }
   return onboardViewportRect;
 }
@@ -645,7 +652,8 @@ function updateOnboardCamera(dt){
 function renderViews(){
   // Viewport/scissor use CSS pixels; Three.js applies the renderer pixel ratio.
   // Always restore the full canvas, including the first frame back in the hangar.
-  renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
+  const {width,height}=size();
+  renderer.setScissorTest(false);renderer.setViewport(0,0,width,height);
   if(screen==='flight')cameraRig.render(renderer,scene);else renderer.render(scene,camera);
   const rect=getOnboardViewport();if(!rect)return;
   const shadowAutoUpdate=renderer.shadowMap.autoUpdate;
@@ -658,7 +666,7 @@ function renderViews(){
     onboardRig.render(renderer,scene);
   }finally{
     renderer.shadowMap.autoUpdate=shadowAutoUpdate;
-    renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
+    renderer.setScissorTest(false);renderer.setViewport(0,0,width,height);
   }
 }
 
@@ -689,6 +697,7 @@ function crash(){
   showModal('crashModal','flight');
 }
 function updateHUD(){
+  const {width,height}=size();
   syncGroundControls();
   $('speedValue').textContent=Math.round(model.airspeed*3.6);$('altitudeValue').textContent=Math.round(Math.max(0,model.altitude));$('timeValue').textContent=clockText(elapsed);
   $('windValue').textContent=settings.wind?`${settings.wind} M/S`:'CALM';
@@ -698,8 +707,8 @@ function updateHUD(){
     const inFrontOfCamera=p.clone().sub(camera.position).dot(camera.getWorldDirection(vA))>0;
     p.project(camera);
     const onScreen=inFrontOfCamera&&Math.abs(p.x)<.9&&Math.abs(p.y)<.85;
-    const x=onScreen?clamp((p.x*.5+.5)*innerWidth,innerWidth*.27,innerWidth*.78):innerWidth*.5;
-    const y=onScreen?clamp((-p.y*.5+.5)*innerHeight-32,innerHeight*.31,innerHeight*.69):innerHeight*.65;
+    const x=onScreen?clamp((p.x*.5+.5)*width,width*.27,width*.78):width*.5;
+    const y=onScreen?clamp((-p.y*.5+.5)*height-32,height*.31,height*.69):height*.65;
     $('targetMarker').style.left=`${x}px`;$('targetMarker').style.top=`${y}px`;
     $('targetMarker').querySelector('span').textContent=onScreen?'⌄':'◎';
     $('targetDistance').textContent=onScreen?`${Math.round(distance)} m`:`${aheadOfAircraft?'Gate ahead':'Gate behind plane'} · ${Math.round(distance)} m`;

@@ -12,10 +12,11 @@
   <title>Skyfield RC · GoLingo Flight Club</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./style.css?v=8">
+  <link rel="stylesheet" href="./style.css?v=9">
   <script defer src="./orientation.js?v=1"></script>
 </head>
 <body class="in-hangar full-view">
+  <div id="game-shell">
   <canvas id="world" aria-label="3D radio-controlled airplane flying field"></canvas>
   <div class="film-grain" aria-hidden="true"></div>
 
@@ -137,9 +138,9 @@
     <section id="completeModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="completeTitle"><div class="eyebrow">A BEAUTIFUL LITTLE FLIGHT</div><h2 id="completeTitle">Nicely flown.</h2><p id="completeText">You found your line through every ring.</p><div class="flight-summary"><span>YOUR TIME<b id="completeTime">0:00</b></span><span>PERSONAL BEST<b id="bestTime">0:00</b></span></div><button id="againButton" class="primary-button">Fly another lap <span>↗</span></button><button id="continueButton" class="text-button">Keep exploring</button></section>
   </div>
 
-  <div id="rotatePrompt"><div class="rotate-device">↻</div><h2>Switching to landscape…</h2><p>Skyfield requested landscape. If GoLingo stays upright, the iPhone app needs its landscape update. You can also try Safari with Rotation Lock off.</p><button id="rotateHangar">Back to hangar</button></div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=10"></script>
+  </div>
+  <script type="module" src="./app.js?v=11"></script>
   <script>setTimeout(()=>{if(!window.skyfieldReady&&!window.skyfieldFailed){document.getElementById('loading').classList.add('hidden');document.getElementById('loadError').classList.remove('hidden');document.getElementById('loadErrorText').textContent='The game is taking longer than expected. Check your connection, then try again.'}},25000);</script>
 </body>
 </html>

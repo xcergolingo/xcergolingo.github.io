@@ -4,7 +4,7 @@ An original Three.js browser game inspired by the model-flying experience of [Pi
 
 ## Play
 
-Open the deployed game in a browser with WebGL enabled. On a phone, hold the device in landscape while flying. The hangar and settings also work in portrait.
+Open the deployed game in a browser with WebGL enabled. Skyfield now displays its hangar and flight in landscape even when the native GoLingo webview stays portrait-locked: the web game shell rotates clockwise into a virtual landscape layout, matching Neon Trick Rush. For the intended view, turn the phone sideways; no GoLingo app rebuild is needed for the web-only fallback. A native orientation request remains available for host apps that implement it.
 
 The default is **Scout / Word flight / Easy mode / Start in the air / Ground controller camera / Calm wind**. Word flight is selected each time the game opens, including for returning players; Free flight and Ring run remain selectable from the hangar. Swipe the aircraft row or use its arrows to choose among nine aircraft. Use the visible **Camera** selector in the hangar header to choose your flight view before starting. Choose **Runway** or **In air** directly above **Start flight**, then start. All nine aircraft support both choices. The Start button is fixed inside the visible screen in both orientations. Audio starts after this gesture; installed browser and device voices determine speech availability.
 
@@ -74,7 +74,7 @@ Tap **Easy / Acro** beside the throttle (keyboard **M**) to change flying style 
 | R or Reset | Restart the selected flight. |
 | Escape or Pause | Pause / resume. Escape first closes an open camera chooser. |
 
-Touch sticks use separate pointer capture so the throttle and steering can be operated together. Pointer release, cancellation and window blur clear controls; they do not open the pause screen. The game pauses when the document becomes hidden. Portrait orientation temporarily stops flight and displays the rotate prompt.
+Touch sticks use separate pointer capture so the throttle and steering can be operated together. Pointer release, cancellation and window blur clear controls; they do not open the pause screen. The game pauses when the document becomes hidden. A portrait-locked host displays a 90-degree clockwise virtual landscape shell; steering, throttle, target markers, camera aspect and onboard inset scissor rectangles are remapped to that shell. There is no portrait-only rotate blocker.
 
 In **Flight settings → Pitch control**, choose **Pull down to climb** (the default) or **Push up to climb**. The choice applies to the right touch stick and the Up/W / Down/S keys, is saved locally, and is reflected in the stick labels and Controls help. Throttle and left/right banking keep their directions. During Full view, use **Pause → Restart flight** to restart without bringing back the instruments.
 
