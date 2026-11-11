@@ -13,6 +13,7 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=8">
+  <script defer src="./orientation.js?v=1"></script>
 </head>
 <body class="in-hangar full-view">
   <canvas id="world" aria-label="3D radio-controlled airplane flying field"></canvas>
@@ -138,7 +139,7 @@
 
   <div id="rotatePrompt"><div class="rotate-device">↻</div><h2>A little more horizon.</h2><p>Turn your phone sideways to fly.</p><button id="rotateHangar">Back to hangar</button></div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=9"></script>
+  <script type="module" src="./app.js?v=10"></script>
   <script>setTimeout(()=>{if(!window.skyfieldReady&&!window.skyfieldFailed){document.getElementById('loading').classList.add('hidden');document.getElementById('loadError').classList.remove('hidden');document.getElementById('loadErrorText').textContent='The game is taking longer than expected. Check your connection, then try again.'}},25000);</script>
 </body>
 </html>
