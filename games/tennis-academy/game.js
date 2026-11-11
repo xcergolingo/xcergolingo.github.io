@@ -510,7 +510,9 @@ function speakAnswer(item,correct) {
 }
 
 function resetBallToServer() {
-  ball.visible=true;ball.position.set(player.position.x+.30,1.35,player.position.z-.4);
+  // The waiting ball belongs in the non-racket hand, outside the silhouette.
+  // It must never look attached to the athlete's neck or upper back.
+  ball.visible=true;ball.position.set(player.position.x-.42,1.02,player.position.z+.18);
   ballShadow.position.set(ball.position.x,.13,ball.position.z);
   ballTrail.forEach(t=>t.visible=false);
 }
@@ -567,7 +569,8 @@ function launchPlayerShot() {
   setStatus(serving?'TOSS THE BALL · LOAD THE SERVE':`${shotInfo[shot].name.toUpperCase()} · PREPARE THE RACKET`);
 }
 function commitPlayerShot(stroke) {
-  const launch=new THREE.Vector3(player.position.x+(stroke.shot==='backhand'?-.19:.25),stroke.serving?2.70:1.58,player.position.z-.78);
+  const racketSide=stroke.shot==='backhand'?-1:1;
+  const launch=new THREE.Vector3(player.position.x+(stroke.serving?.27:racketSide*.67),stroke.serving?2.70:1.58,player.position.z-.78);
   const target=getTargetPoint(0,selectedShot);
   const spec=shotInfo[stroke.shot];
   const p=hitPower;
@@ -584,15 +587,20 @@ function commitPlayerShot(stroke) {
 function updatePendingStroke(dt) {
   if(!pendingStroke)return;
   const s=pendingStroke;s.elapsed+=dt;
-  const t=clamp(s.elapsed/s.windup,0,1),x=player.position.x+(s.shot==='backhand'?-0.25:.27);
+  const t=clamp(s.elapsed/s.windup,0,1),x=player.position.x+(s.shot==='backhand'?-.67:.67);
   const z=player.position.z-.45;
   ball.visible=true;
   if(s.serving){
-    // A visible left-hand ball toss before the overhead contact frame.
-    ball.position.set(player.position.x+lerp(-.26,.17,t),1.34+1.65*smooth(t),z-.11);
+    // Rise from the outside hand, reach the toss apex, then settle slightly
+    // to the overhead contact point. Stay outside the shoulder silhouette
+    // until the ball is safely ABOVE the head; crossing the back at neck
+    // height made the old toss look like a ball stuck to the player.
+    const tossHeight=t<.72?1.02+2.20*smooth(t/.72):3.22-.52*smooth((t-.72)/.28);
+    const tossSide=t<.70?-.55:lerp(-.55,.27,smooth((t-.70)/.30));
+    ball.position.set(player.position.x+tossSide,tossHeight,lerp(player.position.z+.18,player.position.z-.78,t));
   }else{
-    // Keep the arriving ball beside the hitting zone while the player loads.
-    ball.position.set(lerp(ball.position.x,x,t*.35),1.12+Math.sin(t*Math.PI)*.26,z-.8);
+    // Contact is outside the right/left racket hand, never behind the head.
+    ball.position.set(lerp(ball.position.x,x,clamp(t*.62,0,1)),1.15+.43*smooth(t),z-.33);
   }
   ballShadow.position.set(ball.position.x,.13,ball.position.z);
   if(t>=1)commitPlayerShot(s);
@@ -811,16 +819,42 @@ function drawAtlasFrame(c,actor,pose,alpha=1,opposing=false,motion=null) {
   const sx=(pose.index%cols)*cw,sy=Math.floor(pose.index/cols)*ch;
   const baseHeight=Math.min(view.h*.34*(opposing?.39+.23*p.depth:.54+.46*p.depth),view.w*.34);
   const width=baseHeight*cw/ch;
+  // Each photographic pose has a different transparent margin. Anchor to the
+  // athlete's hips/feet (not the image-cell center) so the entire body does
+  // not jump sideways when the racket extends for a stroke.
+  const anchors=pose.special?[
+    [.53,.967],[.45,.970],[.48,.980],[.52,.976]
+  ]:[
+    [.54,.978],[.42,.974],[.43,.959],[.44,.965],
+    [.50,.958],[.38,.957],[.48,.978],[.45,.957]
+  ];
+  const anchor=anchors[pose.index]||[.5,.97];
   const walking=actor.userData.walkStrength||0;
   const sway=Math.sin(actor.userData.walkTime)*walking;
+  const sideStep=clamp(playerVelocity.x/6.65,-1,1),forwardStep=clamp(playerVelocity.z/5.9,-1,1);
   const m=motion||{x:0,y:0,tilt:0,scale:1};
   c.save();c.globalAlpha=alpha;
-  c.translate(p.x+sway*view.w*.0025+view.h*m.x,p.y-(actor.position.y||0)*view.h*.045-view.h*m.y);
-  c.rotate(sway*.017+m.tilt);
-  c.scale(1,m.scale);
+  c.translate(p.x+sway*view.h*.005+view.h*m.x,p.y-(actor.position.y||0)*view.h*.045-view.h*m.y);
+  c.rotate(-sideStep*.018+forwardStep*.006+sway*.012+m.tilt);
+  c.scale(pose.flip?-1:1,(m.scale||1)*(1+walking*.008*Math.abs(sway)));
   c.shadowColor='#090e0b90';c.shadowBlur=opposing?3:5;c.shadowOffsetY=0;
   if(opposing)c.filter='hue-rotate(-78deg) saturate(.65) brightness(.76)';
-  c.drawImage(image,sx,sy,cw,ch,-width*.5,-baseHeight*.958,width,baseHeight);
+  const left=-width*anchor[0],top=-baseHeight*anchor[1];
+  if(walking>.06 && !actor.userData.hitTime && !opposing){
+    // Two subtle planted-foot phases keep side shuffles from looking like
+    // skating. Only the lower legs move; the photographic torso and the
+    // hand-held racket remain joined and unchanged.
+    const legCut=.68,lower=baseHeight*(1-legCut);
+    c.save();c.beginPath();c.rect(left-1,top-1,width+2,baseHeight*legCut+2);c.clip();
+    c.drawImage(image,sx,sy,cw,ch,left,top,width,baseHeight);c.restore();
+    for(const side of [-1,1]){
+      const stride=side*sway;
+      c.save();c.beginPath();
+      c.rect(left+(side<0?0:width*.5),top+baseHeight*legCut,width*.5+1,lower+2);c.clip();
+      c.translate(stride*baseHeight*.018,-Math.max(0,stride)*baseHeight*.017);
+      c.drawImage(image,sx,sy,cw,ch,left,top,width,baseHeight);c.restore();
+    }
+  }else c.drawImage(image,sx,sy,cw,ch,left,top,width,baseHeight);
   c.restore();return true;
 }
 function drawPhotorealPlayer(c,actor,opposing=false) {
@@ -829,30 +863,33 @@ function drawPhotorealPlayer(c,actor,opposing=false) {
   c.fillStyle=opposing?'#10171170':'#080e0b8b';
   c.beginPath();c.ellipse(p.x,p.y+2,width,Math.max(2,width*.17),0,0,2*Math.PI);c.fill();
   const rig=actor.userData,progress=clamp(1-rig.hitTime/(rig.hitDuration||.72),0,1);
-  const main=(index)=>({special:false,index}),special=(index)=>({special:true,index});
+  const main=(index,flip=false)=>({special:false,index,flip}),special=(index)=>({special:true,index});
   const ready=opposing||selectedShot!=='serve'?special(3):main(0);
   let sequence;
-  if(opposing)sequence=[ready,main(4),main(5),special(0),ready];
-  else if(rig.hitType==='serve')sequence=[main(0),main(1),main(2),main(3),ready];
-  else if(rig.hitType==='forehand')sequence=[ready,main(4),main(5),main(5),ready];
-  else if(rig.hitType==='backhand')sequence=[ready,main(6),main(6),special(0),ready];
+  if(opposing)sequence=[ready,main(4),main(5),main(7),ready];
+  // The original video's strokes follow preparation -> contact -> extension
+  // -> recovery. Keep the racket in the photo hand; never overlay two rackets
+  // or rest the racket head on the nape of the neck.
+  else if(rig.hitType==='serve')sequence=[main(0),special(2),main(2),main(3),main(0)];
+  else if(rig.hitType==='forehand')sequence=[ready,main(4),main(5),main(7),ready];
+  else if(rig.hitType==='backhand')sequence=[ready,main(4,true),main(5,true),main(7,true),ready];
   else if(rig.hitType==='drop')sequence=[ready,main(4),special(1),special(1),ready];
-  else if(rig.hitType==='lob')sequence=[ready,main(7),special(2),main(7),ready];
+  else if(rig.hitType==='lob')sequence=[ready,special(2),main(7),main(3),ready];
   else sequence=[ready];
   if(!rig.hitTime){
-    if(!drawAtlasFrame(c,actor,ready,1,opposing))drawFallbackPerson(c,actor,opposing);
+    const idle={x:0,y:.003*Math.sin(elapsed*2.3),tilt:0,scale:1};
+    if(!drawAtlasFrame(c,actor,ready,1,opposing,idle))drawFallbackPerson(c,actor,opposing);
     return;
   }
-  const time=[0,.22,.45,.72,1];
-  let segment=0;while(segment<3 && progress>time[segment+1])segment++;
-  const u=clamp((progress-time[segment])/(time[segment+1]-time[segment]),0,1);
-  const t=smooth(clamp((u-.25)/.75,0,1));
+  const times=[0,.17,.43,.72,.90,1];
+  let frame=0;while(frame<4 && progress>=times[frame+1])frame++;
   const impulse=Math.sin(Math.PI*progress),sign=rig.hitType==='backhand'?-1:1;
   const serve=rig.hitType==='serve';
-  const motion={x:sign*.017*Math.sin(Math.PI*progress*1.6),y:(serve?.028:.010)*impulse*impulse,
-    tilt:(serve?-.072:sign*.045)*Math.sin(progress*Math.PI*1.7),scale:1+(serve?.025:.014)*impulse};
-  if(!drawAtlasFrame(c,actor,sequence[segment],1-t,opposing,motion))drawFallbackPerson(c,actor,opposing);
-  if(t>.002)drawAtlasFrame(c,actor,sequence[segment+1],t,opposing,motion);
+  const motion={x:sign*.012*Math.sin(progress*Math.PI),y:(serve?.022:.008)*impulse*impulse,
+    tilt:(serve?-.045:sign*.032)*Math.sin(progress*Math.PI*1.7),scale:1+(serve?.020:.012)*impulse};
+  // One coherent photograph per animation frame. Long alpha crossfades made
+  // two racket heads overlap behind the athlete's neck.
+  if(!drawAtlasFrame(c,actor,sequence[frame],1,opposing,motion))drawFallbackPerson(c,actor,opposing);
 }
 function drawPhotorealCourt(c,w,h) {
   const view=courtView();
@@ -929,8 +966,10 @@ function drawFallbackPerson(c,actor,opposing=false) {
   c.restore();c.restore();
 }
 function drawFallbackBall(c) {
-  const shadow=projectFallback(ball.position.x,ball.position.z);
-  c.fillStyle='#001a1b60';c.beginPath();c.ellipse(shadow.x,shadow.y,9,3,0,0,Math.PI*2);c.fill();
+  if(phase!=='serve'&&phase!=='windup'){
+    const shadow=projectFallback(ball.position.x,ball.position.z);
+    c.fillStyle='#001a1b60';c.beginPath();c.ellipse(shadow.x,shadow.y,9,3,0,0,Math.PI*2);c.fill();
+  }
   for(let i=Math.min(5,trailHistory.length-1);i>=0;i--){
     const t=trailHistory[i];if(!t)continue;
     const pt=projectFallback(t.x,t.z,t.y);

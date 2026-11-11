@@ -4,8 +4,12 @@ A browser tennis training game with a fixed rear-court camera. One athlete faces
 a far-baseline mechanical ball feeder. Serve, forehand, backhand, drop shot,
 and lob drills introduce foreign-language vocabulary.
 
-The athlete uses the earlier realistic action artwork with timed preparation,
-contact and follow-through poses, plus eased lateral footwork. The opposite end
+The athlete retains the realistic action artwork, with body-centered pose
+alignment, separate preparation/contact/follow-through frames, and subtly
+animated footwork during lateral shuffles. One pose is rendered at a time so
+the racket stays in the athlete's hand without ghosting across the neck.
+Serve balls begin by the non-racket hand, travel above the head on a timed
+toss, and meet the contact pose before flying across the net. The opposite end
 contains only a ball machine. The court backdrop is a perspective image.
 
 ## Play
