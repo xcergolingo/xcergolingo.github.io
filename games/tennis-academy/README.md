@@ -4,10 +4,9 @@ A browser tennis training game with a fixed rear-court camera. One athlete faces
 a far-baseline mechanical ball feeder. Serve, forehand, backhand, drop shot,
 and lob drills introduce foreign-language vocabulary.
 
-The athlete is animated continuously using two-bone arm inverse kinematics,
-projected three-dimensional knee flexion, joint-connected racket motion, timed
-preparation/contact/follow-through, and eased lateral footwork. The opposite
-end contains only a ball machine. The court backdrop is a perspective image.
+The athlete uses the earlier realistic action artwork with timed preparation,
+contact and follow-through poses, plus eased lateral footwork. The opposite end
+contains only a ball machine. The court backdrop is a perspective image.
 
 ## Play
 
@@ -24,5 +23,6 @@ Example: {"primaryLanguage":"en","learningLanguage":"ja","words":[{"id":"101","w
 The built-in lesson is used when none is passed from the game hub. Browser
 speech synthesis provides pronunciation and example sentences.
 
-Files: index.html, game.js, kinematic-player.js, tennis-court.jpg,
+Files: index.html, game.js, kinematic-player.js (ball machine drawing),
+tennis-court.jpg, athlete-actions.png, athlete-special.png,
 three.module.js, cover.svg.

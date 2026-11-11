@@ -1,5 +1,5 @@
 import * as THREE from './three.module.js';
-import {drawKinematicPlayer,drawBallMachine} from './kinematic-player.js';
+import {drawBallMachine} from './kinematic-player.js';
 
 // GoLingo Tennis Academy — browser-local, procedural 3D tennis and vocabulary drills.
 const $ = (id) => document.getElementById(id);
@@ -70,11 +70,13 @@ let fallbackContext=null, usesCanvasFallback=false;
 let ballTrail=[], targetRings=[], targetButtons=[], courtMaterial, selectionBeam, particles=[];
 let audioContext=null,activeWordAudio=null;
 const worldClock=new THREE.Clock();
-// The reference uses a fixed rear-court viewpoint. Keep its realistic court,
-// but animate a connected tennis rig instead of swapping photographs.
-const courtPlate=new Image();
-courtPlate.decoding='async';
+// Restore the realistic tennis player from the earlier version while retaining
+// the stationary ball machine and improved mobile controls.
+const courtPlate=new Image(),athleteActions=new Image(),athleteSpecial=new Image();
+courtPlate.decoding='async';athleteActions.decoding='async';athleteSpecial.decoding='async';
 courtPlate.src='./tennis-court.jpg';
+athleteActions.src='./athlete-actions.png';
+athleteSpecial.src='./athlete-special.png';
 let pendingStroke=null;
 
 function createMaterial(color, roughness=.85, metalness=0, options={}) {
@@ -801,6 +803,57 @@ function projectFallback(x,z,height=0) {
   return {x:view.x+view.w*(.5+(x/5.485)*half),y:view.y+view.h*(floorY-height*heightScale),depth,scale:.50+.50*depth};
 }
 function imageIsReady(img) {return img.complete && img.naturalWidth>0;}
+function drawAtlasFrame(c,actor,pose,alpha=1,opposing=false,motion=null) {
+  const image=pose.special?athleteSpecial:athleteActions;
+  if(!imageIsReady(image))return false;
+  const p=projectFallback(actor.position.x,actor.position.z),view=courtView();
+  const cols=pose.special?2:4,rows=2,cw=image.naturalWidth/cols,ch=image.naturalHeight/rows;
+  const sx=(pose.index%cols)*cw,sy=Math.floor(pose.index/cols)*ch;
+  const baseHeight=Math.min(view.h*.34*(opposing?.39+.23*p.depth:.54+.46*p.depth),view.w*.34);
+  const width=baseHeight*cw/ch;
+  const walking=actor.userData.walkStrength||0;
+  const sway=Math.sin(actor.userData.walkTime)*walking;
+  const m=motion||{x:0,y:0,tilt:0,scale:1};
+  c.save();c.globalAlpha=alpha;
+  c.translate(p.x+sway*view.w*.0025+view.h*m.x,p.y-(actor.position.y||0)*view.h*.045-view.h*m.y);
+  c.rotate(sway*.017+m.tilt);
+  c.scale(1,m.scale);
+  c.shadowColor='#090e0b90';c.shadowBlur=opposing?3:5;c.shadowOffsetY=0;
+  if(opposing)c.filter='hue-rotate(-78deg) saturate(.65) brightness(.76)';
+  c.drawImage(image,sx,sy,cw,ch,-width*.5,-baseHeight*.958,width,baseHeight);
+  c.restore();return true;
+}
+function drawPhotorealPlayer(c,actor,opposing=false) {
+  const p=projectFallback(actor.position.x,actor.position.z),view=courtView();
+  const width=view.h*(opposing?.032:.078)*(.62+.38*p.depth);
+  c.fillStyle=opposing?'#10171170':'#080e0b8b';
+  c.beginPath();c.ellipse(p.x,p.y+2,width,Math.max(2,width*.17),0,0,2*Math.PI);c.fill();
+  const rig=actor.userData,progress=clamp(1-rig.hitTime/(rig.hitDuration||.72),0,1);
+  const main=(index)=>({special:false,index}),special=(index)=>({special:true,index});
+  const ready=opposing||selectedShot!=='serve'?special(3):main(0);
+  let sequence;
+  if(opposing)sequence=[ready,main(4),main(5),special(0),ready];
+  else if(rig.hitType==='serve')sequence=[main(0),main(1),main(2),main(3),ready];
+  else if(rig.hitType==='forehand')sequence=[ready,main(4),main(5),main(5),ready];
+  else if(rig.hitType==='backhand')sequence=[ready,main(6),main(6),special(0),ready];
+  else if(rig.hitType==='drop')sequence=[ready,main(4),special(1),special(1),ready];
+  else if(rig.hitType==='lob')sequence=[ready,main(7),special(2),main(7),ready];
+  else sequence=[ready];
+  if(!rig.hitTime){
+    if(!drawAtlasFrame(c,actor,ready,1,opposing))drawFallbackPerson(c,actor,opposing);
+    return;
+  }
+  const time=[0,.22,.45,.72,1];
+  let segment=0;while(segment<3 && progress>time[segment+1])segment++;
+  const u=clamp((progress-time[segment])/(time[segment+1]-time[segment]),0,1);
+  const t=smooth(clamp((u-.25)/.75,0,1));
+  const impulse=Math.sin(Math.PI*progress),sign=rig.hitType==='backhand'?-1:1;
+  const serve=rig.hitType==='serve';
+  const motion={x:sign*.017*Math.sin(Math.PI*progress*1.6),y:(serve?.028:.010)*impulse*impulse,
+    tilt:(serve?-.072:sign*.045)*Math.sin(progress*Math.PI*1.7),scale:1+(serve?.025:.014)*impulse};
+  if(!drawAtlasFrame(c,actor,sequence[segment],1-t,opposing,motion))drawFallbackPerson(c,actor,opposing);
+  if(t>.002)drawAtlasFrame(c,actor,sequence[segment+1],t,opposing,motion);
+}
 function drawPhotorealCourt(c,w,h) {
   const view=courtView();
   c.fillStyle='#110f0d';c.fillRect(0,0,w,h);
@@ -809,7 +862,7 @@ function drawPhotorealCourt(c,w,h) {
   // otherwise stationary architectural scene.
   drawFallbackRings(c);
   drawBallMachine(c,opponent,projectFallback,view,elapsed);
-  drawKinematicPlayer(c,player,projectFallback,view);
+  drawPhotorealPlayer(c,player,false);
   if(ball.visible)drawFallbackBall(c);
   const rim=c.createLinearGradient(view.x,view.y,view.x,view.y+view.h);
   rim.addColorStop(0,'#01090817');rim.addColorStop(.48,'#ffffff00');rim.addColorStop(1,'#0207062b');
@@ -957,7 +1010,7 @@ function renderCanvasFallback() {
   for(let i=0;i<=38;i++){const x=-6.3+i*12.6/38,a=projectFallback(x,0),b=projectFallback(x,0,1.1);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();}
   for(let i=1;i<9;i++){const aa=projectFallback(-6.3,0,i*.12),bb=projectFallback(6.3,0,i*.12);c.beginPath();c.moveTo(aa.x,aa.y);c.lineTo(bb.x,bb.y);c.stroke();}
   c.strokeStyle='#f5fff1';c.lineWidth=4;for(const pos of [ntl,ntr]){const bottom=projectFallback(pos===ntl?-6.3:6.3,0);c.beginPath();c.moveTo(bottom.x,bottom.y+4);c.lineTo(pos.x,pos.y-4);c.stroke();}
-  drawKinematicPlayer(c,player,projectFallback,courtView());
+  drawPhotorealPlayer(c,player,false);
   drawFallbackBall(c);
   // Light shafts gently draw the eye towards the vocabulary targets.
   const grad=c.createRadialGradient(w*.5,h*.36,10,w*.5,h*.36,Math.max(w,h)*.62);
