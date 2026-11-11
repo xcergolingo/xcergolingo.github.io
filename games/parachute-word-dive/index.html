@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#062c40">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Glide continuously through floating vocabulary rings and learn languages with GoLingo.">
+  <title>Parachute Word Dive · GoLingo</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main id="app" aria-label="GoLingo Parachute Word Dive">
+    <div id="sky-scene" aria-hidden="true"></div>
+    <div id="sky-vignette" aria-hidden="true"></div>
+    <canvas id="effects" aria-hidden="true"></canvas>
+
+    <header class="topbar">
+      <div class="brand" aria-label="GoLingo Sky Academy">
+        <span class="brand-mark">G<span>↗</span></span>
+        <span class="brand-type"><strong>GoLingo</strong><small>SKY ACADEMY</small></span>
+      </div>
+      <div class="topbar-actions">
+        <button class="study-switch" id="study-switch" aria-label="Change learning mode" title="Switch Learn, Listening and Knowledge modes"><span id="study-switch-label">LEARN</span><small>CHANGE MODE ↻</small></button>
+        <button class="icon-button" id="camera-button" aria-label="Change camera view" title="Change camera view"><svg viewBox="0 0 24 24"><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13.5" r="3.3"/></svg></button>
+        <button class="icon-button" id="sound-button" aria-label="Mute speech" title="Mute speech"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/></svg></button>
+        <button class="icon-button" id="full-button" aria-label="Enter full screen" title="Full screen"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
+        <button class="icon-button" id="pause-button" aria-label="Pause game" title="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+      </div>
+    </header>
+
+    <section class="hud hidden" id="hud" aria-live="polite">
+      <div class="altitude-hud">
+        <div class="hud-kicker"><span class="tiny-dot"></span> LIVE ALTITUDE</div>
+        <div class="altitude-line"><span id="altitude-number">1,800</span><span class="altitude-unit">m</span></div>
+        <div class="fall-meter"><span id="fall-progress"></span></div>
+        <div class="mode-line"><span id="flight-mode">FREEFALL</span><span id="speed-number">164 KM/H</span></div>
+      </div>
+      <div class="challenge">
+        <span class="challenge-label"><span class="radio-wave">◎</span> <span id="challenge-label">LEARN · ONE WORD AT A TIME</span></span>
+        <div class="prompt-line"><span id="prompt-word">GLIDE TO A WORD</span><button id="replay-button" class="speak-button" aria-label="Repeat the word" title="Repeat the word">▶</button></div>
+        <div class="challenge-hint" id="challenge-hint">Reach any glowing word ring to hear it</div>
+      </div>
+      <div class="score-hud">
+        <div class="score-number"><strong id="score-number">0000</strong><small>POINTS</small></div>
+        <div class="round-pill"><span id="round-count">00</span> <span class="round-label">WORDS COLLECTED</span></div>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div class="status-bottom hidden" id="status-bottom">
+      <span class="status-line"><span class="status-pulse"></span><span id="status-copy">KEEP GLIDING · EVERY WORD COUNTS</span></span>
+      <span id="wind-copy">WIND 04 KM/H ↗</span>
+    </div>
+    <div class="touch-controls hidden" id="touch-controls">
+      <div class="thumb-area" id="joystick" aria-label="Four direction steering joystick: up forward, down backward, left and right" role="application">
+        <div class="thumb-cross"><span>↖</span><span>↗</span><span>↙</span><span>↘</span></div>
+        <div class="thumb-ring"><div class="thumb-knob" id="joystick-knob"><span></span></div></div>
+        <span class="control-caption">4-WAY STEER · ↑ FORWARD</span>
+      </div>
+      <div class="right-controls">
+        <button id="brake-button" class="side-control" aria-label="Slow your flight"><span>↓</span><small>BRAKE</small></button>
+        <button id="deploy-button" class="deploy-control"><span class="deploy-icon">◡</span><strong>OPEN CHUTE</strong><small id="chute-status">AT 850 M</small></button>
+      </div>
+    </div>
+
+    <div id="start-screen" class="screen-overlay show" role="dialog" aria-labelledby="intro-title">
+      <div class="intro-shade"></div>
+      <div class="intro-content">
+        <div class="eyebrow"><span class="eyebrow-line"></span> THE SKY IS YOUR CLASSROOM <span class="eyebrow-line"></span></div>
+        <div class="title-accent">PARACHUTE</div>
+        <h1 id="intro-title">WORD <em>DIVE</em></h1>
+        <p class="intro-description">Freefall above a living city. Steer in <strong>all four directions</strong>, fly through glowing vocabulary rings, and learn as you descend.</p>
+        <div class="intro-rule"></div>
+        <div class="intro-label">YOUR LEARNING LANGUAGE</div>
+        <select id="language-select" aria-label="Choose the language to learn">
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="zh">🇨🇳 Chinese</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="de">🇩🇪 German</option>
+          <option value="pt">🇵🇹 Portuguese</option>
+        </select>
+        <div class="intro-label study-title">CHOOSE YOUR LANGUAGE CHALLENGE</div>
+        <div class="study-picker" role="group" aria-label="Choose learning mode">
+          <button type="button" data-study="learn" class="study-option active" aria-pressed="true"><span>01</span><strong>LEARN</strong><small>One word · repeat aloud</small></button>
+          <button type="button" data-study="listen" class="study-option" aria-pressed="false"><span>02</span><strong>LISTENING</strong><small>Hear word · choose of 3</small></button>
+          <button type="button" data-study="knowledge" class="study-option" aria-pressed="false"><span>03</span><strong>KNOWLEDGE</strong><small>Hear meaning · choose of 3</small></button>
+        </div>
+        <div class="mode-picker" role="group" aria-label="Choose flight steering">
+          <button type="button" id="easy-mode" class="mode-option active" aria-pressed="true"><strong>ASSISTED FLIGHT</strong><small>Tap a ring to glide to it</small></button>
+          <button type="button" id="challenge-mode" class="mode-option" aria-pressed="false"><strong>FREE STEER</strong><small>Choose your own path</small></button>
+        </div>
+        <div class="import-note" id="import-note">Continuous descent • GoLingo word lists supported</div>
+        <button id="start-button" class="primary-cta"><span>START YOUR DIVE</span><span class="cta-arrow">↗</span></button>
+        <div class="instruction-row">
+          <div><span class="instruction-icon">⌁</span><span>4-WAY FLIGHT</span></div>
+          <div><span class="instruction-icon">◉</span><span>HEAR &amp; LEARN</span></div>
+          <div><span class="instruction-icon">◡</span><span>OPEN PARACHUTE</span></div>
+        </div>
+        <small class="desktop-hint">UP/W: FORWARD · DOWN/S: BACKWARD · LEFT/RIGHT: BANK · SPACE: CHUTE</small>
+      </div>
+      <span class="start-footer">GO LINGO. GO FURTHER. <span>✦</span> GOLINGOAPP.COM</span>
+    </div>
+
+    <div id="pause-screen" class="screen-overlay hidden" role="dialog" aria-labelledby="pause-title">
+      <div class="modal-card">
+        <span class="modal-eyebrow">FLIGHT ON HOLD</span>
+        <h2 id="pause-title">Catching your breath?</h2>
+        <p>Every great language learner takes a moment to enjoy the view.</p>
+        <div class="modal-stats"><div><strong id="pause-score">0</strong><small>POINTS</small></div><div><strong id="pause-words">0</strong><small>WORDS LEARNED</small></div></div>
+        <button id="resume-button" class="primary-cta"><span>RESUME FLIGHT</span><span class="cta-arrow">↗</span></button>
+        <button id="restart-button" class="text-cta">START A NEW DIVE</button>
+      </div>
+    </div>
+
+    <div id="end-screen" class="screen-overlay hidden" role="dialog" aria-labelledby="end-title">
+      <div class="modal-card end-card">
+        <div class="end-badge">✦ TOUCHDOWN ✦</div>
+        <h2 id="end-title">You've landed!</h2>
+        <p id="end-summary">Look how far your vocabulary has traveled.</p>
+        <div class="end-score"><strong id="final-score">800</strong><small>FLIGHT POINTS</small></div>
+        <div class="end-metrics"><span><strong id="final-words">8</strong> words collected</span><span id="final-accuracy">Keep listening, keep learning</span></div>
+        <div class="learned-list" id="learned-list"></div>
+        <button id="play-again-button" class="primary-cta"><span>DIVE AGAIN</span><span class="cta-arrow">↗</span></button>
+        <button id="export-button" class="text-cta">↓ EXPORT MY WORDS</button>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
