@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#071a21" />
+  <meta name="description" content="GoLingo Tennis Academy: practice serves, forehands, backhands, drop shots and lobs while learning a new language." />
+  <title>GoLingo Tennis Academy — Language Drill</title>
+  <style>
+    :root {
+      --ink:#effdf3; --soft:#b8d7cd; --muted:#8cadad; --jade:#11c795;
+      --lime:#dcfa6b; --amber:#ffca65; --panel:rgba(7,26,34,.77);
+      --outline:rgba(229,255,238,.16); --shadow:0 22px 66px rgba(0,8,14,.35);
+      color-scheme:dark;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071a21;color:var(--ink);touch-action:none;-webkit-user-select:none;user-select:none}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+    button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+    #game-root{position:fixed;inset:0;overflow:hidden;isolation:isolate}
+    #scene{display:block;position:absolute;inset:0;width:100%;height:100%}
+    #edgeShade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(2,13,23,.32),transparent 29%,transparent 66%,rgba(2,13,23,.54)),linear-gradient(90deg,rgba(1,14,20,.27),transparent 18%,transparent 80%,rgba(1,14,20,.25))}
+    .topbar{position:absolute;top:0;left:0;right:0;z-index:20;padding:clamp(12px,2.2vw,25px) clamp(14px,2.5vw,34px);display:flex;align-items:flex-start;gap:14px;pointer-events:none}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brandmark{width:43px;height:43px;border:1px solid rgba(239,255,226,.45);background:linear-gradient(140deg,#31d2a4,#0b6b65);border-radius:15px;display:grid;place-items:center;box-shadow:0 8px 30px #00d6a333;font-size:26px;transform:rotate(-8deg)}
+    .brandmark span{transform:rotate(8deg)}
+    .brand-name{font-size:clamp(17px,2vw,23px);letter-spacing:-.075em;font-weight:900;line-height:1.03;text-shadow:0 2px 12px #001b24}
+    .brand-name em{font-style:normal;color:var(--lime)}
+    .brand-kicker{font-size:9px;font-weight:800;letter-spacing:.27em;color:#b1f8db;line-height:2}
+    .top-spacer{flex:1}
+    .scoreboard{display:flex;gap:1px;background:rgba(5,22,31,.82);border:1px solid var(--outline);border-radius:17px;overflow:hidden;backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+    .scorecell{text-align:center;min-width:70px;padding:7px 11px 9px}
+    .scorecell+.scorecell{border-left:1px solid var(--outline)}
+    .scorecell small{display:block;color:#9db9b7;font-weight:800;font-size:9px;letter-spacing:.15em}
+    .scorecell strong{font-size:20px;line-height:1.2;display:block;font-variant-numeric:tabular-nums}
+    .scorecell .lime{color:var(--lime)}
+    .round-btn{display:grid;place-items:center;flex:none;width:45px;height:45px;color:#eefef0;background:var(--panel);border:1px solid var(--outline);border-radius:16px;backdrop-filter:blur(16px);box-shadow:var(--shadow);font-size:19px;pointer-events:auto}
+    .round-btn:active{transform:scale(.96)}
+    .hud-actions{display:flex;gap:8px;pointer-events:auto}
+    .lesson-card{position:absolute;z-index:12;top:clamp(88px,12vh,126px);left:50%;transform:translateX(-50%);width:min(430px,calc(100% - 170px));padding:12px 19px 14px;text-align:center;background:linear-gradient(135deg,rgba(6,32,38,.94),rgba(6,30,35,.79));border:1px solid rgba(180,242,211,.27);border-radius:19px;box-shadow:0 15px 50px #01181c7a;backdrop-filter:blur(20px)}
+    .lesson-eyebrow{display:flex;align-items:center;justify-content:center;gap:7px;color:#85ecc6;font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+    .pulse-dot{width:7px;height:7px;background:#72ffc1;box-shadow:0 0 13px #39f8ac;border-radius:50%;animation:pulse 2s infinite}
+    .lesson-row{display:flex;align-items:center;justify-content:center;gap:11px}
+    #question{font-size:clamp(18px,2.5vw,29px);line-height:1.12;font-weight:900;letter-spacing:-.035em;margin:5px 0 0;max-width:100%;overflow-wrap:anywhere}
+    .lesson-sub{margin-top:5px;color:#a1c3ba;font-size:11px}
+    .listen-btn{flex:none;background:rgba(165,249,203,.12);border:1px solid rgba(165,249,203,.3);color:#c5ffe2;width:34px;height:34px;border-radius:12px;font-size:16px}
+    #targetLayer{position:absolute;inset:0;pointer-events:none;z-index:11}
+    .word-target{position:absolute;transform:translate(-50%,-50%);padding:7px 12px;min-width:84px;max-width:160px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:3px;color:#f7fff4;border:1px solid rgba(200,255,225,.65);border-radius:13px;background:linear-gradient(150deg,rgba(9,52,52,.96),rgba(6,25,31,.93));box-shadow:0 6px 18px #001c27aa,0 0 0 1px #164d4b inset;backdrop-filter:blur(6px);transition:border-color .14s,background .14s,box-shadow .14s,scale .14s}
+    .word-target .target-number{position:absolute;left:-9px;top:-9px;width:19px;height:19px;display:grid;place-items:center;color:#042529;background:var(--lime);border-radius:100%;font-size:10px;font-weight:900;box-shadow:0 4px 8px #001c27aa}
+    .word-target .target-word{font-weight:800;line-height:1.15;font-size:clamp(14px,1.55vw,20px);text-shadow:0 1px 8px #0009;overflow-wrap:anywhere}
+    .word-target .target-hint{font-size:9px;letter-spacing:.06em;color:#a4cec1;text-transform:uppercase;font-weight:750}
+    .word-target.selected{border:2px solid var(--lime);background:linear-gradient(140deg,rgba(16,92,69,.98),rgba(5,47,47,.96));box-shadow:0 0 0 5px rgba(211,252,109,.17),0 6px 25px #001a20c9;scale:1.045}
+    .word-target.correct-flash{border-color:#aaffdb;box-shadow:0 0 36px #47ffc7bb;background:#136b54}
+    .word-target.wrong-flash{border-color:#ff9a7a;background:#6b352b}
+    .aim-indicator{position:absolute;z-index:9;top:33%;left:50%;transform:translateX(-50%);font-size:12px;font-weight:750;color:#f4fff7;text-shadow:0 3px 12px #001c25;text-align:center;pointer-events:none;opacity:.96}
+    .aim-indicator span{display:inline-block;background:rgba(6,29,37,.7);padding:7px 13px;border:1px solid rgba(229,255,238,.14);border-radius:99px;backdrop-filter:blur(10px)}
+    .feedback{position:absolute;z-index:15;top:45%;left:50%;transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;text-align:center;transition:opacity .2s,transform .25s}
+    .feedback.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    .feedback b{display:block;font-size:clamp(23px,5vw,55px);line-height:1;color:var(--lime);font-weight:1000;text-shadow:0 4px 20px #062b2b,0 0 36px #2cff9569;white-space:nowrap}
+    .feedback small{display:block;margin-top:8px;font-size:clamp(11px,1.7vw,16px);font-weight:850;text-shadow:0 3px 15px #051b20}
+    .feedback.bad b{color:#ffb19b}
+    .statusbar{position:absolute;z-index:12;bottom:clamp(144px,21vh,184px);left:50%;transform:translateX(-50%);display:flex;gap:9px;align-items:center;pointer-events:none}
+    #statusText{white-space:nowrap;text-align:center;font-size:11px;font-weight:800;letter-spacing:.035em;text-shadow:0 2px 13px #001b25;background:rgba(4,31,34,.65);border:1px solid rgba(222,255,235,.18);border-radius:30px;padding:8px 16px;backdrop-filter:blur(6px)}
+    .incoming-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 15px var(--amber)}
+    .controls{position:absolute;z-index:16;left:0;right:0;bottom:0;padding:0 clamp(14px,4vw,55px) calc(max(15px,env(safe-area-inset-bottom)) + 7px);display:grid;grid-template-columns:minmax(110px,1fr) auto minmax(110px,1fr);align-items:end;gap:10px;pointer-events:none}
+    .joystick-wrap{justify-self:start;display:flex;align-items:center;flex-direction:column;gap:8px;pointer-events:auto}
+    .joystick-label,.swing-label{font-size:9px;font-weight:850;letter-spacing:.17em;color:#cde8df;text-shadow:0 2px 8px #001e25}
+    #joystick{position:relative;width:clamp(98px,13vw,139px);height:clamp(98px,13vw,139px);border-radius:50%;border:2px solid rgba(210,255,226,.38);background:radial-gradient(circle at 50% 50%,rgba(152,241,212,.13) 0 30%,rgba(7,44,50,.53) 32% 100%);box-shadow:0 0 0 9px rgba(170,241,220,.06),0 9px 34px #001b20b0 inset;touch-action:none}
+    #joystick:before,#joystick:after{content:"";position:absolute;background:rgba(216,254,238,.17);left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+    #joystick:before{width:76%;height:1px}#joystick:after{width:1px;height:76%}
+    #stick{position:absolute;top:50%;left:50%;width:45%;height:45%;border-radius:50%;transform:translate(-50%,-50%);background:linear-gradient(145deg,rgba(187,255,224,.79),rgba(49,162,137,.8));border:2px solid #e8fff1a6;box-shadow:0 6px 16px #001b1fa8,0 0 0 3px #16594a66;pointer-events:none}
+    .shot-picker{display:flex;gap:5px;align-items:center;justify-content:center;background:rgba(5,30,36,.87);border:1px solid rgba(221,255,236,.17);padding:6px;border-radius:19px;backdrop-filter:blur(16px);box-shadow:0 10px 35px #001620aa;pointer-events:auto;max-width:calc(100vw - 240px)}
+    .shot{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:71px;padding:8px 10px;border-radius:13px;border:1px solid transparent;background:transparent;color:#b7d9d1;transition:background .12s,transform .12s}
+    .shot .glyph{font-size:19px;line-height:1.1;display:block;height:21px}
+    .shot .shot-name{font-size:10px;font-weight:850;letter-spacing:.02em}
+    .shot.selected{color:#102a2b;background:var(--lime);box-shadow:0 3px 15px #cbfa5942}
+    .shot.selected .shot-name{color:#173d30}
+    .shot:active{transform:scale(.94)}
+    .swing-wrap{justify-self:end;display:flex;align-items:center;flex-direction:column;gap:7px;pointer-events:auto}
+    #swingBtn{width:clamp(100px,12.5vw,139px);height:clamp(100px,12.5vw,139px);border-radius:50%;border:3px solid rgba(239,255,202,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:#173c2a;background:radial-gradient(circle at 35% 25%,#f0ffa7 0%,#ccf666 52%,#8edb50 100%);box-shadow:0 0 0 8px rgba(201,255,103,.13),0 7px 38px #b7fb3f55,0 10px 22px #001b1e88;touch-action:none;position:relative}
+    #swingBtn:active,#swingBtn.charging{transform:scale(.96);box-shadow:0 0 0 14px rgba(201,255,103,.21),0 0 45px #c6ff7e8e}
+    #swingBtn .racket-icon{font-size:29px;height:32px;line-height:32px;transform:rotate(-28deg)}
+    #swingBtn strong{font-weight:1000;letter-spacing:.07em;font-size:17px}
+    #swingBtn small{font-size:9px;font-weight:850;letter-spacing:.12em;opacity:.75}
+    .hintkeys{position:absolute;right:20px;bottom:195px;color:#b8dbce;font-size:10px;z-index:10;background:#051d2699;border:1px solid #ffffff20;padding:7px 10px;border-radius:9px}
+    .overlay{position:absolute;z-index:40;inset:0;background:radial-gradient(ellipse at 50% 37%,rgba(11,47,50,.48),rgba(1,12,20,.76) 65%),rgba(1,11,20,.4);backdrop-filter:blur(8px);display:grid;place-items:center;padding:22px;overflow:auto}
+    .overlay[hidden]{display:none!important}
+    .modal{width:min(560px,100%);max-height:min(760px,92vh);overflow:auto;border:1px solid rgba(191,250,220,.27);border-radius:29px;background:linear-gradient(150deg,rgba(12,55,58,.96),rgba(5,26,36,.98));box-shadow:0 35px 100px #00141edb;padding:clamp(23px,4.3vw,39px);text-align:center}
+    .modal .eyebrow{color:var(--lime);font-size:11px;letter-spacing:.22em;font-weight:900}
+    .modal h1{font-size:clamp(33px,6vw,52px);line-height:.98;letter-spacing:-.065em;margin:12px 0}
+    .modal h1 em{color:var(--lime);font-style:normal}
+    .modal p{color:#bdd9d1;font-size:14px;line-height:1.58;margin:14px auto;max-width:440px}
+    .feature-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:22px 0}
+    .feature-pills span{font-size:11px;font-weight:750;color:#d4efdd;border:1px solid #efffe12b;background:#f2ffe50d;padding:7px 10px;border-radius:99px}
+    .primary{border:0;border-radius:15px;background:var(--lime);color:#153730;padding:14px 22px;font-weight:950;letter-spacing:.035em;box-shadow:0 11px 30px #bbf54d33;min-width:205px}
+    .primary:active{transform:translateY(2px)}
+    .secondary{border:1px solid #bbf0ce55;color:#dfffe6;background:#0d48484c;padding:12px 18px;border-radius:14px;font-weight:800}
+    .two-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px}
+    .modal-steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:23px 0}
+    .modal-steps div{border:1px solid #ffffff19;border-radius:13px;background:#ffffff09;padding:12px 8px;text-align:center;font-size:11px;color:#bfdacf;line-height:1.4}
+    .modal-steps b{display:block;color:#e8ffda;margin-bottom:6px;font-size:19px}
+    .settings-modal{text-align:left;width:min(590px,100%)}
+    .settings-modal .settings-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .settings-modal h2{margin:0;font-size:29px;letter-spacing:-.045em}
+    .setting-section{margin:21px 0;border-top:1px solid #ffffff24;padding-top:15px}
+    .setting-section label.heading{display:block;color:#a7ffda;font-weight:850;letter-spacing:.14em;font-size:10px;margin:0 0 9px}
+    .setting-section select,.setting-section textarea{border:1px solid #b4fae04f;color:#eafff0;background:#082f38;border-radius:12px;padding:11px;width:100%;outline:0}
+    .setting-section textarea{height:135px;resize:vertical;font-size:12px;font-family:ui-monospace,SFMono-Regular,monospace;user-select:text;-webkit-user-select:text;touch-action:auto}
+    .setting-section select option{background:#092d37}
+    .toggle-row{display:flex;justify-content:space-between;align-items:center;gap:15px;color:#d5e9df;font-size:13px;padding:7px 0}
+    .toggle-row input{accent-color:#b7ed5a;width:20px;height:20px;touch-action:auto}
+    .setting-info{font-size:11px;color:#9abeb3;margin-top:5px}
+    #importMessage{font-size:12px;color:#9ffaab;min-height:16px}
+    .toast{position:absolute;top:22%;left:50%;transform:translate(-50%,-16px);z-index:55;background:#0a3637ef;color:#eaffeb;border:1px solid #ccf5da60;border-radius:13px;padding:10px 16px;font-size:12px;font-weight:760;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s}
+    .toast.show{transform:translate(-50%,0);opacity:1}
+    #confetti{position:absolute;inset:0;pointer-events:none;z-index:18}
+    .sr-only{position:absolute!important;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden;white-space:nowrap}
+    @keyframes pulse{50%{box-shadow:0 0 4px #39f8ac;opacity:.6}}
+    @media(max-width:720px){
+      .topbar{padding:11px 12px;gap:7px}
+      .brandmark{width:34px;height:34px;border-radius:11px;font-size:22px}
+      .brand{gap:7px}.brand-name{font-size:16px}.brand-kicker{font-size:7px;letter-spacing:.2em}
+      .scorecell{min-width:51px;padding:6px 6px}.scorecell small{font-size:7px}.scorecell strong{font-size:16px}
+      .scoreboard{border-radius:12px}.round-btn{width:34px;height:34px;border-radius:11px;font-size:15px}.hud-actions{gap:5px}
+      .lesson-card{top:61px;width:min(345px,calc(100% - 45px));padding:8px 11px 9px;border-radius:14px}
+      #question{font-size:18px}.lesson-sub{font-size:9px;margin-top:2px}.lesson-eyebrow{font-size:8px}
+      .listen-btn{width:28px;height:28px;font-size:13px;border-radius:9px}
+      .shot-picker{max-width:calc(100vw - 33px);gap:2px;padding:4px;border-radius:13px}
+      .shot{min-width:54px;padding:7px 5px;border-radius:9px}.shot .glyph{font-size:16px;height:18px}.shot .shot-name{font-size:9px}
+      .controls{display:flex;justify-content:space-between;align-items:end;padding:0 18px calc(env(safe-area-inset-bottom) + 12px)}
+      .shot-picker{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 115px);left:50%;transform:translateX(-50%)}
+      #joystick{width:94px;height:94px}#swingBtn{width:96px;height:96px}#swingBtn .racket-icon{font-size:23px;height:25px;line-height:25px}#swingBtn strong{font-size:15px}
+      .joystick-label,.swing-label{font-size:8px}
+      .statusbar{bottom:calc(env(safe-area-inset-bottom) + 164px)}#statusText{font-size:10px;padding:6px 10px}
+      .word-target{padding:5px 9px;min-width:68px;max-width:111px;border-radius:10px}.word-target .target-word{font-size:15px}.word-target .target-hint{font-size:7px}
+      .aim-indicator{display:none}.hintkeys{display:none}
+    }
+    @media(max-width:480px){
+      .brandmark{display:none}.brand-name{font-size:14px}.brand-kicker{display:none}
+      .scorecell{min-width:43px;padding:5px 4px}.scorecell small{font-size:6px}.scorecell strong{font-size:14px}
+      .round-btn{width:30px;height:30px;border-radius:10px;font-size:14px}.hud-actions{gap:3px}
+      .topbar{gap:6px}.brand{gap:0}
+      .lesson-card{top:53px}
+    }
+    @media(max-height:500px){
+      .topbar{padding:8px 12px}.brandmark{width:32px;height:32px}.brand-name{font-size:16px}.brand-kicker{font-size:7px}
+      .scorecell{min-width:54px;padding:5px 7px}.scorecell strong{font-size:15px}.round-btn{width:32px;height:32px}
+      .lesson-card{top:47px;padding:7px 11px 9px;width:min(340px,40vw)}#question{font-size:18px}.lesson-eyebrow{font-size:8px}.lesson-sub{display:none}
+      .controls{display:flex;justify-content:space-between;padding:0 25px 12px}
+      #joystick,#swingBtn{height:86px;width:86px}.joystick-label,.swing-label{display:none}
+      .shot-picker{position:absolute;bottom:11px;left:50%;transform:translateX(-50%);gap:1px}
+      .shot{min-width:62px;padding:6px 7px}.shot .glyph{font-size:16px;height:17px}
+      .statusbar{bottom:95px}#statusText{font-size:10px;padding:5px 10px}
+      .word-target{padding:4px 8px}.word-target .target-word{font-size:15px}.word-target .target-hint{display:none}
+      .aim-indicator{display:none}.hintkeys{display:none}
+      .modal{max-height:96vh;padding:20px}.modal h1{font-size:34px}.modal p{font-size:12px;margin:8px auto}.modal-steps{margin:12px 0}
+    }
+    @media(max-width:370px){.brandmark{display:none}.scorecell{min-width:45px}.hud-actions{gap:3px}.shot{min-width:51px}.word-target{max-width:94px}}
+    /* Tennis Drill v2: an unobstructed, video-style court. */
+    .topbar{align-items:center;justify-content:space-between;padding:13px 21px}
+    .drill-next{position:relative;z-index:2;border:1.5px solid rgba(246,255,246,.58);color:#efffe9;background:rgba(19,38,37,.43);border-radius:50%;width:88px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:1.2;text-align:center;backdrop-filter:blur(5px);box-shadow:0 5px 25px #0003;pointer-events:auto}
+    .drill-next span{display:block;margin-top:3px;font-size:18px}
+    .brand{position:absolute;top:17px;left:50%;transform:translateX(-50%);opacity:.82;pointer-events:none}
+    .brandmark{width:33px;height:33px;font-size:20px}.brand-name{font-size:18px}.brand-kicker{font-size:7px}
+    .top-spacer{flex:1}.scoreboard{margin-left:auto;margin-right:10px;background:rgba(9,28,29,.56);border-radius:12px}
+    .scorecell{min-width:62px;padding:6px 9px}.scorecell strong{font-size:17px}.scorecell small{font-size:8px}
+    .hud-actions{gap:7px}.round-btn{width:43px;height:43px;border-radius:50%;background:rgba(14,37,38,.49);border:1px solid #e4ffe79c}
+    .lesson-card{top:67px;width:min(340px,calc(100vw - 220px));padding:7px 12px 9px;border-radius:12px;background:rgba(8,30,33,.68);border-color:#b5e5c349;box-shadow:0 7px 20px #00171955}
+    .lesson-eyebrow{font-size:9px;letter-spacing:.11em}.lesson-eyebrow .pulse-dot{width:5px;height:5px}
+    #question{font-size:clamp(16px,2vw,23px);margin-top:3px;letter-spacing:-.02em}
+    .lesson-sub{font-size:10px;margin-top:3px;color:#c2ded0}
+    .listen-btn{width:27px;height:27px;border-radius:50%;font-size:12px}
+    #targetLayer{display:none!important}
+    .aim-indicator{top:auto;bottom:145px;font-size:10px;opacity:.75}.aim-indicator span{padding:5px 11px;background:#0d282989}
+    .feedback{top:40%}.feedback b{font-size:clamp(24px,4.5vw,45px)}
+    .statusbar{bottom:clamp(122px,17vh,149px)}#statusText{background:rgba(5,29,30,.57);border:1px solid #aaf0cb35}
+    .joystick-label,.swing-label{font-size:9px;color:#ebfff0}
+    #joystick{border:2px solid #edfef3a3;background:radial-gradient(circle,rgba(215,255,226,.16),rgba(20,43,39,.25) 65%);box-shadow:0 0 0 5px #fff2,0 6px 18px #06191566 inset}
+    #stick{background:radial-gradient(circle at 35% 30%,#eff5e8bc,#a2b0a8ad);border-color:#eefff5dd}
+    #swingBtn{border:2.5px solid #f0fff5d6;background:radial-gradient(circle at 42% 36%,rgba(233,255,245,.35),rgba(60,106,90,.34));color:#f6ffeb;box-shadow:0 0 0 7px #d8ffe41f,0 8px 24px #001b2170;text-shadow:0 2px 8px #001b23}
+    #swingBtn strong{font-size:16px}#swingBtn small{font-size:8px;color:#e0f8df;opacity:1}
+    #swingBtn:active,#swingBtn.charging{background:radial-gradient(circle,#d9ff85b5,#4d8b5a9c);box-shadow:0 0 0 10px #dcff6b4d}
+    .shot-picker{background:rgba(13,40,41,.64);border:1px solid #bafbd246;box-shadow:0 3px 15px #031e2170}
+    .shot{color:#d6e4d9}.shot.selected{background:#cffa7f;color:#1c382b;box-shadow:none}
+    .hintkeys{display:none}
+    @media(max-height:520px){
+      .topbar{padding:9px 19px}.drill-next{width:82px;height:82px;font-size:10px}
+      .brand{top:12px}.scoreboard{margin-right:7px}.lesson-card{top:48px;width:min(310px,39vw);padding:5px 8px}
+      .lesson-eyebrow{font-size:8px}#question{font-size:16px}.lesson-sub{display:none}
+      #joystick,#swingBtn{width:90px;height:90px}.controls{padding:0 24px 13px}
+      .statusbar{bottom:106px}.shot-picker{bottom:14px}.aim-indicator{display:none}
+    }
+    @media(max-width:600px) and (orientation:portrait){
+      .topbar{padding:10px 9px}.drill-next{width:62px;height:62px;font-size:8px;flex:none}
+      .drill-next span{font-size:15px}.brand{top:14px}.brand-name{font-size:14px}.brand-kicker{display:none}.brandmark{display:none}
+      .scoreboard{position:absolute;right:10px;top:78px;margin:0}.scorecell{min-width:40px;padding:4px 5px}.scorecell strong{font-size:14px}.scorecell small{font-size:7px}
+      .hud-actions{margin-left:auto;gap:4px}.round-btn{width:32px;height:32px;font-size:14px}
+      .lesson-card{top:122px;width:min(320px,calc(100vw - 34px))}#question{font-size:18px}
+      .statusbar{bottom:calc(env(safe-area-inset-bottom) + 168px)}.shot-picker{bottom:calc(env(safe-area-inset-bottom) + 115px)}
+      .controls{padding:0 16px calc(env(safe-area-inset-bottom) + 13px)}
+    }
+    /* Keep the athlete, baseline and racket unobstructed, like the video. */
+    .brand{display:none}
+    .lesson-card{top:13px;width:min(330px,calc(100% - 450px));padding:7px 12px 8px;background:rgba(10,29,28,.73)}
+    .aim-indicator{display:none!important}
+    .statusbar{top:110px;bottom:auto;left:16px;transform:none}
+    #statusText{white-space:normal;max-width:265px;font-size:10px;text-align:left}
+    @media(max-height:520px){
+      .lesson-card{top:9px;width:min(295px,36vw);padding:5px 9px}
+      .statusbar{top:98px;left:15px}
+      #statusText{max-width:225px;font-size:9px}
+    }
+    @media(max-width:600px) and (orientation:portrait){
+      .lesson-card{top:86px;width:min(310px,calc(100% - 22px))}
+      .statusbar{top:182px;left:10px}
+    }
+    /* Collapsible shot menu: the five drill choices never sit over the player. */
+    .drill-control{position:relative;z-index:2;display:flex;align-items:center;gap:6px;pointer-events:auto}
+    .shot-menu-toggle,.drill-next{height:38px;width:auto;min-width:0;padding:0 12px;border-radius:12px;border:1px solid #e5ffde88;background:rgba(13,34,34,.78);color:#f5ffec;font-size:12px;font-weight:850;line-height:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;white-space:nowrap;box-shadow:0 7px 19px #00141455;backdrop-filter:blur(7px)}
+    .shot-menu-toggle{background:rgba(12,47,42,.88);border-color:#c5f9d2a0}
+    .shot-menu-toggle .caret{font-size:17px;line-height:0;transition:transform .15s}
+    .shot-menu-toggle[aria-expanded="true"] .caret{transform:rotate(180deg)}
+    .drill-next span{display:inline;font-size:17px;margin:0}
+    .shot-picker{display:none!important;position:fixed!important;top:60px!important;left:14px!important;bottom:auto!important;right:auto!important;transform:none!important;flex-direction:column;align-items:stretch;width:181px;max-width:min(240px,calc(100vw - 28px));padding:6px;gap:2px;z-index:60;background:#0b2929f5;border-radius:14px}
+    .shot-picker.open{display:flex!important}
+    .shot{display:flex;flex-direction:row;justify-content:flex-start;min-width:0;width:100%;gap:12px;padding:10px 12px;border-radius:9px}
+    .shot .glyph{height:auto;font-size:17px}.shot .shot-name{font-size:12px}
+    .shot.selected{background:#d2f986}
+    /* The outer ring fills clockwise, 30–100%, during a held or tapped charge. */
+    #swingBtn{--charge-angle:108deg;isolation:isolate}
+    #swingBtn::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:conic-gradient(#e5ff7a var(--charge-angle),rgba(226,255,235,.17) var(--charge-angle));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));pointer-events:none;transition:background .08s}
+    #swingBtn .racket-icon,#swingBtn strong,#swingBtn small{position:relative;z-index:1}
+    #swingBtn.charging{background:radial-gradient(circle at 50% 45%,rgba(223,255,126,.67),rgba(23,97,63,.78));box-shadow:0 0 0 7px #ccff763a,0 0 35px #deff7770}
+    #powerText{font-size:10px!important;font-weight:950!important;letter-spacing:.04em!important;opacity:1!important;font-variant-numeric:tabular-nums}
+    #swingHint{font-size:9px;letter-spacing:.07em}
+    @media(max-height:520px){
+      .topbar{padding:8px 12px}.shot-menu-toggle,.drill-next{height:34px;font-size:10px;padding:0 9px;border-radius:10px}
+      .drill-control{gap:4px}.shot-picker{top:51px!important}
+      .lesson-card{width:min(275px,34vw)}
+    }
+    @media(max-width:600px) and (orientation:portrait){
+      .shot-menu-toggle,.drill-next{height:32px;font-size:10px;padding:0 8px}
+      .shot-picker{top:49px!important}
+    }
+    /* With the shot menu collapsed there are only two large touch controls.
+       Keep them pinned to opposite sidelines, clear of the player's feet. */
+    .controls{display:flex;justify-content:space-between;align-items:flex-end}
+    .swing-wrap{margin-left:auto}
+    @media(max-height:520px){.controls{padding-left:20px;padding-right:20px}}
+  </style>
+</head>
+<body>
+<main id="game-root">
+  <canvas id="scene" aria-label="Interactive tennis drill court"></canvas>
+  <div id="edgeShade"></div>
+  <canvas id="confetti"></canvas>
+  <header class="topbar">
+    <div class="drill-control"><button class="shot-menu-toggle" id="shotMenuBtn" aria-label="Choose tennis shot" aria-expanded="false" aria-controls="shotPicker">🎾 <span id="shotMenuLabel">Serve</span><span class="caret">⌄</span></button><button class="drill-next" id="nextDrillBtn" aria-label="Next tennis drill">Next <span>›</span></button></div>
+    <div class="brand"><div class="brandmark" aria-hidden="true"><span>🎾</span></div><div><div class="brand-name">GoLingo <em>Tennis</em></div><div class="brand-kicker">THE LANGUAGE COURT</div></div></div>
+    <div class="top-spacer"></div>
+    <div class="scoreboard" aria-label="Practice score">
+      <div class="scorecell"><small>POINTS</small><strong id="points">000</strong></div>
+      <div class="scorecell"><small>ACCURACY</small><strong id="accuracy">0%</strong></div>
+      <div class="scorecell"><small>STREAK</small><strong class="lime" id="streak">0</strong></div>
+    </div>
+    <div class="hud-actions">
+      <button class="round-btn" id="replayAudio" title="Hear the prompt again" aria-label="Repeat prompt">♫</button>
+      <button class="round-btn" id="settingsBtn" title="Vocabulary and settings" aria-label="Open settings">⚙</button>
+      <button class="round-btn" id="pauseBtn" title="Pause game" aria-label="Pause">Ⅱ</button>
+    </div>
+  </header>
+  <section class="lesson-card" aria-live="polite">
+    <div class="lesson-eyebrow"><i class="pulse-dot"></i> GOLINGO · HEAR IT · HIT IT · LEARN IT</div>
+    <div class="lesson-row"><div id="question">water → 水</div><button id="listenBtn" class="listen-btn" title="Hear the word" aria-label="Hear word again">▶</button></div>
+    <div class="lesson-sub" id="questionSub">SERVE DRILL · 0 / 5 HITS</div>
+  </section>
+  <div id="targetLayer" aria-label="Vocabulary targets"></div>
+  <div class="aim-indicator" id="aimIndicator"><span>Tap the far court to aim your shot</span></div>
+  <div class="feedback" id="feedback" role="status"><b id="feedbackTitle">NICE SHOT!</b><small id="feedbackSub">+100 POINTS</small></div>
+  <div class="statusbar"><span class="incoming-dot" id="statusDot"></span><span id="statusText">Tap SWING to serve · move with the left joystick</span></div>
+  <div class="hintkeys">DESKTOP &nbsp; WASD / ARROWS · 1–5 SHOTS · SPACE SWING</div>
+  <footer class="controls">
+    <div class="joystick-wrap"><div class="joystick-label">MOVE PLAYER</div><div id="joystick" aria-label="Movement joystick"><div id="stick"></div></div></div>
+    <div class="shot-picker" id="shotPicker" role="group" aria-label="Choose tennis shot">
+      <button class="shot selected" data-shot="serve" aria-pressed="true"><span class="glyph">↟</span><span class="shot-name">Serve</span></button>
+      <button class="shot" data-shot="forehand" aria-pressed="false"><span class="glyph">↗</span><span class="shot-name">Forehand</span></button>
+      <button class="shot" data-shot="backhand" aria-pressed="false"><span class="glyph">↖</span><span class="shot-name">Backhand</span></button>
+      <button class="shot" data-shot="drop" aria-pressed="false"><span class="glyph">⌁</span><span class="shot-name">Drop</span></button>
+      <button class="shot" data-shot="lob" aria-pressed="false"><span class="glyph">⤴</span><span class="shot-name">Lob</span></button>
+    </div>
+    <div class="swing-wrap"><div class="swing-label" id="swingHint">HOLD FOR POWER · RELEASE TO SERVE</div><button id="swingBtn" aria-label="Swing racket"><span class="racket-icon">🎾</span><strong>HIT</strong><small id="powerText" aria-live="off">POWER 75%</small></button></div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="overlay" id="startOverlay" hidden>
+    <section class="modal">
+      <div class="eyebrow">GOLINGO · TRAINING SERIES 01</div>
+      <h1>Every shot.<br/><em>A new word.</em></h1>
+      <p>Step onto a beautiful 3D court, aim for the right translation, and learn as you serve, rally, drop and lob.</p>
+      <div class="feature-pills"><span>🎾 5 real shot styles</span><span>🔊 Spoken vocabulary</span><span>📱 Mobile joystick</span><span>✨ Precision targets</span></div>
+      <div class="modal-steps"><div><b>①</b>Listen to the word</div><div><b>②</b>Tap its translation</div><div><b>③</b>Swing and score!</div></div>
+      <button class="primary" id="startBtn">ENTER THE COURT →</button>
+      <p style="font-size:11px;opacity:.76;margin-bottom:0">Works with your own GoLingo word list · No sign-in required</p>
+    </section>
+  </div>
+  <div class="overlay" id="settingsOverlay" hidden>
+    <section class="modal settings-modal">
+      <div class="settings-head"><div><div class="eyebrow">PRACTICE CONTROL</div><h2>Tennis settings</h2></div><button class="round-btn" id="closeSettings" aria-label="Close settings">✕</button></div>
+      <div class="setting-section"><label class="heading" for="languageSelect">VOCABULARY DECK</label><select id="languageSelect"><option value="ja">English → Japanese</option><option value="es">English → Spanish</option><option value="fr">English → French</option><option value="zh">English → Chinese</option><option value="ko">English → Korean</option><option value="vi">English → Vietnamese</option><option value="custom">Imported GoLingo deck</option></select><div class="setting-info" id="deckCount">12 words ready for practice</div></div>
+      <div class="setting-section"><label class="heading">TRAINING OPTIONS</label><label class="toggle-row">Speak words and example sentences <input type="checkbox" id="speechToggle" checked /></label><label class="toggle-row">Show learning translation on HUD <input type="checkbox" id="wordToggle" checked /></label><label class="toggle-row">Assist movement during ball feeds <input type="checkbox" id="assistToggle" checked /></label><label class="toggle-row">Play court sound effects <input type="checkbox" id="soundToggle" checked /></label></div>
+      <div class="setting-section"><label class="heading" for="importJson">IMPORT YOUR GOLINGO JSON</label><textarea id="importJson" spellcheck="false" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"word":"水","translation":"water","sentence":"水を飲みます。"}]}'></textarea><div class="two-actions"><button class="secondary" id="importBtn">Import vocabulary</button><button class="secondary" id="exportBtn">Export collected words</button></div><div id="importMessage"></div></div>
+      <div class="two-actions"><button class="secondary" id="newServeBtn">New serve</button><button class="primary" id="resumeBtn">BACK TO COURT →</button></div>
+    </section>
+  </div>
+</main>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

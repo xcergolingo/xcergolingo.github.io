@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+<title id="title">GoLingo Tennis Academy</title><desc id="desc">A tennis player preparing a shot on an indoor court against a mechanical ball feeder, with a glowing vocabulary target.</desc>
+<defs>
+ <linearGradient id="back" x2="0" y2="1"><stop stop-color="#152626"/><stop offset=".54" stop-color="#41614a"/><stop offset="1" stop-color="#131d1c"/></linearGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#557758"/><stop offset="1" stop-color="#224f48"/></linearGradient>
+ <linearGradient id="machine" x2="1" y2="0"><stop stop-color="#10292f"/><stop offset=".5" stop-color="#44656c"/><stop offset="1" stop-color="#16232c"/></linearGradient>
+ <linearGradient id="shirt" x2="1" y2=".3"><stop stop-color="#0f4b86"/><stop offset=".48" stop-color="#328cc5"/><stop offset="1" stop-color="#0a416d"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#dfff67" stop-opacity=".6"/><stop offset="1" stop-color="#dfff67" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="750" fill="url(#back)"/>
+<path d="M0 160H150L65 580H0ZM1050 160H1200V580H1135Z" fill="#775843"/>
+<g opacity=".72" stroke="#c79b70" stroke-width="5"><path d="M0 245H127M0 315H111M0 390H95M1200 245h-127M1200 315h-111M1200 390h-95"/></g>
+<path d="M155 118H1045L1172 730H28Z" fill="url(#floor)" stroke="#d3e9c9" stroke-width="9"/>
+<g stroke="#eff7dc" stroke-width="6" fill="none" opacity=".94"><path d="M155 118H1045L1172 730H28Z"/><path d="M259 118L166 730M941 118l93 612"/><path d="M93 355h1014M61 514h1078"/><path d="M600 118V730"/></g>
+<path d="M86 336L1115 336L1099 379H101Z" fill="#0e231e" stroke="#fafbe9" stroke-width="7"/>
+<g stroke="#a5bdb4" stroke-width="1.2" opacity=".52"><path d="M100 348H1105M100 362H1102M100 374H1100"/><path d="M180 340v36M260 340v36M340 340v36M420 340v36M500 340v36M580 340v36M660 340v36M740 340v36M820 340v36M900 340v36M980 340v36M1060 340v36"/></g>
+<g transform="translate(610 161)"><ellipse cy="22" rx="44" ry="10" fill="#0b211c" opacity=".7"/>
+ <circle cx="-26" cy="14" r="15" fill="#0d1c23" stroke="#87a397" stroke-width="5"/><circle cx="26" cy="14" r="15" fill="#0d1c23" stroke="#87a397" stroke-width="5"/>
+ <path d="M-33-22H33L39 12H-39Z" fill="url(#machine)" stroke="#bfd4bd" stroke-width="3"/>
+ <rect x="-26" y="-49" width="52" height="31" rx="8" fill="#213b3b" stroke="#bcd2b8" stroke-width="3"/>
+ <circle cx="-13" cy="-9" r="13" fill="#0a1819" stroke="#728b80" stroke-width="6"/><circle cx="14" cy="-9" r="13" fill="#0a1819" stroke="#728b80" stroke-width="6"/>
+ <circle cy="-9" r="5" fill="#d6ff6e"/><path d="M-17-37H17" stroke="#d9ff80" stroke-width="7" stroke-linecap="round"/></g>
+<ellipse cx="772" cy="278" rx="125" ry="47" fill="url(#glow)"/><ellipse cx="772" cy="286" rx="72" ry="23" fill="none" stroke="#eaff8b" stroke-width="8"/>
+<path d="M730 285q-128 44-188 154" stroke="#e6ff8b" stroke-width="5" stroke-dasharray="14 17" fill="none"/><circle cx="555" cy="428" r="12" fill="#e4ff56" stroke="#fffcc4" stroke-width="3"/>
+<g transform="translate(565 530)" stroke-linecap="round" stroke-linejoin="round">
+ <ellipse cx="0" cy="178" rx="86" ry="16" fill="#001910" opacity=".35"/>
+ <path d="M-28 66L-47 138L-41 173M23 67L44 138L46 173" fill="none" stroke="#dfac87" stroke-width="27"/>
+ <path d="M-55 173h38M26 173h37" stroke="#edf9f6" stroke-width="23"/>
+ <path d="M-31 57h65l6 39H-36Z" fill="#f0f7ef" stroke="#9bc8bc" stroke-width="3"/>
+ <path d="M-35-18Q-61-9-46 54Q0 75 45 54Q60-10 35-18Z" fill="url(#shirt)" stroke="#0c3759" stroke-width="4"/>
+ <path d="M-34-12L-68 16L-78 66M35-12L78 14L97-30" stroke="#2e91bd" stroke-width="21" fill="none"/>
+ <path d="M-78 66L-70 82M97-30L104-44" stroke="#d9a781" stroke-width="17" fill="none"/>
+ <rect x="-10" y="-50" width="20" height="35" rx="10" fill="#c18c68"/><ellipse cx="0" cy="-67" rx="28" ry="35" fill="#dba681"/>
+ <path d="M-26-65Q-33-100 0-102Q31-102 27-65Q0-78-26-65" fill="#24313a"/>
+ <path d="M104-44L139-74" stroke="#182f38" stroke-width="10"/>
+ <ellipse cx="152" cy="-88" rx="27" ry="42" transform="rotate(42 152 -88)" fill="#122b34" stroke="#e8f6c1" stroke-width="8"/>
+ <g stroke="#c8eee4" stroke-width="2" opacity=".8"><path d="M137-123l30 71M151-127l30 69M126-97l50 10M131-82l49 9M140-67l40 7"/></g>
+</g>
+<rect x="28" y="28" width="545" height="94" rx="19" fill="#092f30" fill-opacity=".90" stroke="#aaffb4" stroke-opacity=".5" stroke-width="3"/>
+<text x="58" y="76" font-family="Arial,Helvetica,sans-serif" font-size="44" font-weight="900" fill="#eeffe7" letter-spacing="-1">GOLINGO <tspan fill="#ddfb72">TENNIS</tspan></text>
+<text x="60" y="106" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#a9e5c3" letter-spacing="4">SERVE · SWING · SPEAK</text>
+<rect x="898" y="45" width="252" height="67" rx="20" fill="#071e25" fill-opacity=".85" stroke="#dcfa72" stroke-width="2"/>
+<text x="1024" y="86" text-anchor="middle" font-family="Arial,sans-serif" font-size="27" font-weight="900" fill="#e2ff86">水 · WATER</text>
+</svg>
