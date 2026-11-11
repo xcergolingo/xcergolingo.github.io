@@ -457,6 +457,7 @@ function startFlight({forceAir=false}={}){
   const help=model.grounded?(model.config.propulsion==='jet'?'Raise the throttle, let the turbine build power, then gently raise the nose.':'Add throttle, build speed, then gently raise the nose.'):activeMode==='free'?(model.config.retractableGear?'Use smooth banks. Lower the gear before landing.':model.config.propulsion==='jet'?'Use smooth banks and leave room for your approach.':'Steer gently. Choose a camera whenever you like.'):'Fly your plane through the gold ring to collect it.';
   $('statusMessage').classList.add('hidden');clearTimeout(statusTimeout);
   syncFlightView();syncCameraUI();syncAerobaticUI();hint(help,8);updateModelView();updateCamera(0);syncGroundControls();updateAudio();
+  window.skyfieldOrientation?.request?.();
   try{const locked=screenOrientationLock();if(locked?.catch)locked.catch(()=>{});}catch{}
 }
 function screenOrientationLock(){return window.screen.orientation?.lock?.('landscape');}
@@ -465,7 +466,7 @@ function returnHangar(){
   window.scrollTo(0,0);
   document.body.classList.add('in-hangar');document.body.classList.remove('flying');$('hangar').classList.remove('hidden');$('flightHUD').classList.add('hidden');
   ringGroup.visible=false;rings.forEach(r=>r.wordLabel.sprite.visible=false);smokeLine.visible=false;aircraft.visible=true;aircraft.position.set(0,aircraft.userData.groundClearance||.61,100);aircraft.rotation.set(0,0,0);
-  cameraSnap=true;onboardSnap=true;syncOnboardUI();resize();updateAudio();window.screen.orientation?.unlock?.();
+  cameraSnap=true;onboardSnap=true;syncOnboardUI();resize();updateAudio();window.skyfieldOrientation?.request?.();
   revealSelectedAircraft();
   if(isFullscreen()){const exit=document.exitFullscreen||document.webkitExitFullscreen;try{Promise.resolve(exit?.call(document)).catch(()=>{});}catch{}}
 }
