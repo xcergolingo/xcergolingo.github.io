@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#070e26">
+  <meta name="description" content="Ride a 3D bicycle through a living Starry Night painting. Collect glowing words and deliver them to the steeple in this GoLingo game.">
+  <title>Starry Nightrider — GoLingo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css?v=9">
+</head>
+<body>
+  <main id="game" aria-label="Starry Nightrider 3D language learning game">
+    <div class="sky" aria-hidden="true"></div>
+    <canvas id="world" aria-label="Three-dimensional cyclist riding through Van Gogh inspired village"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="hud" id="hud">
+      <div class="brand" aria-label="GoLingo Starry Word Rider">
+        <span class="brand-stars">✳</span>
+        <span><strong>GoLingo</strong><small>STARRY NIGHTRIDER · 3D</small></span>
+      </div>
+      <div class="hud-center">
+        <div class="stat"><span class="stat-icon">✦</span><span id="wordCount">0</span><small>IN YOUR BAG</small></div>
+        <div class="stat"><span class="stat-icon">⌂</span><span id="deliveredCount">0</span><small>SCORE</small></div>
+        <div class="chapel-meter" title="Distance until the next delivery at the chapel">
+          <div class="chapel-caption"><span>TO THE STEEPLE</span><b id="chapelDistance">56 m</b></div>
+          <div class="meter-track"><div id="meterProgress"></div></div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn voice-btn" id="soundBtn" type="button" aria-label="Turn off word pronunciation" title="Turn off word pronunciation"><span id="voiceIcon">♫</span><small id="voiceState">VOICE ON</small></button>
+        <button class="icon-btn" id="hideBtn" type="button" aria-label="Hide word card" title="Hide word card">◉</button>
+        <button class="icon-btn" id="bookBtn" type="button" aria-label="Open word collection" title="Word collection">▤<span class="tiny-dot" id="bookDot"></span></button>
+        <button class="icon-btn" id="fullscreenBtn" type="button" aria-label="Fullscreen landscape" title="Fullscreen landscape">⛶</button>
+        <button class="icon-btn" id="pauseBtn" type="button" aria-label="Pause game" title="Pause game">Ⅱ</button>
+      </div>
+    </header>
+
+    <div class="minimap-panel" id="minimapPanel" aria-label="Map of the Starry Nightrider world">
+      <canvas id="minimap" width="180" height="180" aria-label="Nearby roads, stars and church"></canvas>
+      <div class="map-caption"><span id="districtName">VINCENT'S VILLAGE</span><span class="map-north">N ↑</span></div>
+    </div>
+
+    <div class="mission-note" id="missionNote"><span class="mission-star">✷</span><span>Explore the village · Collect lights · Return to the golden steeple</span></div>
+    <div class="delivery-toast" id="deliveryToast" aria-live="polite"></div>
+    <div class="jump-toast" id="jumpToast"></div>
+
+    <div class="word-card" id="wordCard" aria-live="polite">
+      <div class="word-overline"><span id="currentLanguage">SPANISH</span><span class="wave">◖ )))</span> LISTEN & REPEAT</div>
+      <div class="word-main-row"><button type="button" id="repeatBtn" class="word-pronounce" aria-label="Play current word"><span id="currentWord">Follow the stars</span><span class="play-symbol">↻</span></button></div>
+      <div class="word-translation" id="currentTranslation">Ride into a glowing word to begin.</div>
+      <div class="word-card-footer"><span id="wordExample">Words repeat until you collect the next one.</span><button type="button" id="translationBtn">Hide meaning</button></div>
+    </div>
+
+    <div class="controls" id="controls" aria-label="Game controls">
+      <div class="control-left">
+        <div class="joystick-wrap" id="joystickWrap" aria-label="Hold and drag left or right to steer your bicycle"><div class="joystick-track" id="joystickTrack"><div class="joystick-knob" id="joystickKnob"></div></div><small>← DRAG TO STEER →</small></div>
+        <div class="steering-group"><button class="control-key" type="button" id="leftBtn" aria-label="Steer left">‹</button><button class="control-key" type="button" id="rightBtn" aria-label="Steer right">›</button></div>
+        <button type="button" class="pedal-key" id="pedalBtn"><span>✦</span><span id="pedalText">CRUISE ON</span></button>
+        <button type="button" class="pedal-key brake-key" id="brakeBtn">BRAKE</button>
+      </div>
+      <div class="control-right"><button type="button" class="trick-key" id="trickBtn">✧<small>TRICK</small></button><button type="button" class="jump-key" id="jumpBtn"><span>↑</span><small>JUMP</small></button></div>
+    </div>
+
+    <div class="intro-backdrop" id="introBackdrop">
+      <video class="intro-video" id="introVideo" autoplay muted playsinline webkit-playsinline preload="auto" poster="./assets/starry-intro.webp" aria-label="A cinematic journey through the Starry Night village"><source src="./assets/starry-intro.mp4" type="video/mp4"></video>
+      <div class="intro-video-wash" aria-hidden="true"></div>
+      <section class="intro-panel" aria-labelledby="introTitle">
+        <div class="intro-eyebrow">A GOLINGO 3D PAINTING ADVENTURE <span>✷</span> OPEN WORLD</div>
+        <div class="intro-artline"><span>✦</span><span class="line"></span><span>✦</span></div>
+        <h1 id="introTitle">Starry<br><em>Nightrider</em></h1>
+        <p class="intro-lede">Watch the stars awaken, then ride into the painting. Discover winding villages, secret paths, glowing words and magical jumps.</p>
+        <label class="language-select-label" for="languageSelect">YOUR LEARNING LANGUAGE</label>
+        <div class="select-wrap"><select id="languageSelect" aria-label="Choose learning language">
+          <option value="es">Español · Spanish</option>
+          <option value="ja">日本語 · Japanese</option>
+          <option value="fr">Français · French</option>
+          <option value="zh">中文 · Chinese</option>
+          <option value="vi">Tiếng Việt · Vietnamese</option>
+          <option value="de">Deutsch · German</option>
+        </select><span>⌄</span></div>
+        <button type="button" id="startBtn" class="start-btn">RIDE NOW <span>↗</span></button>
+        <div class="intro-progress"><span id="introProgress"></span></div>
+        <div class="intro-small">The cinematic starts your ride automatically · Touch joystick to steer · No time limit</div>
+      </section>
+      <button type="button" class="intro-skip" id="skipIntroBtn">SKIP INTRO →</button>
+      <div class="art-credit">Inspired by Vincent van Gogh's <em>The Starry Night</em> (1889)</div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="pauseModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+      <section class="glass-modal pause-modal">
+        <button type="button" class="close-modal" data-close="pauseModal" aria-label="Close">×</button>
+        <div class="modal-eyebrow">A MOMENT IN THE PAINTING</div>
+        <h2 id="pauseTitle">Take a breath,<br><em>then ride on.</em></h2>
+        <p>Your journey and your learned words are waiting here.</p>
+        <button type="button" class="modal-primary" id="resumeBtn">CONTINUE RIDING ↗</button>
+        <button type="button" class="modal-secondary" id="restartBtn">Start a fresh ride</button>
+        <button type="button" class="modal-secondary" id="finishBtn">Finish ride · See score</button>
+        <div class="settings-row"><label><input type="checkbox" id="repeatToggle" checked> Repeat pronunciation</label></div>
+        <div class="settings-row"><label><input type="checkbox" id="voiceToggle" checked> Automatic word voice</label><small class="settings-hint">Turn this off to ride quietly. Tap a word to hear it once.</small></div>
+        <div class="settings-row"><label for="speechGapSelect">Pause between pronunciations</label><select id="speechGapSelect" class="settings-select"><option value="1200">1.2 seconds</option><option value="2200" selected>2.2 seconds</option><option value="3200">3.2 seconds</option><option value="4800">4.8 seconds</option></select></div>
+        <div class="settings-row"><label><input type="checkbox" id="autorideToggle"> Auto-pedal (relaxed mode)</label></div>
+        <div class="settings-row"><label><input type="checkbox" id="meaningToggle" checked> Show translations</label></div>
+      </section>
+    </div>
+    <div class="modal-backdrop hidden" id="finishModal" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+      <section class="glass-modal pause-modal">
+        <div class="modal-eyebrow">THE NIGHT IS YOURS</div>
+        <h2 id="finishTitle">A beautiful<br><em>night ride.</em></h2>
+        <p id="finishSummary">Your stars are waiting in the painting.</p>
+        <button type="button" class="modal-primary" id="rideAgainBtn">RIDE AGAIN ↗</button>
+        <button type="button" class="modal-secondary" id="continueAfterFinishBtn">Keep exploring</button>
+      </section>
+    </div>
+
+    <div class="modal-backdrop hidden" id="bookModal" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+      <section class="glass-modal book-modal">
+        <button type="button" class="close-modal" data-close="bookModal" aria-label="Close">×</button>
+        <div class="modal-eyebrow">YOUR NIGHT SKY COLLECTION</div>
+        <h2 id="bookTitle">Words in your <em>pocket.</em></h2>
+        <p>Tap any word to hear it again. Keep riding to discover more.</p>
+        <div class="book-stats"><span><b id="bookWordCount">0</b> words discovered</span><span><b id="bookDeliveredCount">0</b> delivered</span></div>
+        <div class="word-list" id="wordList"><div class="empty-collection">Your first glowing word is just down the road.</div></div>
+        <div class="book-actions"><button type="button" class="modal-secondary" id="copyWordsBtn">COPY WORDS</button><button type="button" class="modal-primary" id="exportWordsBtn">EXPORT JSON ↓</button></div>
+      </section>
+    </div>
+    <div class="landscape-suggestion" id="landscapeSuggestion">↻ &nbsp; For the widest view, rotate your phone</div>
+  </main>
+  <script type="module">
+    // Loading the real 3D game is the default. The original canvas adventure
+    // remains playable when a device lacks WebGL 2 support.
+    let fallbackLoaded = false;
+    const loadFallback = () => {
+      if (fallbackLoaded) return;
+      fallbackLoaded = true;
+      // A canvas previously bound to WebGL cannot safely switch to 2D.
+      const oldCanvas = document.getElementById('world');
+      const freshCanvas = oldCanvas.cloneNode(false);
+      oldCanvas.replaceWith(freshCanvas);
+      const script = document.createElement('script');
+      script.src = './fallback.js?v=9';
+      document.body.appendChild(script);
+      const hint = document.querySelector('#missionNote span:last-child');
+      if (hint) hint.textContent = 'Low-graphics mode: ride through the painting and collect words.';
+      document.body.classList.add('fallback-mode');
+    };
+    window.addEventListener('starry:webgl-unavailable', loadFallback, {once:true});
+    // Versioned URLs stop iOS WKWebView from reusing stale game code after an update.
+    try { await import('./game-3d.js?v=9'); }
+    catch (error) { console.error('3D engine could not initialize:', error); loadFallback(); }
+  </script>
+</body>
+</html>
