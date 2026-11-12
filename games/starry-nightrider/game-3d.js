@@ -138,6 +138,19 @@ function start3D() {
     t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),8);
     return t;
   }
+  // A tiny baked fabric atlas adds visible oil-brush texture to the rider's
+  // jacket without geometry tessellation, dynamic normal maps or downloads.
+  const coatFabric=createCanvasTexture((g,s)=>{
+    g.fillStyle='#2858ae';g.fillRect(0,0,s,s);
+    for(let i=0;i<320;i++){
+      const x=rand(i*5+28)*s,y=rand(i*13+39)*s,l=3+rand(i*17+11)*13;
+      g.lineWidth=1+rand(i+15)*2.5;g.strokeStyle=i%4===0?'#6b99df':i%3===0?'#1a3f91':'#4076c8';
+      g.globalAlpha=.22+rand(i*7+25)*.4;g.beginPath();g.moveTo(x,y);
+      g.lineTo(x+l*.4,y-l*.2);g.lineTo(x+l,y-l*.33);g.stroke();
+    }
+    g.globalAlpha=1;
+  },256);
+  MAT.blue.color.set(0xffffff);MAT.blue.map=coatFabric;MAT.blue.needsUpdate=true;
   // Startup used to paint 3,400 individual grass strokes onto a canvas.
   // A baked oil-painted meadow atlas has richer detail and avoids that work.
   const grassTexture=new THREE.TextureLoader().load('./assets/meadow-v9.webp');
@@ -424,6 +437,14 @@ function start3D() {
     if(Math.hypot(x,z)<80||!clearOfRoad(x,z,12))continue;
     makeHouse(x,z,houseSeed++,rand(i+17)*TAU);
   }
+  // A few hand-placed, higher-detail cottages frame the very first street.
+  // Previously most of the housing was beyond the first 50 m of riding.
+  for(const [x,z,rotation] of [[-19,77,.18],[21,81,-.15],[-21,94,.2],
+    [22,101,-.14],[-22,123,.12],[23,128,-.08],[-20,148,.15],[22,154,-.1]]){
+    if(!clearOfRoad(x,z,10.5))continue;
+    if(buildingColliders.some(b=>Math.hypot(x-b.x,z-b.z)<13))continue;
+    makeHouse(x,z,houseSeed++,rotation);
+  }
 
   // Densely painted outer neighborhoods. Instanced geometry lets a much
   // larger map have 150+ colorful townhouses without hundreds of draw calls.
@@ -697,6 +718,38 @@ function start3D() {
   scene.add(mesh(new THREE.CylinderGeometry(.46,.67,4,10),material(0xe5c4a1),-118,2.5,102));
   buildingColliders.push({x:-118,z:102,rx:4.2,rz:4.2});
   landmarkMarkers.push({name:'Lantern Market',x:-118,z:102});
+
+  // A lantern-lit outdoor café makes the starting lane feel occupied. Every
+  // parasol, stem, table and stool is in one of four GPU instance batches.
+  const cafeSpots=[[-28,74],[-31,86],[-29,97],[-34,109],[-28,120]];
+  function placeCafe(instance,i,x,y,z,sx=1,sy=1,sz=1,rotation=0){
+    tempObject.position.set(x,y,z);tempObject.rotation.set(0,rotation,0);
+    tempObject.scale.set(sx,sy,sz);tempObject.updateMatrix();instance.setMatrixAt(i,tempObject.matrix);
+  }
+  const cafeCanopies=new THREE.InstancedMesh(new THREE.ConeGeometry(2.7,.7,10),
+    new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}),cafeSpots.length);
+  const cafePosts=new THREE.InstancedMesh(new THREE.CylinderGeometry(.065,.075,4.1,6),
+    MAT.darkWood,cafeSpots.length);
+  const cafeTables=new THREE.InstancedMesh(new THREE.CylinderGeometry(.89,.92,.13,12),
+    material(0x7d5151,{roughness:1}),cafeSpots.length);
+  const cafeStools=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),
+    material(0x8e6070,{roughness:1}),cafeSpots.length*3);
+  cafeSpots.forEach(([x,z],i)=>{
+    placeCafe(cafeCanopies,i,x,4.12,z);
+    cafeCanopies.setColorAt(i,new THREE.Color(choice([0xf1bb7e,0xf4c5b6,0xa7c6de,0xe79d91,0xe2c585],i)));
+    placeCafe(cafePosts,i,x,2.06,z);
+    placeCafe(cafeTables,i,x,1.65,z);
+    for(let j=0;j<3;j++){
+      const a=j/3*TAU+i*.4;
+      placeCafe(cafeStools,i*3+j,x+Math.cos(a)*1.38,.58,z+Math.sin(a)*1.38,.64,1.1,.62,a);
+    }
+  });
+  for(const instance of [cafeCanopies,cafePosts,cafeTables,cafeStools]){
+    instance.instanceMatrix.needsUpdate=true;
+    if(instance.instanceColor)instance.instanceColor.needsUpdate=true;
+    instance.frustumCulled=false;scene.add(instance);
+  }
+  landmarkMarkers.push({name:'Moonlight Café',x:-30,z:97});
 
   const windmill=new THREE.Group();windmill.position.set(-231,0,-226);scene.add(windmill);
   const windBody=mesh(new THREE.CylinderGeometry(3.8,5.5,18,12),material(0xd2ba9c,{map:wallBrushTexture}),0,9,0);
@@ -983,12 +1036,23 @@ function start3D() {
   const torso=mesh(new THREE.LatheGeometry(coatProfile,18),MAT.blue,0,2.19,.28);
   torso.rotation.x=-.14;bikeRig.add(torso);
   const hip=mesh(new THREE.SphereGeometry(.32,12,9),MAT.pants,0,1.65,.39);bikeRig.add(hip);
+  const coatFlaps=[];
+  const coatFlapMat=MAT.blue.clone();coatFlapMat.side=THREE.DoubleSide;
   for(const side of [-1,1]){
     const coatTail=box(.35,.42,.35,MAT.blue,side*.24,1.7,.42);
     coatTail.rotation.set(.14,0,side*.13);bikeRig.add(coatTail);
+    // The coat skirts now lift independently in the slipstream rather than
+    // moving as two stiff blocks attached to the hips.
+    const flap=mesh(new THREE.PlaneGeometry(.46,.75,1,3),coatFlapMat,side*.25,1.43,.71);
+    bikeRig.add(flap);coatFlaps.push({flap,side});
     const frontLapel=box(.115,.5,.06,MAT.blueLight,side*.16,2.27,-.075);
     frontLapel.rotation.z=side*-.12;bikeRig.add(frontLapel);
     bikeRig.add(box(.08,.12,.07,MAT.strawDark,side*.3,2.08,-.095));
+    bikeRig.add(box(.085,.23,.035,MAT.strawDark,side*.3,2.25,-.13));
+  }
+  for(let i=0;i<3;i++){
+    const button=mesh(new THREE.SphereGeometry(.033,7,5),MAT.gold,-.045,2.35-i*.21,-.10);
+    bikeRig.add(button);
   }
 
   // The square cream-and-leather satchel is the most recognizable detail of
@@ -1010,12 +1074,14 @@ function start3D() {
   // Vincent's auburn hair and short beard are sculpted against the skull.
   const hair=mesh(new THREE.SphereGeometry(.281,20,12,0,TAU,0,Math.PI*.57),MAT.hair,0,3.02,.2);
   bikeRig.add(hair);
+  const facialDetails=[];
   for(const side of [-1,1]){
     const ear=mesh(new THREE.SphereGeometry(.077,9,7),MAT.skin,side*.265,2.88,.19);
-    ear.scale.set(.6,1,.55);bikeRig.add(ear);
+    ear.scale.set(.6,1,.55);bikeRig.add(ear);facialDetails.push(ear);
     const sideburn=mesh(new THREE.SphereGeometry(.075,8,7),MAT.hair,side*.23,2.85,.32);
-    sideburn.scale.set(.65,1.8,.6);bikeRig.add(sideburn);
-    bikeRig.add(mesh(new THREE.SphereGeometry(.025,7,5),MAT.darkWood,side*.112,2.936,-.075));
+    sideburn.scale.set(.65,1.8,.6);bikeRig.add(sideburn);facialDetails.push(sideburn);
+    const eye=mesh(new THREE.SphereGeometry(.025,7,5),MAT.darkWood,side*.112,2.936,-.075);
+    bikeRig.add(eye);facialDetails.push(eye);
   }
   const nose=mesh(new THREE.SphereGeometry(.09,10,8),MAT.skin,0,2.86,-.085);
   nose.scale.set(.65,1.05,.85);bikeRig.add(nose);
@@ -1025,10 +1091,17 @@ function start3D() {
   const brim=mesh(new THREE.CylinderGeometry(.45,.46,.06,24),MAT.straw,0,3.21,.18);bikeRig.add(brim);
   const crown=mesh(new THREE.CylinderGeometry(.29,.34,.33,20),MAT.straw,0,3.4,.18);bikeRig.add(crown);
   const band=mesh(new THREE.CylinderGeometry(.305,.34,.07,20),MAT.strawDark,0,3.31,.18);bikeRig.add(band);
+  // A flattened crown, stitched band and loosely uneven brim read as woven
+  // straw instead of a featureless yellow cylinder, even from behind.
+  const crownTop=mesh(new THREE.CylinderGeometry(.285,.3,.055,20),MAT.straw,0,3.55,.18);
+  bikeRig.add(crownTop);
+  const hatRidges=[];
   for(let i=0;i<3;i++){
     const ridge=mesh(new THREE.TorusGeometry(.39-i*.08,.012,4,28),MAT.strawDark,0,3.20+i*.13,.18);
-    ridge.rotation.x=Math.PI*.5;bikeRig.add(ridge);
+    ridge.rotation.x=Math.PI*.5;bikeRig.add(ridge);hatRidges.push(ridge);
   }
+  const scarfKnot=mesh(new THREE.SphereGeometry(.19,12,9),MAT.scarf,-.06,2.61,.39);
+  scarfKnot.scale.set(1.05,.7,.9);bikeRig.add(scarfKnot);
 
   // A single flowing ribbon replaces four stiff scarf boxes. Each frame its
   // tapered mesh ripples gently in the wind and bends during turns and jumps.
@@ -1042,13 +1115,25 @@ function start3D() {
   const scarfRibbon=mesh(scarfGeometry,MAT.scarf);scarfRibbon.frustumCulled=false;bikeRig.add(scarfRibbon);
 
   // Rounded, elbowed sleeves follow a relaxed forward-cycling posture.
+  const armParts=[];
   for(const side of [-1,1]){
     const shoulder=v3(side*.39,2.50,.18),elbow=v3(side*.49,2.11,-.21),hand=v3(side*.51,1.75,-.78);
-    bikeRig.add(mesh(new THREE.SphereGeometry(.2,11,9),MAT.blue,shoulder.x,shoulder.y,shoulder.z));
-    bikeRig.add(cylinderBetween(shoulder,elbow,.145,MAT.blue));
-    bikeRig.add(mesh(new THREE.SphereGeometry(.15,10,8),MAT.blue,elbow.x,elbow.y,elbow.z));
-    bikeRig.add(cylinderBetween(elbow,hand,.112,MAT.blue));
-    bikeRig.add(mesh(new THREE.SphereGeometry(.125,10,8),MAT.gloves,hand.x,hand.y,hand.z));
+    armParts.push(mesh(new THREE.SphereGeometry(.2,11,9),MAT.blue,shoulder.x,shoulder.y,shoulder.z));
+    armParts.push(cylinderBetween(shoulder,elbow,.145,MAT.blue));
+    armParts.push(mesh(new THREE.SphereGeometry(.15,10,8),MAT.blue,elbow.x,elbow.y,elbow.z));
+    armParts.push(cylinderBetween(elbow,hand,.112,MAT.blue));
+    armParts.push(mesh(new THREE.SphereGeometry(.125,10,8),MAT.gloves,hand.x,hand.y,hand.z));
+  }
+  for(const part of armParts)bikeRig.add(part);
+  // Re-parent only the rider's upper body around a hip hinge. This keeps the
+  // hands on the handlebar at rest, while speed gives the human silhouette a
+  // slight forward lean and steering gives it a subtle shoulder shift.
+  const riderUpper=new THREE.Group();
+  riderUpper.position.set(0,1.66,.40);bikeRig.add(riderUpper);
+  bikeRig.updateMatrixWorld(true);riderUpper.updateMatrixWorld(true);
+  for(const part of [torso,head,hair,neck,collar,brim,crown,band,crownTop,scarfKnot,
+    nose,beard,scarfRibbon,...facialDetails,...hatRidges,...armParts]){
+    riderUpper.attach(part);
   }
   // Animated knees and pedals (geometry length is one, transformed each frame).
   const legSegments=[];
@@ -1058,8 +1143,13 @@ function start3D() {
     const foot=box(.25,.18,.42,MAT.tire);bikeRig.add(thigh,shin,foot);
     legSegments.push({side,thigh,shin,foot});
   }
+  let pedalPhase=0;
   function animateRider(time,dt){
-    const pedaling=time*.0009*(state.speed*2.8+1);
+    // Pedals stop at rest and resume at a speed proportional to the wheels.
+    // The previous wall-clock formula caused a noticeable jump in leg pose
+    // whenever the rider accelerated, and spun the legs when standing still.
+    pedalPhase+=(state.speed*dt)*.95;
+    const pedaling=pedalPhase;
     for(const wheel of wheelGroups)wheel.rotation.x-=(state.speed*dt)/.57;
     for(const leg of legSegments){
       const angle=pedaling+(leg.side<0?0:Math.PI);
@@ -1083,6 +1173,12 @@ function start3D() {
     positions.needsUpdate=true;
     scarfGeometry.computeVertexNormals();
     brim.rotation.z=Math.sin(time*.006)*wind*.045;
+    riderUpper.rotation.x=-wind*.085+Math.sin(time*.003)*wind*.008;
+    riderUpper.rotation.z=state.steerSmooth*.038;
+    for(const {flap,side} of coatFlaps){
+      flap.rotation.x=-.15-wind*.36+Math.sin(time*.007+side)*(.035+wind*.09);
+      flap.rotation.z=side*(.08+wind*.08);
+    }
     let roll=state.lean*.18;
     if(state.trickDuration>0){
       const t=clamp((time-state.trickStart)/state.trickDuration,0,1);
@@ -1190,6 +1286,28 @@ function start3D() {
     starGates.push({x,z,group,ring,lastAt:0});
   }
   gateSparkles.instanceMatrix.needsUpdate=true;gateSparkles.frustumCulled=false;scene.add(gateSparkles);
+  // Moonlight launch circles add a surprise reward to exploration. Their
+  // visual cost stays at two GPU-instanced draw calls across all districts;
+  // unlike jumps from a menu, the rider discovers them by riding naturally.
+  const padStops=[[0,91],[0,46],[1,42],[1,123],[3,69],[4,98],
+    [5,43],[6,72],[8,65],[11,78],[13,91],[14,40],[15,28]];
+  const jumpPads=padStops.map(([pathIndex,index])=>{
+    const p=roadPaths[pathIndex][index];return{x:p.x,z:p.z,lastAt:-Infinity};
+  });
+  const padRings=new THREE.InstancedMesh(new THREE.TorusGeometry(1.95,.17,7,32),
+    new THREE.MeshBasicMaterial({color:0x9ef0ef,transparent:true,opacity:.82,
+      depthWrite:false}),jumpPads.length);
+  const padStars=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.46,0),
+    new THREE.MeshBasicMaterial({color:0xffdd9c}),jumpPads.length);
+  jumpPads.forEach((p,i)=>{
+    tempObject.position.set(p.x,.14,p.z);tempObject.rotation.set(-Math.PI*.5,0,0);
+    tempObject.scale.set(1,1,1);tempObject.updateMatrix();padRings.setMatrixAt(i,tempObject.matrix);
+    tempObject.position.set(p.x,.72,p.z);tempObject.rotation.set(0,i*.55,0);
+    tempObject.scale.set(.9,.9,.9);tempObject.updateMatrix();padStars.setMatrixAt(i,tempObject.matrix);
+  });
+  for(const inst of [padRings,padStars]){
+    inst.instanceMatrix.needsUpdate=true;inst.frustumCulled=false;scene.add(inst);
+  }
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
 
   function disposeOrbLabel(orb){
@@ -1441,6 +1559,16 @@ function start3D() {
     showJump('✶ Starry spin! +5');blip(920);updateHud();
   }
   function checkGates(time){
+    for(const pad of jumpPads){
+      if(state.speed<4||state.jumpY>.3||time-pad.lastAt<12500)continue;
+      const dx=state.x-pad.x,dz=state.z-pad.z;
+      if(dx*dx+dz*dz>7.3)continue;
+      pad.lastAt=time;state.jumpVel=13.4;state.jumps=1;
+      state.boostUntil=time+1300;state.rushUntil=Math.max(state.rushUntil,time+1800);
+      state.bonusPoints+=8;state.best=Math.max(state.best,state.delivered+state.bonusPoints);
+      showJump('✦ Moonlight launch! +8');blip(990);spawnParticles(v3(pad.x,.8,pad.z),14,0x9deaf0);
+      updateHud();break;
+    }
     for(const gate of starGates){
       gate.group.rotation.z=Math.sin(time*.001+gate.x)*.018;
       const distance=Math.hypot(state.x-gate.x,state.z-gate.z);
@@ -1515,8 +1643,11 @@ function start3D() {
   }
   function updateCamera(dt){
     const yaw=bike.rotation.y;
-    const behind=v3(0,3.9,8.6+state.speed*.12).applyAxisAngle(vectorUp,yaw);
-    const ahead=v3(0,2.4,-6.3).applyAxisAngle(vectorUp,yaw);
+    // The reference keeps the cyclist prominent, with the town sweeping by.
+    // On small screens an 8.6 m chase distance made Vincent almost invisible.
+    const behind=v3(0,isMobile?3.45:3.9,(isMobile?6.5:8.6)+state.speed*(isMobile?.065:.12))
+      .applyAxisAngle(vectorUp,yaw);
+    const ahead=v3(0,isMobile?2.25:2.4,isMobile?-5.2:-6.3).applyAxisAngle(vectorUp,yaw);
     const desired=bike.position.clone().add(behind);
     desired.y+=Math.min(2.5,state.jumpY*.26);
     const target=bike.position.clone().add(ahead);
@@ -1612,6 +1743,7 @@ function start3D() {
     state.distance=0;state.styleCount=0;state.bonusPoints=0;state.streak=0;
     state.rushUntil=0;state.steepleExitUntil=0;state.visited=new Set();
     state.steerSmooth=0;state.deliveryCooldown=0;
+    for(const pad of jumpPads)pad.lastAt=-Infinity;
     controls.joyX=0;controls.joyY=0;
     bike.position.set(0,0,89);bike.rotation.set(0,0,0);
     for(const orb of orbs){orb.collected=false;orb.group.visible=true;orb.respawnAt=0;}
@@ -1699,7 +1831,10 @@ function start3D() {
       const dx=e.clientX-(r.left+r.width*.5),dy=e.clientY-(r.top+r.height*.5);
       controls.joyX=clamp(dx/(r.width*.33),-1,1);
       controls.joyY=clamp(dy/(r.height*.33),-1,1);
-      knob.style.transform=`translate(calc(-50% + ${controls.joyX*24}px),calc(-50% + ${controls.joyY*24}px))`;
+      // Thumb travel scales with the visible steering-wheel size. A fixed
+      // 24px throw felt unresponsive once the wheel grew on larger phones.
+      const travel=r.width*.29;
+      knob.style.transform=`translate(calc(-50% + ${controls.joyX*travel}px),calc(-50% + ${controls.joyY*travel}px))`;
     };
     const releaseJoystick=e=>{
       if(e&&joystickPointer!==e.pointerId)return;

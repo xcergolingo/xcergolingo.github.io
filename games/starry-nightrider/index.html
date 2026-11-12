@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=9">
+  <link rel="stylesheet" href="./styles.css?v=10">
 </head>
 <body>
   <main id="game" aria-label="Starry Nightrider 3D language learning game">
@@ -141,7 +141,7 @@
       const freshCanvas = oldCanvas.cloneNode(false);
       oldCanvas.replaceWith(freshCanvas);
       const script = document.createElement('script');
-      script.src = './fallback.js?v=9';
+      script.src = './fallback.js?v=10';
       document.body.appendChild(script);
       const hint = document.querySelector('#missionNote span:last-child');
       if (hint) hint.textContent = 'Low-graphics mode: ride through the painting and collect words.';
@@ -149,7 +149,7 @@
     };
     window.addEventListener('starry:webgl-unavailable', loadFallback, {once:true});
     // Versioned URLs stop iOS WKWebView from reusing stale game code after an update.
-    try { await import('./game-3d.js?v=9'); }
+    try { await import('./game-3d.js?v=10'); }
     catch (error) { console.error('3D engine could not initialize:', error); loadFallback(); }
   </script>
 </body>
