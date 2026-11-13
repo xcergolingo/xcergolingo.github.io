@@ -23,7 +23,7 @@
   };
   // Attach the load handler before setting src so even fast cached images
   // create the paving pattern in iPhone WKWebView.
-  roadPaint.src='./assets/cobbles-v9.webp';
+  roadPaint.src='./assets/paving-smooth-v12.webp';
   const TAU = Math.PI * 2;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;

@@ -1,8 +1,10 @@
 import * as THREE from './assets/three.module.js';
-import { createRiderModel } from './rider-model.js?v=11';
+import { createRiderModel } from './rider-model.js?v=12';
 import { createVillageModelKit } from './village-models.js?v=11';
-import { createCountryside } from './countryside.js?v=11';
+import { createCountryside } from './countryside.js?v=12';
 import { createRideAudio } from './audio-engine.js?v=11';
+import { createLandscape } from './landscape-model.js?v=12';
+import { createRoadNetwork } from './road-model.js?v=12';
 
 // Starry Nightrider — fully playable procedural Three.js village.
 // Three.js r170 is bundled beside this file. No build step or server API needed.
@@ -54,11 +56,11 @@ function start3D() {
   const canvas=$('world');
   // Three r170 requires WebGL 2. Construction failure happens before any
   // controls bind, allowing the HTML loader to activate its canvas fallback.
-  const renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance'});
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
   // Most phones are fill-rate limited. Begin with fewer physical pixels, then
   // adapt resolution from measured frame times without sacrificing input FPS.
-  const maxPixelRatio=Math.min(window.devicePixelRatio||1,isMobile?1.06:1.36);
-  const minPixelRatio=isMobile?.72:.88;
+  const maxPixelRatio=Math.min(window.devicePixelRatio||1,isMobile?1.12:1.5);
+  const minPixelRatio=isMobile?.85:1;
   let renderPixelRatio=maxPixelRatio;
   renderer.setPixelRatio(renderPixelRatio);
   renderer.setSize(innerWidth,innerHeight,false);
@@ -174,12 +176,11 @@ function start3D() {
     g.globalAlpha=1;
   },256);
   MAT.blue.color.set(0xffffff);MAT.blue.map=coatFabric;MAT.blue.needsUpdate=true;
-  // Startup used to paint 3,400 individual grass strokes onto a canvas.
-  // A baked oil-painted meadow atlas has richer detail and avoids that work.
-  const grassTexture=new THREE.TextureLoader().load('./assets/meadow-v9.webp');
+  // Baked seamless low-contrast meadow: no tiny speckles to crawl at speed.
+  const grassTexture=new THREE.TextureLoader().load('./assets/meadow-smooth-v12.webp');
   grassTexture.colorSpace=THREE.SRGBColorSpace;
   grassTexture.wrapS=grassTexture.wrapT=THREE.RepeatWrapping;
-  grassTexture.repeat.set(18,18);grassTexture.anisotropy=isMobile?2:4;
+  grassTexture.repeat.set(14,14);grassTexture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),isMobile?4:8);
   // Baked oil-paint textures replace thousands of startup canvas brush
   // operations and allow the stonework to be much richer at zero geometry cost.
   // Texture size is 1024²; phones sample a compressed mipmap rather than
@@ -187,12 +188,12 @@ function start3D() {
   function paintTexture(url,repeatX=1,repeatY=1){
     const t=new THREE.TextureLoader().load(url);
     t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;
-    t.repeat.set(repeatX,repeatY);t.anisotropy=isMobile?2:4;
+    t.repeat.set(repeatX,repeatY);t.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),isMobile?4:8);
     return t;
   }
-  // Scale the photographed-looking impasto stones to bicycle size. The old
-  // UVs repeated a full tile every 5 metres, turning cobbles into static.
-  const cobbleTexture=paintTexture('./assets/cobbles-v9.webp',.7,1);
+  // Every street shares a calm paving tile at the same 8 m world-space scale.
+  // Fine speckles and mismatched per-road texture stretches are removed.
+  const cobbleTexture=paintTexture('./assets/paving-smooth-v12.webp');
   const wallBrushTexture=paintTexture('./assets/stonewall-refined.webp',1.25,1.5);
   const roofBrushTexture=paintTexture('./assets/roof-refined.webp');
   const ground=mesh(new THREE.PlaneGeometry(760,760,1,1),material(0xdfe9da,{map:grassTexture,roughness:1}));
@@ -263,44 +264,17 @@ function start3D() {
   const crescentGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTexture,color:0xffc76c,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,fog:false}));
   crescentGlow.position.copy(crescent.position);crescentGlow.scale.set(43,43,1);scene.add(crescentGlow);
 
-  // Forty-four scenic hills now render in ONE instanced draw instead of 44.
-  const hills=new THREE.InstancedMesh(new THREE.SphereGeometry(1,13,8),
-    material(0xffffff,{flatShading:true,roughness:1}),44);
-  for(let i=0;i<44;i++){
-    const a=i/44*TAU,r=310+rand(i+90)*42;
-    tempObject.position.set(Math.cos(a)*r,3,Math.sin(a)*r);
-    tempObject.rotation.set(0,0,0);
-    tempObject.scale.set(58+rand(i+14)*38,29+rand(i+18)*28,59+rand(i+19)*33);
-    tempObject.updateMatrix();hills.setMatrixAt(i,tempObject.matrix);
-    hills.setColorAt(i,new THREE.Color(choice([0x294769,0x304c6c,0x263e61,0x354f66],i+4)));
-  }
-  hills.instanceMatrix.needsUpdate=true;hills.frustumCulled=false;scene.add(hills);
+  // Continuous smooth ridges replace the faceted, disconnected hill spheres.
+  scene.add(createLandscape(THREE,{isMobile}));
 
   // Painted diffuse lighting is baked into the street art. MeshBasic on
   // phones removes PBR shader cost while keeping the brighter oil-paint color.
   const streetMat=isMobile?
-    new THREE.MeshBasicMaterial({map:cobbleTexture,color:0xe9d5ee,side:THREE.DoubleSide,toneMapped:false}):
-    new THREE.MeshStandardMaterial({map:cobbleTexture,color:0xffedf3,roughness:.97,side:THREE.DoubleSide});
-  const curbMat=new THREE.MeshStandardMaterial({color:0xc39c76,emissive:0x4d3060,emissiveIntensity:.22,roughness:.91});
+    new THREE.MeshBasicMaterial({map:cobbleTexture,color:0xf2e7ee,side:THREE.DoubleSide,toneMapped:false}):
+    new THREE.MeshStandardMaterial({map:cobbleTexture,color:0xf7eff2,roughness:.97,side:THREE.DoubleSide});
+  const roads=createRoadNetwork(THREE,{material:streetMat,tileSize:8});
   function makeRoad(points,width,closed=false){
-    const segments=[],verts=[],uv=[],indices=[];let length=0;
-    for(let i=0;i<points.length;i++){
-      const prev=points[Math.max(0,i-1)],next=points[Math.min(points.length-1,i+1)],p=points[i];
-      const tangent=next.clone().sub(prev).normalize(),perp=v3(-tangent.z,0,tangent.x);
-      const left=p.clone().addScaledVector(perp,width*.5),right=p.clone().addScaledVector(perp,-width*.5);
-      if(i>0)length+=p.distanceTo(points[i-1]);
-      verts.push(left.x,.047,left.z,right.x,.047,right.z);uv.push(0,length/20,1,length/20);
-      if(i) {const n=i*2;indices.push(n-2,n-1,n,n-1,n+1,n);}
-      segments.push({left,right});
-    }
-    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(indices);geo.computeVertexNormals();
-    const pathMesh=mesh(geo,streetMat);pathMesh.receiveShadow=true;scene.add(pathMesh);
-    for(const side of ['left','right']){
-      const curve=new THREE.CatmullRomCurve3(segments.map(s=>s[side]));
-      const line=mesh(new THREE.TubeGeometry(curve,Math.max(20,points.length*2),.075,4,false),curbMat);
-      scene.add(line);
-    }
+    roads.addRoad(points,width,closed);
     roadPaths.push(points);
   }
   const road1=Array.from({length:161},(_,i)=>{const z=-256+i*3.2;return v3(Math.sin(z*.024)*6,0,z);});
@@ -339,11 +313,7 @@ function start3D() {
   const marketLoop=Array.from({length:89},(_,i)=>{const a=i/88*TAU;
     return v3(-118+Math.cos(a)*28,0,102+Math.sin(a)*25);});
   makeRoad(marketLoop,6.8,true);
-  const squareTex=paintTexture('./assets/cobbles-v9.webp',3.2,3.2);
-  const square=mesh(new THREE.CircleGeometry(21,64),isMobile?
-    new THREE.MeshBasicMaterial({map:squareTex,color:0xffffff,toneMapped:false}):
-    new THREE.MeshStandardMaterial({map:squareTex,color:0xf8e7ff,roughness:.96}));
-  square.rotation.x=-Math.PI/2;square.position.y=.071;scene.add(square);
+  scene.add(roads.build());
 
   // Shared UV-mapped roof geometry: previous individual roofs lacked UVs, so
   // their paint map could not actually appear. Every house now uses the same
@@ -430,8 +400,8 @@ function start3D() {
     }
     const trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.25,.42,1,6),
       material(0x213545),trees.length);
-    const foliage=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,7,1),
-      material(0xffffff,{flatShading:true}),trees.length*4);
+    const foliage=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,14,2),
+      material(0xffffff,{flatShading:false}),trees.length*4);
     const strokeCount=isMobile?3:5;
     const strokes=new THREE.InstancedMesh(new THREE.CylinderGeometry(.035,.06,.7,4),
       material(0xffffff,{emissive:0x143c41,emissiveIntensity:.17}),trees.length*strokeCount);

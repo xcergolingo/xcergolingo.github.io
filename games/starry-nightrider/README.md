@@ -2,7 +2,7 @@
 
 An original, free-roaming Three.js r170 bicycle game inspired by the public-domain painting *The Starry Night* (1889). It opens with an eight-second original animated painting video; **tap Ride Now** to begin with sound. Explore an interconnected painterly region, collect luminous vocabulary orbs, find stardust speed rings, and return to the church's golden beam to bank points. The 3D world, buildings, cypresses, bike and rider are procedural, with custom painted material textures. The swirling sky uses an original panoramic illustration.
 
-**Version 11 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. This update replaces the cyclist and house models, composes close-set village streets beside broad curved golden/green fields, adds tall recognizable sunflowers, and fixes tap-to-start audio. It keeps the large steering wheel, jump/trick controls, GoLingo data bridge, collection, and delivery game loop.
+**Version 12 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. This update replaces the faceted hills with continuous smooth blue ridges, gives all roads and the square consistent world-space paving, removes raised lines across junctions, softens field edges and gradients, and refines the skinny cyclist with smooth connected limbs and damped leaning. It preserves the detailed village houses, tall sunflowers, tap-to-start audio, large steering wheel, jump/trick controls, GoLingo data bridge, collection, and delivery game loop.
 
 ## Run it
 
@@ -39,13 +39,13 @@ Pause settings also offer 1.2, 2.2 (default), 3.2, or 4.8 seconds between pronun
 
 ## Mobile performance and painterly detail
 
-The village retains its connected lanes and seven explorable districts, with glowing street-lamp pools, golden hanging lanterns and wildflower meadows. The v9 compressed WebP textures use **fine hand-painted pink-lilac cobbles** with visible strokes, warm olive-colored meadow grass, more neutral irregular limestone walls and muted red tiled roofing. UV-mapped gables, half-timbered facades, instanced shutters and window frames give the village a more colorful, lived-in look. Version 10 adds detailed cottages near the spawn point and a warm outdoor café with parasols and tables.
+The village retains its connected lanes and seven explorable districts, with glowing street-lamp pools, golden hanging lanterns and wildflower meadows. Version 12 uses seamless, lower-contrast paving and meadow textures to reduce visual grain and shimmer. All roads and the central square use the same stone size, orientation, height and material. Soft road shoulders replace raised curb lines at intersections. Field colors blend continuously with feathered borders rather than random triangular color changes. UV-mapped gables, half-timbered facades, instanced shutters and window frames give the village a more colorful, lived-in look.
 
-Repeated buildings, roofs, window frames, lamp posts, cypress trees, meadows, distant hills, orchard trunks/canopies and most chapel sparkles use GPU instancing. Stars use one point-cloud draw instead of dozens of individual glow sprites. **All glowing vocabulary orbs share just three GPU-instanced meshes** (sphere, halo and ring) instead of requiring three separate draw objects per orb. Distant word labels are generated only when needed. The v11 village uses fewer, more carefully placed detailed homes rather than scattered identical boxes. Static architecture is grouped by geometry/material and spatial block, allowing off-camera blocks to be culled. Sunflower heads, stalks and leaves are also instanced by field block.
+Repeated buildings, roofs, window frames, lamp posts, cypress trees, meadows, orchard trunks/canopies and most chapel sparkles use GPU instancing. Three smooth, connected hill surfaces replace the 44 low-sided spheres. The road network uses one paving mesh and one feathered-shoulder mesh. Stars use one point-cloud draw instead of dozens of individual glow sprites. **All glowing vocabulary orbs share just three GPU-instanced meshes** (sphere, halo and ring) instead of requiring three separate draw objects per orb. Distant word labels are generated only when needed. Static architecture is grouped by geometry/material and spatial block, allowing off-camera blocks to be culled. Sunflower heads, stalks and leaves are also instanced by field block.
 
-The replacement cyclist has a narrow tapered coat, smaller head and boater hat, a slim leather satchel, long thin articulated limbs, speed-linked pedal rotation, fixed handlebar hands and a thin vintage bicycle. Five house variants provide separate wall-colored gables, steep red/clay/slate roof slopes, multi-storey windows, shutters, sills, chimneys, occasional dormers and café awnings. Native model renders and structural tests are useful checks, but are not a measured frame rate or visual test on a physical iPhone.
+The cyclist has a narrow tapered coat, smaller head and boater hat, a slim leather satchel, long thin articulated limbs, speed-linked pedal rotation, fixed handlebar hands and a thin vintage bicycle. V12 adds smoothly interpolated body/head contours, connected rounded sleeves and trousers, softer satchel corners and damped body/steering motion. Five house variants provide separate wall-colored gables, steep red/clay/slate roof slopes, multi-storey windows, shutters, sills, chimneys, occasional dormers and café awnings. Native model renders and structural tests are useful checks, but are not a measured frame rate or visual test on a physical iPhone.
 
-The scene uses two static point lights plus the bicycle spotlight, moonlight and hemispherical ambient light; costly dynamic shadow maps are disabled. Mobile stone and roof surfaces use lightweight unlit paint materials. The 3D frame is only drawn occasionally while the cinematic or pause menu covers the scene. During active rides an automatic resolution scaler reduces pixel ratio if the frame rate drops. On browsers without WebGL 2, the illustrated 2D fallback now uses the refined street, house and roof textures, caches the still background, draws paving in one clipped image pass, and uses a reduced mobile pixel ratio and paced redraws. Performance depends on the device; the exact frame rate has not been measured on a physical iPhone.
+The scene uses two static point lights plus the bicycle spotlight, moonlight and hemispherical ambient light; costly dynamic shadow maps are disabled. Mobile stone and roof surfaces use lightweight unlit paint materials. Native edge antialiasing is enabled. The 3D frame is only drawn occasionally while the cinematic or pause menu covers the scene. During active rides an automatic resolution scaler adjusts pixel ratio (mobile 0.85–1.12) from sustained frame timing. The v12 mobile source test contains 402 meshes / 277,190 triangles versus 449 meshes / 305,064 triangles in v11; these are scene totals, not measured FPS. On browsers without WebGL 2, the illustrated 2D fallback uses the new paving texture, caches the still background and draws paving in one clipped image pass. Performance depends on the device; the exact frame rate has not been measured on a physical iPhone.
 
 ## Game loop
 
@@ -85,13 +85,16 @@ In WKWebView you may also call `window.loadGoLingoWords(myData)` with properly J
 - `dist/rider-model.js` — reusable slim cyclist/bicycle model and pedal animation.
 - `dist/village-models.js` — five reusable, batchable detailed house models.
 - `dist/countryside.js` — painted cultivated fields and instanced tall sunflowers.
+- `dist/landscape-model.js` — three continuous, smoothly shaded mountain/foothill layers.
+- `dist/road-model.js` — consistent world-space paving and soft open-junction shoulders.
 - `dist/audio-engine.js` — mobile-gesture-aware original riding soundscape.
 - `dist/fallback.js` — previous canvas game for devices without WebGL 2.
 - `dist/assets/starry-sky.webp` — generated original painterly panorama.
 - `dist/assets/starry-intro.mp4` — original eight-second cinematic (muted autoplay with skip).
 - `dist/assets/starry-intro.webp` — matching poster for mobile autoplay fallback.
-- `dist/assets/cobbles-v9.webp` — hand-painted fine pink-lilac village paving (current).
-- `dist/assets/meadow-v9.webp` — hand-painted olive-green grass and soft impasto strokes (current).
+- `dist/assets/paving-smooth-v12.webp` — seamless, low-contrast rounded paving stones (current).
+- `dist/assets/meadow-smooth-v12.webp` — seamless broad meadow color and soft strokes (current).
+- `dist/assets/cobbles-v9.webp` / `meadow-v9.webp` — previous textures retained for rollback.
 - `dist/assets/cobblestones-refined.webp` — previous paving texture retained for rollback.
 - `dist/assets/stonewall-refined.webp` — refined pale stone wall texture (current).
 - `dist/assets/roof-refined.webp` — refined muted terracotta roof texture (current).
@@ -99,3 +102,7 @@ In WKWebView you may also call `window.loadGoLingoWords(myData)` with properly J
 - `dist/assets/three.module.js` — bundled Three.js r170 (MIT license in `three-LICENSE.txt`).
 
 This is an original game adaptation, not a copy of the reference site's source or assets.
+
+## Verification
+
+`node tests/game-smoke.mjs` and `node tests/game-smoke.mjs --desktop` exercise 40 source-level gameplay/audio checks with real Three.js models and a mocked browser renderer. `node tests/landscape-smoke.mjs` and `node tests/road-smoke.mjs` verify geometry and surface consistency. `tests/chase-preview.mjs` produces a native CPU geometry preview; it is not a browser screenshot or performance test. `node tests/bake-ground-textures.mjs` deterministically regenerates the two v12 ground assets offline.

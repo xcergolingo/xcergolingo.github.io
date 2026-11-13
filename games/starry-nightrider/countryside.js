@@ -3,20 +3,41 @@
 export function createCountryside(THREE,{isMobile=false,clearOfRoad,colliders=[]}={}){
   const group=new THREE.Group();group.name='Sunflower countryside';
   const rand=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
-  const dummy=new THREE.Object3D(),up=new THREE.Vector3(0,1,0);
+  const dummy=new THREE.Object3D();
+  const smooth=t=>{const v=Math.max(0,Math.min(1,t));return v*v*(3-2*v);};
   const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
-  g.fillStyle='#d9c884';g.fillRect(0,0,512,512);
-  // Directional strokes, not tiny noise: these remain legible at riding speed.
-  for(let i=0;i<1250;i++){
-    const x=rand(i+12)*512,y=rand(i+907)*512,len=7+rand(i+51)*35;
-    g.strokeStyle=['#f9e0a2','#b59652','#e4cb77','#fff0b3','#95834f'][i%5];
-    g.lineWidth=1+rand(i+83)*3;g.globalAlpha=.22+rand(i+75)*.35;
-    g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+len*.4,y-2,x+len,y-4);g.stroke();
+  g.fillStyle='#f1efe4';g.fillRect(0,0,512,512);
+  // Long, low-contrast strokes read as cultivated fields instead of grainy
+  // noise. The full-plot atlas does not tile, so there are no repeated seams.
+  g.lineCap='round';
+  for(let i=0;i<420;i++){
+    const x=rand(i+12)*512,y=rand(i+907)*512,len=18+rand(i+51)*66;
+    g.strokeStyle=['#fffbee','#d4d2bc','#e9e6d6','#fffdf2'][i%4];
+    g.lineWidth=1.6+rand(i+83)*3.2;g.globalAlpha=.08+rand(i+75)*.13;
+    g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+len*.5,y-1.5,x+len,y-3);g.stroke();
   }
   g.globalAlpha=1;
+  // Feather the plot into the meadow rather than ending at a hard rectangle.
+  // This is ordinary texture alpha, not a custom shader or extra geometry.
+  g.globalCompositeOperation='destination-in';
+  for(const horizontal of [true,false]){
+    const fade=g.createLinearGradient(0,0,horizontal?512:0,horizontal?0:512);
+    fade.addColorStop(0,'rgba(255,255,255,0)');
+    fade.addColorStop(.075,'rgba(255,255,255,1)');
+    fade.addColorStop(.925,'rgba(255,255,255,1)');
+    fade.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=fade;g.fillRect(0,0,512,512);
+  }
+  g.globalCompositeOperation='source-over';
   const brush=new THREE.CanvasTexture(c);brush.colorSpace=THREE.SRGBColorSpace;
-  brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.anisotropy=isMobile?2:4;
-  const fieldMat=new THREE.MeshStandardMaterial({map:brush,vertexColors:true,roughness:1,metalness:0});
+  brush.wrapS=brush.wrapT=THREE.ClampToEdgeWrapping;brush.anisotropy=isMobile?4:8;
+  brush.minFilter=THREE.LinearMipmapLinearFilter;brush.magFilter=THREE.LinearFilter;
+  const fieldMat=new THREE.MeshStandardMaterial({map:brush,vertexColors:true,
+    transparent:true,depthWrite:false,alphaTest:.008,roughness:1,metalness:0});
+  const palettes={
+    gold:[0xe8cf8b,0xc9b36e,0xe0c17b,0xb7b17b].map(v=>new THREE.Color(v)),
+    green:[0x8f9f78,0x708f76,0xa1a97b,0x7d9478].map(v=>new THREE.Color(v))
+  };
   const patches=[
     {x:38,z:98,w:49,d:70,a:-.13,gold:true},
     {x:-48,z:144,w:67,d:62,a:.08,gold:true},
@@ -34,17 +55,19 @@ export function createCountryside(THREE,{isMobile=false,clearOfRoad,colliders=[]
     const pos=geo.attributes.position,uv=geo.attributes.uv,colors=[];
     for(let i=0;i<pos.count;i++){
       const x=pos.getX(i),z=pos.getZ(i),u=x/p.w,v=z/p.d;
-      const wave=v*8+Math.sin(u*4+k)*.7;
-      const band=Math.floor(wave+10)%4;
-      const color=new THREE.Color(p.gold?
-        [0xf6cf68,0xc9af57,0xe4bd58,0xb7aa62][band]:
-        [0x7d9765,0xb1ac65,0x719474,0xd1bc72][band]);
-      color.multiplyScalar(.87+rand(i+k*107)*.15);colors.push(color.r,color.g,color.b);
-      // Bow the outer edges into organic cultivated plots; never raise lanes.
+      const wave=v*5.2+Math.sin(u*3.3+k*.6)*.55+20;
+      const band=Math.floor(wave),fraction=wave-band,palette=p.gold?palettes.gold:palettes.green;
+      const color=palette[band%4].clone().lerp(palette[(band+1)%4],smooth(fraction));
+      // Broad continuous lighting variation, never random per-vertex colors:
+      // neighboring triangles now interpolate one continuous field surface.
+      color.multiplyScalar(.97+.025*Math.sin(u*4.2+v*2.7+k));
+      colors.push(color.r,color.g,color.b);
+      // Bow entire margins gradually into organic plots. The previous last-
+      // vertex-only offsets kinked the grid along its perimeter.
       pos.setY(i,-.025);
-      if(Math.abs(u)>.47)pos.setX(i,x+Math.sin(v*11+k)*2.8);
-      if(Math.abs(v)>.47)pos.setZ(i,z+Math.sin(u*9+k)*2.3);
-      uv.setXY(i,(u+.5)*p.w/18,(v+.5)*p.d/18);
+      pos.setX(i,x+Math.sin(v*7+k)*2.3*smooth((Math.abs(u)-.27)/.23));
+      pos.setZ(i,z+Math.sin(u*6+k)*2.1*smooth((Math.abs(v)-.27)/.23));
+      uv.setXY(i,u+.5,v+.5);
     }
     geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeVertexNormals();
     const m=new THREE.Mesh(geo,fieldMat);m.position.set(p.x,0,p.z);m.rotation.y=p.a;
@@ -62,17 +85,21 @@ export function createCountryside(THREE,{isMobile=false,clearOfRoad,colliders=[]
   for(let i=0;i<20;i++)planting.push({x:-12.5-Math.sin(i*.27)*1.6,z:122+i*3.5,seed:2100+i});
   const clear=(x,z,margin=6.1)=>clearOfRoad(x,z,margin)&&!colliders.some(b=>Math.abs(x-b.x)<b.rx+1.2&&Math.abs(z-b.z)<b.rz+1.2);
   const plants=planting.filter(p=>clear(p.x,p.z));
-  const petalData=[],petalUV=[];
+  const petalData=[],petalUV=[],petalIndex=[];
   for(let p=0;p<13;p++){
     const a=p/13*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a);
-    const pts=[[.18,-.035],[.39,-.11],[.69,0],[.39,.11]];
-    for(const j of [0,1,2,0,2,3]){
-      const [r,t]=pts[j];petalData.push(ca*r-sa*t,sa*r+ca*t,.012);
+    // A soft cupped petal, not the old flat diamond. Five shared triangles
+    // retain the clear sunflower outline with a small fixed mesh budget.
+    const pts=[[.18,-.025,.012],[.18,.025,.012],[.34,-.1,.027],
+      [.34,.1,.027],[.53,-.085,.048],[.53,.085,.048],[.69,0,.016]],offset=p*7;
+    for(const [r,t,z] of pts){
+      petalData.push(ca*r-sa*t,sa*r+ca*t,z);
       petalUV.push(r/.69,.5+t/.22);
     }
+    for(const j of [0,2,1,1,2,3,2,4,3,3,4,5,4,6,5])petalIndex.push(offset+j);
   }
   const petalGeo=new THREE.BufferGeometry();petalGeo.setAttribute('position',new THREE.Float32BufferAttribute(petalData,3));
-  petalGeo.setAttribute('uv',new THREE.Float32BufferAttribute(petalUV,2));petalGeo.computeVertexNormals();
+  petalGeo.setAttribute('uv',new THREE.Float32BufferAttribute(petalUV,2));petalGeo.setIndex(petalIndex);petalGeo.computeVertexNormals();
   const leafGeo=new THREE.BufferGeometry();leafGeo.setAttribute('position',new THREE.Float32BufferAttribute([
     0,0,0,.22,.25,.05,.03,.68,0,0,0,0,.03,.68,0,-.24,.31,.05],3));leafGeo.computeVertexNormals();
   const stemMat=new THREE.MeshStandardMaterial({color:0x405e3c,roughness:1});

@@ -23,9 +23,9 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
       kind === 'leather' ? ['#4d3023', '#684634', '#8c6243', '#b0865a'] :
       ['#bc944c', '#d6b763', '#edce7c', '#f6df9d'];
     g.fillStyle = palette[1]; g.fillRect(0, 0, 256, 256);
-    for (let i = 0; i < 420; i++) {
+    for (let i = 0; i < 260; i++) {
       const x = rnd(i * 7 + 3) * 256, y = rnd(i * 13 + 7) * 256;
-      g.strokeStyle = palette[i % palette.length]; g.globalAlpha = .25 + rnd(i + 11) * .35;
+      g.strokeStyle = palette[i % palette.length]; g.globalAlpha = .12 + rnd(i + 11) * .20;
       g.lineWidth = kind === 'straw' ? .65 : .7 + rnd(i * 5) * 1.4;
       const dx = kind === 'straw' ? 6 + rnd(i + 6) * 19 : 2 + rnd(i + 6) * 8;
       const dy = kind === 'coat' ? -4 - rnd(i + 10) * 13 : kind === 'straw' ? 1 : -2;
@@ -106,7 +106,32 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
 
   // Elliptical sections give the coat an actual chest, narrow waist and
   // shoulders. In particular its depth is NOT equal to its shoulder width.
-  function loft(sections, sides = 16) {
+  function loft(controlSections, sides = 20) {
+    // Shape-preserving cubic profiles replace the old straight-sided rings.
+    // Continuous tangents round the shoulder, jaw and waist without inflating
+    // the silhouette or making the head a sphere.
+    const sections = [];
+    const tangentAt = (i, axis) => {
+      const n = controlSections.length, current = controlSections[i];
+      if (i === 0) return (controlSections[1][axis] - current[axis]) / (controlSections[1][0] - current[0]);
+      if (i === n - 1) return (current[axis] - controlSections[i - 1][axis]) / (current[0] - controlSections[i - 1][0]);
+      const previous = controlSections[i - 1], next = controlSections[i + 1];
+      const d0 = (current[axis] - previous[axis]) / (current[0] - previous[0]);
+      const d1 = (next[axis] - current[axis]) / (next[0] - current[0]);
+      return d0 * d1 <= 0 ? 0 : 2 * d0 * d1 / (d0 + d1);
+    };
+    for (let j = 0; j < controlSections.length - 1; j++) {
+      const a = controlSections[j], b = controlSections[j + 1], height = b[0] - a[0];
+      for (let step = 0; step < 3; step++) {
+        const t = step / 3, t2 = t * t, t3 = t2 * t;
+        const section = [a[0] + height * t];
+        for (let axis = 1; axis < 4; axis++) section.push(
+          (2 * t3 - 3 * t2 + 1) * a[axis] + (t3 - 2 * t2 + t) * height * tangentAt(j, axis) +
+          (-2 * t3 + 3 * t2) * b[axis] + (t3 - t2) * height * tangentAt(j + 1, axis));
+        sections.push(section);
+      }
+    }
+    sections.push(controlSections[controlSections.length - 1]);
     const positions = [], uvs = [], indices = [];
     sections.forEach(([y, rx, rz, cz], j) => {
       for (let i = 0; i <= sides; i++) {
@@ -131,10 +156,34 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-    geo.setIndex(indices); geo.computeVertexNormals(); return geo;
+    geo.setIndex(indices); geo.computeVertexNormals();
+    // The UV seam has duplicated positions; average their normals explicitly
+    // so a hard vertical lighting line cannot appear down the coat or face.
+    const normals = geo.attributes.normal;
+    for (let j = 0; j < sections.length; j++) {
+      const a = j * (sides + 1), b = a + sides;
+      const nx = normals.getX(a) + normals.getX(b), ny = normals.getY(a) + normals.getY(b), nz = normals.getZ(a) + normals.getZ(b);
+      const length = Math.hypot(nx, ny, nz) || 1;
+      normals.setXYZ(a, nx / length, ny / length, nz / length); normals.setXYZ(b, nx / length, ny / length, nz / length);
+    }
+    return geo;
   }
   function ellipsoid(rx, ry, rz) {
-    return new THREE.SphereGeometry(1, 14, 10).scale(rx, ry, rz);
+    return new THREE.SphereGeometry(1, 18, 12).scale(rx, ry, rz);
+  }
+  function softBox(w, h, d, radius = .025) {
+    // Rounded leather edges with analytic normals, including across UV seams.
+    const geo = new THREE.BoxGeometry(w, h, d, 6, 8, 4);
+    const p = geo.attributes.position, n = geo.attributes.normal;
+    const rx = w * .5 - radius, ry = h * .5 - radius, rz = d * .5 - radius;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const cx = clamp(x, -rx, rx), cy = clamp(y, -ry, ry), cz = clamp(z, -rz, rz);
+      const dx = x - cx, dy = y - cy, dz = z - cz, length = Math.hypot(dx, dy, dz) || 1;
+      p.setXYZ(i, cx + dx / length * radius, cy + dy / length * radius, cz + dz / length * radius);
+      n.setXYZ(i, dx / length, dy / length, dz / length);
+    }
+    return geo;
   }
 
   const bikeParts = builder(rig);
@@ -213,7 +262,7 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
     [2.18, .225, .145, .175], [2.38, .27, .15, .065],
     [2.52, .305, .14, -.002], [2.59, .265, .125, -.035],
     [2.66, .11, .093, -.065]
-  ], 18), M.coat);
+  ], 24), M.coat);
   // Subtle structure: lapels, center seam, hip pockets and a tailored collar.
   bodyParts.tube(v(0, 1.62, .255), v(0, 2.37, -.092), .008, M.seam, 4);
   for (const side of [-1, 1]) {
@@ -224,14 +273,17 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
   for (let i = 0; i < 4; i++) bodyParts.add(ellipsoid(.014, .014, .012), M.buckle,
     v(-.025, 2.34 - i * .16, -.09 + i * .078));
   bodyParts.add(new THREE.CylinderGeometry(.105, .12, .12, 14), M.scarf, v(0, 2.655, -.065));
-  bodyParts.add(new THREE.CylinderGeometry(.075, .088, .18, 12), M.skin, v(0, 2.73, -.075));
+  bodyParts.add(loft([
+    [2.64, .086, .068, -.065], [2.70, .075, .063, -.073],
+    [2.76, .074, .062, -.078], [2.80, .083, .071, -.083]
+  ], 20), M.skin);
   // Sculpted cheeks/jaw replace an oversized spherical head.
   bodyParts.add(loft([
     [2.744, .061, .055, -.085], [2.78, .101, .092, -.095],
     [2.835, .137, .122, -.089], [2.92, .157, .139, -.074],
     [3.005, .15, .13, -.059], [3.074, .119, .105, -.051],
     [3.115, .05, .046, -.049]
-  ], 20), M.skin);
+  ], 24), M.skin);
   for (const side of [-1, 1]) {
     bodyParts.add(ellipsoid(.024, .052, .024), M.skin, v(side * .158, 2.89, -.06));
     bodyParts.add(ellipsoid(.026, .011, .009), M.eyes, v(side * .066, 2.943, -.205));
@@ -249,10 +301,10 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
   bodyParts.add(new THREE.CylinderGeometry(.205, .207, .012, 24).scale(1, 1, .89), M.straw, v(0, 3.294, -.05));
 
   // A small worn leather satchel is fitted to the back, not a giant box.
-  bodyParts.box(.405, .53, .135, M.leather, 0, 2.15, .435);
+  bodyParts.add(softBox(.405, .53, .135, .024), M.leather, v(0, 2.15, .435));
   bodyParts.box(.365, .455, .02, M.leatherEdge, 0, 2.14, .51);
   bodyParts.box(.33, .418, .025, M.leather, 0, 2.14, .528);
-  bodyParts.box(.41, .13, .041, M.leather, 0, 2.375, .526);
+  bodyParts.add(softBox(.41, .13, .041, .013), M.leather, v(0, 2.375, .526));
   bodyParts.box(.042, .135, .032, M.leatherEdge, 0, 2.335, .555);
   bodyParts.box(.065, .047, .038, M.buckle, 0, 2.30, .572);
   for (const side of [-1, 1]) {
@@ -270,7 +322,8 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
       const a = j * sides + i, b = j * sides + (i + 1) % sides;
       indices.push(a, b, a + sides, b, b + sides, a + sides);
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3)); geo.setIndex(indices);
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage)); geo.setIndex(indices);
+    geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(positions.length), 3).setUsage(THREE.DynamicDrawUsage));
     const uv = new Float32Array(rings * sides * 2);
     for (let j = 0; j < rings; j++) for (let i = 0; i < sides; i++) {
       uv[(j * sides + i) * 2] = i / sides; uv[(j * sides + i) * 2 + 1] = j / (rings - 1);
@@ -279,37 +332,63 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
     const mesh = new THREE.Mesh(geo, material); mesh.frustumCulled = false; rig.add(mesh);
     const tangent = v(), axisA = v(), axisB = v(), basis = v(1, 0, 0);
     function update(points, radii) {
-      const attr = geo.attributes.position;
+      const attr = geo.attributes.position, normals = geo.attributes.normal;
       for (let j = 0; j < rings; j++) {
-        tangent.copy(points[Math.min(j + 1, rings - 1)]).sub(points[Math.max(0, j - 1)]).normalize();
+        const before = Math.max(0, j - 1), after = Math.min(j + 1, rings - 1);
+        tangent.copy(points[after]).sub(points[before]);
+        const distance = Math.max(.0001, tangent.length()); tangent.multiplyScalar(1 / distance);
+        const slope = (radii[after] - radii[before]) / distance;
         axisA.crossVectors(tangent, Math.abs(tangent.x) > .9 ? up : basis).normalize();
         axisB.crossVectors(tangent, axisA).normalize();
         for (let i = 0; i < sides; i++) {
-          const a = i / sides * TAU, ca = Math.cos(a) * radii[j], sa = Math.sin(a) * radii[j];
+          const a = i / sides * TAU, cosine = Math.cos(a), sine = Math.sin(a);
+          const ca = cosine * radii[j], sa = sine * radii[j];
           attr.setXYZ(j * sides + i, points[j].x + axisA.x * ca + axisB.x * sa,
             points[j].y + axisA.y * ca + axisB.y * sa, points[j].z + axisA.z * ca + axisB.z * sa);
+          const nx = axisA.x * cosine + axisB.x * sine - tangent.x * slope;
+          const ny = axisA.y * cosine + axisB.y * sine - tangent.y * slope;
+          const nz = axisA.z * cosine + axisB.z * sine - tangent.z * slope;
+          const inverseLength = 1 / Math.hypot(nx, ny, nz);
+          normals.setXYZ(j * sides + i, nx * inverseLength, ny * inverseLength, nz * inverseLength);
         }
       }
-      attr.needsUpdate = true; geo.computeVertexNormals();
+      // Analytic tube normals are seamless and cheaper than recomputing all
+      // triangle cross products for four articulated limbs on every frame.
+      attr.needsUpdate = true; normals.needsUpdate = true;
     }
     return { mesh, update };
   }
 
   const arms = [-1, 1].map(side => {
-    const sleeve = dynamicTube(9, 5, M.coat);
+    const sleeve = dynamicTube(12, 11, M.coat);
     const hand = new THREE.Mesh(ellipsoid(.06, .048, .072), M.skin); rig.add(hand);
     return { side, sleeve, hand, root: v(), elbow: v(), wrist: v(),
-      points: [v(), v(), v(), v(), v()], hint: v(), direction: v() };
+      points: Array.from({ length: 11 }, () => v()), hint: v(), direction: v() };
   });
   const legs = [-1, 1].map(side => {
-    const thigh = new THREE.Mesh(new THREE.CylinderGeometry(.071, .096, 1, 10), M.trousers);
-    const shin = new THREE.Mesh(new THREE.CylinderGeometry(.047, .07, 1, 10), M.trousers);
+    // A continuous trouser leg rounds the knee crease and removes exposed
+    // cylinder ends and gaps, while the centerline still follows two-link IK.
+    const trousers = dynamicTube(12, 11, M.trousers);
     const shoe = new THREE.Mesh(ellipsoid(.081, .061, .17), M.shoe);
     const pedal = new THREE.Mesh(new THREE.BoxGeometry(.14, .038, .18), M.frame);
     const crankArm = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, 1, 6), M.chrome);
-    rig.add(thigh, shin, shoe, pedal, crankArm);
-    return { side, thigh, shin, shoe, pedal, crankArm, hip: v(side * .16, HIP_Y, HIP_Z), ankle: v(), knee: v(), pedalCenter: v(), crankStart: v(side * .18, crank.y, crank.z) };
+    rig.add(shoe, pedal, crankArm);
+    return { side, trousers, shoe, pedal, crankArm, points: Array.from({ length: 11 }, () => v()),
+      hip: v(side * .16, HIP_Y, HIP_Z), ankle: v(), knee: v(), pedalCenter: v(), crankStart: v(side * .18, crank.y, crank.z) };
   });
+  const bendStart = v(), bendEnd = v();
+  function roundedJoint(points, start, joint, end) {
+    points[0].copy(start); points[1].copy(start).lerp(joint, .28); points[2].copy(start).lerp(joint, .56);
+    bendStart.copy(start).lerp(joint, .82); bendEnd.copy(joint).lerp(end, .18);
+    points[3].copy(bendStart);
+    for (let j = 0; j < 3; j++) {
+      const t = (j + 1) / 4;
+      points[j + 4].copy(bendStart).multiplyScalar((1 - t) * (1 - t))
+        .addScaledVector(joint, 2 * t * (1 - t)).addScaledVector(bendEnd, t * t);
+    }
+    points[7].copy(bendEnd); points[8].copy(joint).lerp(end, .48);
+    points[9].copy(joint).lerp(end, .75); points[10].copy(end);
+  }
   const segDirection = v(), segMid = v();
   function segment(mesh, a, b) {
     segDirection.copy(b).sub(a); const length = segDirection.length();
@@ -331,16 +410,19 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
   scarfGeo.setAttribute('position', new THREE.BufferAttribute(scarfPositions, 3)); scarfGeo.setIndex(scarfIndices);
   const scarf = new THREE.Mesh(scarfGeo, M.scarf); scarf.frustumCulled = false; upper.add(scarf);
 
-  let pedalPhase = .7;
+  let pedalPhase = .7, smoothSteering = 0, smoothWind = 0;
   function animate(timeMs, dt, state) {
     const speed = Math.max(0, Number(state.speed) || 0), wind = clamp(speed / 19, 0, 1);
     const steeringAmount = clamp(Number(state.steerSmooth) || 0, -1, 1);
+    const settle = 1 - Math.exp(-Math.min(.1, Math.max(0, dt)) * 12);
+    smoothSteering += (steeringAmount - smoothSteering) * settle;
+    smoothWind += (wind - smoothWind) * settle;
     pedalPhase = (pedalPhase + speed * dt * .72) % TAU;
     for (const wheel of wheels) wheel.rotation.x -= speed * dt / RADIUS;
-    steering.rotation.y = steeringAmount * .25;
-    upper.rotation.x = -wind * .035;
-    upper.rotation.z = steeringAmount * .025 + Math.sin(pedalPhase * 2) * wind * .007;
-    upper.position.y = HIP_Y + Math.sin(pedalPhase * 2) * wind * .006;
+    steering.rotation.y = smoothSteering * .25;
+    upper.rotation.x = -smoothWind * .045;
+    upper.rotation.z = smoothSteering * .025 + Math.sin(pedalPhase * 2) * smoothWind * .007;
+    upper.position.y = HIP_Y + Math.sin(pedalPhase * 2) * smoothWind * .006;
     upper.updateMatrix(); steering.updateMatrix();
     for (const leg of legs) {
       const a = pedalPhase + (leg.side < 0 ? 0 : Math.PI);
@@ -352,7 +434,8 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
       const bend = Math.sqrt(Math.max(.0001, L1 * L1 - along * along));
       leg.knee.set(leg.side * .186, leg.hip.y + dy / d * along - dz / d * bend,
         leg.hip.z + dz / d * along + dy / d * bend);
-      segment(leg.thigh, leg.hip, leg.knee); segment(leg.shin, leg.knee, leg.ankle);
+      roundedJoint(leg.points, leg.hip, leg.knee, leg.ankle);
+      leg.trousers.update(leg.points, [.095, .091, .083, .073, .069, .067, .068, .069, .062, .052, .046]);
       leg.shoe.position.copy(leg.ankle); leg.shoe.position.z -= .065;
       leg.shoe.rotation.x = -.08 + Math.sin(a) * .085;
       leg.pedalCenter.copy(leg.ankle); leg.pedalCenter.y -= .09;
@@ -364,11 +447,13 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
       arm.direction.copy(arm.wrist).sub(arm.root); const d = arm.direction.length(); arm.direction.normalize();
       const l1 = .545, l2 = .54, along = clamp((l1 * l1 - l2 * l2 + d * d) / (2 * d), .01, l1);
       const bend = Math.sqrt(Math.max(.001, l1 * l1 - along * along));
-      arm.hint.set(arm.side, .05, .15); arm.hint.addScaledVector(arm.direction, -arm.hint.dot(arm.direction)).normalize();
+      // Relaxed cycling elbows fold down and slightly behind the forearms;
+      // a lateral bend made the rear silhouette read as hands-on-hips.
+      arm.hint.set(arm.side * .15, -1, .2);
+      arm.hint.addScaledVector(arm.direction, -arm.hint.dot(arm.direction)).normalize();
       arm.elbow.copy(arm.root).addScaledVector(arm.direction, along).addScaledVector(arm.hint, bend);
-      arm.points[0].copy(arm.root); arm.points[1].copy(arm.root).lerp(arm.elbow, .53);
-      arm.points[2].copy(arm.elbow); arm.points[3].copy(arm.elbow).lerp(arm.wrist, .52); arm.points[4].copy(arm.wrist);
-      arm.sleeve.update(arm.points, [.097, .081, .072, .060, .047]);
+      roundedJoint(arm.points, arm.root, arm.elbow, arm.wrist);
+      arm.sleeve.update(arm.points, [.100, .095, .085, .076, .073, .072, .071, .069, .061, .053, .047]);
       arm.hand.position.copy(arm.wrist); arm.hand.rotation.y = steering.rotation.y;
     }
     for (const { mesh, side } of tails) {
@@ -393,7 +478,7 @@ export function createRiderModel(THREE, { isMobile = false } = {}) {
     rig.rotation.z = roll;
   }
   animate(0, 0, { speed: 0, lean: 0, steerSmooth: 0, trickDuration: 0 });
-  group.userData.modelVersion = 'slender-rider-v11';
+  group.userData.modelVersion = 'slender-rider-v12';
   group.userData.proportions = { shoulderWidth: .61, waistWidth: .41, hatTop: 3.30, satchelWidth: .405, wheelRadius: RADIUS };
   return { group, rig, animate, headlight };
 }
