@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#143d30">
+<meta name="description" content="Meet Pip, your little panda language teacher. Explore a beautiful 3D bamboo garden, listen, learn, and play with your own vocabulary.">
+<title>Panda Lingo — Bamboo Garden</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main id="app">
+  <div id="world" aria-label="An animated 3D panda in a bamboo garden"><canvas id="garden-canvas"></canvas></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Panda Lingo home"><span class="brand-mark" aria-hidden="true">✿</span><span>PANDA <b>LINGO</b><small>A LITTLE ADVENTURE. A NEW LANGUAGE.</small></span></a>
+    <div class="header-actions">
+      <button id="language-button" class="pill language-button" title="Languages and lessons"><span class="language-dot"></span><span id="language-label">Español</span><span class="chevron">⌄</span></button>
+      <button id="sound-button" class="icon-button" aria-label="Turn speech off" title="Spoken words"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Zm4 3c2 2 2 6 0 8m3-11c4 4 4 10 0 14"/></svg></button>
+      <button id="settings-button" class="icon-button" aria-label="Game settings" title="Settings"><svg viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M6 6l2 2m8 8 2 2M6 18l2-2m8-8 2-2"/><circle cx="12" cy="12" r="5"/></svg></button>
+    </div>
+  </header>
+  <nav class="mode-tabs" aria-label="Game mode">
+    <button data-mode="learn" class="active"><span>✦</span> Learn</button>
+    <button data-mode="listen"><span>♫</span> Listen</button>
+    <button data-mode="match"><span>◇</span> Match</button>
+  </nav>
+  <div class="garden-label"><span class="tiny-line"></span> THE BAMBOO GARDEN <span class="tiny-line"></span></div>
+  <section class="panda-caption" aria-label="Panda companion"><div id="panda-bubble">Hi, I’m Pip! Let’s grow together.</div><button id="pet-panda" class="panda-name"><span class="live-dot"></span> PIP, YOUR PANDA PAL <span>♡</span></button></section>
+  <div id="reward-float" class="reward-float" aria-live="polite"></div>
+  <section id="lesson-board" class="lesson-board" aria-label="Language game">
+    <div class="board-flower f1" aria-hidden="true">✿</div><div class="board-flower f2" aria-hidden="true">✿</div><div class="board-leaf l1" aria-hidden="true"></div><div class="board-leaf l2" aria-hidden="true"></div>
+    <div class="board-inner">
+      <div class="board-topline"><span id="lesson-category">NATURE & LITTLE WONDERS</span><span id="lesson-number">LET’S BEGIN</span></div>
+      <div id="board-content" class="board-content"></div>
+      <div id="board-feedback" role="status" aria-live="polite"></div>
+    </div>
+    <div class="chalk-piece" aria-hidden="true"></div>
+  </section>
+  <section class="journey-bar" aria-label="Lesson progress">
+    <div class="journey-title"><span class="leaf-symbol">❧</span><span>YOUR LITTLE JOURNEY<small id="journey-subtitle">Eight little discoveries</small></span></div>
+    <div id="journey-dots" class="journey-dots"></div>
+    <div class="bamboo-count"><span>🎋</span><strong id="score-count">0</strong><small>BAMBOO</small></div>
+  </section>
+  <div class="bottom-left"><a href="https://www.golingoapp.com" target="_blank" rel="noopener">GoLingo<span> — a world of words</span> ↗</a></div>
+  <div class="bottom-right"><button id="ambience-button" title="Toggle garden music" aria-pressed="false">♫ <span>Garden sounds</span></button><button id="fullscreen-button" aria-label="Full screen" title="Full screen">⛶</button></div>
+  <div id="loading" class="loading"><div class="loading-panda">🐼</div><h1>A little garden is growing…</h1><p>Getting Pip ready for your adventure</p></div>
+  <div id="toast" class="toast" role="status"></div>
+  <dialog id="setup-dialog" class="game-dialog">
+    <button class="close-dialog" aria-label="Close">×</button><span class="eyebrow">MAKE IT YOUR ADVENTURE</span><h2>A world of words</h2><p class="dialog-intro">Choose your languages and something to explore.</p>
+    <div class="language-fields"><label>I understand<select id="base-language"></select></label><label>I’m learning<select id="target-language"></select></label></div>
+    <label class="field-label">Pick a little adventure</label><div id="category-options" class="category-options"></div>
+    <button id="apply-lesson" class="primary-button wide">Let’s explore <span>→</span></button>
+    <details class="import-details"><summary>Bring your own GoLingo words <span>＋</span></summary><p>Paste a GoLingo word list, or choose a JSON file.</p><textarea id="import-text" rows="4" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"word":"水","translation":"water"}]}'></textarea><div class="import-actions"><label class="secondary-button file-label">Choose file<input id="import-file" type="file" accept=".json,application/json"></label><button id="import-words" class="secondary-button">Use my words</button></div><p id="import-status" role="status"></p></details>
+  </dialog>
+  <dialog id="settings-dialog" class="game-dialog settings-dialog">
+    <button class="close-dialog" aria-label="Close">×</button><span class="eyebrow">A PACE THAT FEELS RIGHT</span><h2>Your garden, your way</h2>
+    <label class="setting-row"><span><b>Speak the words</b><small>Hear each new word in its language</small></span><input id="speech-setting" type="checkbox" checked></label>
+    <label class="setting-row"><span><b>Repeat while learning</b><small>A gentle reminder every 7 seconds</small></span><input id="repeat-setting" type="checkbox" checked></label>
+    <label class="setting-row"><span><b>Garden sounds</b><small>Soft chimes and birdsong</small></span><input id="ambient-setting" type="checkbox"></label>
+    <label class="setting-row"><span><b>Challenge mode</b><small>Listen & Match: 60 seconds, 3 hearts</small></span><input id="challenge-setting" type="checkbox"></label>
+    <label class="setting-row"><span><b>Gentle motion</b><small>Fewer effects and calmer animation</small></span><input id="motion-setting" type="checkbox"></label>
+    <p class="settings-note">Tap Pip to say hello. Use 1–3 for answers, Space to listen, and Enter to continue. Your bamboo rewards stay on this device.</p>
+    <button id="settings-done" class="primary-button wide">Back to the garden</button>
+  </dialog>
+  <dialog id="summary-dialog" class="game-dialog summary-dialog"><div id="summary-content"></div></dialog>
+</main>
+<script type="module" src="./game.js"></script>
+<script>window.addEventListener('error',function(e){if(e.target&&e.target.tagName==='SCRIPT'){var p=document.querySelector('#loading p');if(p)p.textContent='The garden could not load. Please reload the page.';}},true);</script>
+</body>
+</html>
