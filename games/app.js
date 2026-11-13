@@ -47,12 +47,28 @@
     sessionStorage.removeItem(lessonKey); activeLesson = null; lessonInput.value = '';
     lessonStatus.textContent = 'No lesson loaded';
   });
+  // Some games use a words-only schema; adapt only cards that opt in.
+  function launchLessonPayload(lesson, format) {
+    if (format !== 'word-pack') return lesson;
+    const words = ['words', 'sentences', 'phrases', 'items', 'entries'].flatMap(key =>
+      (Array.isArray(lesson[key]) ? lesson[key] : []).map((entry, i) => {
+        if (typeof entry === 'string') return {id: key + '-' + i, word: entry, translation: '', sentence: key === 'sentences' ? entry : ''};
+        if (!entry || typeof entry !== 'object') return null;
+        const word = entry.word ?? entry.text ?? entry.sentence ?? entry.phrase ?? '';
+        return {...entry, id: entry.id ?? key + '-' + i, word,
+          translation: entry.translation ?? entry.meaning ?? entry.sentenceTranslation ?? entry.phraseTranslation ?? '',
+          sentence: entry.sentence ?? (key === 'sentences' ? word : '')};
+      }).filter(entry => entry && typeof entry.word === 'string' && entry.word.trim())
+    );
+    return {...lesson, primaryLanguage: lesson.primaryLanguage || lesson.translationLanguage || 'en', words};
+  }
   // Send the payload only on explicit launch. A URL hash is not sent to servers.
   document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover').forEach(link => {
     link.addEventListener('click', () => {
       const url = new URL(link.href);
-      if (activeLesson) url.hash = 'golingoLesson=' + encodeURIComponent(JSON.stringify(activeLesson));
-      else if (url.hash.startsWith('#golingoLesson=')) url.hash = '';
+      const lessonKey = link.dataset.lessonKey === 'data' ? 'data' : 'golingoLesson';
+      if (activeLesson) url.hash = lessonKey + '=' + encodeURIComponent(JSON.stringify(launchLessonPayload(activeLesson, link.dataset.lessonFormat)));
+      else if (url.hash.startsWith('#' + lessonKey + '=')) url.hash = '';
       link.href = url.toString();
       link.target = '_self'; // WKWebView: reuse the existing page, never create an unhandled new tab.
     });
@@ -197,5 +213,6 @@
   video.addEventListener('error', () => { if (video.getAttribute('src')) document.getElementById('video-error').hidden = false; });
   document.querySelectorAll('img').forEach(image => image.addEventListener('error', () => image.classList.add('image-unavailable')));
 })();
+
 
 
