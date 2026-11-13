@@ -167,3 +167,20 @@
   .fallback-mode .word-translation{font-size:12px}
   .fallback-mode .word-card-footer{display:none}
 }
+/* V13: labels are game controls, not selectable document text. Explicit child
+   rules also cover Safari/WKWebView, dynamic word lists and the 2D fallback. */
+html,body,#game,#game *{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
+#game img,#game canvas,#game video{-webkit-user-drag:none}
+/* Actual text-entry fields remain editable; keyboard focus rings stay intact. */
+#game input,#game textarea,
+#game [contenteditable="true"],#game [contenteditable="plaintext-only"],
+#game [contenteditable="true"] *,#game [contenteditable="plaintext-only"] *{
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+}

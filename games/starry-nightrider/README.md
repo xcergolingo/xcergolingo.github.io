@@ -2,7 +2,7 @@
 
 An original, free-roaming Three.js r170 bicycle game inspired by the public-domain painting *The Starry Night* (1889). It opens with an eight-second original animated painting video; **tap Ride Now** to begin with sound. Explore an interconnected painterly region, collect luminous vocabulary orbs, find stardust speed rings, and return to the church's golden beam to bank points. The 3D world, buildings, cypresses, bike and rider are procedural, with custom painted material textures. The swirling sky uses an original panoramic illustration.
 
-**Version 12 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. This update replaces the faceted hills with continuous smooth blue ridges, gives all roads and the square consistent world-space paving, removes raised lines across junctions, softens field edges and gradients, and refines the skinny cyclist with smooth connected limbs and damped leaning. It preserves the detailed village houses, tall sunflowers, tap-to-start audio, large steering wheel, jump/trick controls, GoLingo data bridge, collection, and delivery game loop.
+**Version 13 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. Text selection, tap highlighting and long-press callouts are disabled throughout the game UI, including labels, words, menus and controls. Text-entry fields and keyboard focus indicators remain usable, and the Copy Words button still works. This focused interaction update preserves v12's smooth landscape, paving, fields and cyclist, plus all existing audio and gameplay features.
 
 ## Run it
 
@@ -80,6 +80,7 @@ In WKWebView you may also call `window.loadGoLingoWords(myData)` with properly J
 ## Project files
 
 - `dist/index.html` — markup, controls and WebGL fallback loader.
+- `dist/interaction-guard.js` — shared selection/long-press protection for both renderers.
 - `dist/styles.css` — adaptive HUD and mobile layout.
 - `dist/game-3d.js` — fully commented Three.js world, bicycle, collectibles, camera, physics, language audio and UI.
 - `dist/rider-model.js` — reusable slim cyclist/bicycle model and pedal animation.
@@ -105,4 +106,4 @@ This is an original game adaptation, not a copy of the reference site's source o
 
 ## Verification
 
-`node tests/game-smoke.mjs` and `node tests/game-smoke.mjs --desktop` exercise 40 source-level gameplay/audio checks with real Three.js models and a mocked browser renderer. `node tests/landscape-smoke.mjs` and `node tests/road-smoke.mjs` verify geometry and surface consistency. `tests/chase-preview.mjs` produces a native CPU geometry preview; it is not a browser screenshot or performance test. `node tests/bake-ground-textures.mjs` deterministically regenerates the two v12 ground assets offline.
+`node tests/game-smoke.mjs` and `node tests/game-smoke.mjs --desktop` exercise 40 source-level gameplay/audio checks with real Three.js models and a mocked browser renderer. `node tests/interaction-guard-smoke.mjs` verifies selection prevention without blocking native editing or gameplay input. `node tests/landscape-smoke.mjs` and `node tests/road-smoke.mjs` verify geometry and surface consistency. `tests/chase-preview.mjs` produces a native CPU geometry preview; it is not a browser screenshot or performance test. `node tests/bake-ground-textures.mjs` deterministically regenerates the two v12 ground assets offline.

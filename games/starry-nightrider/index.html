@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=12">
+  <link rel="stylesheet" href="./styles.css?v=13">
 </head>
 <body>
   <main id="game" aria-label="Starry Nightrider 3D language learning game">
@@ -20,7 +20,7 @@
     <header class="hud" id="hud">
       <div class="brand" aria-label="GoLingo Starry Word Rider">
         <span class="brand-stars">✳</span>
-        <span><strong>GoLingo</strong><small id="engineLabel">STARRY NIGHTRIDER · 3D · V12</small></span>
+        <span><strong>GoLingo</strong><small id="engineLabel">STARRY NIGHTRIDER · 3D · V13</small></span>
       </div>
       <div class="hud-center">
         <div class="stat"><span class="stat-icon">✦</span><span id="wordCount">0</span><small>IN YOUR BAG</small></div>
@@ -134,6 +134,8 @@
     <div class="landscape-suggestion" id="landscapeSuggestion">↻ &nbsp; For the widest view, rotate your phone</div>
   </main>
   <script type="module">
+    import {installGameInteractionGuards} from './interaction-guard.js?v=13';
+    installGameInteractionGuards(document.getElementById('game'));
     // Loading the real 3D game is the default. The original canvas adventure
     // remains playable when a device lacks WebGL 2 support.
     let fallbackLoaded = false;
@@ -149,7 +151,7 @@
       document.body.appendChild(script);
       const hint = document.querySelector('#missionNote span:last-child');
       if (hint) hint.textContent = '2D compatibility mode: this browser cannot display the new 3D models.';
-      document.getElementById('engineLabel').textContent = 'STARRY NIGHTRIDER · 2D · V12';
+      document.getElementById('engineLabel').textContent = 'STARRY NIGHTRIDER · 2D · V13';
       document.body.classList.add('fallback-mode');
     };
     window.addEventListener('starry:webgl-unavailable', loadFallback, {once:true});
