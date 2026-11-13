@@ -1,0 +1,52 @@
+/* Small, tactile improvements around the pitch. */
+#goalLabels{position:static;inset:auto;display:grid;grid-template-columns:repeat(var(--choice-count,3),minmax(0,1fr));gap:4px;margin:9px 0 3px;pointer-events:auto}
+#goalLabels .goal-label{position:static;inset:auto;transform:none;width:100%;min-width:0;max-width:none;padding:7px 4px 6px;border:1px solid #cad8cb;border-radius:6px;box-shadow:0 2px 0 #17343e14;white-space:normal}
+#goalLabels .goal-label:after{display:none}
+#goalLabels .goal-label b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;white-space:normal;max-width:none;min-height:2.3em;font-size:11px;line-height:1.15;letter-spacing:0}
+#goalLabels .goal-label small{display:block;font-size:5px;letter-spacing:.4px;line-height:1.3;margin-top:4px}
+#goalLabels .goal-label.active{border-color:#749c73;background:#e2edc6}
+.word-hidden #goalLabels{visibility:visible;pointer-events:auto}
+#challengeName{background:transparent;padding:0;text-align:left;border-bottom:1px solid #ffffff55;padding-bottom:2px;pointer-events:auto}
+#challengeName:hover{color:#ffe7a9;border-color:#ffe7a9}
+#puzzleBest{color:#f5db8b;font-size:10px;letter-spacing:1px;line-height:1;text-shadow:0 1px 4px #102c35}
+.power-meter{height:5px;position:relative;margin-top:7px;background:#d3dcd2;border:1px solid #c5cebd55}
+.power-meter i{background:linear-gradient(90deg,#3b9284,#b7bc67 66%,#e4b863);border-radius:2px}
+#chargeHint{font-size:7px;font-weight:800;letter-spacing:.35px;text-align:center;color:#64776e;margin-top:7px;line-height:1.2;white-space:nowrap}
+.shoot-btn{touch-action:none;-webkit-touch-callout:none}
+.charging .shot-console{border-color:#f1d184;box-shadow:0 0 0 2px #f1d18499,0 6px 28px #17343e20}
+.charging .power-meter{height:8px}.charging .power-meter i{transition:none}
+.charging .shoot-btn{background:#f6db83;box-shadow:0 1px 0 #b59c5b;transform:translateY(2px)}
+.charging #chargeHint{color:#8d5e18}
+.replay-btn{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;margin-top:9px;padding:6px 2px 1px;background:transparent;color:#3a605f;font-size:8px;font-weight:850;letter-spacing:.6px;border-top:1px solid #d5decf}
+.replay-btn svg{width:14px;height:14px}
+#replayRibbon{position:absolute;left:50%;top:115px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;border:1px solid #f3df9c70;border-radius:6px;background:#15383eee;color:#fff6d6;font-size:9px;font-weight:850;letter-spacing:1px;padding:9px 12px;white-space:nowrap;box-shadow:0 2px 15px #102d3933;pointer-events:none}
+#replayRibbon i{width:6px;height:6px;display:block;background:#f3c66b;border-radius:50%}#replayRibbon span{border-left:1px solid #ffffff35;padding-left:8px;font-size:7px;opacity:.8;letter-spacing:.6px}
+.replaying .goal-label{opacity:.65;pointer-events:none}.replaying .shot-console{border-color:#f0d88799}.replaying #aimHint{opacity:0!important}
+.challenge-launch{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#e7ece0;border:1px solid #dce3d2;border-radius:7px;width:100%;padding:10px 11px;margin:10px 0 0;color:#365650;font-size:9px;letter-spacing:.4px;font-weight:850}
+.challenge-launch>span{display:flex;align-items:center;gap:7px}.challenge-launch svg{height:15px;width:15px;color:#8f7540;stroke-width:1.6}.challenge-launch b{font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#667657}
+.challenge-modal{width:min(700px,calc(100vw - 28px));max-width:700px;max-height:88dvh;padding:27px;background:#f7f6ed;overscroll-behavior:contain}
+.challenge-modal .modal-heading{margin-bottom:8px}.challenge-modal .modal-heading h2{font-size:29px;letter-spacing:-1px}.challenge-modal .modal-heading small{font-size:8px;letter-spacing:1.4px;color:#738166}
+.challenge-intro{font-size:12px;color:#637268;margin:2px 0 17px;line-height:1.4}
+.challenge-summary{padding:10px 12px;background:#e8ecdc;border-radius:8px;color:#536744;font-size:11px;font-weight:750;margin-bottom:14px}
+.challenge-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.challenge-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:119px;padding:11px 10px 9px;background:linear-gradient(150deg,#ffffff,#eef0e7);border:1px solid #dce2d4;border-radius:10px;box-shadow:0 2px 0 #d8e0cf55;overflow:hidden;transition:border-color .15s,background .15s}
+.challenge-card:before{content:'';position:absolute;right:-8px;top:-15px;width:62px;height:62px;border:1px solid #d4decf;border-radius:50%;pointer-events:none}
+.challenge-card.venue-1{background:linear-gradient(150deg,#f8faf3,#e5eddf)}.challenge-card.venue-2{background:linear-gradient(150deg,#f8f8f3,#e4e9e7)}
+.challenge-card.selected{border:2px solid #487971;padding:10px 9px 8px;background:#e2eddf}.challenge-card:hover{border-color:#89a48a}
+.challenge-number{font-size:23px;font-weight:900;letter-spacing:-1px;line-height:1.1;color:#28554e}.challenge-card small{position:absolute;right:9px;top:15px;font-size:5px;letter-spacing:.5px;color:#7b8878;font-weight:900}
+.challenge-title{font-size:10px;font-weight:850;line-height:1.25;margin:9px 0 7px;min-height:25px;max-width:95%}.challenge-stars{font-size:14px;letter-spacing:2px;color:#b2b9a3;line-height:1;margin-top:auto}.completed .challenge-stars{color:#a8822d}
+.challenge-footnote{font-size:9px;line-height:1.6;color:#788574;margin:15px 0 0;text-align:center}
+#openChallengesBtn{margin-top:10px}
+@media(max-width:600px) and (orientation:portrait){
+ .power-meter{height:4px;margin-top:6px}.charging .power-meter{height:6px}#chargeHint{font-size:5px;letter-spacing:.25px;margin-top:6px}.shoot-btn{height:39px}
+ #puzzleBest{font-size:8px;letter-spacing:.7px}.skill-strip{column-gap:5px}#bonusLabel{font-size:4px;letter-spacing:.35px}
+ .replay-btn{font-size:6px;gap:4px;margin-top:7px;padding-top:5px}.replay-btn svg{width:12px;height:12px}
+ #replayRibbon{top:116px;padding:7px 10px;font-size:8px;gap:6px;letter-spacing:.7px}#replayRibbon span{font-size:6px;padding-left:6px}
+ .challenge-launch{padding:8px 9px;margin-top:8px;font-size:7px}.challenge-launch svg{height:12px;width:12px}.challenge-launch b{font-size:8px}
+ .challenge-modal{width:calc(100vw - 24px);padding:18px;max-height:90dvh}.challenge-modal .modal-heading h2{font-size:24px}.challenge-intro{font-size:10px;margin-bottom:12px}.challenge-summary{font-size:10px;padding:9px 10px}.challenge-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.challenge-card{min-height:111px;padding:10px 8px 8px}.challenge-card.selected{padding:9px 7px 7px}.challenge-card small{font-size:4px;right:7px;top:14px}.challenge-number{font-size:22px}.challenge-title{font-size:9px;min-height:24px}.challenge-stars{font-size:13px;letter-spacing:1px}
+}
+@media(max-height:540px) and (orientation:landscape){
+ #chargeHint{font-size:5px;margin-top:5px}.power-meter{height:3px}.charging .power-meter{height:5px}.replay-btn{font-size:6px;margin-top:6px;padding-top:4px}.replay-btn svg{width:11px;height:11px}#puzzleBest{font-size:8px}
+ #replayRibbon{top:70px;padding:7px 10px;font-size:8px}.challenge-launch{padding:6px 8px;margin-top:7px;font-size:7px}.challenge-launch svg{width:12px;height:12px}.challenge-launch b{font-size:8px}.challenge-modal{padding:20px;max-height:90dvh}.challenge-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.challenge-card{min-height:112px}.challenge-card small{font-size:4px}.challenge-title{font-size:9px}.challenge-modal .modal-heading h2{font-size:24px}
+}
+@media(prefers-reduced-motion:reduce){.challenge-card{transition:none}}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#112b35">
+  <meta name="description" content="Drive, curl, and chip through 24 soccer challenges. Athletic players, precision targets, and language learning with your own GoLingo vocabulary.">
+  <title>GoLingo Goal Club — Bend it. Say it. Score it.</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./v2.css">
+  <link rel="stylesheet" href="./v3.css">
+  <link rel="stylesheet" href="./v4.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="gameCanvas" aria-label="Soccer puzzle. Swipe a curved route from the ball toward the goal, then release to kick."></canvas>
+    <div class="screen-vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <button class="brand" id="homeBtn" title="Game menu" aria-label="Open game menu"><span class="brand-ball" aria-hidden="true">✦</span><span><small>GoLingo</small><b>GOAL CLUB</b></span></button>
+      <div class="match-status" id="matchStatus"><span class="live-dot"></span><span id="venueName">SUNNY PARK</span><span class="status-separator"></span><span id="stageNumber">SHOT 01</span></div>
+      <div class="header-actions">
+        <button class="icon-btn" id="audioBtn" aria-label="Mute sound" title="Sound"><svg viewBox="0 0 24 24"><path d="M11 4 6 8H3v8h3l5 4V4Z"/><path class="sound-wave" d="M15 8c2 2 2 6 0 8m3-11c4 4 4 10 0 14"/></svg></button>
+        <button class="icon-btn" id="hideBtn" aria-label="Hide word card" title="Hide word card"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="icon-btn" id="reviewBtn" aria-label="Open learned words" title="Learned words"><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 2 1 3 3 0 0 1 2-1h6v15h-6a3 3 0 0 0-2 1 3 3 0 0 0-2-1H4V4Zm8 1v15"/></svg><span id="reviewBadge">0</span></button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Open settings" title="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg></button>
+        <button class="icon-btn" id="pauseBtn" aria-label="Pause game" title="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+      </div>
+    </header>
+    <main id="playUI" hidden>
+      <div class="round-strip"><span id="modePill">LEARN & PLAY</span><div class="round-dots" id="roundDots" aria-label="Round progress"></div><span id="livesDisplay">● ● ● BALLS</span><span class="goals-total"><b id="goalsValue">0</b> GOALS</span></div>
+      <button id="challengeName" title="Choose a shooting puzzle" aria-label="Open shooting challenges">BREAK THE WALL</button>
+      <div class="skill-strip" id="skillStrip"><button id="difficultyBadge" title="Change difficulty">CHALLENGE</button><span id="shotClock" hidden>18.0s</span><span id="puzzleBest">☆☆☆</span><span id="bonusLabel">◎ PRECISION +150</span></div>
+      <div id="aimHint"><span class="hint-dot"></span><span id="hintText">Swipe a route from the ball and release to kick</span></div>
+      <div class="score-float" id="scoreFloat" aria-live="polite"></div>
+      <div id="replayRibbon" hidden><i></i> SHOT REPLAY <span>0.45× SLOW MOTION</span></div>
+      <div class="bottom-ui">
+        <section class="word-card" id="wordCard" aria-label="Current word">
+          <div class="word-meta"><span id="wordEyebrow">YOUR NEXT WORD</span><button class="mini-icon" id="speakBtn" aria-label="Hear the current word" title="Hear again"><svg viewBox="0 0 24 24"><path d="m8 5 12 7-12 7V5Z"/></svg></button></div>
+          <div class="word-main" id="wordMain">hola</div>
+          <div class="word-translation" id="wordTranslation">hello</div>
+          <div id="goalLabels" role="group" aria-label="Choose a word to aim at" aria-live="off" hidden></div>
+          <div class="word-sentence" id="wordSentence" hidden></div>
+          <div class="word-footer"><span id="languageLabel">SPANISH · 01 / 20</span><span id="repeatIndicator"><i></i> REPEAT ON</span></div>
+        </section>
+        <section class="shot-console" aria-label="Shot controls">
+          <div class="shot-styles" role="group" aria-label="Choose shot type"><button data-shot="drive" title="Low, fast drive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 16-9m-6-1 6 1-2 6M4 21h16"/></svg>Drive</button><button data-shot="curl" class="active" title="Curl around the wall"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19C21 19 22 5 9 5H5m4-4L5 5l4 4"/></svg>Curl</button><button data-shot="chip" title="Lift over low obstacles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18C5 2 18 2 21 18m-5-3 5 3 1-6M3 22h18"/></svg>Chip</button></div>
+          <div class="power-meter" aria-hidden="true"><i id="powerFill"></i></div>
+          <button id="tuneBtn" class="tune-btn" aria-expanded="false">Aim &amp; power <span id="powerValue">72%</span></button>
+          <div class="power-adjust"><label for="powerRange">SHOT POWER</label><input id="powerRange" type="range" min="35" max="100" value="72" step="1" aria-label="Shot power"></div>
+          <div class="bend-title"><label for="bendRange">BEND YOUR SHOT</label><button id="straightBtn">RESET <span>↺</span></button></div>
+          <div class="bend-control"><span aria-hidden="true">↶</span><input id="bendRange" type="range" min="-10" max="10" value="0" step="0.1" aria-label="Shot curve: left or right"><span aria-hidden="true">↷</span></div>
+          <button class="shoot-btn" id="shootBtn" aria-describedby="chargeHint"><span id="shootLabel">SHOOT</span><svg viewBox="0 0 24 24"><path d="M5 19 19 5M6 5h13v13"/></svg></button>
+          <div id="chargeHint">TAP KICK · HOLD FOR POWER</div>
+          <button id="replayBtn" class="replay-btn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8a8 8 0 1 1-1 7M5 3v5h5"/><path d="m10 9 5 3-5 3Z"/></svg> REPLAY SHOT</button>
+          <p class="control-note" id="controlNote">Drag to aim. Bend around the red team.</p>
+        </section>
+      </div>
+      <div class="small-score"><span id="scoreValue">0000</span><small>POINTS</small><span class="streak" id="streakValue"></span><small id="bestScore">BEST 0000</small></div>
+    </main>
+    <section id="startScreen" class="start-screen" aria-label="Welcome to Goal Club">
+      <div class="start-copy"><div class="edition"><span></span> GOLINGO · THE SKILL SHOT EDITION</div><h1>MAKE EVERY<br><em>SHOT COUNT.</em></h1><p>Drive it low. Bend the wall. Chip the keeper.<br>Earn your stars. Replay your best shots.</p></div>
+      <div class="start-panel">
+        <div class="panel-heading"><span class="club-tag">24 CHALLENGES · 3 SHOT TYPES</span><span class="tiny-ball" aria-hidden="true">⚽</span></div>
+        <div class="select-wrap"><label for="startLanguage">I WANT TO LEARN</label><select id="startLanguage"><option value="es">🇪🇸 Spanish</option><option value="ja">🇯🇵 Japanese</option><option value="zh">🇨🇳 Mandarin Chinese</option><option value="fr">🇫🇷 French</option><option value="ko">🇰🇷 Korean</option><option value="de">🇩🇪 German</option></select></div>
+        <div class="mode-tabs" role="group" aria-label="Choose a learning mode"><button data-mode="learn" class="active"><b>Learn</b><small>Hear & score</small></button><button data-mode="listen"><b>Listen</b><small>Find the word</small></button><button data-mode="meaning"><b>Match</b><small>Test meaning</small></button></div>
+        <p class="mode-description" id="modeDescription">Learn a word while solving a real shooting puzzle. Three balls per level.</p>
+        <div class="difficulty-start"><label for="startDifficulty">DIFFICULTY</label><select id="startDifficulty"><option value="practice">Practice · unlimited balls</option><option value="challenge" selected>Challenge · three balls</option><option value="pro">Pro · beat the clock</option></select></div>
+        <button class="primary-btn" id="startBtn">LET’S PLAY <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13"/></svg></button>
+        <button id="startChallengesBtn" class="challenge-launch"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9Z"/></svg> CHOOSE A CHALLENGE</span><b id="challengeCount">0 / 24</b></button>
+        <button class="text-btn" id="startImportBtn">Bring your own GoLingo words <span>＋</span></button>
+        <div class="ready-line" id="dataStatus"><span></span> 20 Spanish words ready to play</div>
+      </div>
+      <div class="start-bottom"><span>BEND IT. SAY IT. SCORE IT.</span><a href="https://www.golingoapp.com" target="_blank" rel="noopener">MADE FOR GOLINGO ↗</a></div>
+    </section>
+    <div id="toast" role="status"></div>
+    <dialog id="settingsDialog" class="modal">
+      <div class="modal-heading"><div><small>MAKE IT YOUR GAME</small><h2>Club settings</h2></div><button class="close-btn" data-close aria-label="Close settings">×</button></div>
+      <label class="field-label" for="settingsLanguage">Learning language</label><select id="settingsLanguage"><option value="es">Spanish</option><option value="ja">Japanese</option><option value="zh">Mandarin Chinese</option><option value="fr">French</option><option value="ko">Korean</option><option value="de">German</option></select>
+      <label class="field-label" for="settingsMode">Play mode</label><select id="settingsMode"><option value="learn">Learn — hear, shoot, repeat</option><option value="listen">Listen — find the word you hear</option><option value="meaning">Match — find the word for its meaning</option></select>
+      <label class="field-label" for="stageSelect">Choose a shooting puzzle</label><select id="stageSelect"></select>
+      <button class="secondary-btn" id="openChallengesBtn">Challenge board <span>★</span></button>
+      <label class="toggle-row"><span><b>Sound and pronunciation</b><small>Hear your words and goal celebrations</small></span><input id="soundToggle" type="checkbox" checked></label>
+      <label class="toggle-row"><span><b>Repeat until the next word</b><small>Keep listening while you line up your shot</small></span><input id="repeatToggle" type="checkbox" checked></label>
+      <label class="toggle-row"><span><b>Show translation</b><small>Keep a little help on the word card</small></span><input id="translationToggle" type="checkbox" checked></label>
+      <label class="field-label" for="difficultySelect">Difficulty</label><select id="difficultySelect"><option value="practice">Practice — unlimited balls, slower guards</option><option value="challenge">Challenge — three balls, full route guide</option><option value="pro">Pro — 18 seconds, faster guards, shorter guide</option></select><input id="easyToggle" type="checkbox" hidden>
+      <label class="toggle-row"><span><b>Automatically continue after a goal</b><small>Keep the next shooting challenge coming</small></span><input id="autoToggle" type="checkbox" checked></label>
+      <button class="secondary-btn" id="openImportBtn">Import your word list <span>＋</span></button>
+      <button class="secondary-btn" id="fullscreenBtn">Full screen <span>⤢</span></button>
+      <p class="modal-note">Swipe from the ball toward the goal. Curve around obstacles and release to kick. Drag elsewhere to adjust aim and bend, or use Aim &amp; power + Kick.<br>Tap Kick at the selected power, or hold it and release to choose power in the moment. Drive stays low, Curl bends through a medium arc, and Chip lifts over low obstacles. Too much power can send a chip over the bar.<br>Replay any completed shot in slow motion. Best stars are saved separately for each difficulty and learning mode: three stars on your first attempt, two on your second, one after that.<br>Keyboard: ← → aim · A / D bend · 1 / 2 / 3 shot type · Space kick · P pause.<br>Challenge: three balls for three shots. Miss all three and restart that level.</p>
+    </dialog>
+    <dialog id="challengeDialog" class="modal challenge-modal">
+      <div class="modal-heading"><div><small id="challengeMode">CHALLENGE · LEARN</small><h2>Your next great shot.</h2></div><button class="close-btn" data-close aria-label="Close challenges">×</button></div>
+      <p class="challenge-intro">Choose any puzzle. Come back for all three stars.</p>
+      <div id="challengeSummary" class="challenge-summary">0 / 24 completed · 0 / 72 stars</div>
+      <div id="challengeGrid" class="challenge-grid"></div>
+      <p class="challenge-footnote">3 stars: first attempt · 2 stars: second · 1 star: keep trying.<br>Your best results stay saved on this device.</p>
+    </dialog>
+    <dialog id="importDialog" class="modal">
+      <div class="modal-heading"><div><small>YOUR WORDS, YOUR GAME</small><h2>Bring your vocabulary</h2></div><button class="close-btn" data-close aria-label="Close import">×</button></div>
+      <p class="import-description">Load a GoLingo JSON word list, or paste it below. Your own audio is supported too.</p>
+      <label class="file-picker">Choose a JSON file<input type="file" id="fileInput" accept=".json,application/json"></label>
+      <label class="field-label" for="jsonInput">Or paste your list</label><textarea id="jsonInput" rows="6" spellcheck="false" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"word":"水","translation":"water","sentence":"水を飲みます。"}]}'></textarea>
+      <p id="importError" role="alert"></p><button class="primary-btn" id="importBtn">LOAD WORDS <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13"/></svg></button>
+    </dialog>
+    <dialog id="reviewDialog" class="modal review-modal">
+      <div class="modal-heading"><div><small>EVERY GOAL COUNTS</small><h2>Your word collection</h2></div><button class="close-btn" data-close aria-label="Close learned words">×</button></div>
+      <p class="review-count" id="reviewCount"></p><div id="reviewList"></div><button class="primary-btn" id="exportBtn">EXPORT LEARNED WORDS <span>↓</span></button>
+    </dialog>
+    <dialog id="pauseDialog" class="modal pause-modal"><span class="pause-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></svg></span><h2>Take a breather.</h2><p>Your next great shot can wait.</p><button class="primary-btn" id="resumeBtn">BACK TO THE PITCH <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13"/></svg></button><button class="text-btn" id="menuBtn">Return to club menu</button></dialog>
+    <div id="loading"><span class="loading-ball">⚽</span><p>Warming up the pitch…</p></div>
+    <noscript>Please enable JavaScript to play GoLingo Goal Club.</noscript>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
