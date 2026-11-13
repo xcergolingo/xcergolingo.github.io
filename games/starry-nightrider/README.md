@@ -1,8 +1,8 @@
 # Starry Nightrider — GoLingo
 
-An original, free-roaming Three.js r170 bicycle game inspired by the public-domain painting *The Starry Night* (1889). It opens with an eight-second original animated painting video and automatically becomes a ride (or tap **Ride Now** to skip). Explore an interconnected 600 m painterly region, collect luminous vocabulary orbs, find stardust speed rings, and return to the church's golden beam to bank points. The 3D world, buildings, cypresses, bike and rider are procedural, with custom painted material textures. The swirling sky uses an original panoramic illustration.
+An original, free-roaming Three.js r170 bicycle game inspired by the public-domain painting *The Starry Night* (1889). It opens with an eight-second original animated painting video; **tap Ride Now** to begin with sound. Explore an interconnected painterly region, collect luminous vocabulary orbs, find stardust speed rings, and return to the church's golden beam to bank points. The 3D world, buildings, cypresses, bike and rider are procedural, with custom painted material textures. The swirling sky uses an original panoramic illustration.
 
-**Version 10 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. The v9 build added new brush-painted cobbles, meadow textures, close-set multicolored homes, window frames/shutters/chimneys, and spatially culled detail batches. This update adds much larger steering controls, a more animated textured cyclist, café terraces near the starting lane, and discoverable moonlight launch pads.
+**Version 11 / GitHub release:** `https://xcergolingo.github.io/games/starry-nightrider/`. This update replaces the cyclist and house models, composes close-set village streets beside broad curved golden/green fields, adds tall recognizable sunflowers, and fixes tap-to-start audio. It keeps the large steering wheel, jump/trick controls, GoLingo data bridge, collection, and delivery game loop.
 
 ## Run it
 
@@ -33,19 +33,23 @@ Mobile has a forgiving, one-thumb **analogue joystick** to steer. Version 10 inc
 
 The steering touch target explicitly receives pointer events in iPhone Safari/WKWebView, captures your thumb for the duration of a drag, and releases safely when interrupted. Hold and slide your thumb **left to turn left** or **right to turn right**. The cyclist has a painted cobalt coat texture, articulated sleeves, animated flapping coat tails, speed-sensitive shoulder posture, dark trousers, realistic pedal timing, reddish hair and beard, a detailed straw hat, a leather satchel, and a wind-animated scarf. The mobile chase camera sits closer so these details are visible.
 
-The top **Voice On / Voice Off** switch mutes automatic vocabulary speech without muting collectible sound effects. In Pause settings, turn off repeat, toggle the word voice, or choose 1.2, 2.2 (default), 3.2, or 4.8 seconds between pronunciations. A muted word can still be spoken manually by tapping it. Preferences are saved locally.
+The top **Audio On / Audio Off** control manages original quiet riding ambience, wheel/wind sounds and bells. **Voice On / Voice Off** independently manages vocabulary speech. Play and Resume explicitly resume the audio context inside the user's tap; the first word is spoken immediately from Play, without waiting for a pickup or timer. The muted intro no longer starts the game without a gesture. In Pause, **Test sound** plays a two-note bell and **Test word voice** tries the current learning word. A blocked audio/voice state is reported instead of silently claiming playback. Check phone media volume and Silent Mode if the sound test remains inaudible.
+
+Pause settings also offer 1.2, 2.2 (default), 3.2, or 4.8 seconds between pronunciations. A muted word can still be spoken manually by tapping it. Preferences are saved locally. Audio pauses when the game is paused or the tab is hidden. Sound uses a bounded pool of reusable audio nodes, not a new oscillator per frame. The soundscape is original and does not reuse the reference video's soundtrack.
 
 ## Mobile performance and painterly detail
 
 The village retains its connected lanes and seven explorable districts, with glowing street-lamp pools, golden hanging lanterns and wildflower meadows. The v9 compressed WebP textures use **fine hand-painted pink-lilac cobbles** with visible strokes, warm olive-colored meadow grass, more neutral irregular limestone walls and muted red tiled roofing. UV-mapped gables, half-timbered facades, instanced shutters and window frames give the village a more colorful, lived-in look. Version 10 adds detailed cottages near the spawn point and a warm outdoor café with parasols and tables.
 
-Repeated buildings, roofs, window frames, lamp posts, cypress trees, meadows, distant hills, orchard trunks/canopies and most chapel sparkles use GPU instancing. Stars use one point-cloud draw instead of dozens of individual glow sprites. **All glowing vocabulary orbs share just three GPU-instanced meshes** (sphere, halo and ring) instead of requiring three separate draw objects per orb. Distant word labels are generated only when needed. Version 9 spreads denser homes across all road districts (196 on mobile vs 100 before; 292 on desktop vs 174 before). It groups static buildings into spatial GPU batches, so those outside the camera can be culled. The automated v10 mobile scene inspection finds 440 mesh objects / 255,430 indexed triangles in total, but only 274 objects are visible at the starting view. These are scene-structure measurements, not measured iPhone frame rates.
+Repeated buildings, roofs, window frames, lamp posts, cypress trees, meadows, distant hills, orchard trunks/canopies and most chapel sparkles use GPU instancing. Stars use one point-cloud draw instead of dozens of individual glow sprites. **All glowing vocabulary orbs share just three GPU-instanced meshes** (sphere, halo and ring) instead of requiring three separate draw objects per orb. Distant word labels are generated only when needed. The v11 village uses fewer, more carefully placed detailed homes rather than scattered identical boxes. Static architecture is grouped by geometry/material and spatial block, allowing off-camera blocks to be culled. Sunflower heads, stalks and leaves are also instanced by field block.
+
+The replacement cyclist has a narrow tapered coat, smaller head and boater hat, a slim leather satchel, long thin articulated limbs, speed-linked pedal rotation, fixed handlebar hands and a thin vintage bicycle. Five house variants provide separate wall-colored gables, steep red/clay/slate roof slopes, multi-storey windows, shutters, sills, chimneys, occasional dormers and café awnings. Native model renders and structural tests are useful checks, but are not a measured frame rate or visual test on a physical iPhone.
 
 The scene uses two static point lights plus the bicycle spotlight, moonlight and hemispherical ambient light; costly dynamic shadow maps are disabled. Mobile stone and roof surfaces use lightweight unlit paint materials. The 3D frame is only drawn occasionally while the cinematic or pause menu covers the scene. During active rides an automatic resolution scaler reduces pixel ratio if the frame rate drops. On browsers without WebGL 2, the illustrated 2D fallback now uses the refined street, house and roof textures, caches the still background, draws paving in one clipped image pass, and uses a reduced mobile pixel ratio and paced redraws. Performance depends on the device; the exact frame rate has not been measured on a physical iPhone.
 
 ## Game loop
 
-1. Watch or skip the cinematic opening. Explore the winding central village, market, vineyard, windmill ridge, orchard, lantern-lined lanes, and moonlit canal; use the circular minimap to navigate.
+1. Tap Ride Now during or after the cinematic opening to activate sound. Explore the winding central village, sunflower fields, market, vineyard, windmill ridge, orchard, lantern-lined lanes, and moonlit canal; use the circular minimap to navigate.
 2. Collect the glowing orbs. Each speaks its assigned learning-language word and repeats until the next word is collected.
 3. Ride into the church's golden beam to deposit orbs and score 10 points each. An example sentence is spoken at delivery when available.
 4. Ride through magical stardust rings for speed boosts and bonus points. Look for **13 glowing turquoise moonlight circles** along the roads: biking through one launches the cyclist skyward and awards +8 points. Visit new districts for exploration points and earn style points for mid-air tricks.
@@ -78,6 +82,10 @@ In WKWebView you may also call `window.loadGoLingoWords(myData)` with properly J
 - `dist/index.html` — markup, controls and WebGL fallback loader.
 - `dist/styles.css` — adaptive HUD and mobile layout.
 - `dist/game-3d.js` — fully commented Three.js world, bicycle, collectibles, camera, physics, language audio and UI.
+- `dist/rider-model.js` — reusable slim cyclist/bicycle model and pedal animation.
+- `dist/village-models.js` — five reusable, batchable detailed house models.
+- `dist/countryside.js` — painted cultivated fields and instanced tall sunflowers.
+- `dist/audio-engine.js` — mobile-gesture-aware original riding soundscape.
 - `dist/fallback.js` — previous canvas game for devices without WebGL 2.
 - `dist/assets/starry-sky.webp` — generated original painterly panorama.
 - `dist/assets/starry-intro.mp4` — original eight-second cinematic (muted autoplay with skip).

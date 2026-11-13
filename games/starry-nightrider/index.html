@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=10">
+  <link rel="stylesheet" href="./styles.css?v=11">
 </head>
 <body>
   <main id="game" aria-label="Starry Nightrider 3D language learning game">
@@ -20,7 +20,7 @@
     <header class="hud" id="hud">
       <div class="brand" aria-label="GoLingo Starry Word Rider">
         <span class="brand-stars">✳</span>
-        <span><strong>GoLingo</strong><small>STARRY NIGHTRIDER · 3D</small></span>
+        <span><strong>GoLingo</strong><small id="engineLabel">STARRY NIGHTRIDER · 3D · V11</small></span>
       </div>
       <div class="hud-center">
         <div class="stat"><span class="stat-icon">✦</span><span id="wordCount">0</span><small>IN YOUR BAG</small></div>
@@ -31,6 +31,7 @@
         </div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn ambience-btn" id="ambienceBtn" type="button" aria-label="Enable riding sounds" title="Riding ambience and bell"><span>♪</span><small id="ambienceState">TAP FOR AUDIO</small></button>
         <button class="icon-btn voice-btn" id="soundBtn" type="button" aria-label="Turn off word pronunciation" title="Turn off word pronunciation"><span id="voiceIcon">♫</span><small id="voiceState">VOICE ON</small></button>
         <button class="icon-btn" id="hideBtn" type="button" aria-label="Hide word card" title="Hide word card">◉</button>
         <button class="icon-btn" id="bookBtn" type="button" aria-label="Open word collection" title="Word collection">▤<span class="tiny-dot" id="bookDot"></span></button>
@@ -72,7 +73,7 @@
         <div class="intro-eyebrow">A GOLINGO 3D PAINTING ADVENTURE <span>✷</span> OPEN WORLD</div>
         <div class="intro-artline"><span>✦</span><span class="line"></span><span>✦</span></div>
         <h1 id="introTitle">Starry<br><em>Nightrider</em></h1>
-        <p class="intro-lede">Watch the stars awaken, then ride into the painting. Discover winding villages, secret paths, glowing words and magical jumps.</p>
+        <p class="intro-lede">Ride past glowing village windows and tall sunflowers, through golden fields under a painted sky. Collect words, jump, and explore at your own pace.</p>
         <label class="language-select-label" for="languageSelect">YOUR LEARNING LANGUAGE</label>
         <div class="select-wrap"><select id="languageSelect" aria-label="Choose learning language">
           <option value="es">Español · Spanish</option>
@@ -84,9 +85,9 @@
         </select><span>⌄</span></div>
         <button type="button" id="startBtn" class="start-btn">RIDE NOW <span>↗</span></button>
         <div class="intro-progress"><span id="introProgress"></span></div>
-        <div class="intro-small">The cinematic starts your ride automatically · Touch joystick to steer · No time limit</div>
+        <div class="intro-small">Tap RIDE NOW to start with sound · Drag the large wheel to steer · No time limit</div>
       </section>
-      <button type="button" class="intro-skip" id="skipIntroBtn">SKIP INTRO →</button>
+      <button type="button" class="intro-skip" id="skipIntroBtn">RIDE WITH SOUND →</button>
       <div class="art-credit">Inspired by Vincent van Gogh's <em>The Starry Night</em> (1889)</div>
     </div>
 
@@ -101,6 +102,9 @@
         <button type="button" class="modal-secondary" id="finishBtn">Finish ride · See score</button>
         <div class="settings-row"><label><input type="checkbox" id="repeatToggle" checked> Repeat pronunciation</label></div>
         <div class="settings-row"><label><input type="checkbox" id="voiceToggle" checked> Automatic word voice</label><small class="settings-hint">Turn this off to ride quietly. Tap a word to hear it once.</small></div>
+        <div class="settings-row"><label><input type="checkbox" id="ambienceToggle" checked> Riding sounds and gentle music</label><small class="settings-hint">Wind, bicycle rolling, bells and a quiet original soundscape. Separate from spoken words.</small></div>
+        <div class="audio-tests"><button type="button" class="modal-secondary" id="testAudioBtn">TEST SOUND ♪</button><button type="button" class="modal-secondary" id="testVoiceBtn">TEST WORD VOICE ↻</button></div>
+        <p class="audio-status" id="audioStatus" role="status">Tap Ride to activate sound. If it is still silent, check media volume and the phone's Silent Mode.</p>
         <div class="settings-row"><label for="speechGapSelect">Pause between pronunciations</label><select id="speechGapSelect" class="settings-select"><option value="1200">1.2 seconds</option><option value="2200" selected>2.2 seconds</option><option value="3200">3.2 seconds</option><option value="4800">4.8 seconds</option></select></div>
         <div class="settings-row"><label><input type="checkbox" id="autorideToggle"> Auto-pedal (relaxed mode)</label></div>
         <div class="settings-row"><label><input type="checkbox" id="meaningToggle" checked> Show translations</label></div>
@@ -141,15 +145,16 @@
       const freshCanvas = oldCanvas.cloneNode(false);
       oldCanvas.replaceWith(freshCanvas);
       const script = document.createElement('script');
-      script.src = './fallback.js?v=10';
+      script.src = './fallback.js?v=11';
       document.body.appendChild(script);
       const hint = document.querySelector('#missionNote span:last-child');
-      if (hint) hint.textContent = 'Low-graphics mode: ride through the painting and collect words.';
+      if (hint) hint.textContent = '2D compatibility mode: this browser cannot display the new 3D models.';
+      document.getElementById('engineLabel').textContent = 'STARRY NIGHTRIDER · 2D · V11';
       document.body.classList.add('fallback-mode');
     };
     window.addEventListener('starry:webgl-unavailable', loadFallback, {once:true});
     // Versioned URLs stop iOS WKWebView from reusing stale game code after an update.
-    try { await import('./game-3d.js?v=10'); }
+    try { await import('./game-3d.js?v=11'); }
     catch (error) { console.error('3D engine could not initialize:', error); loadFallback(); }
   </script>
 </body>

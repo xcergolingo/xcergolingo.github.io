@@ -51,11 +51,12 @@
   let importedLesson = null;
   let W = 0, H = 0, DPR = 1;
   let lastTime = performance.now();
-  let ambientCtx = null, ambientGain = null;
+  let rideAudio = null, voiceNotice = '', currentUtterance = null, sharedWordAudio = null;
   let utteranceTimer = null, voiceToken = 0, playingAudio = null;
   let particles = [], orbs = [], sceneObjects = [], groundMarks = [], screenOrbs = [];
   let orbitIndex = 0, nextOrbZ = 0, lastHudUpdate = 0, toastTimer = null, jumpToastTimer = null;
-  const keys = { left: false, right: false, forward: false, brake: false };
+  const keys = { left: false, right: false, forward: false, brake: false, joyX: 0, joyY: 0 };
+  let resetSteering = () => { keys.left=keys.right=keys.forward=keys.brake=false;keys.joyX=keys.joyY=0; };
 
   const state = {
     started: false, paused: false, z: 0, lane: 0, lean: 0, speed: 12,
@@ -66,8 +67,20 @@
   };
   try{
     state.audioOn=localStorage.getItem('golingoStarryVoice')!=='off';
+    state.fxOn=localStorage.getItem('golingoStarryAmbience')!=='off';
     state.speechGap=Number(localStorage.getItem('golingoStarrySpeechGap')||2200);
   }catch{}
+  try { sharedWordAudio = new Audio(); sharedWordAudio.preload = 'auto'; } catch {}
+  // Load the sound engine BEFORE accepting Play, so the eventual click calls
+  // AudioContext.resume and speech directly within its trusted gesture.
+  for (const id of ['startBtn','skipIntroBtn']) if ($(id)) $(id).disabled = true;
+  const audioReady = import('./audio-engine.js?v=11').then(({createRideAudio}) => {
+    rideAudio = createRideAudio({onStatus: updateSoundUi});
+    setAmbientVolume();
+  }).catch(() => {
+    voiceNotice = 'Game sound is unavailable here. Word pronunciation can still be tested below.';
+    updateSoundUi();
+  });
 
   function normalizeLesson(value) {
     if (typeof value === 'string') {
@@ -582,8 +595,10 @@
     $('pedalBtn').classList.toggle('is-off',!state.autoRide);
     $('hideBtn').classList.toggle('is-off',!state.showCard);
     $('soundBtn').classList.toggle('is-off',!state.audioOn);
+    $('soundBtn').setAttribute('aria-label',state.audioOn?'Turn off word pronunciation':'Turn on word pronunciation');
     $('voiceState').textContent=state.audioOn?'VOICE ON':'VOICE OFF';
     $('voiceIcon').textContent=state.audioOn?'♫':'♪';
+    updateSoundUi();
   }
 
   function updateWordCard() {
@@ -639,11 +654,12 @@
   function update(dt,time) {
     if(!state.started||state.paused)return;
     state.moment+=dt;
-    const turn=(keys.right?1:0)-(keys.left?1:0);
+    const turn=clamp((keys.right?1:0)-(keys.left?1:0)+keys.joyX,-1,1);
     let targetSpeed=state.autoRide?12.5:4.5;
-    if(keys.forward) targetSpeed=19.5;
-    if(keys.brake)targetSpeed=2.8;
-    state.speed=lerp(state.speed,targetSpeed,clamp(dt*(keys.brake?3:1.4),0,1));
+    if(keys.forward||keys.joyY<-.18) targetSpeed=19.5;
+    const braking=keys.brake||keys.joyY>.24;
+    if(braking)targetSpeed=2.8;
+    state.speed=lerp(state.speed,targetSpeed,clamp(dt*(braking?3:1.4),0,1));
     state.lane=clamp(state.lane+turn*dt*(3.4+state.speed*.27),-roadWidth*.43,roadWidth*.43);
     if(!turn)state.lane*=Math.pow(.99,dt*60);
     state.lean=lerp(state.lean,turn,clamp(dt*7,0,1));
@@ -665,6 +681,7 @@
   function frame(time) {
     const dt=clamp((time-lastTime)/1000,0,.045);lastTime=time;
     update(dt,time);
+    if(state.started&&!state.paused)rideAudio?.update(state.speed,time);
     // The 2D fallback used to repaint hundreds of vector details at full
     // retina resolution 60 times a second, even underneath the intro video.
     // Physics/input still update every rAF; only the expensive canvas paint
@@ -679,72 +696,98 @@
 
   function cancelPendingVoiceOnly() {
     if(utteranceTimer)clearTimeout(utteranceTimer);utteranceTimer=null;
-    if(playingAudio){try{playingAudio.pause();playingAudio.currentTime=0;}catch{}playingAudio=null;}
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    if(playingAudio){try{playingAudio.onended=null;playingAudio.onerror=null;playingAudio.pause();playingAudio.currentTime=0;}catch{}playingAudio=null;}
+    currentUtterance=null;
+    try{window.speechSynthesis?.cancel();}catch{}
   }
   function cancelSpeech() { voiceToken++;cancelPendingVoiceOnly(); }
 
   function speakOne(text,language,onDone,audioURL='',force=false) {
-    if((!state.audioOn&&!force) || !text || !state.started || state.paused){onDone?.();return;}
+    if((!state.audioOn&&!force) || !text || (!state.started&&!force) || (state.paused&&!force)){onDone?.(false);return;}
+    const token=voiceToken;let finished=false;
+    const done=ok=>{
+      if(finished||token!==voiceToken)return;finished=true;playingAudio=null;currentUtterance=null;
+      onDone?.(ok);
+    };
     if(audioURL) {
       try {
         const url=new URL(audioURL,location.href);
         if(['http:','https:','blob:','data:'].includes(url.protocol)){
-          const sound=new Audio(url.href);playingAudio=sound;sound.onended=()=>{playingAudio=null;onDone?.();};
-          sound.onerror=()=>{playingAudio=null;speakOne(text,language,onDone,'',force);};
-          sound.play().catch(()=>{playingAudio=null;speakOne(text,language,onDone,'',force);});return;
+          // Reuse the element activated by Play instead of creating a new,
+          // potentially autoplay-blocked media element for every word.
+          const sound=sharedWordAudio||(sharedWordAudio=new Audio());playingAudio=sound;sound.src=url.href;
+          sound.onended=()=>done(true);
+          const fallback=()=>{
+            if(finished||token!==voiceToken)return;finished=true;playingAudio=null;
+            sound.onended=null;sound.onerror=null;try{sound.pause();}catch{}
+            speakOne(text,language,onDone,'',force);
+          };
+          sound.onerror=fallback;
+          sound.play()?.catch?.(fallback);return;
         }
       }catch{}
     }
-    if(!('speechSynthesis' in window)){onDone?.();return;}
+    if(!window.speechSynthesis||typeof SpeechSynthesisUtterance==='undefined'){
+      voiceNotice='Word voice is unavailable in this browser. Try imported audio recordings or another browser.';
+      updateSoundUi();done(false);return;
+    }
     const u=new SpeechSynthesisUtterance(text);u.lang=getLocale(language);u.rate=.84;u.pitch=1.04;u.volume=.98;
-    const voices=window.speechSynthesis.getVoices();
+    let voices=[];try{voices=window.speechSynthesis.getVoices()||[];}catch{}
     const exact=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase());
     const prefix=voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.toLowerCase().split('-')[0]));
     if(exact||prefix)u.voice=exact||prefix;
-    u.onend=()=>onDone?.();u.onerror=()=>onDone?.();
-    try { window.speechSynthesis.speak(u); }catch{onDone?.();}
+    currentUtterance=u;
+    u.onstart=()=>{if(token===voiceToken){voiceNotice='';updateSoundUi();}};
+    u.onend=()=>done(true);
+    u.onerror=event=>{
+      if(token!==voiceToken)return;
+      voiceNotice=event.error==='not-allowed'?
+        'Tap Test Voice to enable pronunciation on this device.':
+        'Pronunciation could not play. Tap Test Voice; check your media volume and installed language voices.';
+      updateSoundUi();done(false);
+    };
+    try { window.speechSynthesis.resume();window.speechSynthesis.speak(u); }
+    catch{voiceNotice='Tap Test Voice to try pronunciation again.';updateSoundUi();done(false);}
   }
   function startWordLoop(item) {
     cancelSpeech();if(!item || !state.audioOn || !state.started||state.paused)return;
     const token=voiceToken;
     const step=()=>{
       if(token!==voiceToken||state.paused||!state.started||!state.audioOn)return;
-      speakOne(item.word,lesson.learningLanguage,()=>{
-        if(token!==voiceToken)return;
+      speakOne(item.word,lesson.learningLanguage,ok=>{
+        if(token!==voiceToken||ok===false)return;
         if(state.repeat) utteranceTimer=setTimeout(step,state.speechGap);
       },item.audioURL);
     };
     step();
   }
 
+  function updateSoundUi() {
+    const status=rideAudio?.status||'unavailable';
+    const labels={ready:'SOUND ON',locked:'TAP FOR SOUND',muted:'SOUND OFF',paused:state.started?'SOUND PAUSED':'SOUND READY',unavailable:'NO GAME SOUND',disposed:'SOUND OFF'};
+    if($('ambienceState'))$('ambienceState').textContent=labels[status]||'SOUND OFF';
+    if($('ambienceBtn')){
+      $('ambienceBtn').classList.toggle('is-off',!state.fxOn||status==='locked'||status==='unavailable');
+      $('ambienceBtn').setAttribute('aria-label',status==='locked'?'Enable game sound':state.fxOn?'Turn off music and effects':'Turn on music and effects');
+    }
+    if($('ambienceToggle'))$('ambienceToggle').checked=state.fxOn;
+    if($('audioStatus')){
+      const messages={ready:'Music and effects are ready. Word pronunciation has its own switch.',locked:'Tap Sound or Test Sound to enable audio on this device.',muted:'Music and effects are off. Word pronunciation is controlled separately.',paused:'Sound is paused with the ride. Test Sound still works here.',unavailable:'Game sound is unavailable in this browser. You can still test word pronunciation.'};
+      $('audioStatus').textContent=voiceNotice||messages[status]||'';
+    }
+  }
   function startAmbient() {
-    if(ambientCtx){ambientCtx.resume?.();return;}
-    const AC=window.AudioContext||window.webkitAudioContext;
-    if(!AC)return;
-    try {
-      ambientCtx=new AC();ambientGain=ambientCtx.createGain();ambientGain.gain.value=.012;
-      const lowPass=ambientCtx.createBiquadFilter();lowPass.type='lowpass';lowPass.frequency.value=430;
-      ambientGain.connect(lowPass);lowPass.connect(ambientCtx.destination);
-      for(const [hz,index] of [[130.81,0],[196,1],[261.63,2]]){
-        const osc=ambientCtx.createOscillator();osc.type=index===1?'sine':'triangle';osc.frequency.value=hz;
-        const gain=ambientCtx.createGain();gain.gain.value=[.32,.16,.09][index];osc.connect(gain);gain.connect(ambientGain);osc.start();
-      }
-    }catch{ambientCtx=null;}
-    setAmbientVolume();
+    // Called only by trusted controls, never by the intro's ended event.
+    if(!rideAudio){updateSoundUi();return;}
+    rideAudio.unlock().then(updateSoundUi);
   }
   function setAmbientVolume() {
-    if(ambientGain&&ambientCtx)ambientGain.gain.setTargetAtTime(state.fxOn && state.started&&!state.paused ? .012:0,ambientCtx.currentTime,.13);
+    rideAudio?.setEnabled(state.fxOn);
+    rideAudio?.setPaused(!state.started||state.paused);
+    updateSoundUi();
   }
   function playPickupChime() {
-    if(!ambientCtx || !state.fxOn)return;
-    try {
-      const oscillator=ambientCtx.createOscillator(),gain=ambientCtx.createGain();
-      oscillator.type='sine';oscillator.frequency.setValueAtTime(700,ambientCtx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(1110,ambientCtx.currentTime+.17);
-      gain.gain.setValueAtTime(0,ambientCtx.currentTime);gain.gain.linearRampToValueAtTime(.045,ambientCtx.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.0001,ambientCtx.currentTime+.48);
-      oscillator.connect(gain);gain.connect(ambientCtx.destination);oscillator.start();oscillator.stop(ambientCtx.currentTime+.5);
-    }catch{}
+    if(state.fxOn)rideAudio?.chime(720);
   }
 
   function startRide() {
@@ -752,19 +795,24 @@
     state.started=true;state.paused=false;
     $('introBackdrop').classList.add('hidden');
     try{$('introVideo').pause();}catch{}
-    startAmbient();setAmbientVolume();updateHud();
+    if(!state.current)state.current=lesson.words[0];
+    setAmbientVolume();startAmbient();updateHud();updateWordCard();
+    // This first word is requested directly from Play, not from a timer. It
+    // unlocks iOS pronunciation before automatic collection/review begins.
     if(state.current)startWordLoop(state.current);
     try{window.parent?.postMessage({type:'GOLINGO_GAME_EVENT',event:'started',game:'starry-word-rider'},'*');}catch{}
   }
   function pauseFor(id) {
     if(!state.started)return;
-    state.paused=true;cancelSpeech();setAmbientVolume();
+    state.paused=true;resetSteering();cancelSpeech();setAmbientVolume();
     $(id).classList.remove('hidden');
     if(id==='bookModal')fillWordBook();
   }
   function resumeRide() {
     $('pauseModal').classList.add('hidden');$('bookModal').classList.add('hidden');
-    state.paused=false;setAmbientVolume();if(state.current)startWordLoop(state.current);
+    state.paused=false;setAmbientVolume();startAmbient();
+    if(!state.current)state.current=lesson.words[0];
+    updateWordCard();if(state.current)startWordLoop(state.current);
   }
   function jump() {
     if(!state.started||state.paused)return;
@@ -791,7 +839,7 @@
       const c=document.createElement('span'),main=document.createElement('strong'),sub=document.createElement('small'),sp=document.createElement('span');
       main.textContent=item.word;sub.textContent=item.translation;c.append(main,sub);sp.className='speaker';sp.textContent='↻';b.append(c,sp);
       b.addEventListener('click',()=>{
-        cancelSpeech();const prev=state.paused;state.paused=false;speakOne(item.word,lesson.learningLanguage,()=>{state.paused=prev;},item.audioURL,true);
+        startAmbient();cancelSpeech();speakOne(item.word,lesson.learningLanguage,()=>{},item.audioURL,true);
       });container.appendChild(b);
     }
     $('bookDot').classList.remove('show');
@@ -812,22 +860,83 @@
   function bindUI() {
     $('startBtn').addEventListener('click',startRide);
     $('skipIntroBtn').addEventListener('click',startRide);
-    $('introVideo').addEventListener('ended',startRide);
+    // Ending muted video is not a user gesture. Keep the Ride button visible
+    // until a real tap enables both Web Audio and vocabulary pronunciation.
+    $('introVideo').addEventListener('ended',()=>{$('startBtn').focus({preventScroll:true});});
     $('languageSelect').addEventListener('change',e=>{
       if(importedLesson && e.target.value===importedLesson.learningLanguage) setLesson(importedLesson,true);
       else{lesson=demoLesson(e.target.value);resetRide(true);$('missionNote').classList.remove('faded');}
     });
     pressHold('leftBtn','left');pressHold('rightBtn','right');
+    // The compatibility renderer uses the SAME enlarged wheel as 3D mode.
+    // Its entire wrapper captures a finger, not just the small centre knob.
+    const wheel=$('joystickWrap'),track=$('joystickTrack'),knob=$('joystickKnob');
+    if(wheel&&track&&knob){
+      let pointer=null;
+      const moveWheel=e=>{
+        const r=track.getBoundingClientRect();
+        const dx=e.clientX-r.left-r.width*.5,dy=e.clientY-r.top-r.height*.5;
+        keys.joyX=clamp(dx/Math.max(1,r.width*.33),-1,1);
+        keys.joyY=clamp(dy/Math.max(1,r.height*.33),-1,1);
+        const travel=Math.max(1,r.width*.27);
+        knob.style.transform=`translate(calc(-50% + ${keys.joyX*travel}px),calc(-50% + ${keys.joyY*travel}px))`;
+      };
+      const releaseWheel=e=>{
+        if(e&&pointer!==e.pointerId)return;
+        const captured=pointer;pointer=null;keys.joyX=keys.joyY=0;
+        wheel.classList.remove('control-active');knob.style.transform='translate(-50%,-50%)';
+        try{if(captured!==null&&wheel.hasPointerCapture?.(captured))wheel.releasePointerCapture(captured);}catch{}
+      };
+      resetSteering=()=>{releaseWheel();keys.left=keys.right=keys.forward=keys.brake=false;};
+      wheel.addEventListener('pointerdown',e=>{
+        if(!state.started||state.paused||pointer!==null)return;
+        e.preventDefault();e.stopPropagation();pointer=e.pointerId;
+        wheel.classList.add('control-active');try{wheel.setPointerCapture(pointer);}catch{}
+        moveWheel(e);
+      });
+      wheel.addEventListener('pointermove',e=>{
+        if(pointer!==e.pointerId)return;e.preventDefault();e.stopPropagation();moveWheel(e);
+      });
+      for(const type of ['pointerup','pointercancel','lostpointercapture'])wheel.addEventListener(type,releaseWheel);
+    }
     $('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();jump();});
     $('trickBtn').addEventListener('pointerdown',e=>{e.preventDefault();trick();});
     $('pedalBtn').addEventListener('click',()=>{state.autoRide=!state.autoRide;$('autorideToggle').checked=state.autoRide;updateHud();});
-    $('soundBtn').addEventListener('click',()=>{state.audioOn=!state.audioOn;cancelSpeech();setAmbientVolume();
+    $('soundBtn').addEventListener('click',()=>{state.audioOn=!state.audioOn;cancelSpeech();startAmbient();
       $('voiceToggle').checked=state.audioOn;
       try{localStorage.setItem('golingoStarryVoice',state.audioOn?'on':'off');}catch{}
-      if(state.audioOn&&state.current)startWordLoop(state.current);updateHud();});
+      if(state.audioOn){
+        if(!state.current)state.current=lesson.words[0];
+        if(state.started&&!state.paused)startWordLoop(state.current);
+        else speakOne(state.current.word,lesson.learningLanguage,()=>{},state.current.audioURL,true);
+      }
+      updateHud();updateWordCard();});
+    $('ambienceBtn')?.addEventListener('click',()=>{
+      state.fxOn=rideAudio?.status==='locked'?true:!state.fxOn;
+      try{localStorage.setItem('golingoStarryAmbience',state.fxOn?'on':'off');}catch{}
+      setAmbientVolume();if(state.fxOn)startAmbient();updateHud();
+    });
+    $('ambienceToggle')?.addEventListener('change',e=>{
+      state.fxOn=e.target.checked;
+      try{localStorage.setItem('golingoStarryAmbience',state.fxOn?'on':'off');}catch{}
+      setAmbientVolume();if(state.fxOn)startAmbient();
+    });
+    $('testAudioBtn')?.addEventListener('click',()=>{
+      voiceNotice='';state.fxOn=true;
+      try{localStorage.setItem('golingoStarryAmbience','on');}catch{}
+      setAmbientVolume();rideAudio?.test().then(ok=>{
+        voiceNotice=ok?'Two-note sound test sent to the speakers. If silent, check media volume and Silent Mode.':'Sound is still blocked. Tap Test Sound again; check browser and device audio settings.';
+        updateSoundUi();
+      });updateSoundUi();
+    });
+    $('testVoiceBtn')?.addEventListener('click',()=>{
+      startAmbient();cancelSpeech();voiceNotice='';
+      const item=state.current||lesson.words[0];
+      if(item)speakOne(item.word,lesson.learningLanguage,()=>{},item.audioURL,true);
+    });
     $('hideBtn').addEventListener('click',()=>{state.showCard=!state.showCard;updateWordCard();updateHud();});
     $('translationBtn').addEventListener('click',()=>{state.showMeaning=!state.showMeaning;$('meaningToggle').checked=state.showMeaning;updateWordCard();});
-    $('repeatBtn').addEventListener('click',()=>{if(state.current){cancelSpeech();speakOne(state.current.word,lesson.learningLanguage,()=>{if(state.repeat)startWordLoop(state.current);},state.current.audioURL,true);}});
+    $('repeatBtn').addEventListener('click',()=>{if(state.current){startAmbient();cancelSpeech();speakOne(state.current.word,lesson.learningLanguage,ok=>{if(ok!==false&&state.repeat&&!state.paused)utteranceTimer=setTimeout(()=>startWordLoop(state.current),state.speechGap);},state.current.audioURL,true);}});
     $('pauseBtn').addEventListener('click',()=>state.paused?resumeRide():pauseFor('pauseModal'));
     $('bookBtn').addEventListener('click',()=>pauseFor('bookModal'));
     $('resumeBtn').addEventListener('click',resumeRide);
@@ -858,7 +967,7 @@
     canvas.addEventListener('pointerdown',e=>{
       if(!state.started||state.paused)return;
       const found=screenOrbs.find(o=>Math.hypot(o.x-e.clientX,o.y-e.clientY)<Math.max(30,o.r));
-      if(found){cancelSpeech();speakOne(found.word.word,lesson.learningLanguage,()=>{if(state.current&&state.repeat)startWordLoop(state.current);},found.word.audioURL,true);}
+      if(found){startAmbient();cancelSpeech();speakOne(found.word.word,lesson.learningLanguage,ok=>{if(ok!==false&&state.current&&state.repeat)utteranceTimer=setTimeout(()=>startWordLoop(state.current),state.speechGap);},found.word.audioURL,true);}
     });
     window.addEventListener('keydown',e=>{
       const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' ','space','w','a','s','d','e'].includes(k))e.preventDefault();
@@ -881,14 +990,21 @@
       if(k==='arrowup'||k==='w')keys.forward=false;
       if(k==='arrowdown'||k==='s')keys.brake=false;
     });
+    window.addEventListener('blur',resetSteering);
     document.addEventListener('visibilitychange',()=>{
-      if(document.hidden)cancelSpeech();
-      else if(state.started&&!state.paused&&state.current)startWordLoop(state.current);
+      if(document.hidden){resetSteering();cancelSpeech();}
+      else updateSoundUi(); // A new user control tap can resume pronunciation.
     });
   }
 
-  resize();buildWorld();loadInitialLesson();bindUI();
+  resize();buildWorld();loadInitialLesson();
+  audioReady.finally(()=>{
+    bindUI();
+    for(const id of ['startBtn','skipIntroBtn'])if($(id))$(id).disabled=false;
+    updateSoundUi();
+  });
   $('voiceToggle').checked=state.audioOn;
+  $('autorideToggle').checked=state.autoRide;
   $('speechGapSelect').value=String(state.speechGap);
   requestAnimationFrame(frame);
 })();

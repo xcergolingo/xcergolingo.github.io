@@ -1,4 +1,8 @@
 import * as THREE from './assets/three.module.js';
+import { createRiderModel } from './rider-model.js?v=11';
+import { createVillageModelKit } from './village-models.js?v=11';
+import { createCountryside } from './countryside.js?v=11';
+import { createRideAudio } from './audio-engine.js?v=11';
 
 // Starry Nightrider — fully playable procedural Three.js village.
 // Three.js r170 is bundled beside this file. No build step or server API needed.
@@ -11,6 +15,8 @@ const lerp = (a,b,t) => a+(b-a)*t;
 const rand = seed => { const v=Math.sin(seed*127.17+93.7)*43758.545; return v-Math.floor(v); };
 const choice = (items,seed) => items[Math.floor(rand(seed)*items.length)];
 const v3 = (x,y,z) => new THREE.Vector3(x,y,z);
+const SPAWN_Z=135,SPAWN_X=Math.sin(SPAWN_Z*.024)*6;
+const SPAWN_HEADING=Math.atan(.144*Math.cos(SPAWN_Z*.024));
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth<730;
 
 const DEMO = {
@@ -81,11 +87,13 @@ function start3D() {
   let lesson=demoPack('es');
   let nextWordIndex=0;
   let speechVersion=0,speechTimeout=0,currentAudio=null;
-  let audioContext=null;
+  const sharedWordAudio=typeof Audio==='function'?new Audio():null;
+  let voiceBlocked=false,voiceMessage='Tap Ride or Test voice to activate pronunciation';
+  let soundStatus='locked';
   let lastHudTime=0,lastHintTime=0,finishRequested=false;
   let lastOrbRespawn=0;
   const controls={forward:false,brake:false,left:false,right:false,space:false,joyX:0,joyY:0};
-  const state={started:false,paused:false,finished:false,x:0,z:89,heading:0,speed:0,
+  const state={started:false,paused:false,finished:false,x:SPAWN_X,z:SPAWN_Z,heading:SPAWN_HEADING,speed:0,
     jumpY:0,jumpVel:0,jumps:0,boostUntil:0,lean:0,steerSmooth:0,trickStart:0,trickDuration:0,
     bag:[],history:[],delivered:0,best:0,distance:0,current:null,
     showCard:true,showMeaning:true,audioOn:true,fxOn:true,repeat:true,autoRide:true,
@@ -95,7 +103,22 @@ function start3D() {
     state.best=Number(localStorage.getItem('golingoStarryBest')||0);
     state.speechGap=Number(localStorage.getItem('golingoStarrySpeechGap')||2200);
     state.audioOn=localStorage.getItem('golingoStarryVoice')!=='off';
+    state.fxOn=localStorage.getItem('golingoStarryAmbience')!=='off';
   }catch{}
+
+  function renderAudioStatus(){
+    const labels={ready:'AUDIO ON',locked:'TAP FOR AUDIO',muted:'AUDIO OFF',paused:'AUDIO PAUSED',unavailable:'AUDIO UNAVAILABLE'};
+    const label=!state.started&&state.fxOn?'TAP FOR AUDIO':labels[soundStatus]||'TAP FOR AUDIO';
+    if($('ambienceState'))$('ambienceState').textContent=label;
+    if($('ambienceBtn')){
+      $('ambienceBtn').classList.toggle('is-off',!state.fxOn);
+      $('ambienceBtn').setAttribute('aria-label',soundStatus==='ready'?'Mute riding sounds':'Enable riding sounds');
+    }
+    if($('ambienceToggle'))$('ambienceToggle').checked=state.fxOn;
+    if($('audioStatus'))$('audioStatus').textContent=(soundStatus==='ready'?'Riding audio active. ':soundStatus==='locked'?'Audio needs a tap. ':soundStatus==='unavailable'?'This browser cannot play the soundscape. ':state.fxOn?'Riding sounds paused. ':'Riding sounds muted. ')+(state.audioOn?voiceMessage:'Automatic word voice is off.');
+  }
+  const rideAudio=createRideAudio({onStatus:status=>{soundStatus=status;renderAudioStatus();}});
+  rideAudio.setEnabled(state.fxOn);rideAudio.setPaused(true);
 
   const MAT={
     frame:new THREE.MeshStandardMaterial({color:0xb88452,metalness:.67,roughness:.3}),
@@ -347,221 +370,58 @@ function start3D() {
     roof.scale.set(width,rise,depth);roof.userData.staticPrototype='roof';return roof;
   }
 
-  const timberBeamMat=material(0x364052,{roughness:1});
-  function makeHouse(x,z,seed,rotation=0){
-    const width=5.1+rand(seed+11)*4.6,depth=5.8+rand(seed+12)*3.1;
-    const height=4.6+rand(seed+13)*4.5;
-    const palette=[0xd5e9ff,0xc1c7f7,0xf6cdd2,0xf1d1b7,0xbde0d6,0xffdbb5,0xd8d0f6,0xdbe7ff];
-    const roofs=[0xffc7bf,0xf5b7b1,0xbad4fa,0xffd5b9,0xdfc1f1,0xc7dfef];
-    const wallTint=choice(palette,seed+1);
-    const wallMat=isMobile?
-      new THREE.MeshBasicMaterial({color:wallTint,map:wallBrushTexture,toneMapped:false}):
-      material(wallTint,{map:wallBrushTexture,roughness:1});
-    const roofMat=choice(roofs,seed+3);
-    const house=new THREE.Group();house.position.set(x,0,z);house.rotation.y=rotation;
-    const body=box(width,height,depth,wallMat,0,height*.5,0);body.receiveShadow=true;body.castShadow=!isMobile&&seed%4===0;house.add(body);
-    house.add(makePitchedRoof(width,depth,height,1.6+rand(seed+5)*1.5,roofMat));
-    house.add(box(width*1.11,.13,depth*1.12,MAT.darkWood,0,height+.07,0));
-    const frames=material(0x1b2e42,{roughness:1});
-    for(const face of [-1,1])for(let floor=0;floor<(height>7?2:1);floor++)for(let col=-1;col<=1;col+=2){
-      const wy=1.85+floor*2.65,wx=col*width*.24,wz=face*(depth*.501+.02);
-      const windowFrame=box(1.12,1.36,.18,frames,wx,wy,wz);house.add(windowFrame);
-      const pane=box(.83,1.03,.19,(rand(seed+floor+col+face*5)>.18?MAT.glass:MAT.glassDim),wx,wy,wz+face*.08);house.add(pane);
-      house.add(box(.08,1.1,.25,frames,wx,wy,wz+face*.16));
-      house.add(box(.98,.08,.25,frames,wx,wy,wz+face*.16));
-    }
-    // Many houses in the filmed village are half-timbered. Those dark wooden
-    // cross-braces transform a flat blue block into a recognizable old-world
-    // facade; the batcher packs every brace into the same instanced mesh, so
-    // adding this architectural silhouette costs no additional draw calls.
-    if(seed%3!==2){
-      for(const face of [-1,1]){
-        const zFace=face*(depth*.501+.13);
-        for(const xEdge of [-1,1])
-          house.add(box(.19,height*.9,.13,timberBeamMat,xEdge*width*.47,height*.48,zFace));
-        house.add(box(width*.96,.2,.13,timberBeamMat,0,height*.61,zFace));
-        house.add(box(width*.96,.14,.13,timberBeamMat,0,.8,zFace));
-        for(const side of [-1,1]){
-          const dx=side*width*.34,dy=height*.3;
-          const brace=box(.17,Math.hypot(dx,dy),.12,timberBeamMat,
-            side*width*.22,height*.79,zFace+face*.075);
-          brace.rotation.z=-Math.atan2(dx,dy);house.add(brace);
-        }
-      }
-    }
-    house.add(box(1.35,2.3,.14,MAT.darkWood,0,1.17,depth*.514));
-    house.add(mesh(new THREE.SphereGeometry(.09,8,6),MAT.gold,.38,1.17,depth*.64));
-    if(seed%3===0){
-      const flowers=material(0xc34176,{emissive:0x662850,emissiveIntensity:.3});
-      for(const side of [-1,1]){
-        house.add(box(1.5,.29,.46,MAT.darkWood,side*width*.24,1.31,depth*.58));
-        for(let p=-1;p<=1;p++)house.add(mesh(new THREE.SphereGeometry(.13,6,5),flowers,
-          side*width*.24+p*.34,1.5,depth*.61));
-      }
-    }
-    const chimney=box(.95,1.6,.9,material(0x6c5a6e),width*.25,height+1,depth*.16);house.add(chimney);
-    // Rich, painterly trim lines on roof edges.
-    house.add(box(width*.98,.1,.14,curbMat,0,height+.2,-depth*.55));
-    house.add(box(width*.98,.1,.14,curbMat,0,height+.2,depth*.55));
-    // Windows glow through emissive paint; individual dynamic lights per house
-    // were a major GPU bottleneck and are deliberately omitted.
-    scene.add(house);staticBatchRoots.push(house);
+  const villageModels=createVillageModelKit(THREE,{isMobile,wallTexture:wallBrushTexture,roofTexture:roofBrushTexture});
+  function makeHouse(x,z,seed,rotation=0,width=6,depth=6.2,height=8.3){
+    const house=villageModels.makeHouse({width,depth,height,seed,variant:seed%5,detail:Math.hypot(x,z)>155?0:1});
+    house.position.set(x,0,z);house.rotation.y=rotation;scene.add(house);staticBatchRoots.push(house);
     houseSlots.push({x,z,height,width,depth,rotation});
-    buildingColliders.push({x,z,rx:width*.56,rz:depth*.56});
+    const c=Math.abs(Math.cos(rotation)),s=Math.abs(Math.sin(rotation));
+    buildingColliders.push({x,z,rx:width*.5*c+depth*.5*s,rz:depth*.5*c+width*.5*s});
   }
-
-  // Keep the rideable lane genuinely open. Building placement is checked
-  // against every cobblestone path (not merely the world axes).
   function clearOfRoad(x,z,margin){
     if(Math.hypot(x,z)<27)return false;
-    for(const path of roadPaths){
-      for(let i=0;i<path.length;i+=2){
-        const p=path[i];
-        if(Math.abs(x-p.x)<margin&&Math.abs(z-p.z)<margin&&Math.hypot(x-p.x,z-p.z)<margin)return false;
-      }
+    for(const path of roadPaths)for(let i=0;i<path.length;i+=2){
+      const p=path[i];
+      if(Math.abs(x-p.x)<margin&&Math.abs(z-p.z)<margin&&Math.hypot(x-p.x,z-p.z)<margin)return false;
     }
     return true;
   }
-
-  // Four neighborhoods surround a broad, rideable church square.
-  let houseSeed=1;
-  const nearHouseCount=isMobile?29:38;
-  for(let i=0;i<nearHouseCount;i++){
-    const a=i/nearHouseCount*TAU+rand(i*19)*.13,r=61+rand(i+19)*24;
-    const x=Math.cos(a)*r,z=Math.sin(a)*r;
-    if(!clearOfRoad(x,z,11.6))continue;
-    makeHouse(x,z,houseSeed++, -a+Math.PI*.5);
-  }
-  for(let i=0;i<(isMobile?19:32);i++){
-    const x=(rand(i*17+190)-.5)*330,z=(rand(i*22+123)-.5)*328;
-    if(Math.hypot(x,z)<80||!clearOfRoad(x,z,12))continue;
-    makeHouse(x,z,houseSeed++,rand(i+17)*TAU);
-  }
-  // A few hand-placed, higher-detail cottages frame the very first street.
-  // Previously most of the housing was beyond the first 50 m of riding.
-  for(const [x,z,rotation] of [[-19,77,.18],[21,81,-.15],[-21,94,.2],
-    [22,101,-.14],[-22,123,.12],[23,128,-.08],[-20,148,.15],[22,154,-.1]]){
-    if(!clearOfRoad(x,z,10.5))continue;
-    if(buildingColliders.some(b=>Math.hypot(x-b.x,z-b.z)<13))continue;
-    makeHouse(x,z,houseSeed++,rotation);
-  }
-
-  // Densely painted outer neighborhoods. Instanced geometry lets a much
-  // larger map have 150+ colorful townhouses without hundreds of draw calls.
-  function addInstancedNeighborhoods(){
-    const lots=[];
-    // Distribute dense, but cheap, rowhouses across *all* winding streets.
-    // The earlier loop filled its lot budget along the first few roads and
-    // left entire outlying districts looking empty from the chase camera.
-    const maxLots=isMobile?196:292;
-    const pathQuota=Math.ceil(maxLots/roadPaths.length);
-    const clearLot=(x,z,width,depth)=>{
-      if(Math.max(Math.abs(x),Math.abs(z))>257)return false;
-      if(!clearOfRoad(x,z,Math.max(width,depth)*.5+5.7))return false;
-      return !buildingColliders.some(b=>Math.abs(x-b.x)<b.rx+width*.52+1.8&&
-        Math.abs(z-b.z)<b.rz+depth*.53+1.8);
-    };
-    for(let sweep=0;sweep<2&&lots.length<maxLots;sweep++){
-      for(let pathIndex=0;pathIndex<roadPaths.length&&lots.length<maxLots;pathIndex++){
-        const path=roadPaths[pathIndex];
-        const step=pathIndex<5?(sweep?5:7):(sweep?4:6);
-        let addedOnPath=0;
-        for(let i=sweep?11:8;i<path.length-7&&lots.length<maxLots;i+=step){
-          if(sweep===0&&addedOnPath>=pathQuota)break;
-        const p=path[i],prev=path[Math.max(0,i-2)],next=path[Math.min(path.length-1,i+2)];
-        const dx=next.x-prev.x,dz=next.z-prev.z,len=Math.hypot(dx,dz)||1;
-        const rightX=-dz/len,rightZ=dx/len;
-        for(const side of [-1,1]){
-          if(lots.length>=maxLots)break;
-          const seed=pathIndex*107+i*11+side*3+sweep*1301;
-          if(rand(seed+12)<.19)continue;
-          const width=5.6+rand(seed+16)*3.4,depth=5.2+rand(seed+17)*3.5;
-          const offset=11.4+rand(seed+29)*2.4;
-          const x=p.x+rightX*side*offset,z=p.z+rightZ*side*offset;
-          if(!clearLot(x,z,width,depth))continue;
-          const height=5+rand(seed+19)*9;
-          const rotation=Math.atan2(dx,dz)+Math.PI*(side<0?0:1);
-          lots.push({x,z,width,depth,height,rotation,seed});
-          addedOnPath++;
-          buildingColliders.push({x,z,rx:width*.57,rz:depth*.57});
-          houseSlots.push({x,z,height,width,depth,rotation});
-        }
-      }
+  // The starting street opens eastward into sunflowers and golden fields.
+  // Detailed homes cluster into streets instead of filling every field.
+  let houseSeed=11;
+  function placeStreetHomes(path,accept,spacing=4){
+    for(let i=5;i<path.length-4;i+=spacing){
+      const p=path[i],a=path[i-2],b=path[i+2],dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1;
+      const nx=-dz/len,nz=dx/len;
+      for(const side of [-1,1]){
+        const seed=houseSeed++,width=4.9+rand(seed+6)*2.1,depth=5.0+rand(seed+8)*1.5;
+        const offset=9.7+depth*.3,x=p.x+nx*side*offset,z=p.z+nz*side*offset;
+        if(!accept(x,z)||!clearOfRoad(x,z,8.4))continue;
+        const rotation=Math.atan2(p.x-x,p.z-z);
+        const c=Math.abs(Math.cos(rotation)),s=Math.abs(Math.sin(rotation));
+        const rx=width*.5*c+depth*.5*s,rz=depth*.5*c+width*.5*s;
+        if(buildingColliders.some(h=>Math.abs(h.x-x)<h.rx+rx+1.2&&Math.abs(h.z-z)<h.rz+rz+1.2))continue;
+        makeHouse(x,z,seed,rotation,width,depth,6.9+rand(seed+18)*3.5);
       }
     }
-    const bodyGeo=new THREE.BoxGeometry(1,1,1);
-    const windowGeo=new THREE.BoxGeometry(1,1,.11);
-    const roofGeometry=roofPrototype;
-    const bodyPaint=isMobile?
-      new THREE.MeshBasicMaterial({color:0xffffff,map:wallBrushTexture,toneMapped:false}):
-      material(0xffffff,{map:wallBrushTexture,roughness:1});
-    const roofPaint=isMobile?
-      new THREE.MeshBasicMaterial({color:0xffffff,map:roofBrushTexture,side:THREE.DoubleSide,toneMapped:false}):
-      material(0xffffff,{map:roofBrushTexture,side:THREE.DoubleSide,roughness:1});
-    const bodies=new THREE.InstancedMesh(bodyGeo,bodyPaint,lots.length);
-    const roofs=new THREE.InstancedMesh(roofGeometry,roofPaint,lots.length);
-    const doors=new THREE.InstancedMesh(bodyGeo,MAT.darkWood,lots.length);
-    const windows=new THREE.InstancedMesh(windowGeo,new THREE.MeshStandardMaterial({
-      color:0xffd9a0,emissive:0xffb355,emissiveIntensity:1.9,roughness:.52}),lots.length*4);
-    // Architectural detail stays in three additional draw calls for the
-    // *whole map*: framed windows, colorful shutters and chimneys. These are
-    // much easier to read than unbroken pastel boxes at bicycle height.
-    const trims=new THREE.InstancedMesh(windowGeo,MAT.darkWood,lots.length*4);
-    const shutters=new THREE.InstancedMesh(windowGeo,isMobile?
-      new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}):
-      material(0xffffff,{roughness:.91}),lots.length*8);
-    const chimneys=new THREE.InstancedMesh(bodyGeo,material(0x745867,{roughness:1}),lots.length);
-    const houseColors=[0xfde2cb,0xb1cfef,0xf7b3a8,0xe7b36f,0xb0d7cb,0xe59a9a,0xc4b5f1,0xa4b9e8,0xe9d5b5,0xcf8a8f,0x8eafd0];
-    const roofColors=[0xffb8aa,0xffcfac,0xa2bfd8,0xe7c1c6,0xffc18a,0xadbacf];
-    const shutterColors=[0xa84431,0x29577a,0x8c4846,0x49655e,0xd7a368,0x395171];
-    const dummy=new THREE.Object3D();let windowIndex=0,shutterIndex=0;
-    function place(instance,index,x,y,z,rx,ry,rz,scaleX,scaleY,scaleZ){
-      dummy.position.set(x,y,z);dummy.rotation.set(rx,ry,rz);dummy.scale.set(scaleX,scaleY,scaleZ);
-      dummy.updateMatrix();instance.setMatrixAt(index,dummy.matrix);
-    }
-    for(let i=0;i<lots.length;i++){
-      const l=lots[i];
-      place(bodies,i,l.x,l.height*.5,l.z,0,l.rotation,0,l.width,l.height,l.depth);
-      bodies.setColorAt(i,new THREE.Color(choice(houseColors,l.seed)));
-      place(roofs,i,l.x,l.height,l.z,0,l.rotation,0,l.width,2.5+rand(l.seed+60)*2,l.depth);
-      roofs.setColorAt(i,new THREE.Color(choice(roofColors,l.seed+41)));
-      const c=Math.cos(l.rotation),s=Math.sin(l.rotation);
-      place(doors,i,l.x+s*l.depth*.51,1.15,l.z+c*l.depth*.51,0,l.rotation,0,1.25,2.3,.13);
-      const chimneyX=l.width*.25,chimneyZ=-l.depth*.17;
-      place(chimneys,i,l.x+c*chimneyX+s*chimneyZ,l.height+1.1,l.z-s*chimneyX+c*chimneyZ,
-        0,l.rotation,0,.84,2.1,.82);
-      for(const face of [-1,1])for(const side of [-1,1]){
-        const localX=side*l.width*.26,localZ=face*l.depth*.515;
-        const x=l.x+c*localX+s*localZ,z=l.z-s*localX+c*localZ;
-        const wy=2.8+(l.height>9?1.4:0);
-        place(trims,windowIndex,x,wy,z,0,l.rotation,0,1.35,1.55,.17);
-        place(windows,windowIndex,x+s*face*.13,wy,z+c*face*.13,0,l.rotation,0,.93,1.22,.16);
-        windows.setColorAt(windowIndex,new THREE.Color(choice([0xffd9a1,0xffe5bd,0xf3b4aa,0xffc979],l.seed+windowIndex)));
-        for(const direction of [-1,1]){
-          const shutterX=localX+direction*.63;
-          const sx=l.x+c*shutterX+s*(localZ+face*.12);
-          const sz=l.z-s*shutterX+c*(localZ+face*.12);
-          place(shutters,shutterIndex,sx,wy,sz,0,l.rotation,0,.26,1.39,.14);
-          shutters.setColorAt(shutterIndex,new THREE.Color(choice(shutterColors,l.seed+side*7+face*3)));
-          shutterIndex++;
-        }
-        windowIndex++;
-      }
-    }
-    for(const item of [bodies,roofs,doors,trims,windows,shutters,chimneys]){
-      item.instanceMatrix.needsUpdate=true;
-      if(item.instanceColor)item.instanceColor.needsUpdate=true;
-      item.frustumCulled=false;scene.add(item);
-    }
   }
-  addInstancedNeighborhoods();
+  placeStreetHomes(road1,(x,z)=>z>-88&&z<106&&!(x>0&&z>72));
+  placeStreetHomes(road2,(x,z)=>Math.abs(x)<94);
+  placeStreetHomes(loop,()=>true,5);
+  placeStreetHomes(villageLane,(x,z)=>z>-72&&z<17,5);
+  placeStreetHomes(marketLoop,()=>true,5);
+  for(const [x,z,seed,rotation] of [[-67,153,94,.7],[137,73,69,-1.5],
+    [110,-147,84,.3],[-169,-139,59,1.8],[185,171,79,-.8]]){
+    if(clearOfRoad(x,z,10)&&!buildingColliders.some(h=>Math.hypot(h.x-x,h.z-z)<16))
+      makeHouse(x,z,seed,rotation,7.4,6.8,6.7);
+  }
 
   // All cypress branches are instanced (three draw calls for an entire forest).
   // This keeps the richer 600 m map smooth on mobile rather than creating one
   // expensive draw call per individual brushstroke.
   function addCypressForest(){
     const trees=[];
-    for(let i=0;i<(isMobile?129:200);i++){
+    for(let i=0;i<(isMobile?58:84);i++){
       const a=rand(i*4+7)*TAU,r=38+rand(i*2+88)*250;
       const x=Math.cos(a)*r,z=Math.sin(a)*r;
       if(buildingColliders.some(b=>Math.abs(b.x-x)<8&&Math.abs(b.z-z)<8))continue;
@@ -604,55 +464,8 @@ function start3D() {
   }
   addCypressForest();
 
-  // Small flower meadows bring the painterly countryside right up to the
-  // village lanes. Hundreds of blossoms cost only two instanced draw calls.
-  function addBrushstrokeFlowers(){
-    const meadows=[[-137,49,33],[99,107,39],[142,-148,44],[-217,209,40],
-      [212,153,41],[-62,-202,42],[157,-25,31]];
-    const flowers=[];
-    for(let i=0;i<(isMobile?570:900);i++){
-      const [cx,cz,r]=meadows[i%meadows.length];
-      const a=rand(i*13+7)*TAU,rr=Math.sqrt(rand(i*19+11))*r;
-      const x=cx+Math.cos(a)*rr,z=cz+Math.sin(a)*rr;
-      if(!clearOfRoad(x,z,2.4)||buildingColliders.some(b=>
-        Math.abs(x-b.x)<b.rx+1&&Math.abs(z-b.z)<b.rz+1))continue;
-      flowers.push({x,z,h:.48+rand(i*5+15)*.49,seed:i});
-    }
-    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(.032,.049,1,4),
-      material(0x39765a,{roughness:1}),flowers.length);
-    const petals=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.23,0),
-      new THREE.MeshBasicMaterial({color:0xffffff}),flowers.length);
-    const colors=[0xe9b75e,0xf7d593,0xd382aa,0xd9b0df,0x9ac7d4,0xf4e2b9];
-    for(let i=0;i<flowers.length;i++){
-      const {x,z,h,seed}=flowers[i];
-      tempObject.position.set(x,h*.5,z);tempObject.rotation.set(0,0,0);
-      tempObject.scale.set(1,h,1);tempObject.updateMatrix();stems.setMatrixAt(i,tempObject.matrix);
-      tempObject.position.set(x,h+.035,z);
-      tempObject.rotation.set(rand(seed+53)*TAU,0,rand(seed+61)*TAU);
-      tempObject.scale.set(.72+rand(seed+28)*.8,.65+rand(seed+34)*.5,.75);tempObject.updateMatrix();
-      petals.setMatrixAt(i,tempObject.matrix);
-      petals.setColorAt(i,new THREE.Color(colors[seed%colors.length]));
-    }
-    for(const instance of [stems,petals]){
-      instance.instanceMatrix.needsUpdate=true;
-      if(instance.instanceColor)instance.instanceColor.needsUpdate=true;
-      instance.frustumCulled=false;scene.add(instance);
-    }
-  }
-  addBrushstrokeFlowers();
-
-  // Impasto strokes as instances keep the ground lively with few draw calls.
-  const strokeMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(.24,.07,1.6),
-    new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.39}),580);
-  const strokeColors=[0x5d9ca2,0x315b74,0x8b92a2,0xb69b72,0x2b626c,0x5a7697];
-  for(let i=0;i<580;i++){
-    const x=(rand(i*17+9)-.5)*620,z=(rand(i*71+13)-.5)*620;
-    tempObject.position.set(x,.02,z);tempObject.rotation.set(0,rand(i+7)*TAU,0);
-    const length=.4+rand(i+23)*1.8;
-    tempObject.scale.set(.5+rand(i+19),1,length);tempObject.updateMatrix();
-    strokeMesh.setMatrixAt(i,tempObject.matrix);strokeMesh.setColorAt(i,new THREE.Color(strokeColors[i%strokeColors.length]));
-  }
-  strokeMesh.instanceMatrix.needsUpdate=true;scene.add(strokeMesh);
+  const countryside=createCountryside(THREE,{isMobile,clearOfRoad,colliders:buildingColliders});
+  scene.add(countryside);
 
   // Discoverable landmarks make the larger region feel like a real place:
   // a moonlit canal, flower market, windmill ridge, orchard and vineyard.
@@ -935,36 +748,36 @@ function start3D() {
       root.updateMatrixWorld(true);
       root.traverse(item=>{
         if(!item.isMesh||item.isInstancedMesh||
-          (item.geometry?.type!=='BoxGeometry'&&item.userData.staticPrototype!=='roof')||
+          (item.geometry?.type!=='BoxGeometry'&&!item.userData.staticPrototype)||
           !item.material||Array.isArray(item.material))return;
         const mat=item.material;
-        const isRoof=item.userData.staticPrototype==='roof';
+        const custom=!!item.userData.staticPrototype;
         const {width=1,height=1,depth=1}=item.geometry.parameters||{};
         matrixScale.makeScale(width,height,depth);
-        const matrix=isRoof?item.matrixWorld.clone():
+        const matrix=custom?item.matrixWorld.clone():
           new THREE.Matrix4().multiplyMatrices(item.matrixWorld,matrixScale);
         // Partition static architectural detail by village block. Large
         // unpartitioned batches were visible to the GPU even 300 m behind
         // the camera; each cluster can now be culled by Three.js.
         const chunkX=Math.floor(matrix.elements[12]/chunkSize);
         const chunkZ=Math.floor(matrix.elements[14]/chunkSize);
-        const key=[isRoof?'roof':'box',mat.type,mat.map?.uuid||'',mat.bumpMap?.uuid||'',
+        const key=[custom?item.geometry.uuid:'box',mat.type,mat.map?.uuid||'',mat.bumpMap?.uuid||'',
           mat.emissive?.getHexString?.()||'',mat.emissiveIntensity||0,
           mat.metalness||0,mat.roughness||0,mat.transparent||false,
           mat.opacity??1,mat.side,mat.blending,chunkX,chunkZ].join('|');
-        if(!buckets.has(key))buckets.set(key,{material:mat,isRoof,items:[]});
+        if(!buckets.has(key))buckets.set(key,{material:mat,geometry:custom?item.geometry:unitCube,custom,items:[]});
         buckets.get(key).items.push({item,matrix,color:mat.color?.clone()||new THREE.Color(0xffffff)});
       });
     }
     for(const bucket of buckets.values()){
       const mat=bucket.material.clone();
       if(mat.color)mat.color.set(0xffffff);
-      const instance=new THREE.InstancedMesh(bucket.isRoof?roofPrototype:unitCube,mat,bucket.items.length);
+      const instance=new THREE.InstancedMesh(bucket.geometry,mat,bucket.items.length);
       for(let i=0;i<bucket.items.length;i++){
         const rec=bucket.items[i];
         instance.setMatrixAt(i,rec.matrix);instance.setColorAt(i,rec.color);
         rec.item.parent?.remove(rec.item);
-        if(!bucket.isRoof)rec.item.geometry.dispose();
+        if(!bucket.custom&&rec.item.geometry!==unitCube)rec.item.geometry.dispose();
       }
       instance.instanceMatrix.needsUpdate=true;
       if(instance.instanceColor)instance.instanceColor.needsUpdate=true;
@@ -975,218 +788,12 @@ function start3D() {
   }
   batchStaticBoxes();
 
-  // Bicycle geometry: real torus wheels, spokes, frame, lights and a rider
-  // wearing a yellow straw hat, indigo jacket, and wind-reactive red scarf.
-  const bike=new THREE.Group();bike.position.set(0,0,89);scene.add(bike);
-  const bikeRig=new THREE.Group();bike.add(bikeRig);
-  const wheelGroups=[];
-  function makeWheel(z){
-    const wheel=new THREE.Group();wheel.position.set(0,.62,z);bikeRig.add(wheel);
-    const tire=mesh(new THREE.TorusGeometry(.57,.087,10,28),MAT.tire);tire.rotation.y=Math.PI*.5;wheel.add(tire);
-    const metal=mesh(new THREE.TorusGeometry(.51,.025,6,28),MAT.rim);metal.rotation.y=Math.PI*.5;wheel.add(metal);
-    const hub=mesh(new THREE.CylinderGeometry(.105,.105,.3,10),MAT.frame);hub.rotation.z=Math.PI*.5;wheel.add(hub);
-    const spokes=new THREE.InstancedMesh(new THREE.CylinderGeometry(.012,.012,1,4),MAT.rim,12);
-    for(let i=0;i<12;i++){
-      const a=i/12*TAU;
-      const end=v3(0,Math.sin(a)*.51,Math.cos(a)*.51);
-      tempObject.position.copy(end).multiplyScalar(.5);
-      tempObject.quaternion.setFromUnitVectors(vectorUp,end.clone().normalize());
-      tempObject.scale.set(1,end.length(),1);tempObject.updateMatrix();
-      spokes.setMatrixAt(i,tempObject.matrix);
-    }
-    spokes.instanceMatrix.needsUpdate=true;wheel.add(spokes);
-    wheelGroups.push(wheel);
-  }
-  makeWheel(-1.08);makeWheel(1.06);
-  const framePoints={front:v3(0,.64,-1.08),rear:v3(0,.64,1.06),crank:v3(0,1.0,.15),seat:v3(0,1.62,.52),neck:v3(0,1.65,-.72)};
-  for(const [a,b] of [['rear','crank'],['crank','seat'],['seat','rear'],['seat','neck'],['neck','crank'],['front','neck']]){
-    bikeRig.add(cylinderBetween(framePoints[a],framePoints[b],.055,MAT.frame));
-  }
-  bikeRig.add(cylinderBetween(v3(-.57,1.75,-.78),v3(.57,1.75,-.78),.06,MAT.rim));
-  for(const side of [-1,1]){
-    bikeRig.add(cylinderBetween(v3(side*.43,1.75,-.78),v3(side*.57,1.7,-.82),.07,MAT.tire));
-  }
-  const saddle=box(.42,.12,.68,MAT.tire,0,1.67,.43);bikeRig.add(saddle);
-  bikeRig.add(cylinderBetween(v3(0,1.1,.15),v3(0,1.65,.43),.06,MAT.rim));
-  const chainRing=mesh(new THREE.TorusGeometry(.24,.045,8,24),MAT.rim,0,1,.15);chainRing.rotation.y=Math.PI*.5;bikeRig.add(chainRing);
-  // Twin wheel guards painted in blue-black.
-  for(const z of [-1.08,1.06]){
-    const arcPts=[];for(let i=0;i<24;i++){const a=Math.PI*.05+i/23*Math.PI*.9;
-      arcPts.push(v3(0,.62+Math.sin(a)*.7,z+Math.cos(a)*.7));}
-    bikeRig.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts),30,.043,5,false),MAT.navy));
-  }
+  // Reference-led slim cyclist and vintage bicycle; gameplay owns world motion.
+  const riderModel=createRiderModel(THREE,{isMobile});
+  const bike=riderModel.group,bikeRig=riderModel.rig;
+  bike.position.set(SPAWN_X,0,SPAWN_Z);bike.rotation.y=SPAWN_HEADING;scene.add(bike);
+  function animateRider(time,dt){riderModel.animate(time,dt,state);}
 
-  // Bike lights are visible at night and illuminate nearby stones.
-  const headLamp=mesh(new THREE.SphereGeometry(.17,12,9),
-    new THREE.MeshStandardMaterial({color:0xffedb4,emissive:0xffdb8a,emissiveIntensity:4}),0,1.42,-1.18);
-  bikeRig.add(headLamp);
-  const headlight=new THREE.SpotLight(0xffe4ac,18,23,.48,.9,1.6);
-  headlight.position.set(0,1.42,-1.22);headlight.target.position.set(0,.35,-9);
-  bikeRig.add(headlight,headlight.target);
-  const tailLamp=box(.25,.18,.12,
-    new THREE.MeshStandardMaterial({color:0xff3c40,emissive:0xff122b,emissiveIntensity:3.2}),0,1.12,1.4);
-  bikeRig.add(tailLamp);
-  // An emissive red tail lamp is sufficient without another moving light.
-
-  // The video shows a slender human-shaped rider, not a pill-shaped mannequin.
-  // A smooth, tapered coat and articulated sleeves make the silhouette read
-  // clearly from the chase camera without downloading a heavyweight model.
-  const coatProfile=[[-.61,.30],[-.53,.38],[-.25,.37],[-.04,.35],[.23,.43],[.40,.43],[.52,.27],[.56,.19]]
-    .map(([y,r])=>new THREE.Vector2(r,y));
-  const torso=mesh(new THREE.LatheGeometry(coatProfile,18),MAT.blue,0,2.19,.28);
-  torso.rotation.x=-.14;bikeRig.add(torso);
-  const hip=mesh(new THREE.SphereGeometry(.32,12,9),MAT.pants,0,1.65,.39);bikeRig.add(hip);
-  const coatFlaps=[];
-  const coatFlapMat=MAT.blue.clone();coatFlapMat.side=THREE.DoubleSide;
-  for(const side of [-1,1]){
-    const coatTail=box(.35,.42,.35,MAT.blue,side*.24,1.7,.42);
-    coatTail.rotation.set(.14,0,side*.13);bikeRig.add(coatTail);
-    // The coat skirts now lift independently in the slipstream rather than
-    // moving as two stiff blocks attached to the hips.
-    const flap=mesh(new THREE.PlaneGeometry(.46,.75,1,3),coatFlapMat,side*.25,1.43,.71);
-    bikeRig.add(flap);coatFlaps.push({flap,side});
-    const frontLapel=box(.115,.5,.06,MAT.blueLight,side*.16,2.27,-.075);
-    frontLapel.rotation.z=side*-.12;bikeRig.add(frontLapel);
-    bikeRig.add(box(.08,.12,.07,MAT.strawDark,side*.3,2.08,-.095));
-    bikeRig.add(box(.085,.23,.035,MAT.strawDark,side*.3,2.25,-.13));
-  }
-  for(let i=0;i<3;i++){
-    const button=mesh(new THREE.SphereGeometry(.033,7,5),MAT.gold,-.045,2.35-i*.21,-.10);
-    bikeRig.add(button);
-  }
-
-  // The square cream-and-leather satchel is the most recognizable detail of
-  // the filmed cyclist when viewed from behind. Its straps attach to the coat.
-  const satchel=box(.66,.72,.25,MAT.leather,0,2.15,.75);bikeRig.add(satchel);
-  const satchelPanel=box(.54,.59,.045,MAT.leatherTrim,0,2.17,.9);bikeRig.add(satchelPanel);
-  const satchelFlap=box(.58,.17,.065,MAT.leather,0,2.43,.934);bikeRig.add(satchelFlap);
-  bikeRig.add(box(.11,.10,.07,MAT.gold,0,2.37,.974));
-  for(const side of [-1,1]){
-    bikeRig.add(cylinderBetween(v3(side*.28,2.6,.44),v3(side*.24,2.45,.76),.044,MAT.leatherTrim));
-    bikeRig.add(box(.07,.55,.035,MAT.leather,side*.24,2.17,.926));
-  }
-
-  const collar=mesh(new THREE.CylinderGeometry(.22,.3,.19,16),MAT.red,0,2.63,.23);
-  collar.rotation.x=-.14;bikeRig.add(collar);
-  const neck=mesh(new THREE.CylinderGeometry(.15,.17,.23,12),MAT.skin,0,2.71,.19);bikeRig.add(neck);
-  const head=mesh(new THREE.SphereGeometry(.274,20,16),MAT.skin,0,2.91,.18);
-  head.scale.set(.93,1.12,.97);bikeRig.add(head);
-  // Vincent's auburn hair and short beard are sculpted against the skull.
-  const hair=mesh(new THREE.SphereGeometry(.281,20,12,0,TAU,0,Math.PI*.57),MAT.hair,0,3.02,.2);
-  bikeRig.add(hair);
-  const facialDetails=[];
-  for(const side of [-1,1]){
-    const ear=mesh(new THREE.SphereGeometry(.077,9,7),MAT.skin,side*.265,2.88,.19);
-    ear.scale.set(.6,1,.55);bikeRig.add(ear);facialDetails.push(ear);
-    const sideburn=mesh(new THREE.SphereGeometry(.075,8,7),MAT.hair,side*.23,2.85,.32);
-    sideburn.scale.set(.65,1.8,.6);bikeRig.add(sideburn);facialDetails.push(sideburn);
-    const eye=mesh(new THREE.SphereGeometry(.025,7,5),MAT.darkWood,side*.112,2.936,-.075);
-    bikeRig.add(eye);facialDetails.push(eye);
-  }
-  const nose=mesh(new THREE.SphereGeometry(.09,10,8),MAT.skin,0,2.86,-.085);
-  nose.scale.set(.65,1.05,.85);bikeRig.add(nose);
-  const beard=mesh(new THREE.SphereGeometry(.16,13,9),MAT.hair,0,2.77,-.065);
-  beard.scale.set(.91,.64,.33);bikeRig.add(beard);
-  // Smaller flat-brimmed straw hat, as in the reference; it lifts with speed.
-  const brim=mesh(new THREE.CylinderGeometry(.45,.46,.06,24),MAT.straw,0,3.21,.18);bikeRig.add(brim);
-  const crown=mesh(new THREE.CylinderGeometry(.29,.34,.33,20),MAT.straw,0,3.4,.18);bikeRig.add(crown);
-  const band=mesh(new THREE.CylinderGeometry(.305,.34,.07,20),MAT.strawDark,0,3.31,.18);bikeRig.add(band);
-  // A flattened crown, stitched band and loosely uneven brim read as woven
-  // straw instead of a featureless yellow cylinder, even from behind.
-  const crownTop=mesh(new THREE.CylinderGeometry(.285,.3,.055,20),MAT.straw,0,3.55,.18);
-  bikeRig.add(crownTop);
-  const hatRidges=[];
-  for(let i=0;i<3;i++){
-    const ridge=mesh(new THREE.TorusGeometry(.39-i*.08,.012,4,28),MAT.strawDark,0,3.20+i*.13,.18);
-    ridge.rotation.x=Math.PI*.5;bikeRig.add(ridge);hatRidges.push(ridge);
-  }
-  const scarfKnot=mesh(new THREE.SphereGeometry(.19,12,9),MAT.scarf,-.06,2.61,.39);
-  scarfKnot.scale.set(1.05,.7,.9);bikeRig.add(scarfKnot);
-
-  // A single flowing ribbon replaces four stiff scarf boxes. Each frame its
-  // tapered mesh ripples gently in the wind and bends during turns and jumps.
-  const scarfSegments=9,scarfPositions=new Float32Array((scarfSegments+1)*2*3),scarfIndices=[];
-  for(let i=0;i<scarfSegments;i++){
-    const n=i*2;scarfIndices.push(n,n+1,n+2,n+1,n+3,n+2);
-  }
-  const scarfGeometry=new THREE.BufferGeometry();
-  scarfGeometry.setAttribute('position',new THREE.BufferAttribute(scarfPositions,3));
-  scarfGeometry.setIndex(scarfIndices);
-  const scarfRibbon=mesh(scarfGeometry,MAT.scarf);scarfRibbon.frustumCulled=false;bikeRig.add(scarfRibbon);
-
-  // Rounded, elbowed sleeves follow a relaxed forward-cycling posture.
-  const armParts=[];
-  for(const side of [-1,1]){
-    const shoulder=v3(side*.39,2.50,.18),elbow=v3(side*.49,2.11,-.21),hand=v3(side*.51,1.75,-.78);
-    armParts.push(mesh(new THREE.SphereGeometry(.2,11,9),MAT.blue,shoulder.x,shoulder.y,shoulder.z));
-    armParts.push(cylinderBetween(shoulder,elbow,.145,MAT.blue));
-    armParts.push(mesh(new THREE.SphereGeometry(.15,10,8),MAT.blue,elbow.x,elbow.y,elbow.z));
-    armParts.push(cylinderBetween(elbow,hand,.112,MAT.blue));
-    armParts.push(mesh(new THREE.SphereGeometry(.125,10,8),MAT.gloves,hand.x,hand.y,hand.z));
-  }
-  for(const part of armParts)bikeRig.add(part);
-  // Re-parent only the rider's upper body around a hip hinge. This keeps the
-  // hands on the handlebar at rest, while speed gives the human silhouette a
-  // slight forward lean and steering gives it a subtle shoulder shift.
-  const riderUpper=new THREE.Group();
-  riderUpper.position.set(0,1.66,.40);bikeRig.add(riderUpper);
-  bikeRig.updateMatrixWorld(true);riderUpper.updateMatrixWorld(true);
-  for(const part of [torso,head,hair,neck,collar,brim,crown,band,crownTop,scarfKnot,
-    nose,beard,scarfRibbon,...facialDetails,...hatRidges,...armParts]){
-    riderUpper.attach(part);
-  }
-  // Animated knees and pedals (geometry length is one, transformed each frame).
-  const legSegments=[];
-  for(const side of [-1,1]){
-    const thigh=mesh(new THREE.CylinderGeometry(.15,.13,1,8),MAT.pants);
-    const shin=mesh(new THREE.CylinderGeometry(.115,.1,1,8),MAT.pants);
-    const foot=box(.25,.18,.42,MAT.tire);bikeRig.add(thigh,shin,foot);
-    legSegments.push({side,thigh,shin,foot});
-  }
-  let pedalPhase=0;
-  function animateRider(time,dt){
-    // Pedals stop at rest and resume at a speed proportional to the wheels.
-    // The previous wall-clock formula caused a noticeable jump in leg pose
-    // whenever the rider accelerated, and spun the legs when standing still.
-    pedalPhase+=(state.speed*dt)*.95;
-    const pedaling=pedalPhase;
-    for(const wheel of wheelGroups)wheel.rotation.x-=(state.speed*dt)/.57;
-    for(const leg of legSegments){
-      const angle=pedaling+(leg.side<0?0:Math.PI);
-      const root=v3(leg.side*.23,1.65,.45);
-      const ankle=v3(leg.side*.27,1+Math.sin(angle)*.27,.15+Math.cos(angle)*.3);
-      const knee=v3(leg.side*.31,1.3+Math.sin(angle)*.16,-.01+Math.cos(angle)*.09);
-      setSegment(leg.thigh,root,knee);setSegment(leg.shin,knee,ankle);
-      leg.foot.position.copy(ankle);leg.foot.position.z-=.15;
-    }
-    const wind=clamp(state.speed/18,0,1);
-    const positions=scarfGeometry.attributes.position;
-    for(let i=0;i<=scarfSegments;i++){
-      const t=i/scarfSegments,w=.29*(1-t*.54);
-      const sway=Math.sin(time*.004-t*5.4)*(.025+t*(.07+wind*.18));
-      const x=-.12-t*.2+sway-state.lean*t*.18;
-      const y=2.61-t*(.12+wind*.21)+Math.sin(time*.005-t*4.6)*t*(.035+wind*.08);
-      const z=.43+t*(.72+wind*.83);
-      positions.setXYZ(i*2,x-w*.5,y,z);
-      positions.setXYZ(i*2+1,x+w*.5,y+.018*Math.sin(time*.006+t*9),z);
-    }
-    positions.needsUpdate=true;
-    scarfGeometry.computeVertexNormals();
-    brim.rotation.z=Math.sin(time*.006)*wind*.045;
-    riderUpper.rotation.x=-wind*.085+Math.sin(time*.003)*wind*.008;
-    riderUpper.rotation.z=state.steerSmooth*.038;
-    for(const {flap,side} of coatFlaps){
-      flap.rotation.x=-.15-wind*.36+Math.sin(time*.007+side)*(.035+wind*.09);
-      flap.rotation.z=side*(.08+wind*.08);
-    }
-    let roll=state.lean*.18;
-    if(state.trickDuration>0){
-      const t=clamp((time-state.trickStart)/state.trickDuration,0,1);
-      if(t<1)roll+=t*t*(3-2*t)*TAU;
-      else state.trickDuration=0;
-    }
-    bikeRig.rotation.z=roll;
-  }
 
   // Billboards with their words are visible in-world but stay subtle in the HUD.
   function makeWordSprite(text){
@@ -1204,9 +811,9 @@ function start3D() {
   const orbSphere=new THREE.SphereGeometry(.5,12,9);
   const orbMaterial=new THREE.MeshStandardMaterial({color:0xfff3cc,emissive:0xffd16e,emissiveIntensity:3.1,
     metalness:.06,roughness:.19});
-  // Each district has an easy-to-find word trail. The first four sit directly
+  // Each district has an easy-to-find word trail. The first words sit directly
   // in front of the starting cyclist so the learning begins effortlessly.
-  const orbPositions=[v3(0,1.5,76),v3(1.4,1.5,62),v3(-1.8,1.5,43),v3(1.7,1.5,26),
+  const orbPositions=[...[122,108,94,80,66,50,35,26].map(z=>v3(Math.sin(z*.024)*6,1.5,z)),
     v3(-145,1.5,104),v3(-230,1.5,-191),v3(240,1.5,0),v3(-177,1.5,180),
     v3(207,1.5,201),v3(10,1.5,-204)];
   const roadCandidates=[];
@@ -1215,7 +822,7 @@ function start3D() {
       const p=path[i];if(Math.hypot(p.x,p.z)<19||Math.hypot(p.x,p.z)>244)continue;
       const side=rand(i+path.length*13)>.5?1:-1;
       const candidate=v3(p.x+(rand(i+10)-.5)*2+side*1.2,1.5,p.z+(rand(i+20)-.5)*2);
-      if(candidate.distanceTo(v3(0,1.5,89))<12)continue;
+      if(candidate.distanceTo(v3(SPAWN_X,1.5,SPAWN_Z))<12)continue;
       if(buildingColliders.some(b=>Math.abs(candidate.x-b.x)<b.rx+1&&Math.abs(candidate.z-b.z)<b.rz+1))continue;
       roadCandidates.push(candidate);
     }
@@ -1419,7 +1026,8 @@ function start3D() {
     $('soundBtn').classList.toggle('is-off',!state.audioOn);
     $('soundBtn').setAttribute('aria-label',state.audioOn?'Turn off word pronunciation':'Turn on word pronunciation');
     $('soundBtn').title=state.audioOn?'Turn off word pronunciation':'Turn on word pronunciation';
-    $('voiceState').textContent=state.audioOn?'VOICE ON':'VOICE OFF';
+    $('voiceState').textContent=state.audioOn?(voiceBlocked?'TAP VOICE':'VOICE ON'):'VOICE OFF';
+    renderAudioStatus();
     $('voiceIcon').textContent=state.audioOn?'♫':'♪';
     $('hideBtn').classList.toggle('is-off',!state.showCard);
     $('pedalText').textContent=state.autoRide?'CRUISE ON':'CRUISE OFF';
@@ -1441,59 +1049,81 @@ function start3D() {
     speechVersion++;
     if(speechTimeout)clearTimeout(speechTimeout);
     speechTimeout=0;
-    if(currentAudio){try{currentAudio.pause();currentAudio.currentTime=0;}catch{}currentAudio=null;}
+    if(currentAudio){
+      currentAudio.onended=currentAudio.onerror=null;
+      try{currentAudio.pause();currentAudio.currentTime=0;}catch{}
+      currentAudio=null;
+    }
     try{window.speechSynthesis?.cancel();}catch{}
   }
   function speak(text,audioURL='',onComplete=()=>{},force=false){
-    if((!state.audioOn&&!force)||!text||(!state.started&&!force)||state.paused&&!force){onComplete();return;}
-    if(audioURL){
+    if((!state.audioOn&&!force)||!text||(!state.started&&!force)||(state.paused&&!force)||document.hidden){onComplete(false);return;}
+    const version=speechVersion;let completed=false;
+    const done=ok=>{
+      if(completed||version!==speechVersion)return;
+      completed=true;onComplete(ok);
+    };
+    const voiceFail=()=>{
+      voiceBlocked=true;voiceMessage='Voice needs a tap or an installed voice. Use Test voice below.';
+      renderAudioStatus();done(false);
+    };
+    const tts=()=>{
+      if(version!==speechVersion)return;
+      if(!window.speechSynthesis||typeof SpeechSynthesisUtterance!=='function'){voiceFail();return;}
+      const u=new SpeechSynthesisUtterance(text);
+      u.lang=localeFor(lesson.learningLanguage);u.rate=.88;u.pitch=1.02;u.volume=1;
+      const voices=window.speechSynthesis.getVoices();
+      const found=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase())||
+        voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase()));
+      if(found)u.voice=found;
+      u.onstart=()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Word pronunciation is playing.';renderAudioStatus();};
+      u.onend=()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Word voice is ready.';renderAudioStatus();done(true);};
+      u.onerror=()=>{if(version===speechVersion)voiceFail();};
+      try{window.speechSynthesis.resume();window.speechSynthesis.speak(u);}catch{voiceFail();}
+    };
+    if(audioURL&&sharedWordAudio){
       try{
         const url=new URL(audioURL,location.href);
         if(['https:','http:','blob:','data:'].includes(url.protocol)){
-          const audio=new Audio(url.href);currentAudio=audio;
-          audio.onended=()=>{currentAudio=null;onComplete();};
-          audio.onerror=()=>{currentAudio=null;speak(text,'',onComplete,force);};
-          audio.play().catch(()=>{currentAudio=null;speak(text,'',onComplete,force);});return;
+          let failed=false;const audio=sharedWordAudio;currentAudio=audio;
+          const fallback=()=>{
+            if(failed||version!==speechVersion)return;failed=true;
+            audio.onended=audio.onerror=null;try{audio.pause();}catch{}
+            currentAudio=null;tts();
+          };
+          audio.src=url.href;audio.volume=1;audio.muted=false;
+          audio.onended=()=>{if(version!==speechVersion)return;currentAudio=null;voiceBlocked=false;voiceMessage='Recorded word audio is ready.';renderAudioStatus();done(true);};
+          audio.onerror=fallback;
+          const result=audio.play();
+          result?.then(()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Recorded word audio is playing.';renderAudioStatus();}).catch(fallback);
+          return;
         }
       }catch{}
     }
-    if(!window.speechSynthesis){onComplete();return;}
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang=localeFor(lesson.learningLanguage);u.rate=.84;u.pitch=1.02;
-    const voices=window.speechSynthesis.getVoices();
-    const found=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase())||
-      voices.find(v=>v.lang.toLowerCase().startsWith(u.lang.split('-')[0].toLowerCase()));
-    if(found)u.voice=found;
-    u.onend=onComplete;u.onerror=onComplete;
-    try{window.speechSynthesis.speak(u);}catch{onComplete();}
+    tts();
   }
   function repeatWord(item,initialDelay=0){
     stopSpeech();if(!item||!state.audioOn||!state.started||state.paused)return;
     const version=speechVersion;
     const next=()=>{
-      if(version!==speechVersion||!state.started||state.paused||!state.audioOn)return;
-      speak(item.word,item.audioURL||'',()=>{
-        if(version===speechVersion&&state.repeat)speechTimeout=setTimeout(next,state.speechGap);
+      if(version!==speechVersion||!state.started||state.paused||!state.audioOn||document.hidden)return;
+      speak(item.word,item.audioURL||'',played=>{
+        if(played&&version===speechVersion&&state.repeat)speechTimeout=setTimeout(next,state.speechGap);
       });
     };
-    if(initialDelay)speechTimeout=setTimeout(next,initialDelay);
-    else next();
+    if(initialDelay)speechTimeout=setTimeout(next,initialDelay);else next();
   }
-  function playOne(item){if(!item)return;stopSpeech();speak(item.word,item.audioURL||'',()=>{
-    if(!state.paused&&state.current&&state.repeat)repeatWord(state.current);
-  },true);}
-  function blip(hz=720){
-    if(!state.fxOn)return;
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(!AC)return;if(!audioContext)audioContext=new AC();
-      const now=audioContext.currentTime,osc=audioContext.createOscillator(),gain=audioContext.createGain();
-      osc.type='sine';osc.frequency.setValueAtTime(hz,now);osc.frequency.exponentialRampToValueAtTime(hz*1.5,now+.18);
-      gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.06,now+.03);
-      gain.gain.exponentialRampToValueAtTime(.0001,now+.5);
-      osc.connect(gain);gain.connect(audioContext.destination);osc.start(now);osc.stop(now+.51);
-    }catch{}
+  function playOne(item){
+    if(!item)return;
+    // Both APIs are activated in the real tap, not after a timer or promise.
+    rideAudio.unlock();voiceBlocked=false;stopSpeech();
+    const version=speechVersion;
+    speak(item.word,item.audioURL||'',played=>{
+      if(played&&version===speechVersion&&!state.paused&&state.current&&state.repeat)
+        speechTimeout=setTimeout(()=>repeatWord(state.current),state.speechGap);
+    },true);
   }
+  function blip(hz=720){if(state.fxOn)rideAudio.chime(hz);}
 
   function collectOrb(orb){
     if(orb.collected)return;
@@ -1737,7 +1367,7 @@ function start3D() {
     return true;
   }
   function resetRide(){
-    stopSpeech();state.x=0;state.z=89;state.heading=0;state.speed=0;
+    stopSpeech();state.x=SPAWN_X;state.z=SPAWN_Z;state.heading=SPAWN_HEADING;state.speed=0;
     state.jumpY=0;state.jumpVel=0;state.jumps=0;state.boostUntil=0;
     state.bag=[];state.history=[];state.delivered=0;state.current=null;
     state.distance=0;state.styleCount=0;state.bonusPoints=0;state.streak=0;
@@ -1745,7 +1375,7 @@ function start3D() {
     state.steerSmooth=0;state.deliveryCooldown=0;
     for(const pad of jumpPads)pad.lastAt=-Infinity;
     controls.joyX=0;controls.joyY=0;
-    bike.position.set(0,0,89);bike.rotation.set(0,0,0);
+    bike.position.set(SPAWN_X,0,SPAWN_Z);bike.rotation.set(0,SPAWN_HEADING,0);
     for(const orb of orbs){orb.collected=false;orb.group.visible=true;orb.respawnAt=0;}
     updateHud();updateWordCard();
   }
@@ -1778,17 +1408,17 @@ function start3D() {
 
   function openModal(id){
     if(!state.started||state.finished)return;
-    state.paused=true;stopSpeech();$(id).classList.remove('hidden');
+    state.paused=true;rideAudio.setPaused(true);stopSpeech();$(id).classList.remove('hidden');
     if(id==='bookModal')fillBook();
   }
   function closeModals(){
     for(const id of ['pauseModal','bookModal','finishModal'])$(id).classList.add('hidden');
-    state.paused=false;state.finished=false;
+    state.paused=false;state.finished=false;rideAudio.setPaused(false);rideAudio.unlock();
     if(state.current)repeatWord(state.current);
   }
   function finishRide(){
     if(!state.started)return;
-    stopSpeech();state.paused=true;state.finished=true;
+    stopSpeech();state.paused=true;state.finished=true;rideAudio.setPaused(true);
     $('pauseModal').classList.add('hidden');$('bookModal').classList.add('hidden');
     $('finishSummary').textContent=`${state.delivered} points · ${state.history.length} words collected · ${Math.round(state.distance)} m ridden · best ${state.best} points`;
     $('finishModal').classList.remove('hidden');
@@ -1869,12 +1499,17 @@ function start3D() {
       if(state.started)return;
       state.started=true;state.paused=false;$('introBackdrop').classList.add('hidden');
       try{introVideo.pause();introVideo.currentTime=0;}catch{}
-      updateHud();blip(520);
+      rideAudio.setPaused(false);rideAudio.unlock().then(ok=>{if(ok)blip(520);});
+      if(!state.current)state.current=lesson.words[0]||null;
+      voiceBlocked=false;updateHud();updateWordCard();
+      if(state.current)repeatWord(state.current);
       try{window.parent?.postMessage({type:'GOLINGO_GAME_EVENT',event:'started',game:'starry-nightrider'},'*');}catch{}
     };
     $('startBtn').addEventListener('click',beginRide);
     $('skipIntroBtn').addEventListener('click',beginRide);
-    introVideo.addEventListener('ended',beginRide);
+    introVideo.addEventListener('ended',()=>{
+      document.querySelector('.intro-small').textContent='Tap RIDE NOW to start with sound · Drag the large wheel to steer';
+    });
     introVideo.addEventListener('timeupdate',()=>{
       $('introProgress').style.width=`${Math.min(100,(introVideo.currentTime/(introVideo.duration||8))*100)}%`;
     });
@@ -1884,11 +1519,33 @@ function start3D() {
       else chooseLesson(demoPack(e.target.value),false);
     });
     $('soundBtn').addEventListener('click',()=>{
+      if(state.audioOn&&voiceBlocked){voiceBlocked=false;playOne(state.current||lesson.words[0]);updateHud();return;}
       state.audioOn=!state.audioOn;stopSpeech();
       $('voiceToggle').checked=state.audioOn;
       try{localStorage.setItem('golingoStarryVoice',state.audioOn?'on':'off');}catch{}
-      if(state.audioOn&&state.current)repeatWord(state.current,600);updateHud();
+      if(state.audioOn){rideAudio.unlock();voiceBlocked=false;if(!state.current)state.current=lesson.words[0];
+        if(state.paused)playOne(state.current);else repeatWord(state.current);updateWordCard();}
+      updateHud();
     });
+    $('ambienceBtn').addEventListener('click',()=>{
+      const turnOn=!state.fxOn||['locked','unavailable','paused'].includes(soundStatus);
+      state.fxOn=turnOn;rideAudio.setEnabled(turnOn);
+      try{localStorage.setItem('golingoStarryAmbience',turnOn?'on':'off');}catch{}
+      if(turnOn)rideAudio.unlock().then(ok=>{if(ok&&!state.paused)rideAudio.chime(659);});
+      renderAudioStatus();
+    });
+    $('ambienceToggle').addEventListener('change',e=>{
+      state.fxOn=e.target.checked;rideAudio.setEnabled(state.fxOn);
+      try{localStorage.setItem('golingoStarryAmbience',state.fxOn?'on':'off');}catch{}
+      if(state.fxOn)rideAudio.unlock();renderAudioStatus();
+    });
+    $('testAudioBtn').addEventListener('click',()=>{
+      state.fxOn=true;try{localStorage.setItem('golingoStarryAmbience','on');}catch{}
+      rideAudio.test().then(ok=>{
+        $('audioStatus').textContent=ok?'Two-note sound test sent to the speakers. If silent, check media volume and Silent Mode.':'Sound is still blocked. Tap Test sound again; check browser and device audio settings.';
+      });renderAudioStatus();
+    });
+    $('testVoiceBtn').addEventListener('click',()=>playOne(state.current||lesson.words[0]));
     $('hideBtn').addEventListener('click',()=>{state.showCard=!state.showCard;updateWordCard();updateHud();});
     $('translationBtn').addEventListener('click',()=>{
       state.showMeaning=!state.showMeaning;$('meaningToggle').checked=state.showMeaning;updateWordCard();
@@ -1986,8 +1643,8 @@ function start3D() {
   $('speechGapSelect').value=String(state.speechGap);
   $('autorideToggle').checked=state.autoRide;
   updateHud();updateWordCard();
-  bike.position.set(state.x,0,state.z);camera.position.set(0,5.1,100);
-  chaseLook.set(0,2.3,81);
+  bike.position.set(state.x,0,state.z);camera.position.set(state.x,5.1,state.z+11);
+  chaseLook.set(state.x,2.3,state.z-8);
 
   let previousTime=performance.now(),lastMapTime=0,lastIntroFrame=-Infinity,lastPauseFrame=0;
   let resolutionSamples=0,resolutionWindow=previousTime,qualityLastChange=0;
@@ -2004,6 +1661,7 @@ function start3D() {
       if(time-lastPauseFrame>130){renderer.render(scene,camera);lastPauseFrame=time;}
       return;
     }
+    rideAudio.update(state.speed,time);
     updatePhysics(dt,time);
     animateRider(time,dt);
     animateOrbs(time);
