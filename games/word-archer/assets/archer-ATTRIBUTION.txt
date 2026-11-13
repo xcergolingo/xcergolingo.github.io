@@ -1,0 +1,71 @@
+Word Archer v7 character attribution
+
+CURRENT CHARACTER: MICROSOFT ROCKETBOX FEMALE_ADULT_17
+
+archer-realistic.glb is a conversion of the official Microsoft Rocketbox
+Female_Adult_17 model, released by Microsoft under the MIT License.
+
+Official source and original preview:
+https://github.com/microsoft/Microsoft-Rocketbox/tree/master/Assets/Avatars/Adults/Female_Adult_17
+Original FBX:
+https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults/Female_Adult_17/Export/Female_Adult_17.fbx
+Official license:
+https://github.com/microsoft/Microsoft-Rocketbox/blob/master/LICENSE.md
+
+Conversion modifications: FBX converted to glTF 2.0 GLB using Blender 4.3;
+stale source texture paths repaired; original color and normal textures connected
+to physically based materials; opaque 2048x2048 color images encoded as JPEG at
+quality 92 and normal maps as JPEG at quality 94, both using 4:4:4 chroma;
+original 1024x1024 RGBA hair atlas retained losslessly as PNG; hair alpha testing
+and two-sided cards enabled; faulty source custom vertex normals replaced with
+smooth mesh normals to correct a black shading seam behind the ear;
+uniform source scale and skeletal bind pose retained; model translated to center
+between feet with soles at ground level and exported Y-up with front toward +Z.
+Original face/body geometry, individual bone rest transforms, and skin weights
+are not remodeled. The model retains its 80-joint human skeleton and 8,516 source
+triangles. Reproduction script: tools/convert-rocketbox-archer.py.
+
+MIT License
+
+Copyright (c) 2020 Microsoft
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+LEGACY V6 CHARACTER (RETAINED FOR VERSION HISTORY)
+
+Skinned human mesh: Michelle (Mixamo), distributed as a Three.js official example.
+Source pinned to Three.js r170:
+https://github.com/mrdoob/three.js/blob/r170/examples/models/gltf/Michelle.glb
+
+Source example identifies the model as originating from Mixamo:
+https://github.com/mrdoob/three.js/blob/r170/examples/webgl_animation_skinning_morph.html
+
+Adobe's Mixamo FAQ permits royalty-free use of its characters and animations in
+personal, commercial and non-profit projects, including video games:
+https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html
+
+The character is incorporated into this playable game, not offered as a standalone
+asset library or stock model download. Model ownership remains with its creators.
+
+The bow, arrows, quiver, continuous archery inverse-kinematic pose, and release
+animation were authored specifically for this game. No original Mixamo animation
+clips are played by the game. The provided rigged mesh is posed continuously.
+
+GLTFLoader.js and BufferGeometryUtils.js are pinned to Three.js r181 and distributed
+under the Three.js MIT license; see the vendor attribution provided with the game.

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#1a2d29">
+  <meta name="description" content="GoLingo Archery Range — a real 3D archery and language-learning game.">
+  <title>GoLingo — Archery Range 3D</title>
+  <link rel="stylesheet" href="./style-v6.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+<main id="app">
+  <div id="viewport" aria-label="3D archery range. Drag the view or aim pad to aim. Hold Draw and release to fire."></div>
+  <div class="shade" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-symbol">G</span><div><small>GOLINGO</small><strong>ARCHERY <em>RANGE</em></strong></div></div>
+    <div class="stats"><div><strong id="score">0</strong><small>POINTS</small></div><span></span><div><strong id="streak">0</strong><small>STREAK</small></div></div>
+    <div class="actions"><button id="camera-button" class="icon-button" aria-label="Change camera view" title="Camera"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l2-2h4l2 2h4a1 1 0 0 1 1 1v14H3V6a1 1 0 0 1 1-1z"/><circle cx="12" cy="12.5" r="4"/></svg></button><button id="audio-button" class="icon-button" aria-label="Mute pronunciation" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5L5 9H2v6h3l5 4zM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></button><button id="pause-button" class="icon-button" aria-label="Pause and settings" title="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button></div>
+  </header>
+  <nav class="modes" aria-label="Learning mode"><button data-mode="learn" class="selected" aria-pressed="true">Learn</button><button data-mode="listen" aria-pressed="false">Listen</button><button data-mode="meaning" aria-pressed="false">Meaning</button></nav>
+  <div id="target-labels" aria-hidden="true"></div>
+  <div id="sight" class="sight" aria-hidden="true"><span></span><i></i></div>
+  <div id="sight-caption" class="sight-caption" aria-hidden="true"></div>
+  <section id="clue" class="clue glass" hidden><small id="clue-heading">LISTEN & FIND</small><div><strong id="clue-text">Listen carefully</strong><button id="clue-replay" aria-label="Repeat clue">◖))</button></div></section>
+  <section id="lesson" class="lesson glass" hidden aria-live="polite"><div class="lesson-top"><small>WORD COLLECTED</small><button id="lesson-sound" aria-label="Repeat learned word">◖))</button><button id="lesson-hide" aria-label="Hide word card">−</button></div><strong id="lesson-word"></strong><span id="lesson-translation"></span><p id="lesson-sentence"></p></section>
+  <button id="lesson-show" class="lesson-show glass" hidden aria-label="Show current word">Aa</button>
+  <div id="feedback" class="feedback" role="status"><strong></strong><span></span></div>
+  <div class="hud-bottom">
+    <div class="aim-zone"><div id="aim-pad" role="application" aria-label="Aim joystick. Drag up, down, left or right."><div class="aim-axis x"></div><div class="aim-axis y"></div><div class="aim-knob" id="aim-knob"><span>+</span></div><span class="aim-label">AIM</span></div><span class="control-caption">DRAG TO AIM</span></div>
+    <div class="range-status"><span class="status-dot"></span><span id="range-status">17 M · PRACTICE RANGE</span><small id="aim-hint">Aim with your left thumb. Hold DRAW, then release.</small></div>
+    <div class="draw-zone"><div class="draw-meter"><small id="draw-hint">HOLD TO DRAW</small><strong id="draw-percent">0%</strong></div><button id="draw-button" aria-label="Hold to draw the bow, release to fire"><span class="draw-ring"></span><span class="draw-arrow">➶</span><strong id="draw-label">DRAW</strong></button><span class="control-caption">RELEASE TO SHOOT</span></div>
+  </div>
+  <div class="footer-line"><span>GOLINGO · EVERY SHOT A NEW WORD</span><span id="hit-count">0 WORDS</span></div>
+  <section id="start-screen" class="screen start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title">
+    <div class="start-copy"><small class="eyebrow">GOLINGO · REAL 3D ARCHERY</small><h1 id="start-title">Find your focus.<br><em>Find your words.</em></h1><p>A real bow. A real flight. A new word with every target.</p><div class="steps"><span><b>1</b> Aim with the thumb pad</span><span><b>2</b> Hold to draw the bow</span><span><b>3</b> Release when the sight turns green</span></div><button id="start-button" class="primary" disabled>LOADING RANGE… <span>→</span></button><p id="load-status" class="load-status">Preparing the 3D range…</p><button id="retry-button" class="secondary" hidden>RETRY LOADING</button><small class="start-note">Your shooter stays visible. Your arrow follows the aim.</small></div>
+  </section>
+  <section id="settings-screen" class="screen modal" hidden role="dialog" aria-modal="true" aria-labelledby="settings-title"><div class="panel"><div class="panel-head"><div><small class="eyebrow">TAKE A BREATH</small><h2 id="settings-title">Range paused</h2></div><button class="close" data-close aria-label="Resume game">×</button></div><label class="setting"><span><b>Flight guide</b><small>Show the real predicted arrow path</small></span><input id="guide-option" type="checkbox" checked></label><label class="setting"><span><b>Target words</b><small>Show words above the target faces</small></span><input id="labels-option" type="checkbox" checked></label><label class="setting"><span><b>Repeat pronunciation</b><small>Repeat the word with a 1.5 second pause</small></span><input id="repeat-option" type="checkbox" checked></label><div class="panel-buttons"><button id="import-open" class="secondary">LOAD WORDS</button><button id="review-open" class="secondary">REVIEW WORDS</button><button id="reset-button" class="secondary">RESET SESSION</button></div><button id="resume-button" class="primary full">BACK TO THE RANGE <span>→</span></button><small class="build-note">Human archer · v7 · <a href="./assets/archer-ATTRIBUTION.txt" target="_blank" rel="noopener">Character credits</a></small></div></section>
+  <section id="import-screen" class="screen modal" hidden role="dialog" aria-modal="true" aria-labelledby="import-title"><div class="panel"><div class="panel-head"><div><small class="eyebrow">YOUR VOCABULARY</small><h2 id="import-title">Load GoLingo words</h2></div><button class="close" data-close aria-label="Close word import">×</button></div><p>Paste a GoLingo JSON word or sentence list. Your app can also send its list directly.</p><textarea id="import-json" aria-label="GoLingo vocabulary JSON" spellcheck="false">{"primaryLanguage":"en","learningLanguage":"ja","words":[{"word":"水","translation":"water"},{"word":"山","translation":"mountain"},{"word":"空","translation":"sky"}]}</textarea><p id="import-error" class="error"></p><button id="import-apply" class="primary full">USE THIS LIST <span>→</span></button></div></section>
+  <section id="review-screen" class="screen modal" hidden role="dialog" aria-modal="true" aria-labelledby="review-title"><div class="panel"><div class="panel-head"><div><small class="eyebrow">YOUR PRACTICE</small><h2 id="review-title">Words collected</h2></div><button class="close" data-close aria-label="Close word review">×</button></div><div id="review-list"></div><button id="export-button" class="secondary">COPY WORDS AS JSON</button></div></section>
+</main>
+<script type="module" src="./main-v6.js?v=7"></script>
+</body>
+</html>
