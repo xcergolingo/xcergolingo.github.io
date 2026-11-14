@@ -61,6 +61,6 @@
   <div id="error-overlay" class="overlay hidden"><section class="glass error-panel"><h2>Flight systems need a restart.</h2><p id="error-message"></p><button onclick="location.reload()" class="primary">Reload game ↗</button></section></div>
 </main>
 <script>window.__skyErrors=[];window.addEventListener('error',e=>{window.__skyErrors.push(e.message);if(!window.__skyReady){document.getElementById('error-message').textContent=e.message;document.getElementById('error-overlay').classList.remove('hidden')}});window.addEventListener('unhandledrejection',e=>{window.__skyErrors.push(String(e.reason));if(!window.__skyReady){document.getElementById('error-message').textContent=String(e.reason);document.getElementById('error-overlay').classList.remove('hidden')}});</script>
-<script type="module" src="./main.js"></script>
+<script type="module" src="./main.js?v=20261114-control-fix"></script>
 </body>
 </html>

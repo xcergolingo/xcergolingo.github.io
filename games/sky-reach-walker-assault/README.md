@@ -55,6 +55,8 @@ See [GOLINGO-IMPORT.md](GOLINGO-IMPORT.md) for native, iframe, URL, and gallery 
 
 The game uses a landscape stage on phones, including a rotated stage when a portrait-only webview cannot rotate the screen. Pointer lock is optional; Esc releases it.
 
+Moving the joystick or a visible-page focus change does not open the pause menu. Switching away from the app quietly suspends flight and automatic speech; returning resumes play unless you deliberately left Pause, Map, Help, or Words open. Touch controls retain their own pointer until it is released or cancelled, so a second finger cannot take over the steering stick.
+
 ## Runtime
 
 Buildless vanilla Three.js with bundled Three.js r160. Serve this folder over HTTP(S); there is no install or build step. Open `index.html` from a static server. Direct `file:` URLs may block ES modules.

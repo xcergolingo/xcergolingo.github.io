@@ -24,7 +24,7 @@ let state,lessonWasPaused=false;
 const lessonUI=createLearningUI(learning,{
   stage,
   onOpen(){lessonWasPaused=!!state?.paused;if(state){state.paused=true;releaseAll();document.exitPointerLock?.();}learning.setRunning(false);},
-  onClose(){if(state){state.paused=lessonWasPaused;releaseAll();learning.setRunning(state.started&&!state.paused);}},
+  onClose(){if(state){state.paused=lessonWasPaused;releaseAll();learning.setRunning(state.started&&!state.paused&&!state.suspended);}},
   onToast(message){if(state)toast(message);}
 });
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance',alpha:false});
@@ -62,7 +62,7 @@ for(const definition of definitions){
 }
 const elysia=worlds.get('elysia');
 let stored={};try{stored=JSON.parse(localStorage.getItem('sky-reach-progress-v1')||'{}')}catch{}
-state={started:false,paused:false,mode:'flight',world:'elysia',space:false,altitude:30,time:0,
+state={started:false,paused:false,suspended:!!document.hidden,mode:'flight',world:'elysia',space:false,altitude:30,time:0,
   pos:V(9,elysia.height(9,92)+31,92),yaw:0,pitch:0,roll:0,speed:0,cruise:74,
   hull:100,shield:100,fuel:100,life:100,jetpack:100,crystals:Math.max(0,Number(stored.crystals)||0),cores:new Set((stored.cores||[]).filter(x=>worlds.has(x))),
   target:'vesper',assist:true,invert:true,muted:false,cable:null,travel:null,landing:null,verticalSpeed:0,fireCooldown:0,
@@ -518,11 +518,11 @@ function performContext(held=false){
   else if(action==='exit'||action==='enter')exitShip();else if(action==='mine')controls.mine=true;else if(action==='explore')controls.climb=true;
 }
 function releaseContext(){controls.mine=false;controls.boost=false;controls.climb=false;}
-function closeOverlays(){for(const id of ['map-overlay','help-overlay','pause-overlay'])$(id).classList.add('hidden');state.paused=false;releaseAll();learning.setRunning(state.started);}
+function closeOverlays(){for(const id of ['map-overlay','help-overlay','pause-overlay'])$(id).classList.add('hidden');state.paused=false;releaseAll();learning.setRunning(state.started&&!state.suspended);}
 function openOverlay(id){for(const name of ['map-overlay','help-overlay','pause-overlay'])$(name).classList.toggle('hidden',name!==id);state.paused=true;releaseAll();learning.setRunning(false);document.exitPointerLock?.();if(id==='map-overlay')refreshMap();}
 function refreshMap(){document.querySelectorAll('.map-planet').forEach(button=>{button.classList.toggle('selected',button.dataset.target===state.target);const em=button.querySelector('em');if(em)em.textContent=state.cores.has(button.dataset.target)?'◆ CORE RECOVERED':'◇ WARP CORE';});$('map-target').textContent=state.target==='fleet'?'HALCYON FLEET':state.target.toUpperCase();$('map-description').textContent={elysia:'Green hills, siege walkers, and the light of the Ancient Spire.',vesper:'A pale beacon is waiting beneath the blue mushrooms.',sahra:'Amber dunes conceal another fragment of your warp drive.',nivalis:'A cold signal beyond the frozen ridges.',fleet:'A fleet in distress. Eight fighters and a shielded dreadnought.'}[state.target];}
 function cycleTarget(){const order=['vesper','elysia','sahra','nivalis','fleet'];state.target=order[(order.indexOf(state.target)+1)%order.length];toast(`Target · ${state.target.toUpperCase()}`);refreshMap();}
-function launch(){if(state.started)return;audio.unlock();learning.unlock();state.started=true;learning.setRunning(true);lessonUI.setGameplayVisible(true);state.speed=43;state.flightTime=0;$('intro').classList.add('hidden');$('hud').classList.remove('hidden');announce('GOLINGO · WORD FLIGHT','Fly through word signals · tow walkers · collect vocabulary',4,'SKY REACH');if(isTouch){const el=document.documentElement;try{const promise=el.requestFullscreen?.();promise?.then(()=>screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{})}catch{}}}
+function launch(){if(state.started||state.suspended)return;audio.unlock();learning.unlock();state.started=true;learning.setRunning(true);lessonUI.setGameplayVisible(true);state.speed=43;state.flightTime=0;$('intro').classList.add('hidden');$('hud').classList.remove('hidden');announce('GOLINGO · WORD FLIGHT','Fly through word signals · tow walkers · collect vocabulary',4,'SKY REACH');if(isTouch){const el=document.documentElement;try{const promise=el.requestFullscreen?.();promise?.then(()=>screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{})}catch{}}}
 $('launch').addEventListener('click',launch);
 $('land-button').onclick=beginLanding;
 $('map-button').onclick=()=>openOverlay('map-overlay');$('help-button').onclick=()=>openOverlay('help-overlay');$('pause-button').onclick=()=>openOverlay('pause-overlay');
@@ -534,20 +534,22 @@ $('map-pulse').onclick=()=>{closeOverlays();pulseTo();};
 $('assist-setting').onchange=e=>state.assist=e.target.checked;$('invert-setting').onchange=e=>state.invert=e.target.checked;
 $('reset-assault').onclick=()=>{state.cable=null;state.down=0;walkers.forEach(w=>{w.down=false;w.fall=0;});closeOverlays();pulseTo('elysia');toast('Walker assault reset');};
 function pointerLogical(e){if(stage.classList.contains('rotated'))return{x:e.clientY-innerHeight/2+stage.clientWidth/2,y:-(e.clientX-innerWidth/2)+stage.clientHeight/2};return{x:e.clientX,y:e.clientY};}
-function bindHold(id,key){const button=$(id);button.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(state.paused)return;button.setPointerCapture(e.pointerId);controls[key]=true;button.classList.add('pressed');audio.unlock();if(key==='boost'&&state.mode==='landed')takeoff();});const end=e=>{e.preventDefault();controls[key]=false;button.classList.remove('pressed');};button.addEventListener('pointerup',end);button.addEventListener('pointercancel',end);button.addEventListener('lostpointercapture',()=>{controls[key]=false;button.classList.remove('pressed')});}
+const heldPointers=new Map();
+function bindHold(id,key){const button=$(id);button.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!state.started||state.paused||state.suspended||heldPointers.has(id))return;heldPointers.set(id,e.pointerId);button.setPointerCapture(e.pointerId);controls[key]=true;button.classList.add('pressed');audio.unlock();if(key==='boost'&&state.mode==='landed')takeoff();});const end=e=>{if(heldPointers.get(id)!==e.pointerId)return;e.preventDefault();heldPointers.delete(id);controls[key]=false;button.classList.remove('pressed');};for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,end);}
 bindHold('fire-button','fire');bindHold('boost-button','boost');bindHold('climb-button','climb');bindHold('descend-button','descend');bindHold('brake-button','brake');
-for(const id of ['touch-action','context-button']){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();b.setPointerCapture(e.pointerId);audio.unlock();performContext(true);});b.addEventListener('pointerup',releaseContext);b.addEventListener('pointercancel',releaseContext);b.addEventListener('lostpointercapture',releaseContext);}
+for(const id of ['touch-action','context-button']){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!state.started||state.paused||state.suspended)return;b.setPointerCapture(e.pointerId);audio.unlock();performContext(true);});b.addEventListener('pointerup',releaseContext);b.addEventListener('pointercancel',releaseContext);b.addEventListener('lostpointercapture',releaseContext);}
 $('orbit-button').onclick=()=>pulseTo('fleet');
 let stickPointer=null,stickOrigin=null;
-$('joystick').addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;$('joystick').setPointerCapture(e.pointerId);const r=$('joystick').getBoundingClientRect();stickOrigin=pointerLogical({clientX:r.left+r.width/2,clientY:r.top+r.height/2});updateStick(e);audio.unlock();});
+$('joystick').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!state.started||state.paused||state.suspended||stickPointer!==null)return;stickPointer=e.pointerId;$('joystick').setPointerCapture(e.pointerId);const r=$('joystick').getBoundingClientRect();stickOrigin=pointerLogical({clientX:r.left+r.width/2,clientY:r.top+r.height/2});updateStick(e);audio.unlock();});
 function updateStick(e){if(e.pointerId!==stickPointer)return;const p=pointerLogical(e),radius=$('joystick').clientWidth*.38,dx=p.x-stickOrigin.x,dy=p.y-stickOrigin.y,len=Math.max(radius,Math.hypot(dx,dy));controls.steerX=clamp(dx/len,-1,1);controls.steerY=clamp(dy/len,-1,1);$('stick-knob').style.transform=`translate(${controls.steerX*radius}px,${controls.steerY*radius}px)`;}
 $('joystick').addEventListener('pointermove',updateStick);function endStick(){stickPointer=null;controls.steerX=controls.steerY=0;$('stick-knob').style.transform='';}
-for(const event of ['pointerup','pointercancel','lostpointercapture'])$('joystick').addEventListener(event,endStick);
-canvas.addEventListener('pointerdown',e=>{if(!state.started||state.paused)return;audio.unlock();if(isTouch||e.button===2){lookDrag={id:e.pointerId,last:pointerLogical(e)};canvas.setPointerCapture(e.pointerId);}else{controls.fire=true;if(!document.pointerLockElement){try{const promise=canvas.requestPointerLock?.();promise?.catch?.(()=>{});}catch{}}}});
-canvas.addEventListener('pointermove',e=>{if(!state.started||state.paused)return;const p=pointerLogical(e);if(lookDrag&&lookDrag.id===e.pointerId){const dx=p.x-lookDrag.last.x,dy=p.y-lookDrag.last.y;if(state.mode==='foot')footYaw+=dx*.005;else{state.yaw+=dx*.003;state.pitch=clamp(state.pitch-dy*.003,-1.22,1.22);}lookDrag.last=p;}else if(document.pointerLockElement===canvas){state.yaw+=e.movementX*.0019;state.pitch=clamp(state.pitch-e.movementY*.0019,-1.22,1.22);if(state.mode==='foot')footYaw+=e.movementX*.002;}else if(!isTouch){mouseX=p.x/stage.clientWidth*2-1;mouseY=1-p.y/stage.clientHeight*2;mouseActive=true;$('reticle').style.left=p.x+'px';$('reticle').style.top=p.y+'px';}});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])$('joystick').addEventListener(event,e=>{if(e.pointerId===stickPointer)endStick();});
+canvas.addEventListener('pointerdown',e=>{if(!state.started||state.paused||state.suspended)return;audio.unlock();if(isTouch||e.button===2){lookDrag={id:e.pointerId,last:pointerLogical(e)};canvas.setPointerCapture(e.pointerId);}else{controls.fire=true;if(!document.pointerLockElement){try{const promise=canvas.requestPointerLock?.();promise?.catch?.(()=>{});}catch{}}}});
+canvas.addEventListener('pointermove',e=>{if(!state.started||state.paused||state.suspended)return;const p=pointerLogical(e);if(lookDrag&&lookDrag.id===e.pointerId){const dx=p.x-lookDrag.last.x,dy=p.y-lookDrag.last.y;if(state.mode==='foot')footYaw+=dx*.005;else{state.yaw+=dx*.003;state.pitch=clamp(state.pitch-dy*.003,-1.22,1.22);}lookDrag.last=p;}else if(document.pointerLockElement===canvas){state.yaw+=e.movementX*.0019;state.pitch=clamp(state.pitch-e.movementY*.0019,-1.22,1.22);if(state.mode==='foot')footYaw+=e.movementX*.002;}else if(!isTouch){mouseX=p.x/stage.clientWidth*2-1;mouseY=1-p.y/stage.clientHeight*2;mouseActive=true;$('reticle').style.left=p.x+'px';$('reticle').style.top=p.y+'px';}});
 canvas.addEventListener('pointerup',()=>{lookDrag=null;controls.fire=false});canvas.addEventListener('pointercancel',()=>{lookDrag=null;controls.fire=false});canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement){mouseActive=false;$('reticle').style.left='50%';$('reticle').style.top='50%';}});
 addEventListener('keydown',e=>{
+  if(state.suspended)return;
   if(stage.classList.contains('lingo-panel-open')){if(e.code==='Escape')lessonUI.close();return;}
   if(e.target?.closest?.('input,textarea,select,[contenteditable="true"]'))return;
   if(e.code==='KeyG'&&!e.repeat){e.preventDefault();lessonUI.open('lesson');return;}
@@ -560,19 +562,31 @@ addEventListener('keydown',e=>{
   if(e.code==='KeyF')attachCable();if(e.code==='KeyJ')pulseTo();if(e.code==='KeyT')cycleTarget();if(e.code==='KeyH')pulseTo('fleet');if(e.code==='KeyL')beginLanding();if(e.code==='KeyE')exitShip();
 });
 addEventListener('keyup',e=>{controls.keys.delete(e.code);if(e.code==='KeyE')controls.mine=false;});
-function releaseAll(){controls.keys.clear();for(const k of ['boost','fire','climb','descend','brake','mine'])controls[k]=false;endStick();lookDrag=null;}
-addEventListener('blur',()=>{releaseAll();if(state.started&&!state.paused)openOverlay('pause-overlay');});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseAll();if(state.started&&!state.paused)openOverlay('pause-overlay');}});
+function releaseAll(){controls.keys.clear();for(const k of ['boost','fire','climb','descend','brake','mine'])controls[k]=false;for(const id of heldPointers.keys())$(id).classList.remove('pressed');heldPointers.clear();endStick();lookDrag=null;}
+// Mobile webviews can lose window focus while the page stays visible and a
+// finger is still steering. Focus changes must never open the pause menu.
+// A genuinely hidden page suspends separately from the player's explicit pause.
+function suspendPage(hidden){
+  if(state.suspended===hidden)return;
+  state.suspended=hidden;releaseAll();
+  learning.setRunning(state.started&&!state.paused&&!hidden);
+  audio.setMuted(state.muted||hidden);
+}
+addEventListener('blur',()=>{if(document.hidden)suspendPage(true);else if(!isTouch)releaseAll();});
+addEventListener('focus',()=>suspendPage(!!document.hidden));
+document.addEventListener('visibilitychange',()=>suspendPage(!!document.hidden));
+addEventListener('pagehide',()=>suspendPage(true));
+addEventListener('pageshow',()=>suspendPage(!!document.hidden));
 function resize(){stage.classList.toggle('rotated',isTouch&&innerHeight>innerWidth);const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 addEventListener('resize',resize);resize();
 camera.position.copy(state.pos).add(V(-38,15,70));camera.lookAt(0,58,-35);
 window.__skyReady=true;
 // Read-only diagnostic snapshots make support reproducible without altering play.
-window.skyReach={getState:()=>({started:state.started,paused:state.paused,mode:state.mode,world:state.world,space:state.space,position:state.pos.toArray(),altitude:Math.round(state.altitude),speed:Math.round(state.speed),hull:Math.round(state.hull),fuel:Math.round(state.fuel),crystals:state.crystals,cores:[...state.cores],down:state.down,cable:state.cable?{phase:state.cable.phase,tension:state.cable.tension,wraps:state.cable.wraps}:null,fleet:{...state.fleet},target:state.target,travel:state.travel?.target||null,nearestCrystal:state.nearestCrystal?{distance:state.nearestCrystal.distance,position:state.nearestCrystal.crystal.position.toArray()}:null,context:state.context,learning:{...learning.getSnapshot(),signals:wordSignals.getTargets()},renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},errors:window.__skyErrors})};
+window.skyReach={getState:()=>({started:state.started,paused:state.paused,suspended:state.suspended,mode:state.mode,world:state.world,space:state.space,position:state.pos.toArray(),altitude:Math.round(state.altitude),speed:Math.round(state.speed),hull:Math.round(state.hull),fuel:Math.round(state.fuel),crystals:state.crystals,cores:[...state.cores],down:state.down,cable:state.cable?{phase:state.cable.phase,tension:state.cable.tension,wraps:state.cable.wraps}:null,fleet:{...state.fleet},target:state.target,travel:state.travel?.target||null,nearestCrystal:state.nearestCrystal?{distance:state.nearestCrystal.distance,position:state.nearestCrystal.crystal.position.toArray()}:null,context:state.context,learning:{...learning.getSnapshot(),signals:wordSignals.getTargets()},renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},errors:window.__skyErrors})};
 let last=performance.now(),fpsAverage=60,adaptiveTime=0;
 function frame(now){
   requestAnimationFrame(frame);const raw=Math.max(.001,(now-last)/1000);last=now;const dt=Math.min(raw,.05);
-  if(state.paused){learning.tick(dt);audio.update({speed:0,boost:false,space:state.space,onFoot:true,jetpack:false,pulse:false},dt);return;}
+  if(state.paused||state.suspended){learning.tick(dt);audio.update({speed:0,boost:false,space:state.space,onFoot:true,jetpack:false,pulse:false},dt);return;}
   state.time+=dt;state.fireCooldown=Math.max(0,state.fireCooldown-dt);state.invincible=Math.max(0,state.invincible-dt);state.damageFlash=Math.max(0,state.damageFlash-dt*1.6);
   if(state.started){state.flightTime+=dt;state.nearestWalker=nearestWalker();if(state.mode==='foot')updateOnFoot(dt);else updateFlight(dt);if(controls.fire)fireCannons();}
   updateShip(dt);updateRegion();updateWalkers(dt);updateFleet(dt);updateCamera(dt);
