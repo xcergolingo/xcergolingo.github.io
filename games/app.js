@@ -66,7 +66,7 @@
   document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover').forEach(link => {
     link.addEventListener('click', () => {
       const url = new URL(link.href);
-      const lessonKey = link.dataset.lessonKey === 'data' ? 'data' : 'golingoLesson';
+      const lessonKey = ['data', 'golingo'].includes(link.dataset.lessonKey) ? link.dataset.lessonKey : 'golingoLesson';
       if (activeLesson) url.hash = lessonKey + '=' + encodeURIComponent(JSON.stringify(launchLessonPayload(activeLesson, link.dataset.lessonFormat)));
       else if (url.hash.startsWith('#' + lessonKey + '=')) url.hash = '';
       link.href = url.toString();
