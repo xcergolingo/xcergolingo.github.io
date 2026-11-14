@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Sky Reach — Word Flight</title>
+  <desc id="desc">An original illustration of a white and orange twin-engine fighter flying over green hills toward a vocabulary signal, beside a four-legged siege walker and sandstone arch, beneath a huge cream ringed planet.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#78b9d4"/><stop offset=".72" stop-color="#d5e7d5"/><stop offset="1" stop-color="#f0e4c0"/></linearGradient>
+    <radialGradient id="planet" cx=".33" cy=".25" r=".85"><stop stop-color="#faf0d6"/><stop offset=".6" stop-color="#d7c4a3"/><stop offset="1" stop-color="#9fa596"/></radialGradient>
+    <linearGradient id="land" x2=".3" y2="1"><stop stop-color="#9ebc69"/><stop offset="1" stop-color="#3f6b49"/></linearGradient>
+    <linearGradient id="wing" x2=".2" y2="1"><stop stop-color="#fff8df"/><stop offset="1" stop-color="#b9d2ca"/></linearGradient>
+    <linearGradient id="hull" x2="1" y2=".7"><stop stop-color="#f7f4df"/><stop offset=".6" stop-color="#d6ddd1"/><stop offset="1" stop-color="#7e9994"/></linearGradient>
+    <linearGradient id="exhaust" x2="0" y2="1"><stop stop-color="#f0ffff"/><stop offset=".3" stop-color="#9cffff" stop-opacity=".9"/><stop offset="1" stop-color="#8bfff1" stop-opacity="0"/></linearGradient>
+    <linearGradient id="rock" x2="1" y2="1"><stop stop-color="#d7b075"/><stop offset=".45" stop-color="#b98a54"/><stop offset="1" stop-color="#856844"/></linearGradient>
+    <linearGradient id="walker" x2="1" y2="1"><stop stop-color="#e5dfc5"/><stop offset=".6" stop-color="#b4b9ab"/><stop offset="1" stop-color="#6a807b"/></linearGradient>
+    <linearGradient id="shade" x2="0" y2="1"><stop offset=".55" stop-color="#0d3235" stop-opacity="0"/><stop offset="1" stop-color="#0d3235" stop-opacity=".3"/></linearGradient>
+    <clipPath id="disc"><circle cx="856" cy="147" r="163"/></clipPath>
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1200v750H0z"/>
+  <g transform="rotate(-17 856 147)" fill="none">
+    <ellipse cx="856" cy="147" rx="307" ry="35" stroke="#ebe0c9" stroke-width="23" opacity=".68"/>
+    <ellipse cx="856" cy="147" rx="325" ry="42" stroke="#f8edd7" stroke-width="4" opacity=".6"/>
+  </g>
+  <circle cx="856" cy="147" r="163" fill="url(#planet)"/>
+  <g clip-path="url(#disc)" fill="none" stroke="#b4a486" opacity=".35" transform="rotate(-17 856 147)">
+    <path stroke-width="14" d="M677 59q174 39 357-2M673 119q175 44 363 0M680 211q172 30 347-1"/>
+    <path stroke-width="4" d="M680 86q174 37 355-1M676 156q176 34 360-2M690 246q165 29 325-1"/>
+  </g>
+  <g transform="rotate(-17 856 147)" fill="none">
+    <path d="M549 147a307 35 0 0 0 614 0" stroke="#eee2c5" stroke-width="20"/>
+    <path d="M549 149a307 35 0 0 0 614 0" stroke="#fbf3dc" stroke-width="3"/>
+    <path d="M531 147a325 42 0 0 0 650 0" stroke="#e1d6ba" stroke-width="3" opacity=".8"/>
+  </g>
+  <g fill="#f7f9e9" opacity=".64">
+    <path d="M-35 226q30-40 69-20 14-46 59-35 21-27 48-2 47-8 61 30 46-10 70 27Z"/>
+    <path d="M303 115q21-26 48-12 10-32 40-27 24-24 44 7 35-2 45 29Z" opacity=".6"/>
+    <path d="M918 327q27-31 58-17 14-33 46-17 23-38 64-13 30-11 49 20 35-8 66 27Z" opacity=".75"/>
+  </g>
+  <path fill="#a0bca2" d="M0 387 91 350 168 366 247 325 308 355 401 317 503 355 586 336 694 375 806 346 907 365 1001 337 1108 367 1200 342V750H0Z"/>
+  <path fill="#8eae81" d="M0 432Q130 356 274 404T550 421Q680 359 810 398T1050 417L1200 387V750H0Z"/>
+  <path fill="url(#land)" d="M0 485Q163 393 324 451T598 466Q727 422 847 456T1200 433V750H0Z"/>
+  <path fill="#c1ce87" opacity=".34" d="M0 485Q163 393 324 451T598 466Q474 529 340 506T0 548Z"/>
+  <path fill="#4f8050" d="M0 660q180-100 330-80t300 44q153-79 298-43t272-30v199H0Z"/>
+  <path fill="#7fa45c" d="m0 660 136-47 130 11-95 65-171 30ZM660 633l194-49 179 16-89 77Z"/>
+  <path fill="#355e44" opacity=".38" d="M450 565q164-17 211 8-146 36-257 47ZM772 576l270-46 74 31-255 51Z"/>
+  <!-- Sandstone arch: one continuous band with an open center. -->
+  <path d="M174 449c-1-103 39-170 119-176 84-6 136 61 146 153l-51 15c0-79-33-125-90-126-54 0-77 52-75 133Z" fill="url(#rock)"/>
+  <path d="m174 449 27-93 18-48 45-28-19 37-24 47 2 84Z" fill="#e6bf81"/>
+  <path d="m296 273 62 21 42 41 39 91-27 8-28-89-46-48Z" fill="#d5ab6c"/>
+  <path d="m388 441 23-8-26-81-24-24 19 50Z" fill="#765d40"/>
+  <g fill="url(#rock)">
+    <path d="m70 441 13-64 20-5 7 70Z"/><path d="m69 376 2-13 32-8 9 18-14 9Z"/>
+    <path d="m1112 447 18-108 23-4 17 110Z"/><path d="m1112 336 9-20 42-4 21 22-21 13Z"/>
+  </g>
+  <!-- Walker: articulated original cargo-like siege rig. -->
+  <g stroke="#566c64" stroke-linejoin="round">
+    <g fill="#778e7b" stroke-width="3">
+      <path d="m811 370 30 9 4 91-19 60-24-8 16-59Z"/>
+      <path d="m957 361 28 5 13 91-1 66-23 2-5-64Z"/>
+      <path d="m796 520 36 6 5 13-56 2Z"/><path d="m969 515 37 2 14 13-63 5Z"/>
+    </g>
+    <path d="m764 281 170-18 83 41-3 77-191 36-64-49Z" fill="url(#walker)" stroke-width="3"/>
+    <path d="m764 281 65 40 188-17-83-41Z" fill="#eee7ce" stroke-width="2"/>
+    <path d="m829 321 188-17-3 77-191 36Z" fill="#b4beb1" stroke-width="2"/>
+    <path d="m764 300 54 33-2 50-53-38Z" fill="#8c9b8e" stroke-width="2"/>
+    <path d="m840 351 160-17-1 31-160 25Z" fill="#c97143" stroke-width="2"/>
+    <path d="m855 355 28-3v28l-28 4ZM896 351l27-3v26l-27 4ZM937 347l26-3v24l-26 4Z" fill="#e69458" stroke="none"/>
+    <path d="m779 285 24-19 29 4 12 28-35 4Z" fill="#cad0bd" stroke-width="2"/>
+    <path d="m842 280 55-5 32 14-56 6Z" fill="#9ead9d" stroke-width="2"/>
+    <g fill="url(#walker)" stroke-width="3">
+      <path d="m789 376 34 18-7 82-26 29 5 63-28 5-10-77 27-36Z"/>
+      <path d="m933 389 35-6 14 77 35 37 8 64-31 6-10-59-35-31Z"/>
+      <path d="m755 565 43-8 15 22-70 8Z"/><path d="m986 560 44-7 25 20-79 14Z"/>
+    </g>
+    <g fill="#bf6946" stroke="#d68c58" stroke-width="5">
+      <circle cx="804" cy="398" r="15"/><circle cx="781" cy="493" r="12"/>
+      <circle cx="951" cy="399" r="15"/><circle cx="1000" cy="502" r="12"/>
+    </g>
+    <path d="m1000 312 61-13 32 20-4 49-61 18-27-18Z" fill="url(#walker)" stroke-width="3"/>
+    <path d="m1061 299 32 20-61 16-32-23Z" fill="#e1dfc4" stroke-width="2"/>
+    <path d="m1037 341 39-11v13l-39 10Z" fill="#3c5652" stroke="none"/>
+    <path d="m1065 359 54 9 2 8-56-4ZM1058 369l53 12v8l-53-13Z" fill="#5d746b" stroke-width="2"/>
+  </g>
+  <g fill="#e6d3a8" opacity=".44"><ellipse cx="777" cy="583" rx="53" ry="10"/><ellipse cx="1015" cy="581" rx="56" ry="12"/></g>
+  <!-- Thin vocabulary signal; neutral cyan like the game's learning gates. -->
+  <g transform="translate(572 375) rotate(-13)">
+    <ellipse rx="69" ry="83" fill="#c4fff6" fill-opacity=".055" stroke="#baffee" stroke-width="12" opacity=".32" filter="url(#glow)"/>
+    <ellipse rx="69" ry="83" fill="none" stroke="#e2fff2" stroke-width="3"/>
+    <ellipse rx="75" ry="89" fill="none" stroke="#a3f6db" stroke-width="1.3" opacity=".6"/>
+    <text x="0" y="-106" fill="#294d4c" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" text-anchor="middle">el cielo</text>
+    <path d="M-4-94h8" stroke="#7aafa2" stroke-width="2"/>
+  </g>
+  <!-- Compact twin-engine fighter with swept slab wings and two cyan trails. -->
+  <g transform="translate(422 511) rotate(-18)">
+    <path d="M-75 55-59 55-56 235-71 245ZM54 55h16l-2 190-17-11Z" fill="#8cfff1" opacity=".4" filter="url(#glow)"/>
+    <path d="M-72 51-60 51-63 227-68 243ZM56 51h12l-1 192-6-16Z" fill="url(#exhaust)"/>
+    <path d="m-19-48-138 101 119-15 37 19 41-19 116 15L20-48Z" fill="#607d78" stroke="#3e625e" stroke-width="2"/>
+    <path d="m-20-57-131 99 113-19 38 23 39-23 112 19L19-57Z" fill="url(#wing)" stroke="#6d8e86" stroke-width="2"/>
+    <path d="m-115 29 68-56-4 24-27 24ZM112 29 47-27l4 24 27 24Z" fill="#dc7750"/>
+    <path d="m-37 23 14-68 7-47L0-124l17 33 9 46 13 68-24 36h-31Z" fill="url(#hull)" stroke="#6c8b82" stroke-width="2"/>
+    <path d="M-7-106 1-123l11 29 7 51-11-8Z" fill="#de7e50"/>
+    <path d="m-15-43 5-29L0-85l11 13 6 29-16 13Z" fill="#254d59" stroke="#73998f" stroke-width="2"/>
+    <path d="m-9-65 7-12 8 8 6 18-7 5Z" fill="#83c1c2" opacity=".8"/>
+    <path d="m-79-5 14-11 18 10 3 61-15 12-23-9ZM47-6l18-10L79-5l3 63-23 9-15-12Z" fill="url(#hull)" stroke="#688b83" stroke-width="2"/>
+    <path d="m-76 40 28 1v16l-12 9-20-8ZM48 41l28-1 4 18-20 8-12-9Z" fill="#395e61"/>
+    <path d="m-71 48 18 1v8l-8 5-12-6ZM53 49l18-1 2 8-12 6-8-5Z" fill="#d6ffff"/>
+    <path d="m-35-5-14 13M39-5l13 13M-26 11l10 4M14 27l11-4M-63 12l8-1" fill="none" stroke="#7d9790" stroke-width="2"/>
+    <path d="m-11 2 11-9 11 9-10 30Z" fill="#df8454"/>
+  </g>
+  <g fill="#bdc5a0" stroke="#718768" stroke-width="2"><path d="m99 610 36-30 38 13 11 41-77 9Z"/><path d="m1099 627 27-33 36 8 27 31-35 30-61-14Z"/></g>
+  <g fill="#577f46"><path d="M53 499q-15-32 7-40 24-7 32 28l-13 17Z"/><path d="M1134 500q-17-38 9-47 31-5 37 29l-17 23Z"/><path d="M681 542q-10-24 7-31 19-5 26 22l-13 13Z"/></g>
+  <path fill="url(#shade)" d="M0 0h1200v750H0z"/>
+</svg>
