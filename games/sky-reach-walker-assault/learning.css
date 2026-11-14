@@ -1,0 +1,165 @@
+/* GoLingo stays on the screen's edge; the flight view remains clear. */
+.lingo-hud{position:absolute;right:25px;top:75px;width:235px;z-index:7;padding:11px 12px 10px;pointer-events:auto;border-color:#8ee7e136;box-shadow:0 4px 24px #03152022}
+.world-label.vocabulary{max-width:180px;white-space:normal}
+.world-label.vocabulary strong{display:-webkit-box;max-width:180px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere;font-size:11px;line-height:1.25;letter-spacing:.01em;white-space:normal}
+.lingo-hud button{touch-action:manipulation}
+.lingo-hud-head{display:flex;align-items:center;gap:6px;min-height:20px}
+.lingo-mode-chip,.lingo-hud-count,.lingo-icon{background:transparent;padding:0;color:#cae9e1}
+.lingo-mode-chip{font-size:8px;letter-spacing:.15em;font-weight:700;color:var(--cyan,#8cf0eb)}
+.lingo-hud-count{font:9px monospace;opacity:.7;flex:1;text-align:right;white-space:nowrap}
+.lingo-icon{width:20px;height:20px;font-size:15px;border:1px solid #cae9e126;border-radius:3px;flex-shrink:0}
+.lingo-icon.is-muted{color:var(--orange,#ef996a);opacity:.8}
+#lingo-hud-content{display:flex;align-items:center;gap:9px;margin-top:8px;padding-top:8px;border-top:1px solid #c5e5db22}
+#lingo-hud-replay{flex-shrink:0;align-self:center;background:#99e7e111;border:1px solid #9adbd338;border-radius:50%;width:28px;height:28px;font-size:17px;color:var(--cyan,#8cf0eb);padding:0 0 1px 2px}
+.lingo-current{min-width:0;flex:1}
+.lingo-current strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:18px;line-height:1.2;letter-spacing:0;font-weight:600;overflow-wrap:anywhere;color:#effcf5}
+.lingo-current>span{display:block;font-size:10px;line-height:1.4;color:#c1d7d2;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lingo-hud[data-mode="listen"] .lingo-current strong{font-size:13px;font-weight:500}
+.lingo-hud[data-mode="meaning"] .lingo-current strong{font-size:15px;color:#ffd4ad}
+#lingo-hud-status{font-size:8px;line-height:1.4;color:var(--orange,#ef996a);margin-top:7px}
+.lingo-hud.is-collapsed{width:190px;padding:7px 10px}
+.lingo-hud.is-collapsed #lingo-hud-content,.lingo-hud.is-collapsed #lingo-hud-status{display:none}
+.top-actions .lingo-menu-button{color:var(--cyan,#8cf0eb);border-color:#8ce6df60;font-weight:600;letter-spacing:.03em}
+.top-actions .lingo-menu-button.is-off{color:#b8ccc7;border-color:#cfede127}
+.lingo-intro-open{position:absolute;right:29px;top:25px;width:211px;padding:11px 14px;text-align:left;background:#082532b0;border:1px solid #a4e7dc48;border-radius:5px;z-index:45;pointer-events:auto;backdrop-filter:blur(8px);box-shadow:0 5px 20px #06192322}
+.lingo-intro-open>span{font-size:10px;font-weight:700;color:var(--cyan,#8cf0eb);letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lingo-intro-open>span b{font-size:6px;letter-spacing:.15em;font-weight:500;opacity:.7}
+.lingo-intro-open>strong{display:block;margin-top:7px;font-size:12px;font-weight:500;color:#e8f6ee}
+.lingo-intro-open>small{display:block;font-size:8px;color:#b2ccc5;margin-top:6px}
+#stage.lingo-panel-open{touch-action:manipulation}
+.lingo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:25px;background:#04131ccc;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);z-index:60;touch-action:pan-x pan-y;pointer-events:auto}
+.lingo-panel{display:flex;flex-direction:column;width:min(850px,100%);max-height:calc(100% - 10px);overflow:hidden;background:linear-gradient(115deg,#102b36f5,#081b25f5);border-color:#b8e3d539;color:#e8f6ee}
+.lingo-panel button,.lingo-panel input,.lingo-panel select,.lingo-panel textarea,.lingo-panel a{touch-action:manipulation}
+.lingo-panel button{font:inherit}
+.lingo-panel button:disabled{opacity:.38;cursor:default;filter:none}
+.lingo-panel input,.lingo-panel select,.lingo-panel textarea{font:inherit;accent-color:var(--cyan,#8cf0eb);color:#e7f6ee}
+.lingo-panel input[type="checkbox"]{width:14px;height:14px;margin:0;flex-shrink:0;cursor:pointer}
+.lingo-panel textarea,.lingo-panel input:not([type="checkbox"]):not([type="range"]){user-select:text;-webkit-user-select:text;touch-action:pan-x pan-y}
+.lingo-panel select{background:#071b27;border:1px solid #bbded335;border-radius:4px;max-width:100%;padding:8px 9px;outline:none;font-size:11px}
+.lingo-panel textarea{display:block;width:100%;height:115px;resize:vertical;min-height:78px;max-height:260px;border:1px solid #b5dfd33b;border-radius:4px;background:#061923;font:12px/1.6 monospace;color:#e9f5ee;outline:none;padding:11px 12px}
+.lingo-panel textarea:focus,.lingo-panel select:focus{border-color:#8ce5da92;box-shadow:0 0 0 2px #8ce5da10}
+.lingo-panel textarea::placeholder{color:#668986;opacity:1}
+.lingo-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 28px 18px;flex-shrink:0}
+.lingo-eyebrow{font-size:8px;letter-spacing:.2em;color:var(--cyan,#8cf0eb)}
+.lingo-panel-header h2{font-size:27px;font-weight:400;letter-spacing:-.025em;line-height:1.15;margin:9px 0 0}
+.lingo-panel-header p{font-size:10px;line-height:1.4;color:#a4c4be;margin:9px 0 0}
+.lingo-close{background:#d3eee90c;border:1px solid #d2e8df30;width:32px;height:32px;border-radius:4px;font-size:25px!important;font-weight:300;line-height:25px;flex-shrink:0}
+.lingo-tabs{display:flex;align-items:center;gap:6px;border-top:1px solid #bcddd21c;border-bottom:1px solid #bcddd22b;padding:0 28px;flex-shrink:0;min-height:44px}
+.lingo-tabs>button{height:44px;padding:0 14px;background:transparent;border-bottom:2px solid transparent;font-size:11px;color:#98bbb5}
+.lingo-tabs>button[aria-selected="true"]{border-color:var(--cyan,#8cf0eb);color:#e1fff5}
+.lingo-tabs button span{font:9px monospace;padding:2px 5px;border:1px solid #b4e2d32c;border-radius:3px;margin-left:6px;color:var(--cyan,#8cf0eb)}
+.lingo-enable{margin-left:auto;font-size:10px;display:flex;gap:7px;align-items:center;white-space:nowrap;color:#cbe2d8}
+.lingo-scroll{overflow:auto;overscroll-behavior:contain;min-height:0;padding:21px 28px 26px;scrollbar-width:thin;scrollbar-color:#456c6c #0b232d;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+.lingo-mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.lingo-mode-grid button{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:80px;padding:15px 15px 13px;background:#c8e9df04;border:1px solid #b6dccc26;border-radius:4px;text-align:left;color:#abc9c2}
+.lingo-mode-grid button.selected{background:#8de5dd0d;border-color:#8ce8d97a;color:#e5fff4;box-shadow:inset 0 0 14px #8ce8d905}
+.lingo-mode-grid button>span{position:absolute;right:12px;top:13px;font:8px monospace;opacity:.45}
+.lingo-mode-grid button>b{font-size:15px;font-weight:500;letter-spacing:.01em}
+.lingo-mode-grid button>small{font-size:9px;margin-top:8px;line-height:1.45;opacity:.76}
+.lingo-description{font-size:11px;line-height:1.65;color:#b7d3ca;margin:13px 1px 19px;max-width:690px}
+.lingo-settings-grid{display:grid;grid-template-columns:1fr 1.12fr;gap:25px}
+.lingo-section{min-width:0}
+.lingo-section h3,.lingo-review-heading h3{font-size:11px;font-weight:600;letter-spacing:.06em;color:#dff2e9;margin:0 0 12px}
+.lingo-field{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#a9c8bf;font-size:10px;margin-bottom:11px}
+.lingo-field>select{width:70%;min-width:0}
+.lingo-checks{display:grid;gap:10px;margin:11px 0 12px}
+.lingo-checks label{display:flex;align-items:center;gap:7px;font-size:10px;line-height:1.35;color:#bfd9cf}
+.lingo-checks.two{grid-template-columns:1fr 1fr;gap:9px 12px;margin-top:0}
+.lingo-small{font-size:9px;line-height:1.6;color:#8faea8;margin:8px 0 0}
+.lingo-range-row{display:grid;grid-template-columns:92px 1fr;align-items:center;gap:10px;margin:11px 0}
+.lingo-range-row label{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#a9c8bf}
+.lingo-range-row output{font:9px monospace;color:var(--orange,#ef996a)}
+.lingo-range-row input{width:100%;height:15px;margin:0}
+.lingo-audio-row{display:flex;align-items:center;gap:10px;margin-top:9px}
+.lingo-audio-row>span{font-size:8px;line-height:1.4;color:#93b8ad;min-width:0;overflow-wrap:anywhere}
+.lingo-small-button{background:#b5e7dc07;border:1px solid #c5e5d837;border-radius:4px;padding:8px 10px;font-size:10px!important;color:#c7e7db;white-space:nowrap}
+.lingo-primary{display:flex;justify-content:center;align-items:center;gap:16px;background:#e9a174;color:#122b2d;border:1px solid #f6c5a144;border-radius:4px;padding:10px 14px;font-size:11px!important;font-weight:700!important;white-space:nowrap;box-shadow:0 4px 14px #03151a22}
+.lingo-primary>span{margin-left:auto;font-size:17px;line-height:1}
+.lingo-import-section{margin-top:23px;border-top:1px solid #b5d8cc22;padding-top:20px}
+.lingo-section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.lingo-section-heading h3{margin:0}.lingo-section-heading>span{font-size:8px;letter-spacing:.1em;color:#789c94}
+.lingo-language-row{display:grid;grid-template-columns:1fr 25px 1fr;gap:10px;align-items:end;max-width:500px}
+.lingo-language-row label{font-size:9px;color:#b2d1c6;display:grid;gap:7px}
+.lingo-language-row>span{text-align:center;padding-bottom:9px;font-size:15px;color:var(--orange,#ef996a)}
+.lingo-language-row select{width:100%}
+.lingo-text-label{display:block;color:#c5dfd4;font-size:10px;margin:15px 0 8px}
+.lingo-import-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.lingo-file-button{background:#c6e9de09;border:1px solid #c5e5d837;color:#cae1d7;padding:9px 10px;border-radius:4px;font-size:10px;cursor:pointer;white-space:nowrap;position:relative}
+.lingo-file-button input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+#lingo-file-name{font-size:8px;color:#9ab8ae;max-width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lingo-append{display:flex;align-items:center;gap:7px;font-size:9px;color:#a7c9bd;margin-left:auto}
+.lingo-demo-section{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px;border-top:1px solid #b5d8cc22;padding-top:18px}
+.lingo-demo-section>div{flex:1}.lingo-demo-section h3{margin-bottom:4px}.lingo-demo-section .lingo-small{margin:0}
+.lingo-demo-section select{min-width:110px}
+.lingo-panel-footer{display:flex;gap:22px;align-items:center;justify-content:space-between;border-top:1px solid #b5d8cc26;padding:15px 28px 18px;background:#081c26;flex-shrink:0}
+.lingo-panel-footer>div{min-width:0;flex:1}
+#lingo-notice{font-size:10px;line-height:1.5;color:#a2e7cf;margin:0 0 5px;overflow-wrap:anywhere}
+#lingo-notice:empty{display:none}#lingo-notice.is-error{color:#ffb094}
+.lingo-panel-footer a{font-size:9px;color:#9be2d6;text-decoration:none;line-height:1.4}
+.lingo-panel-footer a span{color:#7faaa0;font-size:8px}
+.lingo-panel-footer>.lingo-primary{min-width:153px;flex-shrink:0}
+.lingo-review-heading{display:flex;align-items:center;gap:15px;justify-content:space-between;margin-bottom:22px}
+.lingo-review-heading h3{margin:0}.lingo-review-heading .lingo-small{margin-top:7px}
+.lingo-review-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.lingo-danger{color:#e9b298;border-color:#e7ab8b3d}
+#lingo-review-empty{text-align:center;padding:35px 30px;color:#9cbbb1}
+#lingo-review-empty>span{font-size:45px;color:#8ce7d0;opacity:.8;display:block;margin-bottom:18px}
+#lingo-review-empty h3{font-size:19px;font-weight:400;color:#d9f1e5;margin:0 0 13px}
+#lingo-review-empty p{font-size:11px;line-height:1.8;max-width:360px;margin:auto}
+.lingo-review-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-top:1px solid #b3dac721}
+.lingo-review-number{font:9px monospace;color:#789f94;align-self:flex-start;margin-top:3px;min-width:18px}
+.lingo-review-copy{flex:1;min-width:0}
+.lingo-review-copy>strong{display:block;font-size:15px;font-weight:500;color:#e4f4eb;overflow-wrap:anywhere}
+.lingo-review-copy>span{display:block;font-size:11px;line-height:1.5;color:#adcfc1;margin-top:4px;overflow-wrap:anywhere}
+.lingo-review-copy>small{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px;line-height:1.5;color:#7fa79a;margin-top:4px}
+.lingo-review-play{display:flex;gap:6px;flex-shrink:0}
+.lingo-review-play .lingo-small-button{font-size:9px!important;padding:7px 9px}
+#lingo-review-more{display:block;margin:20px auto 0;min-width:150px}
+#lingo-copy-fallback{margin-top:20px}#lingo-copy-text{min-height:160px}
+body.touch .lingo-hud{right:23px;top:65px;width:213px;padding:9px 11px}
+body.touch .lingo-current strong{font-size:16px}body.touch .lingo-current>span{font-size:9px}
+body.touch .lingo-hud.is-collapsed{width:181px;padding:6px 9px}
+body.touch .lingo-panel textarea{font-size:16px;line-height:1.5}
+@container skyreach (max-height:600px){
+  .lingo-panel{max-height:100%;width:min(790px,100%)}
+  .lingo-overlay{padding:16px 23px}
+  .lingo-panel-header{padding:15px 22px 12px;gap:15px}
+  .lingo-panel-header h2{font-size:22px;margin-top:7px}.lingo-panel-header p{font-size:9px;margin-top:6px}
+  .lingo-tabs{padding:0 22px;min-height:36px}.lingo-tabs>button{height:36px;font-size:10px;padding:0 10px}.lingo-enable{font-size:9px}
+  .lingo-scroll{padding:16px 22px 21px}.lingo-mode-grid button{min-height:66px;padding:12px}
+  .lingo-mode-grid button>b{font-size:13px}.lingo-mode-grid button>small{font-size:8px;margin-top:6px}.lingo-mode-grid button>span{top:11px;right:10px}
+  .lingo-description{font-size:10px;margin:10px 0 16px}.lingo-settings-grid{gap:20px}
+  .lingo-panel-footer{padding:11px 22px 13px;gap:15px}.lingo-panel-footer>.lingo-primary{min-width:140px;padding:9px 12px}
+  .lingo-panel-footer a{font-size:8px}.lingo-panel-footer a span{font-size:7px}
+  #lingo-notice{font-size:9px;max-height:40px;overflow:auto}
+  .lingo-intro-open{right:24px;top:18px;width:185px;padding:9px 12px}.lingo-intro-open>strong{font-size:11px;margin-top:6px}.lingo-intro-open>small{font-size:7px;margin-top:5px}
+}
+@container skyreach (max-height:440px){
+  .lingo-hud,body.touch .lingo-hud{right:23px;top:57px;width:190px;padding:7px 9px 8px}
+  .lingo-hud-head{min-height:17px;gap:5px}.lingo-mode-chip{font-size:7px}.lingo-hud-count{font-size:8px}
+  .lingo-icon{height:18px;width:18px;font-size:13px}
+  #lingo-hud-content{margin-top:5px;padding-top:6px;gap:7px}.lingo-current strong,body.touch .lingo-current strong{font-size:14px;line-height:1.18;-webkit-line-clamp:2}
+  .lingo-current>span,body.touch .lingo-current>span{font-size:8px;margin-top:3px}
+  .lingo-hud[data-mode="listen"] .lingo-current strong{font-size:11px}.lingo-hud[data-mode="meaning"] .lingo-current strong{font-size:12px}
+  #lingo-hud-replay{width:24px;height:24px;font-size:15px}
+  .lingo-hud.is-collapsed,body.touch .lingo-hud.is-collapsed{width:174px;padding:5px 8px}
+  #lingo-hud-status{font-size:7px;margin-top:5px}
+  .lingo-intro-open{right:23px;top:17px;width:178px;padding:8px 11px}.lingo-intro-open>span{font-size:9px}.lingo-intro-open>span b{font-size:5px}.lingo-intro-open>strong{font-size:10px;margin-top:5px}.lingo-intro-open>small{font-size:6px;margin-top:4px}
+  .lingo-overlay{padding:12px 22px}.lingo-panel{max-height:100%;width:min(760px,100%)}
+  .lingo-panel-header{padding:11px 18px 10px}.lingo-panel-header h2{font-size:19px;margin-top:5px}.lingo-panel-header p{font-size:8px;margin-top:5px}.lingo-eyebrow{font-size:7px}
+  .lingo-close{width:28px;height:28px;font-size:22px!important}
+  .lingo-tabs{padding:0 18px;min-height:33px;gap:4px}.lingo-tabs>button{height:33px;font-size:9px;padding:0 9px}.lingo-tabs button span{font-size:8px;margin-left:4px}.lingo-enable{font-size:8px;gap:6px}
+  .lingo-scroll{padding:13px 18px 18px}.lingo-mode-grid{gap:8px}.lingo-mode-grid button{min-height:61px;padding:10px}.lingo-mode-grid button>b{font-size:12px}.lingo-mode-grid button>small{font-size:8px;margin-top:6px}.lingo-mode-grid button>span{font-size:7px;top:10px;right:9px}
+  .lingo-description{font-size:9px;margin:9px 0 14px;line-height:1.55}.lingo-settings-grid{gap:20px}.lingo-section h3,.lingo-review-heading h3{font-size:10px;margin-bottom:10px}
+  .lingo-panel select{font-size:10px;padding:7px 8px}.lingo-field{font-size:9px;margin-bottom:9px}.lingo-checks{gap:8px;margin:9px 0 10px}.lingo-checks label{font-size:9px}.lingo-panel input[type="checkbox"]{width:13px;height:13px}
+  .lingo-checks.two{gap:8px 10px}.lingo-small{font-size:8px}.lingo-range-row{margin:9px 0;grid-template-columns:84px 1fr}.lingo-range-row label{font-size:9px}.lingo-range-row output{font-size:8px}
+  .lingo-small-button{font-size:9px!important;padding:7px 9px}.lingo-primary{font-size:10px!important;padding:9px 11px}.lingo-audio-row>span{font-size:7px}
+  .lingo-import-section{margin-top:18px;padding-top:16px}.lingo-section-heading>span{font-size:7px}.lingo-language-row label{font-size:8px;gap:6px}.lingo-text-label{font-size:9px;margin-top:12px}
+  .lingo-file-button{font-size:9px;padding:8px 9px}.lingo-append{font-size:8px}.lingo-import-tools{gap:8px}.lingo-demo-section{margin-top:19px;padding-top:15px;gap:10px}
+  .lingo-panel-footer{padding:9px 18px 11px;gap:13px}.lingo-panel-footer>.lingo-primary{font-size:9px!important;padding:8px 10px;min-width:130px}.lingo-panel-footer a{font-size:7px}.lingo-panel-footer a span{font-size:7px}#lingo-notice{font-size:8px;max-height:33px}
+  .lingo-review-heading{margin-bottom:15px;gap:12px}.lingo-review-actions{gap:5px}.lingo-review-row{gap:10px;padding:11px 0}.lingo-review-copy>strong{font-size:13px}.lingo-review-copy>span{font-size:10px}.lingo-review-copy>small{font-size:9px}.lingo-review-play .lingo-small-button{font-size:8px!important;padding:6px 8px}
+}
+@container skyreach (max-width:680px){
+  .lingo-panel-header h2{font-size:17px}.lingo-settings-grid{grid-template-columns:1fr}.lingo-tabs{flex-wrap:wrap}.lingo-enable{margin:0 0 0 auto}.lingo-panel-footer a span{display:none}
+  .lingo-review-heading{align-items:flex-start;flex-direction:column}.lingo-review-play{flex-direction:column}.lingo-append{margin-left:0}.lingo-import-tools>.lingo-primary{margin-left:auto}
+}

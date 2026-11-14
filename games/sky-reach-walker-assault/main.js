@@ -4,6 +4,9 @@ import {createWorld} from './worlds.js';
 import {createSky} from './sky.js';
 import {GameAudio} from './audio.js';
 import {Effects} from './effects.js';
+import {learning} from './lesson.js';
+import {createLearningUI} from './learning-ui.js';
+import {WordSignals} from './word-signals.js';
 
 // Every destination lives in this scene. Travel moves the ship and camera;
 // surface, atmosphere, fleet and exploration never exchange scenes.
@@ -16,6 +19,14 @@ const UP=V(0,1,0),ZERO=V(),temp=V(),temp2=V(),temp3=V(),direction=V(),right=V(),
 const stage=$('stage'),canvas=$('view');
 const isTouch=matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0;
 document.body.classList.toggle('touch',isTouch);
+stage.classList.toggle('rotated',isTouch&&innerHeight>innerWidth);
+let state,lessonWasPaused=false;
+const lessonUI=createLearningUI(learning,{
+  stage,
+  onOpen(){lessonWasPaused=!!state?.paused;if(state){state.paused=true;releaseAll();document.exitPointerLock?.();}learning.setRunning(false);},
+  onClose(){if(state){state.paused=lessonWasPaused;releaseAll();learning.setRunning(state.started&&!state.paused);}},
+  onToast(message){if(state)toast(message);}
+});
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance',alpha:false});
 renderer.setPixelRatio(Math.min(devicePixelRatio,isTouch?1.35:1.65));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -51,7 +62,7 @@ for(const definition of definitions){
 }
 const elysia=worlds.get('elysia');
 let stored={};try{stored=JSON.parse(localStorage.getItem('sky-reach-progress-v1')||'{}')}catch{}
-const state={started:false,paused:false,mode:'flight',world:'elysia',space:false,altitude:30,time:0,
+state={started:false,paused:false,mode:'flight',world:'elysia',space:false,altitude:30,time:0,
   pos:V(9,elysia.height(9,92)+31,92),yaw:0,pitch:0,roll:0,speed:0,cruise:74,
   hull:100,shield:100,fuel:100,life:100,jetpack:100,crystals:Math.max(0,Number(stored.crystals)||0),cores:new Set((stored.cores||[]).filter(x=>worlds.has(x))),
   target:'vesper',assist:true,invert:true,muted:false,cable:null,travel:null,landing:null,verticalSpeed:0,fireCooldown:0,
@@ -78,6 +89,51 @@ dreadShield.scale.set(395,250,700);dreadShield.position.copy(capitals.dreadnough
 const shieldLines=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(1,20,10)),new THREE.LineBasicMaterial({color:0x9efa9c,transparent:true,opacity:.065,depthWrite:false}));shieldLines.scale.copy(dreadShield.scale);shieldLines.position.copy(dreadShield.position);shieldLines.rotation.copy(dreadShield.rotation);scene.add(shieldLines);
 const fighters=[];
 for(let i=0;i<8;i++){const mesh=createFighter({enemy:true});mesh.scale.setScalar(1.35);scene.add(mesh);fighters.push({mesh,index:i,hp:3,alive:true,pos:V(),prev:V(),velocity:V(),phase:i*Math.PI/4,fireTimer:3+i*.4,hitFlash:0});}
+const actorWordCache=new Map(),wrongWordTimes=new Map();
+function liveActors(kind){
+  if(kind==='walker')return walkers.filter(x=>!x.down).map(x=>({id:x.index,position:x.mesh.position}));
+  if(kind==='fighter')return fighters.filter(x=>x.alive).map(x=>({id:x.index,position:x.pos}));
+  const w=worlds.get(state.world);
+  return w.crystals.map((x,i)=>({id:i,position:x.position.clone().add(w.offset)})).filter(x=>!w.mined.has(x.id));
+}
+function actorWord(kind,id){
+  const snap=learning.getSnapshot(),choices=learning.getChoices();
+  if(!snap.enabled||!choices.length)return null;
+  if(snap.mode==='learn')return choices[0];
+  const alive=liveActors(kind),key=`${kind}:${state.world}:${snap.question.id}:${alive.map(x=>x.id).join(',')}`;
+  let cache=actorWordCache.get(kind);
+  if(!cache||cache.key!==key){
+    const ordered=alive.slice().sort((a,b)=>a.position.distanceToSquared(state.pos)-b.position.distanceToSquared(state.pos));
+    const correct=choices.find(x=>learning.isCorrect(x.token))||choices[0],other=choices.filter(x=>x.token!==correct.token);
+    let seed=0;for(const ch of String(snap.question.id))seed=((seed*31)+ch.charCodeAt(0))>>>0;
+    const chosen=seed%Math.max(1,Math.min(3,ordered.length));
+    const assignments=new Map();ordered.forEach((x,i)=>assignments.set(x.id,i===chosen||!other.length?correct:other[(i+seed)%other.length]));
+    cache={key,assignments};actorWordCache.set(kind,cache);
+  }
+  return cache.assignments.get(id)||choices.find(x=>learning.isCorrect(x.token))||choices[0];
+}
+function actorTitle(kind,id,fallback){const snap=learning.getSnapshot();if(!snap.enabled||!snap.settings.showMarkers)return fallback;const choice=actorWord(kind,id);return choice?learning.textFor(choice.entry):fallback;}
+function onLanguageAnswer(result,{position=state.pos,source='signal'}={}){
+  if(!result||['stale','disabled','cooldown','invalid'].includes(result.reason))return;
+  if(result.correct){
+    if(source==='flight'||source==='cannon'){state.crystals+=2;saveProgress();}
+    effects.burst(position.clone(),0x99fff0,12,source==='flight'||source==='cannon'?4:1.5);audio.play('crystal',.35);
+    const text=learning.textFor(result.entry);toast(`Collected · ${text.length>46?text.slice(0,43)+'…':text}`);
+  }else{effects.burst(position.clone(),0xff967b,5,1.3);audio.play('ui',.3);toast('Try again · replay the prompt and choose its word');}
+}
+function completeWord(choice,source,position){
+  if(!choice||!learning.getSnapshot().enabled)return {correct:true,entry:null,reason:'disabled'};
+  const result=learning.answer(choice.token,{source});onLanguageAnswer(result,{position,source});return result;
+}
+function allowWordAction(kind,id,source,position){
+  const choice=actorWord(kind,id),snap=learning.getSnapshot();
+  if(!choice||!snap.enabled||snap.mode==='learn'||learning.isCorrect(choice.token))return true;
+  const key=`${kind}:${id}`;
+  if(state.time-(wrongWordTimes.get(key)??-99)>1.2){wrongWordTimes.set(key,state.time);completeWord(choice,source,position);}
+  return false;
+}
+const wordSignals=new WordSignals({scene,labels:$('labels'),camera,learning,onAnswer:onLanguageAnswer});
+learning.subscribe((snapshot,event)=>{stage.classList.toggle('learning-active',snapshot.enabled);stage.dataset.learningMode=snapshot.mode;});
 function resetFleet(){
   Object.assign(state.fleet,{active:false,entered:false,won:false,lostTimer:0,kills:0,halcyon:35,shield:100,dread:100,timer:0});
   for(const f of fighters){f.alive=true;f.hp=3;f.mesh.visible=true;f.fireTimer=3+f.index*.4;}
@@ -101,20 +157,20 @@ const jetMaterial=new THREE.MeshBasicMaterial({color:0x9efff5,transparent:true,o
 const pilotJets=[];for(const x of [-.21,.21]){const jet=new THREE.Mesh(new THREE.ConeGeometry(.085,.9,7),jetMaterial);jet.position.set(x,.7,.38);jet.rotation.z=Math.PI;pilot.add(jet);pilotJets.push(jet);}
 const labels=[];
 function makeLabel(name,type,getPosition,getText,visible=()=>true){
-  const element=document.createElement('div');element.className=`world-label ${type}`;element.innerHTML=`<strong>${name}</strong><small></small><i class="marker"></i>`;$('labels').appendChild(element);
-  labels.push({element,getPosition,getText,visible});return element;
+  const element=document.createElement('div');element.className=`world-label ${type}`;element.innerHTML='<strong></strong><small></small><i class="marker"></i>';element.querySelector('strong').textContent=typeof name==='function'?name():name;$('labels').appendChild(element);
+  labels.push({element,name,getPosition,getText,visible});return element;
 }
 function range(d){return d>=1000?`${(d/1000).toFixed(d>=10000?1:2)} km`:`${Math.max(0,Math.round(d))} m`;}
-for(const w of walkers)makeLabel('WALKER','hostile',()=>w.mesh.position.clone().add(V(0,98,0)),d=>range(d),()=>state.world==='elysia'&&!state.space&&!w.down);
+for(const w of walkers)makeLabel(()=>actorTitle('walker',w.index,'WALKER'),'hostile vocabulary',()=>w.mesh.position.clone().add(V(0,98,0)),d=>'WALKER · '+range(d),()=>state.world==='elysia'&&!state.space&&!w.down);
 makeLabel('LEG','leg',()=>{if(!state.cable)return V();return getLeg(state.cable.walker,0)},d=>range(d),()=>!!state.cable);
 for(const [id,c] of Object.entries(capitals))makeLabel(id.toUpperCase(),id==='dreadnought'||id==='ravager'?'hostile':'friendly',()=>c.mesh.position.clone().add(V(0,id==='dreadnought'?300:160,0)),d=>range(d),()=>state.space&&state.pos.distanceTo(c.position)<22000&&!(id==='dreadnought'&&state.fleet.won));
-for(const f of fighters)makeLabel('HOSTILE','hostile',()=>f.pos.clone().add(V(0,22,0)),d=>range(d),()=>state.space&&state.fleet.active&&f.alive&&f.pos.distanceTo(state.pos)<2600);
+for(const f of fighters)makeLabel(()=>actorTitle('fighter',f.index,'HOSTILE'),'hostile vocabulary',()=>f.pos.clone().add(V(0,22,0)),d=>'HOSTILE · '+range(d),()=>state.space&&state.fleet.active&&f.alive&&f.pos.distanceTo(state.pos)<2600);
 for(const w of worlds.values()){
   makeLabel(w.id==='elysia'?'ANCIENT SPIRE':'WARP CORE','core',()=>w.beaconWorld.clone().add(V(0,55,0)),d=>`${state.cores.has(w.id)?'RECOVERED · ':''}${range(d)}`,()=>state.world===w.id&&!state.space&&state.pos.distanceTo(w.beaconWorld)<15000);
   makeLabel(w.name,'planet',()=>w.offset.clone().add(V(0,100,0)),d=>range(d),()=>state.space&&state.target===w.id&&state.pos.distanceTo(w.offset)>3000);
 }
 makeLabel('SHIP','friendly',()=>parked.clone().add(V(0,8,0)),d=>range(d),()=>state.mode==='foot');
-makeLabel('CRYSTALS','core',()=>state.nearestCrystal?state.nearestCrystal.crystal.position.clone().add(state.nearestCrystal.world.offset).add(V(0,8,0)):V(),d=>range(d),()=>state.mode==='foot'&&!!state.nearestCrystal);
+for(const world of worlds.values())world.crystals.forEach((crystal,index)=>makeLabel(()=>actorTitle('crystal',index,'CRYSTALS'),'core vocabulary',()=>crystal.position.clone().add(world.offset).add(V(0,8,0)),d=>'CRYSTALS · '+range(d),()=>state.mode==='foot'&&state.world===world.id&&!world.mined.has(index)&&state.pos.distanceTo(crystal.position.clone().add(world.offset))<250));
 
 function saveProgress(){try{localStorage.setItem('sky-reach-progress-v1',JSON.stringify({cores:[...state.cores],crystals:state.crystals}))}catch{}}
 function announce(text,sub='',seconds=4,kicker='TACTICAL UPDATE'){$('banner-text').textContent=text;$('banner-sub').textContent=sub;$('banner-kicker').textContent=kicker;$('banner').classList.remove('hidden');state.bannerUntil=state.time+seconds;}
@@ -150,8 +206,9 @@ function attachCable(){
   if(state.cable){state.cable=null;cableLine.visible=false;cableGlow.visible=false;toast('Cable released');return;}
   const n=nearestWalker();
   if(state.world!=='elysia'||state.space||!n||n.distance>190){toast('Move closer to a walker leg');return;}
+  if(!allowWordAction('walker',n.walker.index,'walker',n.walker.mesh.position.clone().add(V(0,45,0))))return;
   const w=n.walker,angle=Math.atan2(state.pos.x-w.mesh.position.x,state.pos.z-w.mesh.position.z);
-  state.cable={walker:w,phase:'wrapping',elapsed:0,angle,wraps:0,tension:0,away:null};
+  state.cable={walker:w,phase:'wrapping',elapsed:0,angle,wraps:0,tension:0,away:null,wordChoice:actorWord('walker',w.index)};
   state.pitch=0;state.speed=42;audio.play('cable');announce('CABLE ATTACHED','Threading the legs · stay close',2,'TOW SYSTEM');
 }
 function updateCable(dt){
@@ -184,10 +241,11 @@ function updateCable(dt){
   return true;
 }
 function topple(w){
-  if(w.down)return;w.down=true;w.fall=.001;state.down++;state.cable=null;cableLine.visible=false;cableGlow.visible=false;
+  if(w.down)return;const wordChoice=state.cable?.wordChoice||actorWord('walker',w.index);w.down=true;w.fall=.001;state.down++;state.cable=null;cableLine.visible=false;cableGlow.visible=false;
   audio.play('topple');effects.burst(w.mesh.position.clone().add(V(0,48,-20)),0xffaf63,65,14);effects.dust(w.mesh.position.clone().add(V(0,4,0)),22);
   state.hull=Math.min(100,state.hull+14);state.fuel=Math.min(100,state.fuel+25);
   announce(`WALKER DOWN · ${state.down} / 3`,state.down===3?'The hills are clear. Climb to defend the Halcyon · H / ORBIT':'Turn toward the next walker',5,'ASSAULT PROGRESS');
+  completeWord(wordChoice,'walker',w.mesh.position.clone().add(V(0,40,0)));
   if(state.down===3)toast('Assault complete · H to climb to the fleet');
 }
 function enterFleet(){
@@ -251,14 +309,15 @@ function exitShip(){
 }
 function nearestDeposit(){let result=null,d=Infinity;const w=worlds.get(state.world);w.crystals.forEach((c,i)=>{if(w.mined.has(i))return;const distance=state.pos.distanceTo(c.position.clone().add(w.offset));if(distance<d){d=distance;result={crystal:c,index:i,distance,world:w}}});return result;}
 function mine(dt){const n=state.nearestCrystal;if(!n||n.distance>17){state.mining=0;return;}state.mining+=dt;effects.beam(state.pos.clone().add(V(.5,1.4,0)),n.crystal.position.clone().add(n.world.offset).add(V(0,2.4,0)),0x8ef8e7,.08,.07);
-  if(state.mining>1.25){state.mining=0;const amount=n.crystal.amount||8;state.crystals+=amount;n.world.mined.add(n.index);n.crystal.mesh.visible=false;audio.play('crystal');effects.burst(n.crystal.position.clone().add(n.world.offset).add(V(0,3,0)),0x9ef9ee,18,1.2);toast(`+${amount} crystals`);saveProgress();state.nearestCrystal=null;}
+  if(state.mining>1.25){state.mining=0;const point=n.crystal.position.clone().add(n.world.offset);if(!allowWordAction('crystal',n.index,'mining',point))return;const wordChoice=actorWord('crystal',n.index);const amount=n.crystal.amount||8;state.crystals+=amount;n.world.mined.add(n.index);n.crystal.mesh.visible=false;audio.play('crystal');effects.burst(point.clone().add(V(0,3,0)),0x9ef9ee,18,1.2);const learned=completeWord(wordChoice,'mining',point);toast(`+${amount} crystals${learned.correct&&learned.entry?' · word collected':''}`);saveProgress();state.nearestCrystal=null;}
 }
 function recoverCore(world){if(state.cores.has(world.id))return;state.cores.add(world.id);state.life=100;state.fuel=100;state.hull=Math.min(100,state.hull+35);state.crystals+=12;saveProgress();audio.play('core');effects.burst(world.beaconWorld.clone().add(V(0,12,0)),0xccffe8,50,6);
   const next=['vesper','elysia','sahra','nivalis'].find(x=>!state.cores.has(x));if(next)state.target=next;
   announce(state.cores.size===4?'DRIVE ONLINE':`WARP CORE RECOVERED · ${state.cores.size} / 4`,state.cores.size===4?'You found a way home. The sky is still yours.':`+12 crystals · Next signal: ${(next||'complete').toUpperCase()}`,6,'EXPLORATION');
+  if(learning.getSnapshot().enabled&&learning.getSnapshot().settings.speech)learning.speakSentence();
 }
 function hitPlayer(amount){if(state.invincible>0||!state.started||state.mode==='foot')return;if(state.space&&state.shield>0){const absorbed=Math.min(state.shield,amount);state.shield-=absorbed;amount-=absorbed}state.hull=Math.max(0,state.hull-amount);state.damageFlash=.55;audio.play('damage',.45);if(state.hull<25&&!state.criticalWarned){state.criticalWarned=true;announce('HULL CRITICAL','Break away · Pulse to safety with J',4,'DAMAGE ALERT');}if(state.hull<=0)restoreShip();}
-function restoreShip(){state.pos.copy(state.lastSafe);state.world=state.lastSafeWorld;state.hull=40;state.shield=60;state.fuel=Math.max(state.fuel,60);state.mode='flight';state.cable=null;state.travel=null;state.landing=null;state.pitch=.1;state.roll=0;state.speed=60;state.invincible=6;state.criticalWarned=false;pilot.visible=false;cableLine.visible=false;cableGlow.visible=false;state.damageFlash=1;camera.position.copy(state.pos).add(V(0,23,65));announce('EMERGENCY RECOVERY','Restored to your last safe altitude · hull 40%',4,'FLIGHT SYSTEMS');}
+function restoreShip(){state.pos.copy(state.lastSafe);state.world=state.lastSafeWorld;state.hull=40;state.shield=60;state.fuel=Math.max(state.fuel,60);state.mode='flight';state.cable=null;state.travel=null;state.landing=null;state.pitch=.1;state.roll=0;state.speed=60;state.invincible=6;state.criticalWarned=false;pilot.visible=false;cableLine.visible=false;cableGlow.visible=false;state.damageFlash=1;wordSignals.reset();camera.position.copy(state.pos).add(V(0,23,65));announce('EMERGENCY RECOVERY','Restored to your last safe altitude · hull 40%',4,'FLIGHT SYSTEMS');}
 function fireCannons(){
   if(state.mode==='foot'||state.mode==='landed'||state.travel||state.fireCooldown>0)return;
   state.fireCooldown=.115;audio.play('cannon',.5);
@@ -274,15 +333,17 @@ function findTarget(aim=headingVector()){
   const consider=(pos,type,obj,radius)=>{const v=pos.clone().sub(state.pos),distance=v.length(),dot=v.normalize().dot(aim),angle=state.assist?(isTouch?.83:.86):.985;if(distance>3700||dot<angle)return;const score=dot-distance*.000018;if(score>bestScore){bestScore=score;best={pos:pos.clone(),distance,type,[type]:obj,radius};}};
   if(state.space){for(const f of fighters)if(f.alive&&state.fleet.active)consider(f.pos,'fighter',f,23);if(!state.fleet.won)consider(capitals.dreadnought.position,'capital',capitals.dreadnought,230);}
   else if(state.world==='elysia')for(const w of walkers)if(!w.down)consider(w.mesh.position.clone().add(V(0,63,0)),'walker',w,35);
+  for(const signal of wordSignals.getTargets())if(signal.enabled)consider(signal.position,'signal',signal,signal.radius);
   return best;
 }
-function destroyFighter(f){if(!f.alive)return;f.alive=false;f.mesh.visible=false;state.fleet.kills++;state.fleet.halcyon=Math.min(75,state.fleet.halcyon+3);state.fuel=Math.min(100,state.fuel+6);state.shield=Math.min(100,state.shield+10);effects.burst(f.pos,0xffb66d,24,6);audio.play('topple',.25);toast(`Hostile destroyed · ${state.fleet.kills} / 8`);if(state.fleet.kills===8)announce('FIGHTERS CLEARED','Break the dreadnought shield. Finish the fight.',4,'FLEET BATTLE');}
+function destroyFighter(f){if(!f.alive)return;const wordChoice=actorWord('fighter',f.index);f.alive=false;f.mesh.visible=false;state.fleet.kills++;state.fleet.halcyon=Math.min(75,state.fleet.halcyon+3);state.fuel=Math.min(100,state.fuel+6);state.shield=Math.min(100,state.shield+10);effects.burst(f.pos,0xffb66d,24,6);audio.play('topple',.25);completeWord(wordChoice,'fighter',f.pos);toast(`Hostile destroyed · ${state.fleet.kills} / 8`);if(state.fleet.kills===8)announce('FIGHTERS CLEARED','Break the dreadnought shield. Finish the fight.',4,'FLEET BATTLE');}
 function updateShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.last.copy(s.pos);s.pos.addScaledVector(s.dir,s.vel*dt);s.life-=dt;let hit=false;
     if(s.owner==='player'){
-      if(state.space&&state.fleet.active){for(const f of fighters){if(!f.alive)continue;if(segmentDistance(f.pos,s.last,s.pos)<(state.assist?28:17)){f.hp-=s.damage;effects.burst(f.pos,0x91f5ed,4,1.8);if(f.hp<=0)destroyFighter(f);hit=true;break;}}
+      hit=wordSignals.hitTest(s.last,s.pos);
+      if(!hit&&state.space&&state.fleet.active){for(const f of fighters){if(!f.alive)continue;if(segmentDistance(f.pos,s.last,s.pos)<(state.assist?28:17)){if(allowWordAction('fighter',f.index,'fighter',f.pos)){f.hp-=s.damage;effects.burst(f.pos,0x91f5ed,4,1.8);if(f.hp<=0)destroyFighter(f);}hit=true;break;}}
         if(!hit&&!state.fleet.won&&segmentDistance(capitals.dreadnought.position,s.last,s.pos)<(state.fleet.shield>0?480:260)){if(state.fleet.shield>0){state.fleet.shield=Math.max(0,state.fleet.shield-1.65);dreadShield.material.opacity=.25;}else state.fleet.dread=Math.max(0,state.fleet.dread-1.45);effects.burst(s.pos,state.fleet.shield>0?0xb6ff91:0xffaa66,4,6);hit=true;}
-      }else if(state.world==='elysia'){for(const w of walkers)if(!w.down&&segmentDistance(w.mesh.position.clone().add(V(0,63,0)),s.last,s.pos)<34){effects.burst(s.pos,0xffb876,5,3);hit=true;break;}}
+      }else if(!hit&&state.world==='elysia'){for(const w of walkers)if(!w.down&&segmentDistance(w.mesh.position.clone().add(V(0,63,0)),s.last,s.pos)<34){effects.burst(s.pos,0xffb876,5,3);hit=true;break;}}
     }else if(s.owner==='hostile'&&segmentDistance(state.pos,s.last,s.pos)<9){hitPlayer(s.damage);hit=true;}
     if(s.life<=0||hit)shots.splice(i,1);
   }
@@ -327,7 +388,7 @@ function updateFleet(dt){
     fleet.halcyon=Math.max(0,fleet.halcyon-dt*(8-fleet.kills)*.017-dt*(fleet.dread>0?.045:0));
     if(fleet.shield>0)fleet.shield=Math.max(0,fleet.shield-dt*.1);else if(fleet.dread>0)fleet.dread=Math.max(0,fleet.dread-dt*.07);
     if(fleet.halcyon<=0){fleet.active=false;fleet.lostTimer=5;announce('HALCYON LOST','Fleet regrouping · your exploration progress is safe',5,'FLEET BATTLE');audio.play('topple');effects.burst(capitals.halcyon.position,0xffb063,70,45);}
-    if(fleet.kills===8&&fleet.shield<=0&&fleet.dread<=0&&!fleet.won){fleet.won=true;fleet.active=false;effects.burst(capitals.dreadnought.position,0xffb562,100,70);audio.play('topple');announce('HALCYON HOLDS','The way is clear. Pulse to Vesper and recover the warp core.',7,'FLEET SECURED');state.hull=Math.min(100,state.hull+35);state.shield=100;state.target='vesper';saveProgress();}
+    if(fleet.kills===8&&fleet.shield<=0&&fleet.dread<=0&&!fleet.won){fleet.won=true;fleet.active=false;effects.burst(capitals.dreadnought.position,0xffb562,100,70);audio.play('topple');announce('HALCYON HOLDS','The way is clear. Pulse to Vesper and recover the warp core.',7,'FLEET SECURED');state.hull=Math.min(100,state.hull+35);state.shield=100;state.target='vesper';saveProgress();if(learning.getSnapshot().enabled&&learning.getSnapshot().settings.speech)learning.speakSentence();}
   }
   if(fleet.lostTimer>0){fleet.lostTimer-=dt;if(fleet.lostTimer<=0){resetFleet();if(state.space&&state.pos.distanceTo(fleetCenter)<10000)enterFleet();}}
 }
@@ -404,7 +465,7 @@ function updateShip(dt){
 }
 function updateLabels(){
   const width=stage.clientWidth,height=stage.clientHeight;
-  for(const l of labels){if(!state.started||!l.visible()){l.element.style.display='none';continue;}const p=l.getPosition(),d=state.pos.distanceTo(p);temp.copy(p).project(camera);if(temp.z>1||temp.z<0||Math.abs(temp.x)>1.14||Math.abs(temp.y)>1.12){l.element.style.display='none';continue;}l.element.style.display='';l.element.style.left=`${(temp.x*.5+.5)*width}px`;l.element.style.top=`${(-temp.y*.5+.5)*height}px`;l.element.querySelector('small').textContent=l.getText(d);}
+  for(const l of labels){if(!state.started||!l.visible()){l.element.style.display='none';continue;}const p=l.getPosition(),d=state.pos.distanceTo(p);temp.copy(p).project(camera);if(temp.z>1||temp.z<0||Math.abs(temp.x)>1.14||Math.abs(temp.y)>1.12){l.element.style.display='none';continue;}l.element.style.display='';l.element.style.left=`${(temp.x*.5+.5)*width}px`;l.element.style.top=`${(-temp.y*.5+.5)*height}px`;const title=typeof l.name==='function'?l.name():l.name;l.element.querySelector('strong').textContent=title;l.element.title=title;l.element.querySelector('small').textContent=l.getText(d);}
   const lock=state.lockedTarget;
   if(lock&&state.started&&state.mode==='flight'){temp.copy(lock.pos).project(camera);$('aim-lock').classList.toggle('hidden',temp.z>1);$('aim-lock').style.left=`${(temp.x*.5+.5)*width}px`;$('aim-lock').style.top=`${(-temp.y*.5+.5)*height}px`;}else $('aim-lock').classList.add('hidden');
 }
@@ -445,9 +506,10 @@ function updateHUD(dt){
   else if(state.cores.size===4){mission='DRIVE ONLINE';helper='Four warp cores secured. Keep exploring.';number='04';}
   else{const recovered=state.cores.has(world.id);mission=`RECOVER THE WARP<br>CORE · ${state.space||recovered?state.target.toUpperCase():world.name}`;helper=recovered&&!state.space?'Core secured · return to ship · pulse to next world':state.mode==='foot'?'Follow the beacon · mine glowing deposits':state.space?'J pulse · T target · M map':'Land · exit · follow the beacon';number='03';}
   if(mission!==previousMission){$('objective-title').innerHTML=mission;previousMission=mission;}$('objective-helper').textContent=helper;$('mission-number').textContent=number;
-  const c=contextState();state.context=c.action;$('context-key').textContent=c.key;$('context-label').textContent=c.label;$('context-hint').textContent=c.hint;$('touch-action').textContent=c.touch;
+  const c=contextState(),lesson=learning.getSnapshot();state.context=c.action;$('context-key').textContent=c.key;$('context-label').textContent=c.label;$('context-hint').textContent=lesson.enabled&&lesson.mode!=='learn'&&['tow','mine'].includes(c.action)?'Replay the prompt · choose its word':c.hint;$('touch-action').textContent=c.touch;
   $('tow-panel').classList.toggle('hidden',!state.cable);if(state.cable){const pc=state.cable.phase==='wrapping'?state.cable.wraps/3:state.cable.tension;$('tension-value').textContent=Math.round(pc*100)+'%';$('tension-bar').style.width=pc*100+'%';$('tow-instruction').textContent=state.cable.phase==='wrapping'?'THREADING THE LEGS':'PULL IT TIGHT · TENSION';}
   $('fire-button').style.opacity=state.mode==='foot'?'.45':'1';$('boost-button').classList.toggle('pressed',controls.boost);$('climb-button').classList.toggle('pressed',controls.climb);$('descend-button').classList.toggle('pressed',controls.descend);$('land-button').textContent=state.mode==='landed'?'LAUNCH':'LAND';
+  stage.classList.toggle('is-fleet',fleet.active);stage.classList.toggle('on-foot',state.mode==='foot');
   if(state.time>state.bannerUntil)$('banner').classList.add('hidden');if(state.time>state.toastUntil)$('toast').classList.add('hidden');
 }
 function performContext(held=false){
@@ -456,17 +518,17 @@ function performContext(held=false){
   else if(action==='exit'||action==='enter')exitShip();else if(action==='mine')controls.mine=true;else if(action==='explore')controls.climb=true;
 }
 function releaseContext(){controls.mine=false;controls.boost=false;controls.climb=false;}
-function closeOverlays(){for(const id of ['map-overlay','help-overlay','pause-overlay'])$(id).classList.add('hidden');state.paused=false;releaseAll();}
-function openOverlay(id){for(const name of ['map-overlay','help-overlay','pause-overlay'])$(name).classList.toggle('hidden',name!==id);state.paused=true;releaseAll();document.exitPointerLock?.();if(id==='map-overlay')refreshMap();}
+function closeOverlays(){for(const id of ['map-overlay','help-overlay','pause-overlay'])$(id).classList.add('hidden');state.paused=false;releaseAll();learning.setRunning(state.started);}
+function openOverlay(id){for(const name of ['map-overlay','help-overlay','pause-overlay'])$(name).classList.toggle('hidden',name!==id);state.paused=true;releaseAll();learning.setRunning(false);document.exitPointerLock?.();if(id==='map-overlay')refreshMap();}
 function refreshMap(){document.querySelectorAll('.map-planet').forEach(button=>{button.classList.toggle('selected',button.dataset.target===state.target);const em=button.querySelector('em');if(em)em.textContent=state.cores.has(button.dataset.target)?'◆ CORE RECOVERED':'◇ WARP CORE';});$('map-target').textContent=state.target==='fleet'?'HALCYON FLEET':state.target.toUpperCase();$('map-description').textContent={elysia:'Green hills, siege walkers, and the light of the Ancient Spire.',vesper:'A pale beacon is waiting beneath the blue mushrooms.',sahra:'Amber dunes conceal another fragment of your warp drive.',nivalis:'A cold signal beyond the frozen ridges.',fleet:'A fleet in distress. Eight fighters and a shielded dreadnought.'}[state.target];}
 function cycleTarget(){const order=['vesper','elysia','sahra','nivalis','fleet'];state.target=order[(order.indexOf(state.target)+1)%order.length];toast(`Target · ${state.target.toUpperCase()}`);refreshMap();}
-function launch(){if(state.started)return;audio.unlock();state.started=true;state.speed=43;state.flightTime=0;$('intro').classList.add('hidden');$('hud').classList.remove('hidden');announce('ELYSIA · WALKER ASSAULT','Get close. Attach the cable. Hold Boost.',4,'FLIGHT SYSTEMS ONLINE');if(isTouch){const el=document.documentElement;try{const promise=el.requestFullscreen?.();promise?.then(()=>screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{})}catch{}}}
+function launch(){if(state.started)return;audio.unlock();learning.unlock();state.started=true;learning.setRunning(true);lessonUI.setGameplayVisible(true);state.speed=43;state.flightTime=0;$('intro').classList.add('hidden');$('hud').classList.remove('hidden');announce('GOLINGO · WORD FLIGHT','Fly through word signals · tow walkers · collect vocabulary',4,'SKY REACH');if(isTouch){const el=document.documentElement;try{const promise=el.requestFullscreen?.();promise?.then(()=>screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{})}catch{}}}
 $('launch').addEventListener('click',launch);
 $('land-button').onclick=beginLanding;
 $('map-button').onclick=()=>openOverlay('map-overlay');$('help-button').onclick=()=>openOverlay('help-overlay');$('pause-button').onclick=()=>openOverlay('pause-overlay');
 for(const id of ['close-map','close-help','resume-help','resume'])$(id).onclick=closeOverlays;
 $('pause-map').onclick=()=>openOverlay('map-overlay');
-$('audio-button').onclick=()=>{state.muted=!state.muted;audio.setMuted(state.muted);audio.unlock();$('audio-button').textContent=state.muted?'∅':'♪';$('audio-button').setAttribute('aria-label',state.muted?'Unmute audio':'Mute audio');};
+$('audio-button').onclick=()=>{state.muted=!state.muted;audio.setMuted(state.muted);audio.unlock();$('audio-button').textContent=state.muted?'∅':'♪';$('audio-button').setAttribute('aria-label',state.muted?'Unmute game sounds':'Mute game sounds');};
 document.querySelectorAll('.map-planet').forEach(button=>button.onclick=()=>{state.target=button.dataset.target;refreshMap();audio.play('ui',.4)});
 $('map-pulse').onclick=()=>{closeOverlays();pulseTo();};
 $('assist-setting').onchange=e=>state.assist=e.target.checked;$('invert-setting').onchange=e=>state.invert=e.target.checked;
@@ -486,6 +548,9 @@ canvas.addEventListener('pointermove',e=>{if(!state.started||state.paused)return
 canvas.addEventListener('pointerup',()=>{lookDrag=null;controls.fire=false});canvas.addEventListener('pointercancel',()=>{lookDrag=null;controls.fire=false});canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement){mouseActive=false;$('reticle').style.left='50%';$('reticle').style.top='50%';}});
 addEventListener('keydown',e=>{
+  if(stage.classList.contains('lingo-panel-open')){if(e.code==='Escape')lessonUI.close();return;}
+  if(e.target?.closest?.('input,textarea,select,[contenteditable="true"]'))return;
+  if(e.code==='KeyG'&&!e.repeat){e.preventDefault();lessonUI.open('lesson');return;}
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab'].includes(e.code))e.preventDefault();
   if(!state.started){if(e.code==='Enter'||e.code==='Space')launch();return;}
   if(['Escape','KeyP'].includes(e.code)&&!e.repeat){state.paused?closeOverlays():openOverlay('pause-overlay');return;}
@@ -497,23 +562,25 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{controls.keys.delete(e.code);if(e.code==='KeyE')controls.mine=false;});
 function releaseAll(){controls.keys.clear();for(const k of ['boost','fire','climb','descend','brake','mine'])controls[k]=false;endStick();lookDrag=null;}
 addEventListener('blur',()=>{releaseAll();if(state.started&&!state.paused)openOverlay('pause-overlay');});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseAll();if(state.started)openOverlay('pause-overlay');}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseAll();if(state.started&&!state.paused)openOverlay('pause-overlay');}});
 function resize(){stage.classList.toggle('rotated',isTouch&&innerHeight>innerWidth);const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 addEventListener('resize',resize);resize();
 camera.position.copy(state.pos).add(V(-38,15,70));camera.lookAt(0,58,-35);
 window.__skyReady=true;
 // Read-only diagnostic snapshots make support reproducible without altering play.
-window.skyReach={getState:()=>({started:state.started,paused:state.paused,mode:state.mode,world:state.world,space:state.space,position:state.pos.toArray(),altitude:Math.round(state.altitude),speed:Math.round(state.speed),hull:Math.round(state.hull),fuel:Math.round(state.fuel),crystals:state.crystals,cores:[...state.cores],down:state.down,cable:state.cable?{phase:state.cable.phase,tension:state.cable.tension,wraps:state.cable.wraps}:null,fleet:{...state.fleet},target:state.target,travel:state.travel?.target||null,nearestCrystal:state.nearestCrystal?{distance:state.nearestCrystal.distance,position:state.nearestCrystal.crystal.position.toArray()}:null,context:state.context,renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},errors:window.__skyErrors})};
+window.skyReach={getState:()=>({started:state.started,paused:state.paused,mode:state.mode,world:state.world,space:state.space,position:state.pos.toArray(),altitude:Math.round(state.altitude),speed:Math.round(state.speed),hull:Math.round(state.hull),fuel:Math.round(state.fuel),crystals:state.crystals,cores:[...state.cores],down:state.down,cable:state.cable?{phase:state.cable.phase,tension:state.cable.tension,wraps:state.cable.wraps}:null,fleet:{...state.fleet},target:state.target,travel:state.travel?.target||null,nearestCrystal:state.nearestCrystal?{distance:state.nearestCrystal.distance,position:state.nearestCrystal.crystal.position.toArray()}:null,context:state.context,learning:{...learning.getSnapshot(),signals:wordSignals.getTargets()},renderer:{calls:renderer.info.render.calls,triangles:renderer.info.render.triangles},errors:window.__skyErrors})};
 let last=performance.now(),fpsAverage=60,adaptiveTime=0;
 function frame(now){
   requestAnimationFrame(frame);const raw=Math.max(.001,(now-last)/1000);last=now;const dt=Math.min(raw,.05);
-  if(state.paused){audio.update({speed:0,boost:false,space:state.space,onFoot:true,jetpack:false,pulse:false},dt);return;}
+  if(state.paused){learning.tick(dt);audio.update({speed:0,boost:false,space:state.space,onFoot:true,jetpack:false,pulse:false},dt);return;}
   state.time+=dt;state.fireCooldown=Math.max(0,state.fireCooldown-dt);state.invincible=Math.max(0,state.invincible-dt);state.damageFlash=Math.max(0,state.damageFlash-dt*1.6);
   if(state.started){state.flightTime+=dt;state.nearestWalker=nearestWalker();if(state.mode==='foot')updateOnFoot(dt);else updateFlight(dt);if(controls.fire)fireCannons();}
-  updateShip(dt);updateRegion();updateWalkers(dt);updateFleet(dt);updateShots(dt);effects.update(dt,state.time);
+  updateShip(dt);updateRegion();updateWalkers(dt);updateFleet(dt);updateCamera(dt);
+  wordSignals.update(dt,{position:state.pos,yaw:state.yaw,pitch:state.pitch,speed:state.speed,onFoot:state.mode==='foot',space:state.space,worldId:state.world,groundAt:p=>groundAt(worlds.get(state.world),p),active:state.started&&state.mode==='flight',paused:state.paused,cable:!!state.cable,travel:!!state.travel,landing:!!state.landing,viewport:{width:stage.clientWidth,height:stage.clientHeight}});
+  updateShots(dt);effects.update(dt,state.time);learning.tick(dt);
   if(state.mode!=='foot')state.nearestCrystal=null;
   for(const w of worlds.values())if(w.group.visible)w.update(state.time);
-  state.lockedTarget=findTarget();updateCamera(dt);updateLabels();updateHUD(dt);
+  state.lockedTarget=findTarget();updateLabels();updateHUD(dt);
   $('damage-flash').style.opacity=state.damageFlash;$('speed-lines').style.opacity=state.travel?.65:(controls.boost||controls.keys.has('ShiftLeft'))?.2:0;
   audio.update({speed:state.speed,boost:controls.boost||controls.keys.has('ShiftLeft'),space:state.space,onFoot:state.mode==='foot'||state.mode==='landed',jetpack:state.mode==='foot'&&(controls.climb||controls.keys.has('Space')),pulse:!!state.travel},dt);
   renderer.render(scene,camera);

@@ -4,36 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#08151d">
-  <meta name="description" content="Sky Reach. Bring down giant siege walkers, climb into a fleet battle, and land on alien worlds. One continuous procedural flight adventure.">
-  <title>Sky Reach — Walker Assault</title>
+  <meta name="description" content="GoLingo Sky Reach. Learn languages as you fly, bring down siege walkers, defend a fleet, and discover alien worlds. Import your own words, listen, and collect vocabulary.">
+  <title>GoLingo Sky Reach — Word Flight</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%230c1c25'/%3E%3Cpath d='M24 7 39 38 24 30 9 38Z' fill='%23f38e5e'/%3E%3Cpath d='m24 16 3 13-3-2-3 2Z' fill='%2388f4ee'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./learning.css">
+  <script src="./bridge.js"></script>
 </head>
 <body>
-<main id="stage" aria-label="Sky Reach game">
+<main id="stage" aria-label="GoLingo Sky Reach language learning game">
   <canvas id="view" aria-label="Three-dimensional flight game"></canvas>
   <div class="cinema-shade" aria-hidden="true"></div>
   <div id="damage-flash" aria-hidden="true"></div>
   <div id="speed-lines" aria-hidden="true"></div>
   <div id="labels" aria-hidden="true"></div>
-  <div class="brand"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14"/><path d="m18 6 8 23-8-5-8 5Z"/><path d="M2 20h8m16-4h8"/></svg><span>SKY REACH<small>FLIGHT SYSTEM · 04</small></span></div>
+  <div class="brand"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14"/><path d="m18 6 8 23-8-5-8 5Z"/><path d="M2 20h8m16-4h8"/></svg><span>SKY REACH<small>GOLINGO · WORD FLIGHT</small></span></div>
   <div id="intro">
     <section class="launch-card">
-      <div class="eyebrow"><i></i> ELYSIA ORBITAL SECTOR</div>
+      <div class="eyebrow"><i></i> GOLINGO · ELYSIA SECTOR</div>
       <h1>SKY<br><span>REACH</span></h1>
-      <p class="intro-sub">WALKER ASSAULT <b>·</b> FLEET BATTLE <b>·</b> WARP CORE</p>
-      <p class="intro-copy">The sky is only the beginning.<br>Bring the giants down. Find a way home.</p>
-      <button id="launch" class="primary"><span>Launch</span><span class="launch-arrow">↗</span></button>
+      <p class="intro-sub">LEARN <b>·</b> LISTEN <b>·</b> EXPLORE</p>
+      <p class="intro-copy">A new language. A whole new sky.<br>Fly through words. Bring the giants down.</p>
+      <button id="launch" class="primary"><span>Launch & learn</span><span class="launch-arrow">↗</span></button>
       <div class="launch-meta"><span id="system-state"><i class="status-dot"></i> FLIGHT SYSTEMS READY</span><span>01 / ELYSIA</span></div>
-      <div class="intro-controls desktop-only">WASD fly · Mouse aim · Click fire<br>Shift boost · F tow cable · J pulse · E interact · M map</div>
-      <div class="intro-controls touch-only">Left stick steers · Pull down to climb<br>Tow a walker, then hold Boost to pull it down</div>
+      <div class="intro-controls desktop-only">WASD fly · Mouse aim · Click fire · G words<br>Shift boost · F tow · J pulse · E interact · M map</div>
+      <div class="intro-controls touch-only">Left stick steers · Pull down to climb<br>Fly through word signals · WORDS changes your lesson</div>
     </section>
     <div class="intro-coordinate">ELYSIA <span>27° 14′ N &nbsp; 08° 42′ W</span><em>MILD · 21°C</em></div>
   </div>
   <div id="hud" class="hidden">
     <section class="objective glass"><div class="eyebrow"><span class="tiny-square"></span> OBJECTIVE <span id="mission-number">01</span></div><h2 id="objective-title">WALKER ASSAULT <span>· 0 / 3</span><br>DOWN</h2><p id="objective-helper">Get close to a leg · F tow cable</p><div class="core-row"><div class="diamonds"><i></i><i></i><i></i><i></i></div><span id="core-count">0/4</span><small>WARP CORES</small></div></section>
     <div id="compass"><div class="compass-line">N <i>·</i> NE <i>·</i> E <i>·</i> SE <i>·</i> S <i>·</i> SW <i>·</i> W</div><div class="compass-notch"></div><strong id="heading">000°</strong></div>
-    <div class="top-actions"><button id="map-button" aria-label="Open system map"><span>⌘</span> MAP <kbd>M</kbd></button><button id="land-button" aria-label="Land or take off" title="Land / take off · L">LAND</button><button id="help-button" aria-label="Show controls">?</button><button id="audio-button" aria-label="Mute audio" title="Toggle sound">♪</button><button id="pause-button" aria-label="Pause game">Ⅱ</button></div>
+    <div class="top-actions"><button id="map-button" aria-label="Open system map"><span>⌘</span> MAP <kbd>M</kbd></button><button id="land-button" aria-label="Land or take off" title="Land / take off · L">LAND</button><button id="help-button" aria-label="Show controls">?</button><button id="audio-button" aria-label="Mute game sounds" title="Game sounds · word audio is in WORDS">♪</button><button id="pause-button" aria-label="Pause game">Ⅱ</button></div>
     <div id="fleet-strip" class="hidden"><div><span>HALCYON <b id="halcyon-percent">35%</b></span><i><b id="halcyon-bar"></b></i></div><div class="hostile"><span>DREADNOUGHT <b id="dread-percent">100%</b></span><i><b id="dread-bar"></b></i></div></div>
     <div id="reticle" aria-hidden="true"><span></span><i></i><i></i><i></i><i></i></div>
     <div id="aim-lock" class="hidden"><i></i><i></i></div>
@@ -54,7 +56,7 @@
     </div>
   </div>
   <div id="map-overlay" class="overlay hidden"><section class="map-panel glass"><header><div><div class="eyebrow">LOCAL SYSTEM · WARP DRIVE OFFLINE</div><h2>Chart your own course.</h2></div><button id="close-map" aria-label="Close map">×</button></header><div class="system-chart"><div class="orbit-line o1"></div><div class="orbit-line o2"></div><div class="orbit-line o3"></div><div class="map-sun"></div><div class="map-giant"><i></i><span>THE RINGED GIANT</span></div><button class="map-planet elysia" data-target="elysia"><i></i><b>ELYSIA</b><small>Green hills · Walker assault</small><em>◇ WARP CORE</em></button><button class="map-planet vesper selected" data-target="vesper"><i></i><b>VESPER</b><small>Toxic spores · −34°C</small><em>◇ WARP CORE</em></button><button class="map-planet sahra" data-target="sahra"><i></i><b>SAHRA</b><small>Amber dunes · 46°C</small><em>◇ WARP CORE</em></button><button class="map-planet nivalis" data-target="nivalis"><i></i><b>NIVALIS</b><small>Frozen frontier · −68°C</small><em>◇ WARP CORE</em></button><button class="map-planet fleet" data-target="fleet"><i>⌁</i><b>HALCYON FLEET</b><small>Distress signal · 8 hostiles</small></button></div><footer><div><span id="map-target">VESPER</span><small id="map-description">A pale beacon is waiting beneath the blue mushrooms.</small></div><button id="map-pulse" class="primary">Engage pulse <span>↗</span></button></footer></section></div>
-  <div id="help-overlay" class="overlay hidden"><section class="help-panel glass"><header><div><div class="eyebrow">PILOT HANDBOOK</div><h2>A whole sky to leave.</h2></div><button id="close-help" aria-label="Close controls">×</button></header><div class="help-columns"><div><h3>Flight</h3><p><kbd>W / S</kbd> Pitch up / down</p><p><kbd>A / D</kbd> Turn left / right</p><p><kbd>SPACE / C</kbd> Climb / descend</p><p><kbd>SHIFT</kbd> Boost · pull a cable tight</p><p><kbd>CLICK</kbd> Fire twin cannons</p><p><kbd>F</kbd> Attach / release cable</p><p><kbd>L</kbd> Assisted landing / launch</p></div><div><h3>Explore</h3><p><kbd>H</kbd> Climb to the fleet</p><p><kbd>M / T</kbd> System map / cycle target</p><p><kbd>J</kbd> Pulse to selected target</p><p><kbd>E</kbd> Exit / enter · hold to mine</p><p><kbd>SPACE</kbd> Jetpack on foot</p><p><kbd>ESC / P</kbd> Pause / resume</p><p><kbd>DRAG</kbd> Look / aim · click for pointer lock</p></div></div><div class="help-callout"><b>Bring the giants down.</b> Fly close, attach the cable, let it thread the legs, then hold Boost. Flight assist keeps the first pull forgiving.</div><div class="help-callout"><b>On a phone:</b> use the left stick to steer; pull down to climb. FIRE and BOOST are hold buttons. The context button changes to Tow, Land, Exit, or Mine.</div><div class="settings-row"><label><input id="assist-setting" type="checkbox" checked> Flight & aim assist</label><label><input id="invert-setting" type="checkbox" checked> Pull down to climb</label><button id="reset-assault">Replay walker assault</button></div><button id="resume-help" class="primary">Back to the sky <span>↗</span></button></section></div>
+  <div id="help-overlay" class="overlay hidden"><section class="help-panel glass"><header><div><div class="eyebrow">PILOT HANDBOOK</div><h2>A whole sky to leave.</h2></div><button id="close-help" aria-label="Close controls">×</button></header><div class="help-columns"><div><h3>Flight</h3><p><kbd>W / S</kbd> Pitch up / down</p><p><kbd>A / D</kbd> Turn left / right</p><p><kbd>SPACE / C</kbd> Climb / descend</p><p><kbd>SHIFT</kbd> Boost · pull a cable tight</p><p><kbd>CLICK</kbd> Fire twin cannons</p><p><kbd>F</kbd> Attach / release cable</p><p><kbd>L</kbd> Assisted landing / launch</p></div><div><h3>Explore</h3><p><kbd>H</kbd> Climb to the fleet</p><p><kbd>M / T</kbd> System map / cycle target</p><p><kbd>J</kbd> Pulse to selected target</p><p><kbd>E</kbd> Exit / enter · hold to mine</p><p><kbd>SPACE</kbd> Jetpack on foot</p><p><kbd>G</kbd> Words · lesson & review</p><p><kbd>ESC / P</kbd> Pause / resume</p><p><kbd>DRAG</kbd> Look / aim · click for pointer lock</p></div></div><div class="help-callout"><b>Learn as you explore.</b> Fly through or shoot word signals; collect words from walkers, fighters, and crystals. In Listen, hear the word and choose it. In Meaning, match the translation. Open WORDS to import a lesson, change speech, or review your discoveries.</div><div class="help-callout"><b>Bring the giants down.</b> Fly close, attach the cable, let it thread the legs, then hold Boost. Flight assist keeps the first pull forgiving.</div><div class="help-callout"><b>On a phone:</b> use the left stick to steer; pull down to climb. FIRE and BOOST are hold buttons. The context button changes to Tow, Land, Exit, or Mine.</div><div class="settings-row"><label><input id="assist-setting" type="checkbox" checked> Flight & aim assist</label><label><input id="invert-setting" type="checkbox" checked> Pull down to climb</label><button id="reset-assault">Replay walker assault</button></div><button id="resume-help" class="primary">Back to the sky <span>↗</span></button></section></div>
   <div id="pause-overlay" class="overlay hidden"><section class="pause-panel glass"><div class="eyebrow">FLIGHT SYSTEMS ON HOLD</div><h2>Take a breath.</h2><p>Your ship and the battle are paused.</p><button id="resume" class="primary">Resume flight <span>↗</span></button><button id="pause-map" class="secondary">Open system map</button></section></div>
   <div id="error-overlay" class="overlay hidden"><section class="glass error-panel"><h2>Flight systems need a restart.</h2><p id="error-message"></p><button onclick="location.reload()" class="primary">Reload game ↗</button></section></div>
 </main>
