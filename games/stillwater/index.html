@@ -4573,4 +4573,6 @@ three/build/three.module.js:
    *)
 */
 </script>
-</body></html>
+<script type="module">
+try {const params=new URLSearchParams(location.hash.slice(1));const raw=params.get('data')||params.get('golingoLesson');if(raw)window.postMessage(JSON.parse(raw),location.origin);} catch(e){console.warn('Could not read shared lesson',e);}
+</script></body></html>
