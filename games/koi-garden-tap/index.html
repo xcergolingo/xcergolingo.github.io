@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#b6d9c4" />
+  <meta name="description" content="A quiet, interactive koi pond. Release graceful koi, make ripples, and listen to the water." />
+  <title>Koi Garden — Tap &amp; Learn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css?v=3" />
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <main id="experience" aria-label="Interactive koi pond">
+    <canvas id="pond" aria-label="A touch interactive koi pond. Tap a koi to hear its word. Drag in the water to make ripples."></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="topbar interface">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="brand-copy"><div class="eyebrow">A POCKET OF STILLNESS</div><h1>Koi Garden</h1></div>
+      <div class="top-actions">
+        <button class="pill" id="modeBtn" aria-pressed="true">Pond mode</button>
+        <button class="pill" id="soundBtn" aria-label="Enable sound"><span class="sound-icon">♪</span><span>Sound off</span></button>
+        <button class="icon-button" id="hideBtn" aria-label="Hide interface" title="Hide interface"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      </div>
+    </header>
+    <section class="scene-copy interface" aria-live="polite">
+      <span class="sun-dot"></span><span id="sceneStatus">A gentle morning</span>
+      <p>Touch the water. Let your mind follow.</p>
+    </section>
+    <div class="toolbar interface" aria-label="Pond controls">
+      <button id="calmBtn" class="tool-button"><span class="tool-symbol">◌</span>Calm</button>
+      <button id="clearBtn" class="tool-button"><span class="tool-symbol">✧</span><span>Clear pond</span></button>
+      <button id="rainBtn" class="tool-button"><span class="tool-symbol">⌁</span>Rain</button>
+      <button id="vortexBtn" class="tool-button"><span class="tool-symbol">◎</span>Whirlpool</button>
+    </div>
+    <div class="hint interface" id="hint"><span class="hint-icon">✦</span>Drag across the water to make ripples</div>
+    <section class="lesson-dock interface" aria-label="GoLingo word hunt">
+      <div id="wordCard" hidden>
+        <button id="wordClose" aria-label="Hide word card">×</button>
+        <strong id="lessonWord"></strong><div id="lessonTranslation"></div>
+        <div class="word-actions"><button id="voiceBtn">▶ Hear word</button><button id="repeatBtn" aria-pressed="true">Repeat on</button></div>
+        <small id="wordMessage" role="status"></small>
+      </div>
+      <div class="lesson-row"><div><strong>GoLingo · Koi Word Hunt</strong><small id="lessonProgress" aria-live="polite"></small></div><button id="deckBtn">Word list</button><button id="basketBtn">Basket · 0</button></div>
+    </section>
+    <dialog id="deckDialog" aria-labelledby="deckTitle">
+      <form method="dialog"><button class="dialog-close" aria-label="Close word list">×</button></form>
+      <h2 id="deckTitle">Choose your words</h2>
+      <div class="deck-grid"><label>Learning language<select id="learnPreset"></select></label><label>Translation language<select id="primaryPreset"></select></label></div>
+      <button id="presetBtn">Use pond vocabulary</button>
+      <h3>Import your own</h3>
+      <p>Paste GoLingo JSON or one <code>word|translation</code> per line. For a pasted list, enter the language codes below.</p>
+      <div class="deck-grid"><label>Learning code<input id="learnCode" placeholder="ja"></label><label>Translation code<input id="primaryCode" placeholder="en"></label></div>
+      <textarea id="deckInput" rows="5" aria-label="Word list to import" placeholder="魚|fish"></textarea>
+      <p id="deckError" role="alert"></p><button id="importBtn">Load word list</button>
+    </dialog>
+    <dialog id="basketDialog" aria-labelledby="basketTitle">
+      <form method="dialog"><button class="dialog-close" aria-label="Close basket">×</button></form>
+      <h2 id="basketTitle">Your word basket</h2><p id="emptyBasket">Tap a koi to collect your first word.</p>
+      <ul id="basketList"></ul><button id="exportBtn">Export GoLingo JSON</button> <button id="resetHunt">Hunt again</button>
+    </dialog>
+    <aside id="fishPanel" class="fish-panel interface">
+      <div class="panel-heading"><div><div class="eyebrow">YOUR POND, YOUR PACE</div><h2>Invite a koi</h2></div><span class="fish-count"><b id="fishCount">0</b> swimming</span></div>
+      <div class="fish-cards">
+        <button class="fish-card" data-fish="kohaku"><span class="fish-art art-kohaku"><i></i></span><span class="fish-name">Kohaku</span><span class="fish-note">Red &amp; white</span></button>
+        <button class="fish-card" data-fish="showa"><span class="fish-art art-showa"><i></i></span><span class="fish-name">Showa</span><span class="fish-note">Ink &amp; vermilion</span></button>
+        <button class="fish-card" data-fish="ogon"><span class="fish-art art-ogon"><i></i></span><span class="fish-name">Golden Ogon</span><span class="fish-note">A living glimmer</span></button>
+        <button class="fish-card" data-fish="platinum"><span class="fish-art art-platinum"><i></i></span><span class="fish-name">Platinum</span><span class="fish-note">Silver &amp; serene</span></button>
+      </div>
+      <div class="panel-foot"><span>Choose a koi to release it</span><span class="foot-sparkle">✦</span><span>or drag it to a place you love</span></div>
+    </aside>
+    <button id="showBtn" class="show-interface" aria-label="Show interface">＋ <span>Show controls</span></button>
+    <div id="toast" class="toast" role="status"></div>
+  </main>
+  <script type="module" src="./start.js?v=3"></script>
+</body>
+</html>
