@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+<title id="title">Pogo Penguin — Word Hops</title>
+<desc id="desc">A happy black-and-white penguin bounces on a candy-red pogo stick across bright white ice floes in a turquoise sea. Snowy mountains and a yellow sun brighten the Arctic scene.</desc>
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7ed0f2"/><stop offset=".72" stop-color="#c6f3ff"/><stop offset="1" stop-color="#e2fbf9"/></linearGradient>
+  <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#48c8df"/><stop offset=".5" stop-color="#18a4cc"/><stop offset="1" stop-color="#087ca8"/></linearGradient>
+  <linearGradient id="ice" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#c9f4ff"/></linearGradient>
+  <linearGradient id="iceEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7bcadd"/><stop offset="1" stop-color="#429cbf"/></linearGradient>
+  <radialGradient id="sun"><stop stop-color="#fffdf0"/><stop offset=".35" stop-color="#fff4b9" stop-opacity=".8"/><stop offset="1" stop-color="#fff9d9" stop-opacity="0"/></radialGradient>
+  <linearGradient id="pogo" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b82c48"/><stop offset=".47" stop-color="#ff7774"/><stop offset="1" stop-color="#c63956"/></linearGradient>
+  <linearGradient id="penguin" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#2d4d64"/><stop offset=".6" stop-color="#192f48"/><stop offset="1" stop-color="#101f36"/></linearGradient>
+</defs>
+<rect width="1200" height="750" fill="url(#sky)"/>
+<circle cx="984" cy="118" r="180" fill="url(#sun)"/><circle cx="984" cy="118" r="62" fill="#fff8dc" opacity=".85"/>
+<g fill="#ffffff" opacity=".52"><ellipse cx="168" cy="128" rx="105" ry="25"/><ellipse cx="229" cy="111" rx="70" ry="33"/><ellipse cx="816" cy="168" rx="90" ry="24"/><ellipse cx="875" cy="153" rx="64" ry="28"/></g>
+<path d="M0 341 115 174 214 332 344 125 491 347 655 163 826 341 970 198 1128 347 1200 260V450H0Z" fill="#96c8d5"/>
+<path d="M115 174 65 247 117 232 160 260Z M344 125 287 209 339 185 400 225Z M655 163 602 244 660 218 711 244Z M970 198 927 263 976 243 1028 271Z" fill="#f2fdff"/>
+<path d="M0 370 200 282 336 377 515 309 676 382 886 321 1070 381 1200 305V463H0Z" fill="#b7e0e6" opacity=".8"/>
+<path d="M0 394Q260 349 520 390T1200 391V750H0Z" fill="url(#sea)"/>
+<g fill="none" stroke="#e3fcff" stroke-linecap="round" opacity=".35">
+ <path d="M35 490q68-18 146 0m12 56q49-15 99 0m655-57q79-16 174 0M980 594q64-13 137 0M42 645q88-18 179 0M920 690q80-14 165 0" stroke-width="6"/>
+ <path d="M302 437q34-7 77 0M713 423q45-9 92 0M500 722q78-12 156 0" stroke-width="4"/>
+</g>
+<!-- distant ice floes -->
+<g>
+ <path d="m860 473 53-26 83 6 35 28-33 25-90 4-48-18z" fill="#4cbbd9"/>
+ <path d="m858 462 53-26 83 6 35 28-33 25-90 4-48-18z" fill="url(#ice)"/>
+ <ellipse cx="947" cy="473" rx="27" ry="15" fill="#fc7273" opacity=".88"/><ellipse cx="947" cy="473" rx="14" ry="8" fill="#fefeff"/>
+ <path d="m164 483 61-27 88 8 31 29-39 25-92 5-49-18z" fill="#50b8d8"/>
+ <path d="m163 473 61-27 88 8 31 29-39 25-92 5-49-18z" fill="url(#ice)"/>
+ <path d="m247 445 4-18 14 10 14-7-4 22z" fill="#ffb453"/><ellipse cx="259" cy="461" rx="26" ry="11" fill="#ffc65e"/><circle cx="243" cy="456" r="3" fill="#33475c"/>
+</g>
+<!-- foreground floe side, then top -->
+<path d="M258 586 366 508 666 484 882 547 923 642 769 711 469 735 280 662Z" fill="#318ab5" opacity=".22"/>
+<path d="M243 572 366 506 665 482 868 542 904 633 752 692 450 712 264 649Z" fill="url(#iceEdge)"/>
+<path d="M243 549 366 482 665 460 868 519 904 610 752 670 450 690 264 626Z" fill="url(#ice)"/>
+<path d="M312 556 390 517 675 501 809 544 834 609 731 649 450 658 342 622Z" fill="#faffff" opacity=".76"/>
+<g fill="none" stroke="#b0e4ef" stroke-width="5" opacity=".8"><path d="m263 626 177 64 312-20 153-60"/><path d="m450 690 1 22m301-42v22m-488-66v23"/></g>
+<ellipse cx="610" cy="596" rx="120" ry="30" fill="#5bacc4" opacity=".26"/>
+<!-- target and small ice sparkle -->
+<ellipse cx="749" cy="593" rx="58" ry="21" fill="#ec7d83"/><ellipse cx="749" cy="593" rx="39" ry="14" fill="#fffafd"/><ellipse cx="749" cy="593" rx="20" ry="8" fill="#e65f6b"/>
+<g fill="#ffffff" opacity=".88"><path d="m393 552 8-19 8 19 19 8-19 7-8 19-8-19-19-7z"/><path d="m817 417 5-12 5 12 12 5-12 5-5 12-5-12-12-5z"/></g>
+<!-- red and white pogo stick -->
+<ellipse cx="573" cy="627" rx="22" ry="13" fill="#d2475c"/>
+<rect x="559" y="411" width="28" height="211" rx="12" fill="url(#pogo)" stroke="#aa3b55" stroke-width="3"/>
+<rect x="560" y="507" width="27" height="18" rx="5" fill="#f6fdff"/>
+<rect x="560" y="548" width="27" height="17" rx="5" fill="#f6fdff"/>
+<rect x="560" y="585" width="27" height="16" rx="5" fill="#f6fdff"/>
+<path d="M518 418h109" stroke="#d24660" stroke-width="18" stroke-linecap="round"/><path d="M531 418h21m48 0h22" stroke="#233c4e" stroke-width="13" stroke-linecap="round"/>
+<path d="M520 531h102" stroke="#d24660" stroke-width="13" stroke-linecap="round"/>
+<path d="M563 537q-15 7 0 14t0 14t0 14t0 14t0 14" stroke="#f7fdff" stroke-width="6" fill="none" opacity=".8"/>
+<!-- penguin -->
+<path d="M536 413q-46-11-62 42t-2 60q18 12 48-16l37-43Z" fill="#233c55"/>
+<path d="M612 412q42-18 70 24 19 43-4 70-20 8-50-20Z" fill="#233c55"/>
+<ellipse cx="577" cy="413" rx="79" ry="103" fill="url(#penguin)"/>
+<ellipse cx="598" cy="430" rx="57" ry="80" fill="#f9ffff"/>
+<ellipse cx="576" cy="323" rx="69" ry="73" fill="#1c354d"/>
+<ellipse cx="609" cy="325" rx="47" ry="50" fill="#f6ffff"/>
+<ellipse cx="620" cy="317" rx="16" ry="20" fill="#ffffff"/><ellipse cx="624" cy="318" rx="8" ry="13" fill="#24374a"/><circle cx="628" cy="313" r="3" fill="#fff"/>
+<path d="M651 340q36 2 31 18-10 19-37 6Z" fill="#ffa846"/>
+<path d="M543 504q-22 21-18 35 19 14 48-9l14-16Z M609 510q20 31 36 32 20-15-5-40Z" fill="#ffad57"/>
+<path d="M542 382q45 26 90 0" fill="none" stroke="#ef6372" stroke-width="21" stroke-linecap="round"/>
+<path d="M612 391q28 7 39 33" fill="none" stroke="#ee6372" stroke-width="15" stroke-linecap="round"/>
+<circle cx="538" cy="282" r="8" fill="#fff7df" opacity=".75"/>
+<!-- ice word label -->
+<g transform="translate(344 603) rotate(-7)">
+ <rect x="-43" y="-22" width="104" height="49" rx="12" fill="#d9f7ff" stroke="#77bfd5" stroke-width="4"/>
+ <text x="10" y="11" font-family="system-ui,sans-serif" font-size="30" font-weight="800" text-anchor="middle" fill="#246481">水</text>
+</g>
+<!-- sparkles and little arcs -->
+<g fill="none" stroke="#fff7d8" stroke-width="7" stroke-linecap="round"><path d="m730 277 11-24m11 42 23-7m-60-12-15-16"/><path d="m465 290-9-21m-10 46-18 6"/></g>
+<g font-family="system-ui, sans-serif" font-weight="900"><text x="67" y="115" fill="#ffffff" font-size="70" stroke="#3c9eb9" stroke-width="8" paint-order="stroke" letter-spacing="2">POGO</text><text x="67" y="178" fill="#ff786e" font-size="68" stroke="#fefbf4" stroke-width="7" paint-order="stroke" letter-spacing="1">PENGUIN</text><text x="72" y="213" fill="#2f728f" font-size="21" letter-spacing="5">JUMP · LISTEN · LEARN</text></g>
+</svg>

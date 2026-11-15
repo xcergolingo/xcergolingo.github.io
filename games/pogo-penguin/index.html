@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#a9e9f8" />
+  <meta name="description" content="Pogo Penguin — hop across ice floes and learn languages with GoLingo vocabulary." />
+  <title>Pogo Penguin — GoLingo Language Adventure</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap');
+    :root { font-family: 'Nunito', system-ui, sans-serif; color: #154766; --ink: #144a67; --ice: #e9fcff; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; touch-action: none; }
+    html, body { margin: 0; width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #9adff1; }
+    button { -webkit-appearance: none; appearance: none; border: 0; color: inherit; font: inherit; cursor: pointer; touch-action: manipulation; }
+    button:focus-visible { outline: 3px solid #ffbd62; outline-offset: 3px; }
+    #game { position: absolute; inset: 0; overflow: hidden; }
+    #game canvas { display: block; width: 100%; height: 100%; outline: none; }
+    #lightwash { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(218,248,255,.2), transparent 28%, transparent 65%, rgba(3,72,125,.12)); }
+    #hud { position: absolute; z-index: 5; left: max(18px, env(safe-area-inset-left)); right: max(18px, env(safe-area-inset-right)); top: max(16px, env(safe-area-inset-top)); display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; gap: 12px; }
+    .scoreboard { padding: 11px 17px 12px; min-width: 131px; border: 1.5px solid rgba(255,255,255,.72); border-radius: 20px; background: rgba(241,252,255,.80); box-shadow: 0 7px 25px rgba(17,92,136,.14), inset 0 1px 2px white; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+    .stat-kicker { display: block; font-size: 9px; font-weight: 900; letter-spacing: 1.9px; color: #5a97b0; }
+    #score { display: block; font-family: 'Fredoka', system-ui, sans-serif; font-size: 37px; line-height: 1.1; font-weight: 600; letter-spacing: -.6px; color: #17465f; font-variant-numeric: tabular-nums; }
+    #bestLabel { color: #508ca5; font-size: 11px; font-weight: 900; letter-spacing: .2px; }
+    .hudRight { display: flex; gap: 8px; align-items: flex-start; }
+    #combo { align-self: center; background: #ffca66; border: 2px solid rgba(255,255,255,.8); color: #7d4613; border-radius: 30px; padding: 7px 12px; box-shadow: 0 7px 16px rgba(185,102,48,.19); font-family: 'Fredoka', system-ui, sans-serif; font-size: 15px; opacity: 0; transform: translateY(-10px) scale(.8); transition: .22s ease; white-space: nowrap; }
+    #combo.active { opacity: 1; transform: translateY(0) scale(1); }
+    #sound, #bookBtn { pointer-events: auto; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 16px; border: 1.5px solid rgba(255,255,255,.82); background: rgba(241,252,255,.82); box-shadow: 0 6px 20px rgba(17,92,136,.13); font-size: 19px; padding: 0; }
+    #levelLabel { display:block; color:#e48858; font-size:10px; font-weight:900; letter-spacing:.5px; margin-top:2px; }
+    #wordDock { position:absolute; z-index:6; top:calc(max(16px, env(safe-area-inset-top)) + 112px); left:max(16px, env(safe-area-inset-left)); width:max-content; min-width:132px; max-width:min(228px, 65vw); padding:9px 12px 10px; border-radius:17px; background:rgba(241,252,255,.86); border:1.5px solid #ffffffc9; box-shadow:0 7px 25px #1b6f9e29; pointer-events:auto; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+    #wordDock.hidden { display:none; }
+    .wordHead { display:flex; align-items:center; justify-content:space-between; gap:5px; margin-bottom:4px; }
+    #wordCount { font-size:9px; font-weight:900; letter-spacing:1.2px; color:#629db5; }
+    #wordMain { font:700 clamp(17px,5.3vw,24px)/1.15 'Fredoka',sans-serif; color:#215c77; overflow-wrap:anywhere; }
+    #wordTranslation { font-size:12px; line-height:1.3; font-weight:800; color:#cd6f4d; margin-top:4px; }
+    #wordTranslation.hidden { display:none; }
+    #wordButtons { display:flex; gap:5px; align-items:center; }
+    .wordSmallBtn { border:1px solid #d4eef5; background:#ffffffbd; border-radius:9px; min-width:27px; height:27px; padding:0 5px; font-size:12px; font-weight:900; color:#397d9d; }
+    #wordDock.collapsed { padding:6px; min-width:0; }
+    #wordDock.collapsed #wordMain, #wordDock.collapsed #wordTranslation, #wordDock.collapsed #wordCount, #wordDock.collapsed #translationToggle { display:none; }
+    #wordDock.collapsed .wordHead { margin:0; }
+    #wordDock.collapsed #dockCollapse { transform:rotate(180deg); }
+    #bottomUi { pointer-events: none; position: absolute; z-index: 5; left: 12px; right: 12px; bottom: max(24px, env(safe-area-inset-bottom)); display: grid; justify-items: center; gap: 12px; transition: opacity .15s; }
+    .pill { border: 1.5px solid rgba(255,255,255,.8); background: rgba(239,252,255,.85); box-shadow: 0 6px 24px rgba(19,90,133,.11); border-radius: 999px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    #instruction { color: #286d8e; font-size: 11px; font-weight: 900; letter-spacing: 1.45px; padding: 11px 19px; text-align: center; }
+    #chargeWrap { width: min(245px, 66vw); height: 33px; padding: 5px; opacity: 0; transform: translateY(9px); transition: .15s ease; border: 2px solid rgba(255,255,255,.83); background: rgba(255,255,255,.85); border-radius: 999px; position: relative; overflow: hidden; box-shadow: 0 7px 25px #358db32e; }
+    #chargeWrap.active { opacity: 1; transform: translateY(0); }
+    #chargeTrack { border-radius: inherit; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(90deg, #a0d8ef 0%, #b9e8f1 33%, #f6de82 48%, #f6de82 52%, #91dcd3 68%, #8eb6ef 100%); }
+    #chargeMarker { position: absolute; top: 3px; bottom: 3px; left: 50%; width: 5px; border-radius: 10px; background: #20627f; border: 1px solid white; box-shadow: 0 0 0 2px #20627f50; transition: left .03s linear; }
+    #toast { position: absolute; left: 50%; top: 27%; z-index: 7; pointer-events: none; display: flex; flex-direction: column; align-items: center; width: 100%; opacity: 0; transform: translate(-50%, 32px) scale(.75); text-shadow: 0 3px 0 rgba(17,87,120,.15), 0 6px 24px #3f73993c; }
+    #toast.pop { animation: toastPop 1.15s cubic-bezier(.2,.85,.3,1) both; }
+    #toastTitle { font: 700 clamp(31px, 9.3vw, 53px)/1 'Fredoka', sans-serif; letter-spacing: .5px; color: #fff7ce; -webkit-text-stroke: 1.4px #d79551; }
+    #toastSub { margin-top: 5px; color: white; font: 900 13px 'Nunito', sans-serif; letter-spacing: 1.3px; }
+    @keyframes toastPop { 0%{opacity:0;transform:translate(-50%,35px) scale(.5) rotate(-6deg)} 19%{opacity:1;transform:translate(-50%,-8px) scale(1.1) rotate(2deg)} 39%{transform:translate(-50%,0) scale(1)} 75%{opacity:1} 100%{opacity:0;transform:translate(-50%,-42px) scale(.97)} }
+    #warning { position: absolute; z-index: 6; left: 50%; top: 22%; transform: translateX(-50%); opacity: 0; border-radius: 30px; padding: 10px 18px; background: #fef1d8; color: #d26831; font: 900 12px 'Nunito',sans-serif; letter-spacing: 1.5px; box-shadow: 0 6px 20px #b9593655; white-space: nowrap; pointer-events: none; }
+    #warning.visible { opacity: 1; animation: pulse .45s ease-in-out infinite alternate; }
+    @keyframes pulse { to { transform: translateX(-50%) scale(1.07); } }
+    .overlay { position: absolute; z-index: 10; inset: 0; display: flex; align-items: center; justify-content: center; padding: 22px; background: linear-gradient(180deg, rgba(101,189,222,.10), rgba(27,93,147,.13)); transition: opacity .28s ease, visibility .28s; }
+    .overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .panel { width: min(100%, 364px); padding: 25px 22px 24px; border-radius: 35px; text-align: center; background: linear-gradient(150deg, rgba(255,255,255,.97), rgba(226,248,255,.94)); border: 3px solid rgba(255,255,255,.98); box-shadow: 0 24px 75px rgba(25,90,138,.26), 0 8px 0 rgba(56,147,182,.17); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .seal { margin: 0 auto 7px; width: 72px; height: 72px; border-radius: 27px; background: linear-gradient(140deg,#b9f3f0,#67cbdc); display: grid; place-items: center; font-size: 44px; box-shadow: inset 0 2px 7px #ffffffad, 0 9px 0 #64b6cb33; transform: rotate(-7deg); }
+    .eyebrow { font: 900 11px 'Nunito',sans-serif; letter-spacing: 2.8px; color: #63a0bb; margin-top: 18px; }
+    h1 { margin: 8px 0 4px; font: 700 clamp(40px, 12vw, 55px)/.9 'Fredoka', sans-serif; letter-spacing: -1.7px; color: #205b7f; }
+    h1 span { display: block; color: #ef7258; }
+    .tagline { margin: 16px 0 7px; font: 900 15px 'Nunito', sans-serif; letter-spacing: 1px; color: #e48b55; }
+    .desc { margin: 0 auto 20px; max-width: 245px; color: #6f9cb0; font-size: 13px; line-height: 1.55; font-weight: 800; }
+    .primary { width: 100%; max-width: 265px; background: linear-gradient(180deg,#ffac73,#f16f5b); color: white; border-radius: 18px; padding: 14px 20px; font: 700 22px 'Fredoka', sans-serif; box-shadow: inset 0 2px 0 #ffffff70, 0 7px 0 #cb574a, 0 13px 18px #cc786340; transition: transform .13s, box-shadow .13s; }
+    .primary:active { transform: translateY(5px); box-shadow: inset 0 2px 0 #ffffff70, 0 2px 0 #cb574a, 0 5px 9px #cc786340; }
+    .micro { color: #8bb4c4; font-size: 11px; font-weight: 900; letter-spacing: 1.1px; margin-top: 20px; }
+    .secondaryBtn { display:block; margin:12px auto 0; border-radius:12px; background:transparent; color:#488da5; font-size:11px; font-weight:900; letter-spacing:1px; padding:9px 12px; }
+    .learningPanel { max-height:91dvh; overflow-y:auto; touch-action:pan-y; text-align:left; border-radius:27px; padding:21px; }
+    #learningOverlay { z-index:12; }
+    .learningPanel h2 { margin:0; font:700 25px 'Fredoka',sans-serif; color:#24617f; }
+    .learningPanel p { margin:5px 0 13px; color:#789fac; font-size:12px; line-height:1.5; font-weight:800; }
+    .settingsHead { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    #closeLearning { width:33px; height:33px; border-radius:10px; background:#dcedf3; color:#245d78; font-size:18px; font-weight:900; }
+    #jsonInput { display:block; width:100%; height:143px; resize:vertical; padding:11px; border-radius:12px; border:2px solid #bddfe9; background:#fbfeff; color:#214e69; font:600 11px/1.5 ui-monospace,SFMono-Regular,monospace; white-space:pre; overflow:auto; touch-action:pan-y; -webkit-user-select:text; user-select:text; }
+    #jsonInput::placeholder { color:#8cabb9; }
+    .settingLine { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #d9edf4; color:#2d6984; font-weight:900; font-size:12px; }
+    .settingLine input { width:19px; height:19px; accent-color:#f07859; touch-action:manipulation; }
+    .settingsActions { display:flex; gap:8px; margin-top:15px; }
+    .settingsActions .primary { font-size:16px; border-radius:13px; padding:11px; box-shadow:inset 0 1px 0 #ffffff70, 0 4px 0 #cb574a; }
+    .settingsActions .secondaryBtn { margin:0; border:1.5px solid #c4e0ea; border-radius:13px; background:#e1f3f9; color:#32738c; font-size:11px; letter-spacing:0; }
+    #importStatus { min-height:27px; font-size:11px; margin:12px 0 2px; }
+    .sponsor { color:#6f9eb2; font-size:10px; font-weight:900; letter-spacing:1px; text-align:center; margin-top:13px; }
+    .sponsor a { color:#3288a8; text-decoration:none; touch-action:manipulation; }
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #f7ad5c; vertical-align: 1px; margin: 0 5px; }
+    .gameover .panel { padding-top: 29px; }
+    .gameover h2 { margin: 4px 0 0; font: 700 36px 'Fredoka',sans-serif; color: #205b7f; }
+    .gameover p { margin: 4px 0 16px; color: #6a9ab1; font-weight: 800; }
+    .finalScore { font: 700 63px/.95 'Fredoka',sans-serif; color: #f0795e; margin: 14px 0 0; }
+    .finalCaption { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #78a7b8; }
+    .finalStats { display: flex; justify-content: space-evenly; gap: 10px; margin: 18px 0 22px; }
+    .finalStats > div { min-width: 90px; border-radius: 15px; background: #e3f5fc; padding: 10px; }
+    .finalStats strong { display: block; color: #275f7e; font: 700 21px 'Fredoka',sans-serif; }
+    .finalStats small { display: block; color: #7b9eaf; font-weight: 900; letter-spacing: .5px; font-size: 10px; }
+    #orientation { display: none; position: absolute; right: 12px; bottom: 14px; z-index: 11; font-size: 11px; font-weight: 900; color: #165778; background: #e8faffda; border-radius: 20px; padding: 8px 12px; pointer-events: none; }
+    @media (orientation: landscape) and (max-height: 540px) { #orientation { display: block; } .panel { padding: 15px 20px; max-width: 330px; } .seal { display: none; } h1 { font-size: 37px; } .eyebrow { margin-top: 0; } .desc { margin-bottom: 12px; } .micro { margin-top: 10px; } #instruction { padding: 8px 12px; } }
+    @media (max-width: 430px) { #combo { position:absolute; top:48px; right:0; font-size:12px; padding:6px 9px; } }
+    @media (max-width: 350px) { #hud { left: 10px; right: 10px; } .scoreboard { padding: 9px 12px; } #score { font-size: 31px; } #sound, #bookBtn { width:36px; height:36px; } #wordDock { top:117px; } }
+    @media (prefers-reduced-motion: reduce) { .overlay, #combo { transition: none; } }
+  </style>
+</head>
+<body>
+  <div id="game" aria-label="3D penguin jumping game"></div>
+  <div id="lightwash"></div>
+  <header id="hud">
+    <div class="scoreboard"><span class="stat-kicker">SCORE</span><span id="score">0</span><span id="bestLabel">BEST 0</span><span id="levelLabel">LEVEL 1</span></div>
+    <div class="hudRight"><span id="combo">✦ x2 COMBO</span><button id="bookBtn" aria-label="Load GoLingo words" title="Load GoLingo words">📚</button><button id="sound" aria-label="Toggle sound" title="Toggle sound">♫</button></div>
+  </header>
+  <div id="wordDock" class="hidden" aria-live="polite">
+    <div class="wordHead"><span id="wordCount">WORDS 1 / 16</span><div id="wordButtons"><button class="wordSmallBtn" id="replayWord" aria-label="Repeat current word">🔊</button><button class="wordSmallBtn" id="translationToggle" aria-label="Show translation">译</button><button class="wordSmallBtn" id="dockCollapse" aria-label="Collapse word card">⌃</button></div></div>
+    <div id="wordMain">水</div><div id="wordTranslation" class="hidden">water</div>
+  </div>
+  <div id="toast" role="status" aria-live="polite"><div id="toastTitle">PERFECT!</div><div id="toastSub">+100 POINTS</div></div>
+  <div id="warning">⚠ WATCH THE ICE!</div>
+  <div id="bottomUi"><div id="chargeWrap"><div id="chargeTrack"></div><div id="chargeMarker"></div></div><div class="pill" id="instruction">HOLD · SLIDE TO AIM · RELEASE TO JUMP</div></div>
+  <div class="overlay" id="titleOverlay">
+    <div class="panel">
+      <div class="seal" aria-hidden="true">🐧</div>
+      <div class="eyebrow">A TINY ARCTIC ADVENTURE</div>
+      <h1>POGO <span>PENGUIN</span></h1>
+      <div class="tagline">ONE MORE JUMP?</div>
+      <p class="desc">Bouncier jumps, trickier floes, and new words on every landing. Learn as you play!</p>
+      <button class="primary" id="startBtn">LET'S BOUNCE!</button>
+      <button class="secondaryBtn" id="titleWords">📚 USE MY GOLINGO WORDS</button>
+      <div class="micro">HOLD + SLIDE TO AIM <span class="dot"></span> RELEASE TO HOP</div>
+    </div>
+  </div>
+  <div class="overlay hidden" id="learningOverlay">
+    <div class="panel learningPanel">
+      <div class="settingsHead"><h2>📚 Your GoLingo words</h2><button id="closeLearning" aria-label="Close word settings">×</button></div>
+      <p>Paste the JSON from GoLingo. Every word keeps its own translation and pronunciation language.</p>
+      <textarea id="jsonInput" spellcheck="false" aria-label="GoLingo vocabulary JSON" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"id":"101","word":"水","translation":"water"}]}'></textarea>
+      <div class="settingLine"><label for="showTranslationSetting">Show translation after landing</label><input id="showTranslationSetting" type="checkbox" /></div>
+      <div class="settingLine"><label for="repeatSetting">Repeat spoken word automatically</label><input id="repeatSetting" type="checkbox" checked /></div>
+      <div class="settingsActions"><button class="primary" id="loadWords">LOAD WORDS</button><button class="secondaryBtn" id="exportBasket">EXPORT BASKET</button></div>
+      <p id="importStatus" role="status">16 sample Japanese words are ready to play.</p>
+      <div class="sponsor">LEARN MORE AT <a href="https://www.golingoapp.com" target="_blank" rel="noopener noreferrer">GOLINGOAPP.COM</a></div>
+    </div>
+  </div>
+  <div class="overlay hidden gameover" id="endOverlay" aria-live="polite">
+    <div class="panel">
+      <div class="seal" aria-hidden="true">🐧</div>
+      <h2 id="endTitle">SPLASH DOWN!</h2>
+      <p id="endMessage">The ocean got the last bounce.</p>
+      <div class="finalScore" id="finalScore">0</div>
+      <div class="finalCaption">POINTS</div>
+      <div class="finalStats"><div><strong id="finalBest">0</strong><small>PERSONAL BEST</small></div><div><strong id="finalPerfect">0</strong><small>PERFECT HOPS</small></div></div>
+      <button class="primary" id="restartBtn">TRY AGAIN ↻</button>
+      <div class="micro">ONE MORE JUMP? OF COURSE.</div>
+    </div>
+  </div>
+  <div id="orientation">↻ BEST PLAYED IN PORTRAIT</div>
+  <script>
+    // Capture parent-page data even while the Three.js CDN module is loading.
+    window.__pogoIncoming=[];
+    window.addEventListener('message',e=>{
+      const v=e.data;
+      if(window.__pogoIncoming.length<8&&(typeof v==='string'&&v.trim().startsWith('{')||v&&typeof v==='object'&&(v.words||v.data||v.payload||v.gameData)))window.__pogoIncoming.push(v);
+    });
+  </script>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js';
+
+    const $ = id => document.getElementById(id);
+    const ui = {score:$('score'),best:$('bestLabel'),combo:$('combo'),warning:$('warning'),toast:$('toast'),toastTitle:$('toastTitle'),toastSub:$('toastSub'),instruction:$('instruction'),charge:$('chargeWrap'),chargeMarker:$('chargeMarker'),title:$('titleOverlay'),end:$('endOverlay'),sound:$('sound'),level:$('levelLabel'),wordDock:$('wordDock'),wordMain:$('wordMain'),wordTranslation:$('wordTranslation'),wordCount:$('wordCount'),translationToggle:$('translationToggle'),wordsPanel:$('learningOverlay'),jsonInput:$('jsonInput'),importStatus:$('importStatus')};
+    const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+    const lerp = (a,b,t)=>a+(b-a)*t;
+    const smooth = t => t*t*(3-2*t);
+    const rand=(a=0,b=1)=>a+Math.random()*(b-a);
+    const TAU=Math.PI*2;
+    let now=0,dt=0,playState='title',score=0,combo=0,perfects=0,best=0,landedAt=0,shake=0;
+    const DEMO_WORDS=[
+      ['水','water'],['魚','fish'],['氷','ice'],['海','ocean'],['雪','snow'],['跳ぶ','jump'],
+      ['鳥','bird'],['山','mountain'],['空','sky'],['速い','fast'],['冷たい','cold'],['楽しい','fun'],
+      ['波','wave'],['ペンギン','penguin'],['友達','friend'],['冒険','adventure']
+    ].map(([word,translation],i)=>({id:String(i+1),word,translation}));
+    let vocabulary=DEMO_WORDS,learningLanguage='ja',primaryLanguage='en';
+    let showTranslation=false,repeatSpeech=true,pausedFrom='title';
+    let collected=[],seenWords=new Set(),speechToken=0,speechTimer=null,activeWordAudio=null,audioWordIndex=-1;
+    const wordTextures=new Map();
+    const LANGUAGES={ja:'ja-JP',zh:'zh-CN',ko:'ko-KR',en:'en-US',es:'es-ES',fr:'fr-FR',de:'de-DE',pt:'pt-PT',it:'it-IT',vi:'vi-VN',ru:'ru-RU',ar:'ar-SA',hi:'hi-IN',th:'th-TH',uk:'uk-UA',nl:'nl-NL',sv:'sv-SE'};
+    const wordAt=index=>vocabulary[Math.max(0,index)%vocabulary.length];
+    function normalizePayload(data){
+      if(typeof data==='string'){
+        const raw=data.trim();if(raw.length>1500000)throw new Error('Vocabulary is too large');
+        let parsed=null;
+        for(const attempt of [raw,()=>decodeURIComponent(raw),()=>new TextDecoder().decode(Uint8Array.from(atob(raw),c=>c.charCodeAt(0)))]){
+          try{parsed=JSON.parse(typeof attempt==='function'?attempt():attempt);break;}catch(e){}
+        }
+        if(!parsed&&raw.includes('|'))parsed={words:raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean)};
+        if(!parsed)throw new Error('Please paste valid GoLingo JSON or word|translation lines');data=parsed;
+      }
+      if(Array.isArray(data))data={words:data};
+      if(!data||typeof data!=='object')throw new Error('Expected an object with a words array');
+      if(!Array.isArray(data.words)&&data.payload)data=data.payload;
+      if(!Array.isArray(data.words)&&data.data)data=data.data;
+      if(typeof data==='string')return normalizePayload(data);
+      if(!data||!Array.isArray(data.words))throw new Error('Missing the words array');
+      const items=data.words.slice(0,1000).map((w,i)=>{
+        if(typeof w==='string'){const [word,translation='']=w.split('|');return {id:String(i),word:(word||'').trim(),translation:translation.trim()};}
+        if(!w||typeof w!=='object')return null;
+        return {id:String(w.id??i),word:String(w.word??'').trim().slice(0,160),translation:String(w.translation??'').trim().slice(0,300),sentence:String(w.sentence??'').slice(0,500),sentenceTranslation:String(w.sentenceTranslation??'').slice(0,500),audioUrl:typeof w.audioUrl==='string'&&w.audioUrl.length<1500?w.audioUrl:null};
+      }).filter(w=>w&&w.word);
+      if(!items.length)throw new Error('No valid words found');
+      return {words:items,learningLanguage:String(data.learningLanguage||learningLanguage).slice(0,32),primaryLanguage:String(data.primaryLanguage||primaryLanguage).slice(0,32)};
+    }
+    function updateWordCard(){
+      const f=current;if(!f)return;
+      const w=wordAt(f.index);
+      ui.wordMain.textContent=w.word;
+      ui.wordTranslation.textContent=w.translation||'No translation provided';
+      ui.wordTranslation.classList.toggle('hidden',!showTranslation);
+      ui.wordCount.textContent=`WORDS ${collected.length} / ${vocabulary.length}`;
+      ui.translationToggle.textContent=showTranslation?'EN✓':'译';
+      ui.translationToggle.setAttribute('aria-label',showTranslation?'Hide translation':'Show translation');
+      ui.wordDock.classList.toggle('hidden',playState==='title'||playState==='gameover');
+    }
+    function stopSpeech(){
+      speechToken++;audioWordIndex=-1;
+      if(speechTimer!==null){clearTimeout(speechTimer);speechTimer=null;}
+      if(activeWordAudio){activeWordAudio.pause();activeWordAudio.src='';activeWordAudio=null;}
+      try{window.speechSynthesis?.cancel();}catch(e){}
+    }
+    function playWordFor(index,force=false){
+      const w=wordAt(index);if(!w||muted)return;
+      if(!force&&audioWordIndex===index)return;
+      stopSpeech();audioWordIndex=index;
+      const token=speechToken;
+      const schedule=()=>{if(token!==speechToken)return;if(repeatSpeech&&['playing','charging','jumping'].includes(playState))speechTimer=setTimeout(play,1050);};
+      const speakTTS=()=>{
+        if(token!==speechToken||muted)return;
+        try{
+          if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window)){schedule();return;}
+          const u=new SpeechSynthesisUtterance(w.word),short=learningLanguage.toLowerCase().split('-')[0];
+          u.lang=LANGUAGES[short]||learningLanguage;u.rate=.84;u.pitch=1.04;u.volume=1;
+          u.onend=schedule;u.onerror=schedule;
+          window.speechSynthesis.resume();window.speechSynthesis.speak(u);
+        }catch(e){schedule();}
+      };
+      const play=()=>{
+        if(token!==speechToken||muted)return;
+        if(w.audioUrl){try{const a=new Audio(w.audioUrl);activeWordAudio=a;let fellBack=false;const fallback=()=>{if(fellBack)return;fellBack=true;activeWordAudio=null;speakTTS();};a.onended=schedule;a.onerror=fallback;a.play().catch(fallback);return;}catch(e){}}
+        speakTTS();
+      };
+      play();
+    }
+    function collectWord(index,award=25){
+      const key=index%vocabulary.length;
+      if(!seenWords.has(key)){seenWords.add(key);collected.push({...wordAt(index)});score+=award;}
+      updateWordCard();
+    }
+    function setVocabulary(payload,source='GoLingo'){
+      const result=normalizePayload(payload),resume=playState==='paused'?pausedFrom==='playing':['playing','charging','jumping'].includes(playState);
+      stopSpeech();wordTextures.forEach(entry=>entry.texture.dispose());wordTextures.clear();
+      vocabulary=result.words;learningLanguage=result.learningLanguage;primaryLanguage=result.primaryLanguage;
+      reset();if(resume){playState=ui.wordsPanel.classList.contains('hidden')?'playing':'paused';pausedFrom='playing';}
+      ui.importStatus.textContent=`✓ Loaded ${vocabulary.length} words (${learningLanguage}). ${source==='GoLingo'?'Ready to play!':'Your new words are ready.'}`;
+      updateWordCard();
+      if(playState==='playing')playWordFor(current.index);
+      return vocabulary.length;
+    }
+    try {best=Number(localStorage.getItem('pogo-penguin-best'))||0;} catch(e){}
+    ui.best.textContent='BEST '+best.toLocaleString();
+
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0xa3dff4);
+    scene.fog=new THREE.Fog(0xb4e6f6,85,205);
+    const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,400);
+    camera.position.set(0,9.7,12.8);
+    let renderer;
+    try {renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}
+    catch(error){
+      const msg=document.createElement('div');msg.setAttribute('role','alert');msg.style.cssText='position:fixed;z-index:30;left:18px;right:18px;bottom:18px;padding:18px;border:2px solid white;border-radius:18px;background:#f0fcff;color:#23617b;text-align:center;font:800 14px/1.5 system-ui;box-shadow:0 8px 25px #12577b33;';
+      msg.textContent='This browser has 3D graphics (WebGL) disabled. Please open Pogo Penguin in Safari or Chrome with hardware acceleration enabled.';
+      document.body.appendChild(msg);throw error;
+    }
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.23;
+    renderer.domElement.style.touchAction='none';
+    $('game').appendChild(renderer.domElement);
+
+    const ambient=new THREE.HemisphereLight(0xe9fbff,0x78b8c6,2.05);scene.add(ambient);
+    const sunlight=new THREE.DirectionalLight(0xfff9df,2.15);
+    sunlight.position.set(-24,37,-27);sunlight.castShadow=true;
+    sunlight.shadow.mapSize.set(1024,1024);
+    sunlight.shadow.camera.left=-25;sunlight.shadow.camera.right=25;
+    sunlight.shadow.camera.top=32;sunlight.shadow.camera.bottom=-30;
+    sunlight.shadow.camera.near=1;sunlight.shadow.camera.far=110;
+    sunlight.shadow.bias=-.00035;
+    scene.add(sunlight,sunlight.target);
+
+    const sky=new THREE.Mesh(new THREE.SphereGeometry(230,24,16),new THREE.ShaderMaterial({
+      side:THREE.BackSide,depthWrite:false,vertexShader:`varying vec3 vDirection;void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+      fragmentShader:`varying vec3 vDirection;void main(){float h=smoothstep(-0.18,0.90,vDirection.y);vec3 low=vec3(.88,.965,1.0);vec3 high=vec3(.37,.70,.92);gl_FragColor=vec4(mix(low,high,h),1.0);}`
+    }));scene.add(sky);
+
+    const waterUniforms={uTime:{value:0}};
+    const water=new THREE.Mesh(new THREE.PlaneGeometry(650,650,42,42),new THREE.ShaderMaterial({
+      uniforms:waterUniforms,side:THREE.DoubleSide,
+      vertexShader:`uniform float uTime;varying vec3 vWorld;void main(){vec4 world=modelMatrix*vec4(position,1.);world.y+=.045*sin(world.x*.67+world.z*.30+uTime*1.15)+.032*sin(world.z*.95-world.x*.21+uTime*1.4);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,
+      fragmentShader:`uniform float uTime;varying vec3 vWorld;void main(){vec2 p=vWorld.xz;float w=sin(p.x*.62+p.y*.39+uTime*1.28)*.5+.5;float w2=sin(p.x*1.11-p.y*.72-uTime*1.1)*.5+.5;float fine=sin(p.x*2.7+p.y*1.88+uTime*1.65)*.5+.5;vec3 deep=vec3(.040,.49,.72),shallow=vec3(.075,.69,.83);vec3 c=mix(deep,shallow,.33+.36*w+.18*w2);float line=pow(max(.0,1.-abs(fine-.55)*3.4),8.);c+=vec3(.17,.22,.20)*line*.14;float glint=pow(max(0.,sin(p.x*1.74-p.y*.68+uTime*2.2)*sin(p.y*2.36+p.x*.53-uTime*1.4)),18.);c+=vec3(.32,.43,.47)*glint*.31;gl_FragColor=vec4(c,1.);}`
+    }));water.rotation.x=-Math.PI/2;water.position.y=-.36;scene.add(water);
+
+    const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness,metalness:0,flatShading:true});
+    const M={side:mat(0x93d8ed),sideDark:mat(0x67bedc),ice:mat(0xf3fdff,.82),iceTop:mat(0xffffff,.7),iceShard:mat(0xd4f5fd),bullseye:mat(0xf47979),bullring:mat(0xe85b66),black:mat(0x1c3442,.93),wing:mat(0x263c4d,.94),white:mat(0xf9feff,.84),orange:mat(0xffa84c),beak:mat(0xffbb61),red:mat(0xed5c62,.56),redDark:mat(0xba3e51,.62),metal:mat(0xd9eef3,.48),spring:mat(0xffffff,.43),eye:mat(0x1a2f39),fish:mat(0xffc45c,.6),fishTail:mat(0xff9f58,.7),snow:mat(0xffffff)};
+    const geom={sphere:new THREE.SphereGeometry(1,12,9),ball:new THREE.SphereGeometry(1,14,10),floe:new THREE.CylinderGeometry(1,1,.43,8),ring:new THREE.TorusGeometry(1,.065,6,48),cone:new THREE.ConeGeometry(1,1,5)};
+    function addMesh(parent,g,m,x=0,y=0,z=0){const mesh=new THREE.Mesh(g,m);mesh.position.set(x,y,z);parent.add(mesh);return mesh;}
+
+    const scenery=new THREE.Group();scene.add(scenery);
+    for(let i=0;i<28;i++){
+      const x=-172+i*12.8+rand(-4,4),z=-38-rand(0,85),h=rand(13,43),r=rand(9,18);
+      const mountain=new THREE.Group();mountain.position.set(x,-3.3,z);
+      const base=addMesh(mountain,new THREE.ConeGeometry(r,h,5),mat(i%3===0?0x91b9c9:(i%3===1?0xa8cbd8:0x7daac4)));base.position.y=h/2;base.rotation.y=rand(0,6.3);
+      const capH=h*rand(.22,.34);const cap=addMesh(mountain,new THREE.ConeGeometry(r*capH/h*1.04,capH,5),M.ice);cap.position.y=h-capH/2+.03;cap.rotation.y=base.rotation.y;
+      scenery.add(mountain);
+    }
+    for(let i=0;i<11;i++){
+      const isLeft=i%2===0,rock=new THREE.Group();rock.position.set((isLeft?-1:1)*rand(15,47),-.02,-rand(13,110));
+      const b=addMesh(rock,new THREE.IcosahedronGeometry(rand(2.3,5),0),M.iceShard);b.scale.set(1,rand(.5,1.1),.8);b.position.y=1;
+      const tip=addMesh(rock,new THREE.ConeGeometry(rand(.6,1.8),rand(2,5),4),M.iceTop,rand(-.5,.5),rand(2.4,4),0);tip.rotation.z=rand(-.2,.2);
+      scenery.add(rock);
+    }
+    const cloudMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.53,depthWrite:false});
+    for(let k=0;k<8;k++){
+      const cloud=new THREE.Group();cloud.position.set(rand(-100,100),rand(29,58),-rand(90,170));
+      for(let i=0;i<4;i++){let p=addMesh(cloud,geom.sphere,cloudMat,i*3.4,rand(-.4,.7),rand(-1.5,1.5));p.scale.set(rand(3.5,6),rand(1.2,2.2),rand(2.5,4));}
+      scenery.add(cloud);
+    }
+    const sunTexture=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(64,64,5,64,64,64);g.addColorStop(0,'rgba(255,255,236,1)');g.addColorStop(.18,'rgba(255,250,222,.89)');g.addColorStop(.45,'rgba(255,248,225,.28)');g.addColorStop(1,'rgba(255,248,225,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);})();
+    const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTexture,transparent:true,depthWrite:false,depthTest:false}));sunGlow.position.set(-55,62,-130);sunGlow.scale.set(62,62,1);scenery.add(sunGlow);
+
+    const floes=[];
+    let current=null,lastGeneratedX=0,lastGeneratedZ=0,nextIndex=0,aimOffsetX=0,aimOffsetZ=0,actorOffsetX=0,actorOffsetZ=0,holdStarted=0,jump=null,pointerId=null,dragStartX=0,dragStartY=0,originalAimX=0,originalAimZ=0;
+    function floeX(f,t){return f.baseX+(f.moving?Math.sin(t*f.speed+f.phase)*f.amplitude:0);}
+    function createFish(){
+      const fish=new THREE.Group();
+      const body=addMesh(fish,geom.ball,M.fish,0,.19,0);body.scale.set(.19,.14,.34);
+      const tail=addMesh(fish,new THREE.ConeGeometry(.17,.26,3),M.fishTail,0,.19,.40);tail.rotation.x=Math.PI/2;
+      const fin=addMesh(fish,new THREE.ConeGeometry(.095,.22,3),M.fishTail,0,.35,-.06);fin.rotation.x=-.25;
+      for(const x of [-.12,.12]){const e=addMesh(fish,new THREE.SphereGeometry(.027,7,6),M.eye,x,.25,-.18);e.scale.set(1,1,1);}
+      return fish;
+    }
+    function makeCracks(radius){
+      const group=new THREE.Group(),material=new THREE.LineBasicMaterial({color:0x4ba8d7,transparent:true,opacity:0,depthWrite:false});
+      for(let i=0;i<5;i++){
+        const a=i*TAU/5+rand(-.2,.2),points=[];
+        for(let j=0;j<5;j++){const d=(j/4)*radius*.82,ang=a+Math.sin(j*2.7+i)*.18;points.push(new THREE.Vector3(Math.sin(ang)*d,.105,Math.cos(ang)*d));}
+        const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material);group.add(line);
+        if(i%2===0){let p=points[3],ang=a+.73;let side=new THREE.Line(new THREE.BufferGeometry().setFromPoints([p,p.clone().add(new THREE.Vector3(Math.sin(ang)*.41,0,Math.cos(ang)*.41))]),material);group.add(side);}
+      }
+      group.visible=false;return {group,material};
+    }
+    function textureForWord(word){
+      const key=word.word;
+      if(wordTextures.has(key)){const entry=wordTextures.get(key);entry.refs++;return entry.texture;}
+      const canvas=document.createElement('canvas');canvas.width=512;canvas.height=192;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='rgba(228,248,255,.95)';ctx.fillRect(7,7,498,178);
+      ctx.strokeStyle='#8ecfdd';ctx.lineWidth=8;ctx.strokeRect(11,11,490,170);
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#245b7a';
+      let size=83;
+      do{ctx.font=`800 ${size}px system-ui, -apple-system, sans-serif`;if(ctx.measureText(word.word).width<446)break;size-=4;}while(size>30);
+      ctx.fillText(word.word,256,98,456);
+      const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+      texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+      wordTextures.set(key,{texture,refs:1});return texture;
+    }
+    function addFloeWord(group,index,radius){
+      const label=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(1.56,radius*1.03),Math.min(.58,radius*.42)),new THREE.MeshBasicMaterial({map:textureForWord(wordAt(index)),transparent:true,depthWrite:false,side:THREE.DoubleSide}));
+      label.rotation.x=-Math.PI/2;label.position.set(0,.130,radius*.62);
+      group.add(label);
+      return wordAt(index).word;
+    }
+    function makeFloe(index,baseX,z){
+      // Small precision floes appear gradually, rather than making the opening unfair.
+      const narrow=index>4&&Math.random()<Math.min(.31,.10+index*.006);
+      const radius=index===0?2.48:narrow?rand(1.12,1.42):Math.max(1.38,rand(1.65,2.15)-Math.min(.32,index*.011));
+      const group=new THREE.Group();group.position.set(baseX,.42,z);
+      const lower=addMesh(group,new THREE.CylinderGeometry(radius*.97,radius*.84,.46,8),index%4===0?M.sideDark:M.side,0,-.24,0);lower.rotation.y=Math.PI/8;
+      const top=addMesh(group,new THREE.CylinderGeometry(radius,radius*.97,.15,8),M.ice,0,-.018,0);top.rotation.y=Math.PI/8;top.receiveShadow=true;top.castShadow=true;
+      const white=addMesh(group,new THREE.CylinderGeometry(radius*.87,radius*.90,.026,8),M.iceTop,0,.071,0);white.rotation.y=Math.PI/8;white.receiveShadow=true;
+      for(let i=0;i<3;i++){
+        let angle=i*TAU/3+rand(-.5,.5),dist=radius*.77;
+        let chunk=addMesh(group,new THREE.IcosahedronGeometry(rand(.1,.22),0),M.iceShard,Math.cos(angle)*dist,.10,Math.sin(angle)*dist);chunk.scale.y=.35;
+      }
+      const bullseye=index>0&&Math.random()<.37;
+      if(bullseye){
+        const targetRadius=Math.min(.57,radius*.36);
+        const disc=addMesh(group,new THREE.CircleGeometry(targetRadius,24),M.bullseye,0,.093,0);disc.rotation.x=-Math.PI/2;
+        const ring=addMesh(group,new THREE.TorusGeometry(targetRadius*.73,.055,5,32),M.iceTop,0,.102,0);ring.rotation.x=-Math.PI/2;
+        const small=addMesh(group,new THREE.CircleGeometry(targetRadius*.28,20),M.bullring,0,.106,0);small.rotation.x=-Math.PI/2;
+      }
+      const fishIndex=index>0&&Math.random()<.36;
+      const fish=fishIndex?createFish():null;
+      if(fish){fish.position.set(radius*.49,.12,rand(-.2,.2));fish.rotation.y=rand(-2,2);group.add(fish);}
+      const wordKey=addFloeWord(group,index,radius);
+      const cracks=makeCracks(radius);group.add(cracks.group);
+      const f={index,radius,group,baseX,z,wordKey,moving:index>2&&Math.random()<(Math.min(.47,.18+index*.013)),speed:rand(.85,1.55),phase:rand(0,TAU),amplitude:rand(.52,1.18),bobPhase:rand(0,TAU),bullseye,fish,hasFish:!!fish,cracks,breaking:false,broken:false};
+      scene.add(group);floes.push(f);return f;
+    }
+    function appendFloe(){
+      const idx=nextIndex++;
+      if(idx===0){lastGeneratedX=0;lastGeneratedZ=0;return makeFloe(idx,0,0);}
+      lastGeneratedX=clamp(lastGeneratedX+rand(-2.35,2.35),-3.8,3.8);
+      lastGeneratedZ-=rand(4.85,5.45)+Math.min(.75,idx*.024);
+      return makeFloe(idx,lastGeneratedX,lastGeneratedZ);
+    }
+    function disposeFloe(f){
+      scene.remove(f.group);
+      f.group.traverse(o=>{if(o.geometry&&!Object.values(geom).includes(o.geometry))o.geometry.dispose();if(o.material&&o.material.map&&o.material.map.isCanvasTexture)o.material.dispose();});
+      f.cracks.material.dispose();
+      const entry=wordTextures.get(f.wordKey);
+      if(entry&&--entry.refs<=0){entry.texture.dispose();wordTextures.delete(f.wordKey);}
+    }
+    function ensureFloes(){while(nextIndex<(current?.index??0)+12)appendFloe();for(let i=floes.length-1;i>=0;i--){const f=floes[i];if(current&&f.index<current.index-4){disposeFloe(f);floes.splice(i,1);}}}
+    function nextFloe(){return floes.find(f=>current&&f.index===current.index+1)||null;}
+
+    const actor=new THREE.Group();scene.add(actor);
+    const pogo=new THREE.Group();actor.add(pogo);
+    const tip=addMesh(pogo,geom.ball,M.red,0,.092,0);tip.scale.set(.17,.15,.17);
+    const rubber=addMesh(pogo,new THREE.CylinderGeometry(.1,.12,.26,9),M.redDark,0,.2,0);
+    const lowBar=addMesh(pogo,new THREE.CylinderGeometry(.065,.065,.68,9),M.metal,0,.58,0);
+    const upperBar=addMesh(pogo,new THREE.CylinderGeometry(.105,.105,.75,9),M.red,0,1.02,0);
+    for(let i=0;i<3;i++){const stripe=addMesh(pogo,new THREE.CylinderGeometry(.109,.109,.095,9),M.spring,0,.79+i*.23,0);stripe.scale.y=.5;}
+    const handle=addMesh(pogo,new THREE.CylinderGeometry(.075,.075,.78,9),M.redDark,0,1.30,0);handle.rotation.z=Math.PI/2;
+    for(let x of [-.40,.40]){const grip=addMesh(pogo,geom.ball,M.black,x,1.30,0);grip.scale.set(.15,.10,.11);}
+    const peg=addMesh(pogo,new THREE.CylinderGeometry(.065,.065,.70,8),M.metal,0,.60,0);peg.rotation.z=Math.PI/2;
+    const coils=[];for(let i=0;i<=56;i++){const angle=i/56*Math.PI*11;coils.push(new THREE.Vector3(Math.cos(angle)*.145,.30+(i/56)*.40,Math.sin(angle)*.145));}
+    const coil=addMesh(pogo,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(coils),66,.034,5,false),M.spring);
+
+    const penguin=new THREE.Group();actor.add(penguin);
+    const body=addMesh(penguin,geom.ball,M.black,0,1.48,0);body.scale.set(.58,.76,.50);body.castShadow=true;
+    const belly=addMesh(penguin,geom.ball,M.white,0,1.43,-.36);belly.scale.set(.46,.62,.24);belly.castShadow=true;
+    const head=addMesh(penguin,geom.ball,M.black,0,2.08,-.055);head.scale.set(.48,.48,.46);head.castShadow=true;
+    const chin=addMesh(penguin,geom.ball,M.white,0,1.91,-.36);chin.scale.set(.31,.30,.19);
+    const beak=addMesh(penguin,new THREE.ConeGeometry(.135,.30,5),M.beak,0,1.99,-.57);beak.rotation.x=-Math.PI/2;
+    for(let sx of [-1,1]){
+      const eyeWhite=addMesh(penguin,geom.ball,M.white,sx*.24,2.16,-.38);eyeWhite.scale.set(.145,.16,.09);
+      const pupil=addMesh(penguin,geom.ball,M.eye,sx*.23,2.15,-.455);pupil.scale.set(.05,.075,.025);
+      const feet=addMesh(penguin,geom.ball,M.orange,sx*.32,.66,-.14);feet.scale.set(.26,.11,.25);
+    }
+    const wings=[];
+    for(let sx of [-1,1]){
+      const wing=addMesh(penguin,geom.ball,M.wing,sx*.56,1.48,.04);wing.scale.set(.23,.53,.26);wing.rotation.z=sx*.33;wing.castShadow=true;wings.push(wing);
+    }
+    const scarf=addMesh(penguin,new THREE.TorusGeometry(.36,.12,8,20),M.red,0,1.82,-.06);scarf.rotation.x=Math.PI/2;
+    const scarfTail=addMesh(penguin,new THREE.CapsuleGeometry(.115,.35,3,6),M.red,0,1.70,.42);scarfTail.rotation.x=.7;
+    const haloTexture=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d').createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(24,88,105,.31)');g.addColorStop(1,'rgba(24,88,105,0)');const ctx=c.getContext('2d');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
+    const shadow=addMesh(scene,new THREE.PlaneGeometry(2.7,2.7),new THREE.MeshBasicMaterial({map:haloTexture,transparent:true,depthWrite:false,opacity:.9}),0,.53,0);shadow.rotation.x=-Math.PI/2;
+
+    const indicator=new THREE.Group();scene.add(indicator);
+    const discMaterial=new THREE.MeshBasicMaterial({color:0x65f4ca,transparent:true,opacity:.25,side:THREE.DoubleSide,depthWrite:false});
+    const ringMaterial=new THREE.MeshBasicMaterial({color:0x17c5a5,transparent:true,opacity:.95,depthWrite:false});
+    const aimDisc=addMesh(indicator,new THREE.CircleGeometry(.54,40),discMaterial);aimDisc.rotation.x=-Math.PI/2;
+    const aimRing=addMesh(indicator,new THREE.TorusGeometry(.54,.047,8,48),ringMaterial,0,.014,0);aimRing.rotation.x=Math.PI/2;
+    const aimCore=addMesh(indicator,new THREE.CircleGeometry(.12,24),ringMaterial,0,.015,0);aimCore.rotation.x=-Math.PI/2;
+    const aimArrow=addMesh(indicator,new THREE.ConeGeometry(.14,.29,3),ringMaterial,0,.03,-.78);aimArrow.rotation.x=-Math.PI/2;
+    const pathGeometry=new THREE.BufferGeometry();const arcCount=28,pathPoints=new Float32Array(arcCount*3);pathGeometry.setAttribute('position',new THREE.BufferAttribute(pathPoints,3));
+    const pathLine=new THREE.Line(pathGeometry,new THREE.LineDashedMaterial({color:0xffffff,transparent:true,opacity:.82,dashSize:.28,gapSize:.2,depthWrite:false}));scene.add(pathLine);
+
+    const pCount=220,pPositions=new Float32Array(pCount*3),pColors=new Float32Array(pCount*3),particles=[];
+    for(let i=0;i<pCount;i++){pPositions[i*3+1]=-1000;particles.push({life:0,x:0,y:0,z:0,vx:0,vy:0,vz:0});}
+    const pGeom=new THREE.BufferGeometry();pGeom.setAttribute('position',new THREE.BufferAttribute(pPositions,3));pGeom.setAttribute('color',new THREE.BufferAttribute(pColors,3));
+    const pMesh=new THREE.Points(pGeom,new THREE.PointsMaterial({size:.17,transparent:true,opacity:.96,vertexColors:true,depthWrite:false,sizeAttenuation:true}));pMesh.frustumCulled=false;scene.add(pMesh);
+    let particleCursor=0;
+    function burst(x,y,z,n=20,type='ice'){
+      for(let k=0;k<n;k++){
+        const i=(particleCursor++)%pCount,p=particles[i],a=rand(0,TAU),s=rand(.75,3.1),col=new THREE.Color(type==='fish'?0xffd16c:type==='splash'?0x66cff3:type==='perfect'?0xe0fff7:0xffffff);
+        p.x=x+rand(-.3,.3);p.y=y+rand(-.1,.25);p.z=z+rand(-.3,.3);p.vx=Math.cos(a)*s;p.vz=Math.sin(a)*s;p.vy=rand(1.1,4.0);p.life=rand(.5,1.15);pColors[i*3]=col.r;pColors[i*3+1]=col.g;pColors[i*3+2]=col.b;
+      }
+      pGeom.attributes.color.needsUpdate=true;
+    }
+    function updateParticles(d){
+      for(let i=0;i<pCount;i++){
+        const p=particles[i];if(p.life>0){p.life-=d;p.x+=p.vx*d;p.y+=p.vy*d;p.z+=p.vz*d;p.vy-=7*d;p.vx*=1-d*.45;p.vz*=1-d*.45;pPositions[i*3]=p.x;pPositions[i*3+1]=p.y;pPositions[i*3+2]=p.z;}
+        else pPositions[i*3+1]=-1000;
+      }
+      pGeom.attributes.position.needsUpdate=true;
+    }
+
+    let audioCtx=null,muted=false;
+    function wakeAudio(){if(muted)return;try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
+    function tone(freq,duration=.11,kind='sine',vol=.06,endFreq=null,delay=0){
+      if(muted||!audioCtx)return;try{const t=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=kind;o.frequency.setValueAtTime(freq,t);if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.01);}catch(e){}
+    }
+    function sfx(kind){if(kind==='jump'){tone(350,.15,'sine',.065,670);tone(170,.12,'triangle',.035,250,.045);}else if(kind==='land'){tone(180,.11,'triangle',.075,87);}else if(kind==='perfect'){tone(570,.18,'sine',.075,760);tone(860,.2,'sine',.064,1100,.11);}else if(kind==='fish'){tone(800,.10,'sine',.05,1050);tone(1150,.20,'sine',.055,1500,.09);}else if(kind==='fail'){tone(280,.28,'sawtooth',.045,85);}else if(kind==='crack'){tone(190,.15,'triangle',.035,110);}}
+    ui.sound.onclick=()=>{
+      muted=!muted;ui.sound.textContent=muted?'♪̸':'♫';ui.sound.setAttribute('aria-label',muted?'Unmute sound':'Mute sound');
+      if(muted)stopSpeech();else{wakeAudio();if(['playing','charging'].includes(playState))playWordFor(current.index);}
+    };
+
+    const updateScore=()=>{ui.score.textContent=score.toLocaleString();if(score>best){best=score;ui.best.textContent='BEST '+best.toLocaleString();try{localStorage.setItem('pogo-penguin-best',String(best));}catch(e){}}};
+    function popup(title,detail,kind='perfect'){
+      ui.toastTitle.textContent=title;ui.toastSub.textContent=detail;
+      ui.toastTitle.style.color=kind==='fish'?'#fff0a8':kind==='fail'?'#d3f8ff':'#fff9d5';
+      ui.toast.classList.remove('pop');void ui.toast.offsetWidth;ui.toast.classList.add('pop');
+    }
+    function reset(){
+      stopSpeech();for(const f of floes)disposeFloe(f);
+      floes.length=0;nextIndex=0;lastGeneratedX=lastGeneratedZ=0;current=null;score=combo=perfects=0;shake=0;jump=null;aimOffsetX=0;aimOffsetZ=0;actorOffsetX=0;actorOffsetZ=0;pointerId=null;now=0;
+      collected=[];seenWords=new Set();
+      for(let i=0;i<12;i++)appendFloe();current=floes[0];
+      actor.position.set(0,.5,0);actor.rotation.set(0,0,0);landedAt=0;
+      camera.position.set(0,9.5,13.2);camera.lookAt(0,1,-5.5);
+      ui.combo.classList.remove('active');ui.warning.classList.remove('visible');ui.charge.classList.remove('active');ui.toast.classList.remove('pop');ui.instruction.textContent='HOLD · SLIDE TO AIM · RELEASE TO JUMP';ui.level.textContent='LEVEL 1';
+      collectWord(0,0);updateScore();
+      for(let i=0;i<pCount;i++)particles[i].life=0;
+    }
+    function begin(){reset();wakeAudio();playState='playing';ui.title.classList.add('hidden');ui.end.classList.add('hidden');ui.instruction.textContent='DRAG TO AIM · RELEASE TO HOP';updateWordCard();playWordFor(0);sfx('perfect');}
+    $('startBtn').addEventListener('click',begin);
+    $('restartBtn').addEventListener('click',begin);
+
+    function chargeValue(){if(playState!=='charging')return .5;return .5+.5*Math.sin((now-holdStarted)*4.1);}
+    function landingPoint(){
+      const f=nextFloe();if(!f)return null;
+      const flightTime=.84;
+      const power=(chargeValue()-.5)*2.8;
+      // Sway is part of the indicated trajectory, so timing and tiny aiming
+      // corrections matter, while the ring remains an honest landing preview.
+      const sway=Math.sin(now*3.35+current.index*.8)*Math.min(1.13,.16+current.index*.038);
+      const swayDepth=Math.cos(now*2.8+current.index*.65)*Math.min(.46,.13+current.index*.018);
+      return {x:floeX(f,now+flightTime)+aimOffsetX+sway,z:f.z+aimOffsetZ-power+swayDepth,y:.49+Math.sin((now+flightTime)*1.25+f.bobPhase)*.055};
+    }
+    function pointFloe(x,z,landingTime){
+      let found=null,min=1e8;
+      for(const f of floes){if(current&&f.index<=current.index)continue;const fx=floeX(f,landingTime),d=Math.hypot(x-fx,z-f.z);if(d<f.radius-.16&&d<min){found=f;min=d;}}
+      return found;
+    }
+    function launch(){
+      if(playState!=='playing'&&playState!=='charging')return;
+      const goal=landingPoint();if(!goal)return;
+      const start={x:actor.position.x,z:actor.position.z,y:actor.position.y};
+      jump={from:start,to:{...goal},startTime:now,duration:.84};playState='jumping';
+      ui.charge.classList.remove('active');ui.instruction.textContent='LAND ON THE CENTER FOR A PERFECT!';ui.warning.classList.remove('visible');
+      playWordFor((current?.index??0)+1);sfx('jump');
+    }
+    function land(){
+      const f=pointFloe(jump.to.x,jump.to.z,now);
+      if(!f){splash('miss');return;}
+      current=f;landedAt=now;actor.position.x=jump.to.x;actor.position.z=jump.to.z;
+      actorOffsetX=actor.position.x-floeX(f,now);actorOffsetZ=actor.position.z-f.z;
+      actor.position.y=f.group.position.y+.084;
+      const center=Math.hypot(actor.position.x-floeX(f,now),actor.position.z-f.z);
+      const perfect=center<(f.bullseye?Math.min(.50,f.radius*.34):Math.max(.30,.43-f.index*.006));
+      const gained=Math.max(35,Math.round((jump.from.z-jump.to.z)*13));
+      score+=gained;
+      burst(actor.position.x,actor.position.y,actor.position.z,perfect?29:15,perfect?'perfect':'ice');shake=perfect?.14:.075;sfx('land');
+      if(perfect){combo++;perfects++;const extra=100*Math.min(combo,10)+(f.bullseye?100:0);score+=extra;popup(`PERFECT! ×${combo}`,`+${extra} BONUS${f.bullseye?' · BULLSEYE':''}`);sfx('perfect');}
+      else {combo=0;if(center<f.radius*.62)popup('NICE HOP!',`+${gained} POINTS`,'fish');}
+      if(f.hasFish&&f.fish){f.hasFish=false;f.group.remove(f.fish);score+=150;burst(actor.position.x,actor.position.y+.6,actor.position.z,18,'fish');if(!perfect)popup('FISH CAUGHT!','+150 POINTS','fish');sfx('fish');}
+      collectWord(f.index);playWordFor(f.index);
+      ui.combo.textContent=`✦ ×${combo} COMBO`;ui.combo.classList.toggle('active',combo>1);
+      updateScore();
+      ui.level.textContent=`LEVEL ${1+Math.floor(f.index/5)}`;
+      aimOffsetX=rand(-.22,.22);aimOffsetZ=0;
+      jump=null;playState='playing';ui.instruction.textContent='HOLD · SLIDE TO AIM · RELEASE TO JUMP';
+      ensureFloes();
+      if(navigator.vibrate)navigator.vibrate(perfect?25:12);
+    }
+    function splash(reason){
+      stopSpeech();playState='falling';jump=null;shake=.34;combo=0;ui.combo.classList.remove('active');ui.warning.classList.remove('visible');ui.charge.classList.remove('active');sfx('fail');burst(actor.position.x,.1,actor.position.z,54,'splash');
+      setTimeout(()=>{
+        if(playState!=='falling')return;
+        playState='gameover';$('finalScore').textContent=score.toLocaleString();$('finalBest').textContent=best.toLocaleString();$('finalPerfect').textContent=perfects.toString();
+        $('endTitle').textContent=reason==='ice'?'ICE BREAK!':'SPLASH DOWN!';
+        $('endMessage').textContent=reason==='ice'?'You waited a little too long.':'The ocean got the last bounce.';
+        ui.end.classList.remove('hidden');ui.wordDock.classList.add('hidden');
+      },850);
+    }
+    function updateWorld(d){
+      waterUniforms.uTime.value=now;water.position.z=actor.position.z;
+      scenery.position.z=actor.position.z-28;
+      sky.position.copy(camera.position);
+      for(const f of floes){
+        f.group.position.x=floeX(f,now);f.group.position.y=.42+Math.sin(now*1.25+f.bobPhase)*.055;
+        f.group.rotation.z=Math.sin(now*.61+f.bobPhase)*.012;
+        if(f.fish){f.fish.position.y=.12+Math.sin(now*3+f.bobPhase)*.07;f.fish.rotation.y+=d*.36;}
+        if(f.breaking){f.group.position.y-=Math.min(.7,(now-f.breakingAt)*.54);f.group.rotation.z+=(now-f.breakingAt)*.05;}
+      }
+      if(playState==='playing'||playState==='charging'||playState==='title'){
+        if(current){
+          actor.position.x=floeX(current,now)+actorOffsetX;
+          actor.position.z=current.z+actorOffsetZ;
+          actor.position.y=current.group.position.y+.085+Math.max(0,Math.sin(now*11))*.075;
+        }
+      }
+      if(playState==='jumping'&&jump){
+        const t=clamp((now-jump.startTime)/jump.duration,0,1),s=smooth(t);
+        actor.position.x=lerp(jump.from.x,jump.to.x,s);actor.position.z=lerp(jump.from.z,jump.to.z,s);actor.position.y=lerp(jump.from.y,jump.to.y,t)+Math.sin(Math.PI*t)*3.45;
+        if(t>=1)land();
+      }
+      if(playState==='falling'){actor.position.y-=d*5.4;actor.rotation.z+=d*1.2;}
+      if(playState==='playing'||playState==='charging'){
+        const wait=now-landedAt;
+        const limit=Math.max(3.55,5.2-(current?.index??0)*.077);
+        if(wait>limit-2.1&&current){current.cracks.group.visible=true;current.cracks.material.opacity=clamp((wait-(limit-2.1))/1.5,0,.88);}
+        ui.warning.classList.toggle('visible',wait>limit-1.27);
+        if(wait>limit&&current){current.breaking=true;current.breakingAt=now;burst(actor.position.x,.4,actor.position.z,40,'ice');sfx('crack');splash('ice');}
+      }
+      const flight=playState==='jumping',falling=playState==='falling';
+      pogo.scale.y=flight?1.06:falling?.8:1-.075*Math.max(0,Math.sin(now*11));
+      penguin.rotation.z=flight?Math.sin((now-jump.startTime)/jump.duration*Math.PI)*-.15:Math.sin(now*2.2)*.035;
+      penguin.rotation.x=flight?-.15:Math.sin(now*8)*.022;
+      for(let i=0;i<2;i++)wings[i].rotation.z=(i===0?-1:1)*(.32+(flight?.26:Math.sin(now*8+i)*.065));
+      scarfTail.rotation.x=.7+Math.sin(now*8)*.14;
+      shadow.position.set(actor.position.x,(current?.group.position.y??.42)+.096,actor.position.z);
+      const shadowScale=1+Math.max(0,actor.position.y-.6)*.15;shadow.scale.set(shadowScale,shadowScale,1);
+      shadow.material.opacity=clamp(.88-(actor.position.y-.6)*.16,.15,.88);
+      if(!flight&&!falling){
+        const goal=landingPoint();indicator.visible=!!goal;pathLine.visible=!!goal;
+        if(goal){
+          indicator.position.set(goal.x,goal.y+.095,goal.z);
+          const f=pointFloe(goal.x,goal.z,now+.84);discMaterial.color.setHex(f?0x68ffd5:0xff948e);ringMaterial.color.setHex(f?0x14d1b2:0xff6c6c);
+          aimRing.scale.setScalar(1+Math.sin(now*6)*.07);
+          for(let i=0;i<arcCount;i++){const t=i/(arcCount-1),s=smooth(t);pathPoints[i*3]=lerp(actor.position.x,goal.x,s);pathPoints[i*3+1]=lerp(actor.position.y,goal.y,t)+Math.sin(t*Math.PI)*3.45+.13;pathPoints[i*3+2]=lerp(actor.position.z,goal.z,s);}
+          pathGeometry.attributes.position.needsUpdate=true;pathLine.computeLineDistances();
+          actor.rotation.y=lerp(actor.rotation.y,-Math.atan2(goal.x-actor.position.x,actor.position.z-goal.z),Math.min(1,d*7));
+        }
+        ui.chargeMarker.style.left=(chargeValue()*100)+'%';
+      } else {indicator.visible=false;pathLine.visible=false;}
+      const lookX=actor.position.x*.58+(nextFloe()?.group.position.x??actor.position.x)*.42;
+      const lookZ=actor.position.z-6.5;
+      const camX=lookX*.7,camY=9.55,camZ=actor.position.z+13.1;
+      const response=1-Math.exp(-d*3.4);
+      camera.position.x=lerp(camera.position.x,camX,response);
+      camera.position.y=lerp(camera.position.y,camY,response);
+      camera.position.z=lerp(camera.position.z,camZ,response);
+      if(shake>.001){camera.position.x+=rand(-shake,shake);camera.position.y+=rand(-shake*.6,shake*.6);shake*=Math.exp(-d*9);}else shake=0;
+      camera.lookAt(lookX,1.15,lookZ);
+      sunlight.position.set(actor.position.x-24,37,actor.position.z-27);sunlight.target.position.set(actor.position.x,0,actor.position.z-8);
+      sunlight.target.updateMatrixWorld();
+      updateParticles(d);
+    }
+    let lastFrame=performance.now();
+    function tick(time){requestAnimationFrame(tick);dt=Math.min(.045,(time-lastFrame)/1000);lastFrame=time;if(playState!=='gameover'&&playState!=='paused')now+=dt;updateWorld(dt);renderer.render(scene,camera);}
+    function resize(){camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth>innerHeight?53:60;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);}
+    addEventListener('resize',resize);
+
+    renderer.domElement.addEventListener('pointerdown',e=>{
+      if(playState!=='playing'||pointerId!==null)return;
+      e.preventDefault();wakeAudio();pointerId=e.pointerId;renderer.domElement.setPointerCapture(e.pointerId);
+      dragStartX=e.clientX;dragStartY=e.clientY;originalAimX=aimOffsetX;originalAimZ=aimOffsetZ;holdStarted=now;playState='charging';ui.charge.classList.add('active');ui.instruction.textContent='RELEASE TO JUMP!';
+    },{passive:false});
+    renderer.domElement.addEventListener('pointermove',e=>{
+      if(pointerId!==e.pointerId||playState!=='charging')return;
+      e.preventDefault();const sensitivity=4.4/Math.min(innerWidth,520);
+      aimOffsetX=clamp(originalAimX+(e.clientX-dragStartX)*sensitivity,-2.8,2.8);
+      aimOffsetZ=clamp(originalAimZ+(e.clientY-dragStartY)*.009,-1.4,1.4);
+    },{passive:false});
+    function endPointer(e){if(pointerId!==e.pointerId)return;e.preventDefault();pointerId=null;if(playState==='charging')launch();}
+    renderer.domElement.addEventListener('pointerup',endPointer,{passive:false});
+    renderer.domElement.addEventListener('pointercancel',e=>{if(pointerId!==e.pointerId)return;pointerId=null;if(playState==='charging'){playState='playing';ui.charge.classList.remove('active');}},{passive:false});
+    window.addEventListener('keydown',e=>{
+      if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter'].includes(e.code))e.preventDefault();
+      if(e.code==='Enter'&&(playState==='title'||playState==='gameover')){begin();return;}
+      if(playState!=='playing')return;
+      if(e.code==='ArrowLeft'||e.code==='KeyA')aimOffsetX=clamp(aimOffsetX-.28,-2.8,2.8);
+      if(e.code==='ArrowRight'||e.code==='KeyD')aimOffsetX=clamp(aimOffsetX+.28,-2.8,2.8);
+      if(e.code==='ArrowUp'||e.code==='KeyW')aimOffsetZ=clamp(aimOffsetZ-.18,-1.4,1.4);
+      if(e.code==='ArrowDown'||e.code==='KeyS')aimOffsetZ=clamp(aimOffsetZ+.18,-1.4,1.4);
+      if(e.code==='Space')launch();
+    });
+    function openLearningSettings(){
+      pausedFrom=playState==='charging'?'playing':playState;
+      pointerId=null;playState='paused';stopSpeech();ui.charge.classList.remove('active');
+      ui.wordsPanel.classList.remove('hidden');
+      $('showTranslationSetting').checked=showTranslation;
+      $('repeatSetting').checked=repeatSpeech;
+      ui.importStatus.textContent=`${vocabulary.length} words ready (${learningLanguage}). Paste GoLingo JSON to replace them.`;
+    }
+    function closeLearningSettings(){
+      ui.wordsPanel.classList.add('hidden');playState=pausedFrom;
+      updateWordCard();
+      if(['playing','charging'].includes(playState)&&current&&!muted){wakeAudio();playWordFor(current.index);}
+    }
+    $('bookBtn').addEventListener('click',openLearningSettings);
+    $('titleWords').addEventListener('click',openLearningSettings);
+    $('closeLearning').addEventListener('click',closeLearningSettings);
+    $('dockCollapse').addEventListener('click',()=>{
+      const collapsed=ui.wordDock.classList.toggle('collapsed');
+      $('dockCollapse').setAttribute('aria-label',collapsed?'Expand word card':'Collapse word card');
+    });
+    $('replayWord').addEventListener('click',()=>{wakeAudio();if(current)playWordFor(current.index,true);});
+    ui.translationToggle.addEventListener('click',()=>{
+      showTranslation=!showTranslation;$('showTranslationSetting').checked=showTranslation;updateWordCard();
+    });
+    $('showTranslationSetting').addEventListener('change',e=>{showTranslation=e.target.checked;updateWordCard();});
+    $('repeatSetting').addEventListener('change',e=>{
+      repeatSpeech=e.target.checked;
+      if(!repeatSpeech)stopSpeech();
+      else if(['playing','charging'].includes(playState)&&current)playWordFor(current.index);
+    });
+    $('loadWords').addEventListener('click',()=>{
+      try{const n=setVocabulary(ui.jsonInput.value,'pasted');ui.importStatus.textContent=`✓ Loaded ${n} words. Close this window to play!`;}
+      catch(error){ui.importStatus.textContent='⚠ '+error.message;}
+    });
+    $('exportBasket').addEventListener('click',()=>{
+      if(!collected.length){ui.importStatus.textContent='No collected words yet.';return;}
+      const payload={primaryLanguage,learningLanguage,words:collected};
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='pogo-penguin-golingo-basket.json';
+      document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3500);
+      ui.importStatus.textContent=`Exported ${collected.length} collected words for GoLingo.`;
+    });
+    function loadIncomingData(){
+      const query=new URLSearchParams(location.search);
+      const hash=location.hash.replace(/^#\??/,'');
+      const hashParams=new URLSearchParams(hash);
+      for(const params of [query,hashParams]){
+        for(const key of ['data','gameData','golingoData','words','json']){
+          const value=params.get(key);if(!value)continue;
+          try{setVocabulary(value,'GoLingo');return;}catch(error){ui.importStatus.textContent='Could not read URL word data: '+error.message;}
+        }
+      }
+      try{
+        for(const key of ['golingoGameData','golingoWords','golingo_game_data']){
+          const value=sessionStorage.getItem(key);if(value){setVocabulary(value,'GoLingo');return;}
+        }
+      }catch(error){}
+    }
+    function ingestMessage(data){
+      if(!data||typeof data!=='object'&&typeof data!=='string')return;
+      const payload=typeof data==='object'?(data.words?data:data.payload?.words?data.payload:data.data?.words?data.data:data.gameData?.words?data.gameData:typeof data.payload==='string'?data.payload:typeof data.data==='string'?data.data:null):data.trim().startsWith('{')?data:null;
+      if(!payload)return;
+      try{setVocabulary(payload,'GoLingo');}catch(error){ui.importStatus.textContent='GoLingo data error: '+error.message;}
+    }
+    window.addEventListener('message',event=>ingestMessage(event.data));
+    reset();loadIncomingData();
+    for(const incoming of window.__pogoIncoming||[])ingestMessage(incoming);
+    window.__pogoIncoming=[];
+    try{if(window.parent!==window)window.parent.postMessage({type:'GOLINGO_GAME_READY',game:'pogo-penguin'},'*');}catch(error){}
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>

@@ -27,6 +27,8 @@ These checks execute the gallery script against its actual HTML, without a brows
 
 **Website:** https://xcergolingo.github.io/games/
 
+**Pogo Penguin — Word Hops:** https://xcergolingo.github.io/games/pogo-penguin/ is a single-file Three.js vocabulary game. Hop between drifting, cracking ice floes, earn center-landing combos, collect fish, hear the active word repeat, reveal its exact GoLingo translation, and export collected words. Its gallery card is tagged Winter, 3D Game, Sports, Action, Language Learning, and Words. Both launch links carry shared lesson data using the gallery's `#data=` word-pack format. Source and cover are in `pogo-penguin/`.
+
 **Aonami — Coastal Fishing:** https://xcergolingo.github.io/games/aonami-fishing/ is a first-person pier-fishing language game with a red lighthouse, turquoise ocean, lure and float methods, catch and reel controls, real recorded pronunciation for 30 Japanese coastal words, word translation revealed after catching fish, and a GoLingo-compatible basket. Its new gallery card is tagged Fishing, Scenery, Water, 3D Game, Explore, Language Learning, and Words. Both Play links pass the gallery's `word-pack` lesson as `?data=` to its standalone HTML. Source is included as a downloadable ZIP in `aonami-fishing/`.
 
 **Download GoLingo:** https://apps.apple.com/app/id1194977025
@@ -37,6 +39,7 @@ The verified App Store listing is **Learn Lingo With GoLingo & AI**, by **xin wa
 
 | Game | Browser demo | Preview |
 | --- | --- | --- |
+| Pogo Penguin — Word Hops | https://xcergolingo.github.io/games/pogo-penguin/ | Original vector illustration + playable 3D game |
 | Yokohama City Flight | https://xcergolingo.github.io/yokohama-city-flight/ | Original vector illustration + playable game |
 | 御剑飞仙 — Sword Riding Immortal | https://xcergolingo.github.io/games/sword-riding-immortal/ | Illustrated card + playable game |
 | Lagoon | https://xcergolingo.github.io/far-cry-lagoon/ | media/lagoon.mp4 |
