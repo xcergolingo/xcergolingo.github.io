@@ -74,25 +74,25 @@ function saveSession(lesson){try{sessionStorage.setItem(LESSON_KEY,JSON.stringif
 function loadSession(){try{const raw=sessionStorage.getItem(LESSON_KEY);return raw?normalizedLesson(raw):null}catch{return null}}
 function labelLanguage(code){return LANG_NAMES[code.split('-')[0]]||code.toUpperCase()}
 
-export function createLearningController({getMode,pauseGame,resumeGame,notify,paChime}){
+export function createLearningController({getMode,pauseGame,resumeGame,notify,paChime,beforeSpeak=()=>{}}){
   const settings=Object.assign({showWords:true,showTranslation:true,repeat:true},readSettings());
   let lesson=fromIncomingUrl()||loadSession()||normalizedLesson(DEMO);
   let fromDemo=lesson.words.length===DEMO.words.length&&lesson.learningLanguage==='es';
-  let nextIndex=0,deck=[],basket=[],selected=null,repeatTimer=null,currentAudio=null,speakingToken=0;
+  let nextIndex=0,deck=[],basket=[],selected=null,selectedCode='',repeatTimer=null,currentAudio=null,speakingToken=0;
   let modalWasPlaying=false;
   const state={get lesson(){return lesson},get basket(){return basket}};
 
   function clearAudio(){
     speakingToken++;
     clearTimeout(repeatTimer);repeatTimer=null;
-    if(currentAudio){currentAudio.pause();currentAudio.src='';currentAudio=null}
+    if(currentAudio){const player=currentAudio;currentAudio=null;player.onended=player.onerror=null;player.pause();player.src=''}
     try{if('speechSynthesis'in window)speechSynthesis.cancel()}catch{}
   }
   function createDeck(){deck=shuffle(lesson.words.map((_,i)=>i));nextIndex=0}
   function nextWord(){if(nextIndex>=deck.length)createDeck();return lesson.words[deck[nextIndex++]]}
   function updateRibbon(item=selected){
-    $('lessonCaption').textContent=`GOLINGO · ${labelLanguage(lesson.learningLanguage).toUpperCase()} ${item?'· LANDED':'· APPROACH'}`;
-    $('lessonWord').textContent=item&&settings.showWords?item.word:(settings.showWords?'AWAITING A LANDING':'WORDS HIDDEN');
+    $('lessonCaption').textContent=`GOLINGO · ${labelLanguage(lesson.learningLanguage).toUpperCase()} · ${item?selectedCode||'SELECTED':'TAP TO LEARN'}`;
+    $('lessonWord').textContent=item&&settings.showWords?item.word:(settings.showWords?'TAP AN AIRCRAFT':'WORDS HIDDEN');
     $('lessonTranslation').textContent=item&&settings.showTranslation?item.translation||item.sentenceTranslation:'';
     $('lessonRibbon').classList.toggle('is-muted',!settings.showWords);
     $('hideWordsBtn').textContent=settings.showWords?'◉':'◎';
@@ -109,6 +109,7 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
   }
   function speak(item,force=false){
     if(!item||(!force&&getMode()!=='playing'))return;
+    beforeSpeak();
     clearAudio();
     const token=speakingToken;
     const again=()=>{if(token!==speakingToken||getMode()!=='playing'||!settings.repeat)return;repeatTimer=setTimeout(()=>{if(token!==speakingToken)return;speak(item)},1100)};
@@ -117,8 +118,9 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
       try{
         const player=new Audio(url);currentAudio=player;player.volume=.77;
         player.onended=again;
-        player.onerror=()=>{if(token===speakingToken){currentAudio=null;speakWithSpeech(item,token,again)}};
-        player.play().catch(()=>{if(token===speakingToken){currentAudio=null;speakWithSpeech(item,token,again)}});
+        const fallback=()=>{if(token!==speakingToken||currentAudio!==player)return;currentAudio=null;player.onended=player.onerror=null;player.pause();speakWithSpeech(item,token,again)};
+        player.onerror=fallback;
+        player.play().catch(fallback);
         return;
       }catch{}
     }
@@ -146,7 +148,7 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
     $('repeatCheck').checked=settings.repeat;
     saveSettings(settings);updateRibbon();
   }
-  function reset(){clearAudio();basket=[];selected=null;createDeck();updateRibbon();$('lessonStatus').textContent=`Ready: ${lesson.words.length} ${labelLanguage(lesson.learningLanguage)} entries.`}
+  function reset(){clearAudio();basket=[];selected=null;selectedCode='';createDeck();updateRibbon();$('lessonStatus').textContent=`Ready: ${lesson.words.length} ${labelLanguage(lesson.learningLanguage)} entries. Tap an aircraft to learn.`}
   function load(value,{demo=false}={}){
     const next=normalizedLesson(value);lesson=next;fromDemo=demo;saveSession(next);reset();
     $('lessonJson').value='';
@@ -163,7 +165,7 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
   }
   function closeModal(){
     $('lessonOverlay').hidden=true;
-    if(modalWasPlaying){resumeGame();if(selected)speak(selected)}
+    if(modalWasPlaying)resumeGame();
     modalWasPlaying=false;
   }
   function exportBasket(){
@@ -179,7 +181,7 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
   $('startLessonBtn').addEventListener('click',openModal);
   $('lessonBtn').addEventListener('click',openModal);
   $('closeLessonBtn').addEventListener('click',closeModal);
-  $('replayWordBtn').addEventListener('click',()=>{if(selected)speak(selected,true);else notify('LAND AN AIRCRAFT TO HEAR ITS WORD')});
+  $('replayWordBtn').addEventListener('click',()=>{if(selected)speak(selected,true);else notify('TAP AN AIRCRAFT TO HEAR ITS WORD')});
   function refreshPlaneLabels(){document.querySelectorAll('.plane-label .plane-word').forEach(span=>{span.hidden=!settings.showWords;span.textContent=settings.showWords?span.dataset.word||'':''})}
   $('hideWordsBtn').addEventListener('click',()=>{$('showWordsCheck').checked=settings.showWords=!settings.showWords;refreshSettings();refreshPlaneLabels()});
   for(const [id,key] of [['showWordsCheck','showWords'],['showTranslationCheck','showTranslation'],['repeatCheck','repeat']]){
@@ -205,7 +207,13 @@ export function createLearningController({getMode,pauseGame,resumeGame,notify,pa
   if(!fromDemo)saveSession(lesson);
   return Object.assign(state,{
     assignPlane(plane){plane.learningItem=nextWord();updatePlaneLabel(plane);return plane.learningItem},
-    onLanding(plane){const item=plane.learningItem;if(!item)return;const entry={...item};basket.push(entry);selected=entry;updateRibbon(entry);speak(entry);},
+    onSelect(plane){
+      if(getMode()!=='playing'||!plane.learningItem)return;
+      selected={...plane.learningItem};selectedCode=plane.code||'SELECTED';
+      updateRibbon();speak(selected);
+    },
+    // Landing earns a review entry, but never steals the tapped word or its audio.
+    onLanding(plane){if(plane.learningItem)basket.push({...plane.learningItem})},
     removePlane(plane){if(plane.label){const span=plane.label.querySelector('.plane-word');span?.remove()}},
     reset,clearAudio,
     pause(){clearAudio()},

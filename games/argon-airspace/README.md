@@ -8,7 +8,7 @@ Open `index.html` from a local HTTP server, or play at `https://xcergolingo.gith
 
 ## Learn languages
 
-Every aircraft carries a GoLingo word or sentence. On landing, it is collected, displayed in the compact bottom radio, and spoken using the learning language voice. Enable **Repeat until next landing** for continuous listening, or turn off **Show words** / **Show translation** to challenge your memory. The controls do not stop normal flight-path gestures.
+Every aircraft carries a GoLingo word or sentence. **Tap an aircraft** to display its word and translation in the compact bottom radio and immediately play its supplied audio or the learning-language voice. **Repeat selected word** keeps it playing until you tap another aircraft or pause. Landings still collect review words and earn points, but never change or interrupt the selected word. Turn off **Show words** / **Show translation** to challenge your memory. Tapping leaves existing flight paths intact; touch and drag from the aircraft to draw a new approach as usual.
 
 Use **Lesson → Load lesson** to paste a GoLingo JSON payload, or pass one from the games gallery in `#golingoLesson=`. If no lesson is supplied, a 16-word Spanish aviation lesson is available. Each shift shuffles the lesson order. The basket can be exported as GoLingo-compatible JSON; only successfully landed words count.
 
