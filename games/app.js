@@ -164,7 +164,78 @@
   function renderLike(card) {
     const button = card.querySelector('.game-like');
     if (!button) return;
-    const isLiked = !!…1026 tokens truncated…ty.hidden = count !== 0;
+    const isLiked = !!liked[card.id];
+    button.setAttribute('aria-pressed', String(isLiked));
+    button.setAttribute('aria-label', (isLiked ? 'Unlike ' : 'Like ') + cardNames.get(card));
+    button.innerHTML = (isLiked ? '👍 Liked' : '👍 Like') + ' <span aria-hidden="true">' + (isLiked ? '1' : '0') + '</span>';
+  }
+  function renderFavorite(card) {
+    const button = card.querySelector('.game-favorite');
+    if (!button) return;
+    const saved = !!favorites[card.id];
+    button.setAttribute('aria-pressed', String(saved));
+    button.setAttribute('aria-label', (saved ? 'Remove ' : 'Add ') + cardNames.get(card) + (saved ? ' from favorites' : ' to favorites'));
+    button.innerHTML = '<span class="favorite-icon" aria-hidden="true">' + (saved ? '♥' : '♡') + '</span> ' + (saved ? 'Favorited' : 'Favorite');
+  }
+  function renderPlays(card) {
+    const label = card.querySelector('.game-plays');
+    if (!label) return;
+    const count = playCount(card);
+    label.textContent = count.toLocaleString() + (count === 1 ? ' play' : ' plays');
+    label.title = 'Game launches on this device, not completed sessions';
+    label.setAttribute('aria-label', count.toLocaleString() + (count === 1 ? ' launch' : ' launches') + ' of ' + cardNames.get(card) + ' on this device');
+  }
+  function sortGames() {
+    const sorted = cards.slice().sort((a, b) => {
+      let difference = 0;
+      if (view.sort === 'plays') difference = playCount(b) - playCount(a);
+      else if (view.sort === 'recent') difference = (plays[b.id]?.lastPlayed || 0) - (plays[a.id]?.lastPlayed || 0);
+      else if (view.sort === 'likes') difference = Number(!!liked[b.id]) - Number(!!liked[a.id]);
+      else if (view.sort === 'name') difference = cardNames.get(a).localeCompare(cardNames.get(b));
+      return difference || originalOrder.get(a) - originalOrder.get(b);
+    });
+    // Avoid detaching every card on each keystroke, preserving keyboard focus.
+    const focused = document.activeElement;
+    sorted.forEach((card, index) => {
+      if (grid.children[index] !== card) grid.insertBefore(card, grid.children[index] || null);
+    });
+    if (focused?.closest?.('.game-card') && !focused.closest('.game-card').hidden && document.activeElement !== focused) {
+      focused.focus({ preventScroll: true });
+    }
+  }
+
+  function applyView() {
+    const focusedCard = document.activeElement?.closest?.('.game-card');
+    const tokens = normalizeSearch(view.search).trim().split(/\s+/).filter(Boolean);
+    let count = 0;
+    cards.forEach(card => {
+      const categoryMatch = view.category === 'all' || (card.dataset.tags || '').split(/\s+/).includes(view.category);
+      const show = categoryMatch && (!view.favoritesOnly || !!favorites[card.id]) && tokens.every(token => searchIndex.get(card).includes(token));
+      card.hidden = !show;
+      if (show) count++;
+    });
+    filterChips.forEach(chip => {
+      const on = chip.dataset.filter === view.category;
+      chip.classList.toggle('active', on);
+      chip.setAttribute('aria-pressed', String(on));
+    });
+    if (searchControl && searchControl.value !== view.search) searchControl.value = view.search;
+    if (clearSearch) clearSearch.hidden = !view.search;
+    if (sortControl) sortControl.value = view.sort;
+    const favoriteCount = Object.keys(favorites).length;
+    const countLabel = document.getElementById('favorites-count');
+    if (countLabel) countLabel.textContent = String(favoriteCount);
+    if (favoritesToggle) {
+      favoritesToggle.classList.toggle('active', view.favoritesOnly);
+      favoritesToggle.setAttribute('aria-pressed', String(view.favoritesOnly));
+      favoritesToggle.setAttribute('aria-label', (view.favoritesOnly ? 'Turn off' : 'Turn on') + ' favorites filter, ' + favoriteCount + ' saved');
+    }
+    document.getElementById('hub-count').textContent = count === cards.length
+      ? count + (count === 1 ? ' game' : ' games')
+      : count + ' of ' + cards.length + ' games';
+    const empty = document.getElementById('hub-empty');
+    if (empty) {
+      empty.hidden = count !== 0;
       const noFavorites = view.favoritesOnly && favoriteCount === 0;
       const heading = document.getElementById('hub-empty-title');
       const description = document.getElementById('hub-empty-description');
