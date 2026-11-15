@@ -1,0 +1,31 @@
+:root{touch-action:pan-y}
+.learning-strip{position:absolute;top:calc(env(safe-area-inset-top) + 125px);left:50%;transform:translateX(-50%);width:min(calc(100% - 20px),455px);height:64px;display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:auto;padding:5px;border:1px solid #ffffff60;border-radius:19px;background:#152b4b94;backdrop-filter:blur(11px);box-shadow:0 6px 24px #0d2a4055}
+.learn-tool{flex:none;position:relative;width:39px;height:44px;border:1px solid #fff5;border-radius:13px;background:#ffffff1b;color:#fffef4;font-size:21px;font-weight:900;display:grid;place-items:center;line-height:1}
+.learn-tool.active{background:#fff3bb;color:#60462c;border-color:#ffe482;box-shadow:0 2px 0 #ddab43}
+.learn-tool:active{transform:translateY(1px)}
+.learn-focus{height:53px;min-width:0;flex:1;border-radius:12px;background:#ffffff17;color:#fff;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 5px;line-height:1.13;overflow:hidden}
+.learn-cue{font-size:8px;letter-spacing:1.1px;font-weight:900;color:#c4f8e5;white-space:nowrap}
+.learn-focus strong{font-family:'Nunito',system-ui,sans-serif;font-size:clamp(17px,4.3vw,25px);font-weight:900;text-overflow:ellipsis;white-space:nowrap;max-width:100%;overflow:hidden}
+.learn-focus small{font-size:10px;color:#ffedab;font-weight:800;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.learning-strip.focus-minimized .learn-focus strong,.learning-strip.focus-minimized .learn-focus small{display:none}
+.learning-strip.focus-minimized .learn-focus{flex:0 1 70px}.learning-strip.focus-minimized .learn-cue{font-size:9px}
+.basket-tool{font-family:system-ui}.basket-tool span{position:absolute;right:-3px;top:-6px;min-width:17px;height:17px;line-height:17px;border-radius:99px;background:#ffcd54;color:#58412e;font-size:10px;box-shadow:0 1px 4px #2228}
+.language-panel{width:100%;max-height:min(67vh,550px);overflow:auto;text-align:left;scrollbar-width:thin}
+.language-panel label{display:block;font-size:11px;color:#fff2c4;letter-spacing:.6px;font-weight:900;margin:11px 0 5px}
+.language-panel select,.language-panel textarea{display:block;width:100%;font-family:system-ui,sans-serif;border:1px solid #ffffff9b;background:#152c4aba;color:#fffef3;border-radius:12px;padding:11px 12px;outline:none;user-select:text;-webkit-user-select:text;touch-action:pan-y}
+.language-panel textarea{min-height:92px;resize:vertical;font-size:12px;line-height:1.45}.language-panel select{font-size:13px}.language-panel option{background:#203752;color:#fff}
+.language-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toggle-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.toggle-list label{margin:0;border:1px solid #ffffff57;border-radius:13px;background:#ffffff13;padding:11px 7px;display:flex;gap:6px;align-items:center;justify-content:center;font-size:11px;letter-spacing:0;cursor:pointer}
+.toggle-list input{width:16px;height:16px;accent-color:#f9d35c}
+.panel-message{font-size:11px;min-height:20px;margin-top:8px;color:#b4f5cf;text-align:center}
+.panel-button-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.panel-button-row .secondary-cta{margin-top:5px;min-width:118px;padding:11px}
+.basket-list{max-height:min(37vh,300px);overflow:auto;text-align:left;margin:11px 0 15px}
+.basket-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ffffff17;border:1px solid #ffffff3c;border-radius:12px;padding:8px 11px;margin:6px 0}
+.basket-entry strong{display:block;font-size:19px;overflow-wrap:anywhere}.basket-entry small{display:block;color:#fff4b5;font-weight:800}
+.basket-entry button{width:37px;height:35px;background:#fff2;border-radius:12px;border:1px solid #fff7;color:#fff;font-size:17px;flex:none}
+.golingo-brand{font-family:'Nunito',system-ui,sans-serif;font-weight:900;color:#c0ffe5;letter-spacing:1.2px;text-decoration:none;font-size:12px}
+.golingo-subline{font-size:11px;letter-spacing:.5px;margin:9px 0 12px;color:#ecf8ed}
+.overlay-card .big-cta{width:100%}.overlay-card .secondary-cta{max-width:100%}
+@media(max-width:360px){.learning-strip{gap:4px;padding:4px}.learn-tool{width:34px;height:41px;font-size:18px}.learn-cue{font-size:7px}.learn-focus strong{font-size:18px}.learn-focus small{font-size:9px}}
+@media(max-height:650px){.learning-strip{top:calc(env(safe-area-inset-top) + 108px);height:52px}.learn-tool{height:38px}.learn-focus{height:42px}.learn-focus strong{font-size:18px}}

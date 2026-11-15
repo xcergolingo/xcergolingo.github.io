@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Cannon Crash 3D — Word Blast</title>
+  <desc id="desc">A blue cannon fires a curved stream of white balls into stacked wooden crates, vocabulary cans, and glowing cubes on desert canyon platforms.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#59488d"/><stop offset=".47" stop-color="#d66d83"/><stop offset="1" stop-color="#ffbe77"/></linearGradient>
+    <radialGradient id="sun"><stop stop-color="#fff4c4"/><stop offset=".8" stop-color="#ffdc95"/><stop offset="1" stop-color="#ffd48f" stop-opacity="0"/></radialGradient>
+    <linearGradient id="deck" x2="0" y2="1"><stop stop-color="#d49769"/><stop offset="1" stop-color="#845367"/></linearGradient>
+    <linearGradient id="cannon" x2=".15" y2="1"><stop stop-color="#b6d9ec"/><stop offset=".45" stop-color="#4f8dbd"/><stop offset="1" stop-color="#203e78"/></linearGradient>
+    <linearGradient id="neon" x2="1" y2="1"><stop stop-color="#58f4f4"/><stop offset="1" stop-color="#c86aff"/></linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#2a244e" flood-opacity=".35"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="11"/></filter>
+    <pattern id="plank" width="120" height="20" patternUnits="userSpaceOnUse"><path d="M0 10h120M60 0v10" fill="none" stroke="#ffe0a0" stroke-opacity=".22" stroke-width="3"/></pattern>
+  </defs>
+  <rect width="1200" height="750" fill="url(#sky)"/>
+  <circle cx="974" cy="150" r="143" fill="url(#sun)"/>
+  <circle cx="974" cy="150" r="75" fill="#fff1bb" opacity=".9"/>
+  <path d="M0 421l95-116 69 45 47-104 82 69 84-45 86 151 101-69 95 49 67-131 100 65 116-112 79 84 109-51v346H0z" fill="#b35977" opacity=".57"/>
+  <path d="M0 503l67-109 84 12 56-87 82 52 57-31 81 147 121-36 78 35 85-91 88 49 89-78 77 89 116-46 119 86v245H0z" fill="#894d70" opacity=".57"/>
+  <path d="M0 641c223-71 374-42 557-4s365-46 643-11v124H0z" fill="#d39079"/>
+  <path d="M0 693c271-69 458-11 662-29s349-67 538-13v99H0z" fill="#f2b07b"/>
+  <g filter="url(#shadow)">
+    <path d="M311 392l11-20 23 4 7 205h-43zM870 392l10-20 28 4 9 211h-41z" fill="#77546b"/>
+    <rect x="250" y="376" width="740" height="43" rx="9" fill="url(#deck)" stroke="#f9c88a" stroke-width="8"/>
+    <rect x="265" y="385" width="710" height="22" fill="url(#plank)"/>
+    <path d="M264 421h710l-10 49H275z" fill="#495f73"/>
+    <path d="M280 423v43m88-43v43m88-43v43m88-43v43m88-43v43m88-43v43m88-43v43m88-43v43" stroke="#e9bc90" stroke-width="13"/>
+    <rect x="424" y="205" width="422" height="35" rx="7" fill="url(#deck)" stroke="#ffdc9c" stroke-width="7"/>
+    <rect x="430" y="242" width="410" height="29" fill="#594d75"/>
+    <path d="M462 272v101m328-101v101" stroke="#63506e" stroke-width="18"/>
+  </g>
+  <g filter="url(#shadow)">
+    <g transform="translate(478 332)"><rect x="-39" y="-74" width="78" height="74" rx="8" fill="#c98955" stroke="#7e4c55" stroke-width="8"/><path d="M-35-70l70 65m-70 0l70-65" stroke="#f6c07a" stroke-width="8"/><path d="M-35-73h70M-35-3h70" stroke="#8b5665" stroke-width="9"/></g>
+    <g transform="translate(574 332)"><rect x="-39" y="-74" width="78" height="74" rx="8" fill="#bc7755" stroke="#7e4c55" stroke-width="8"/><path d="M-35-70l70 65m-70 0l70-65" stroke="#f6c07a" stroke-width="8"/><path d="M-35-73h70M-35-3h70" stroke="#8b5665" stroke-width="9"/></g>
+    <g transform="translate(658 313)"><ellipse cx="0" cy="-65" rx="38" ry="10" fill="#d9e8e7"/><rect x="-37" y="-65" width="74" height="72" rx="14" fill="#69bdc5" stroke="#3e7598" stroke-width="6"/><ellipse cx="0" cy="7" rx="37" ry="10" fill="#437fa0"/><circle cx="0" cy="-31" r="25" fill="#ffeac3"/><text x="0" y="-21" text-anchor="middle" font-size="29" font-weight="800" fill="#28777e">水</text></g>
+    <g transform="translate(765 331)"><rect x="-39" y="-79" width="78" height="79" rx="6" fill="#273d78" stroke="#68f5ed" stroke-width="8"/><rect x="-26" y="-66" width="52" height="53" fill="#b168ff" opacity=".35"/><text x="0" y="-24" fill="#b6fff2" font-size="35" text-anchor="middle" font-weight="900">★</text></g>
+    <g transform="translate(463 205)"><rect x="-37" y="-76" width="74" height="76" rx="7" fill="#a96b4d" stroke="#f6c180" stroke-width="7"/><path d="M-30-65l60 60m-60 0l60-60" stroke="#ffdc99" stroke-width="7"/></g>
+    <g transform="translate(563 203)"><rect x="-37" y="-74" width="74" height="74" rx="8" fill="#253b76" stroke="#60f5f0" stroke-width="7"/><text x="0" y="-22" fill="#a3fbff" font-size="33" font-weight="900" text-anchor="middle">語</text></g>
+    <g transform="translate(669 205)"><rect x="-37" y="-76" width="74" height="76" rx="6" fill="#c27a51" stroke="#ffcf91" stroke-width="6"/><path d="M-29-68l58 59m-58 0l58-59" stroke="#ffe4a0" stroke-width="7"/></g>
+    <g transform="translate(765 205)"><rect x="-37" y="-76" width="74" height="76" rx="8" fill="#263f7d" stroke="#c881ff" stroke-width="7"/><text x="0" y="-22" text-anchor="middle" fill="#f0ccff" font-size="37">★</text></g>
+  </g>
+  <g fill="#fffdf0" stroke="#aacddc" stroke-width="3" filter="url(#shadow)">
+    <circle cx="601" cy="482" r="15"/><circle cx="611" cy="447" r="14"/><circle cx="619" cy="408" r="13"/><circle cx="630" cy="370" r="13"/>
+    <circle cx="646" cy="337" r="12"/><circle cx="672" cy="310" r="12"/><circle cx="703" cy="293" r="11"/>
+  </g>
+  <g transform="translate(579 605)" filter="url(#shadow)">
+    <ellipse cx="0" cy="86" rx="135" ry="26" fill="#383d68" opacity=".32"/>
+    <g transform="rotate(-11)"><rect x="-47" y="-151" width="94" height="208" rx="36" fill="url(#cannon)" stroke="#1c3867" stroke-width="12"/><ellipse cx="0" cy="-151" rx="47" ry="21" fill="#a8d1e8" stroke="#264a78" stroke-width="12"/><ellipse cx="0" cy="-150" rx="25" ry="12" fill="#16305b"/><rect x="-55" y="-96" width="110" height="22" rx="10" fill="#b6dced"/></g>
+    <path d="M-107 11L-85-30 81-30 107 12 91 73H-94z" fill="#315c8f" stroke="#19355c" stroke-width="12"/>
+    <circle cx="-86" cy="57" r="42" fill="#29436c" stroke="#8fc3dd" stroke-width="12"/><circle cx="-86" cy="57" r="13" fill="#d5edf1"/>
+    <circle cx="86" cy="57" r="42" fill="#29436c" stroke="#8fc3dd" stroke-width="12"/><circle cx="86" cy="57" r="13" fill="#d5edf1"/>
+  </g>
+  <g filter="url(#shadow)"><circle cx="1050" cy="616" r="101" fill="#a91e49" stroke="#fff0d6" stroke-width="17"/><circle cx="1050" cy="604" r="76" fill="#ee4255" stroke="#ff9988" stroke-width="8"/><text x="1050" y="602" font-family="Arial,sans-serif" font-weight="900" font-size="40" text-anchor="middle" fill="#fffdf3">FIRE</text><text x="1050" y="646" font-family="Arial,sans-serif" font-size="40" font-weight="900" text-anchor="middle" fill="#fff3d2">∞</text></g>
+  <g font-family="Arial,sans-serif" font-weight="900" text-anchor="start">
+    <text x="58" y="99" fill="#4c2c63" stroke="#4c2c63" stroke-width="13" paint-order="stroke" font-size="72">CANNON</text>
+    <text x="58" y="99" fill="#fff9e6" font-size="72">CANNON</text>
+    <text x="64" y="167" fill="#59345a" stroke="#59345a" stroke-width="13" paint-order="stroke" font-size="72">CRASH 3D!</text>
+    <text x="64" y="167" fill="#ffe876" font-size="72">CRASH 3D!</text>
+    <text x="65" y="211" fill="#fff5e1" font-size="23" letter-spacing="5">AIM · LEARN · FIRE FOREVER</text>
+  </g>
+  <rect x="48" y="681" width="278" height="47" rx="23" fill="#2c406c" opacity=".82"/>
+  <text x="187" y="712" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="24" fill="#b8fff5">GoLingo Word Blast</text>
+</svg>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#dc8d58" />
+  <meta name="description" content="Cannon Crash 3D by GoLingo — knock down vocabulary targets, hear words, and learn languages while playing." />
+  <title>Cannon Crash 3D · GoLingo Word Blast</title>
+  <script type="module" crossorigin src="./assets/index-DN3xAQ5_.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-TprmDedL.css">
+</head>
+<body>
+  <div id="app">
+    <div id="scene" aria-label="3D cannon knockdown game"></div>
+    <div id="vignette"></div>
+    <div id="hud" class="hidden">
+      <header class="topbar">
+        <button id="pauseBtn" class="round-control" aria-label="Pause game"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></button>
+        <div class="stage-title"><span id="worldLabel">DUSTY FRONTIER</span><strong id="levelLabel">LEVEL 01</strong></div>
+        <div class="coin-pill"><span class="coin-icon">★</span><span id="coinCount">0</span></div>
+      </header>
+      <div class="progress-wrap"><div class="progress-track"><div class="progress-fill" id="progressFill"></div><div class="progress-sheen"></div></div><div class="progress-caption"><span id="targetCount">0 TARGETS LEFT</span><span id="progressPercent">0%</span></div></div>
+      <div class="learning-strip" id="learningStrip">
+        <button id="labelsBtn" class="learn-tool active" title="Show or hide words on targets" aria-label="Toggle words on targets" aria-pressed="true">文</button>
+        <button id="focusBtn" class="learn-focus" title="Tap to pronounce the current word" aria-label="Hear current word"><span class="learn-cue">LISTEN &amp; FIND · <span id="languagePair">EN → JA</span></span><strong id="focusWord">水</strong><small id="focusTranslation">water</small></button>
+        <button id="voiceBtn" class="learn-tool" title="Toggle spoken repetition" aria-label="Toggle spoken repetition" aria-pressed="true">🔊</button>
+        <button id="basketBtn" class="learn-tool basket-tool" title="Collected words" aria-label="Collected words">▤<span id="basketBadge">0</span></button>
+        <button id="learningBtn" class="learn-tool" title="Language settings" aria-label="Language settings">⚙</button>
+      </div>
+      <div id="comboText" class="combo-text"></div>
+      <div id="aimHint" class="aim-hint"><span class="hint-line"></span> DRAG TO AIM <span class="hint-line"></span></div>
+      <div class="bottom-hud">
+        <div class="ammo-status"><div class="ammo-symbol"><span class="ammo-dot"></span><span class="ammo-dot"></span><span class="ammo-dot"></span></div><div><span class="tiny-label">UNLIMITED AMMO</span><strong id="shotsCount">∞</strong></div></div>
+        <button id="fireBtn" class="fire-button" aria-label="Hold to fire cannon continuously"><span class="fire-highlight"></span><span class="fire-inner">FIRE<small>HOLD ●</small></span></button>
+      </div>
+      <div class="bottom-notice">∞ UNLIMITED FIRE · GOLINGO</div>
+    </div>
+    <div id="toastContainer" aria-live="polite"></div>
+    <div id="popupLayer" aria-live="polite"></div>
+    <div id="screenOverlay" class="overlay">
+      <div class="overlay-shade"></div>
+      <div class="overlay-content" id="overlayContent"></div>
+    </div>
+    <div id="landscapeNotice">Best played in portrait <span>↻</span></div>
+  </div>
+</body>
+</html>

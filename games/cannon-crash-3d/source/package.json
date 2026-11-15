@@ -1,0 +1,19 @@
+{
+  "name": "cannon-crash-3d",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node tests/physics.mjs && node tests/learning.mjs"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "vite": "^7.2.0"
+  }
+}
