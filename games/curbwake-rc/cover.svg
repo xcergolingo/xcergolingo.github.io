@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+<title id="title">Curbwake RC</title><desc id="desc">An original vector illustration of Yolk, a small yellow and cream toy crawler with a roof basket, warm headlamps, and a rear spare, on a quiet night street with vocabulary labels.</desc>
+<defs>
+<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#0c1420"/><stop offset="1" stop-color="#253c4d"/></linearGradient>
+<linearGradient id="road" x2="0" y2="1"><stop stop-color="#34424b"/><stop offset="1" stop-color="#1a2730"/></linearGradient>
+<radialGradient id="pool"><stop stop-color="#f0c878" stop-opacity=".24"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></radialGradient>
+<linearGradient id="beam"><stop stop-color="#fff4d0" stop-opacity=".31"/><stop offset="1" stop-color="#fff4d0" stop-opacity="0"/></linearGradient>
+<linearGradient id="paint" x2="0" y2="1"><stop stop-color="#f0cf4d"/><stop offset="1" stop-color="#c49723"/></linearGradient>
+</defs>
+<rect width="1200" height="750" fill="url(#sky)"/>
+<path d="M0 300 250 259 470 290 676 271 1200 316V750H0Z" fill="url(#road)"/>
+<path d="m1200 312-353-42-74 14 427 204Z" fill="#667377"/><path d="m773 284 427 204v34L770 302Z" fill="#3c4a50"/>
+<path d="m0 400 356-84 53 7L0 472Z" fill="#7b8181"/><path d="m0 450 397-126 12-1L0 477Z" fill="#a4aba7"/>
+<g fill="#14222b"><path d="M808 156h122v117H808zM964 130h166v167H964zM728 204h57v68h-57z"/><path d="m796 156 74-56 73 56zm154-26 100-65 95 65z"/></g>
+<g fill="#e1bc73" opacity=".7"><path d="M835 181h27v35h-27zM1030 168h26v37h-26z"/></g>
+<g fill="#080f15" opacity=".8"><path d="M887 181h24v35h-24zM994 168h22v37h-22zM1090 167h22v37h-22zM868 234h24v39h-24z"/></g>
+<g stroke="#2a3942" stroke-width="5" fill="none"><path d="M1172 308v-89m-30 84v-87m-30 82v-85m-30 80v-83m-30 79v-80m-30 77v-77m-30 73v-73m-30 70v-69M953 251l247 37"/></g>
+<ellipse cx="345" cy="456" rx="387" ry="211" fill="url(#pool)"/>
+<g id="street-lamp" transform="translate(230 0)"><g fill="#5d6467"><rect x="261" y="155" width="10" height="233" rx="4"/><path d="M261 156v-31q0-21 21-21h57v8h-55q-13 0-13 15v29z"/></g>
+<path d="m321 107 39 0-5 12h-29z" fill="#8f9290"/><ellipse cx="340" cy="120" rx="17" ry="4" fill="#fff0be"/><ellipse cx="340" cy="121" rx="41" ry="17" fill="#f0c878" opacity=".08"/>
+<path d="m325 125-125 306h312L354 125Z" fill="#f0c878" opacity=".035"/>
+</g><g transform="translate(20 233)"><path d="m0 38 155-22 98 17v80L0 145Z" fill="#886227"/><path d="m0 38 155-22 98 17-95 15Z" fill="#bd8a37"/><path d="m16 55 17-3v34l-17 3zm30-5 18-3v34l-18 3zm31-5 18-3v34l-18 3zm31-5 19-3v34l-19 3z" fill="#253335"/><path d="m0 107 251-41" stroke="#45331e" stroke-width="6"/><ellipse cx="53" cy="127" rx="22" ry="28" fill="#11181d"/><ellipse cx="210" cy="101" rx="22" ry="28" fill="#11181d"/><text x="106" y="93" fill="#3a2c1d" font-family="sans-serif" font-size="10" transform="rotate(-8 106 93)">VESPER LINE</text></g>
+<g stroke="#111d24" stroke-width="3" fill="none" opacity=".65"><path d="m54 674 140-51 46 9 68-46 21 8m-89 38 43 31-15 28m515-51 80 24 47-12 102 39M765 352l43 14 58-7 29 12"/></g>
+<g stroke="#dfd8bc" stroke-width="3" fill="none" opacity=".3"><path d="m949 503 75 25 55-21-71-24zm-18 25 79 28 66-23-78-27zm-41 23 91 33 81-26-88-31z"/></g>
+<ellipse cx="582" cy="595" rx="246" ry="64" fill="#081016" opacity=".7"/>
+<path d="m747 463 403 42 26 140-493-121Z" fill="url(#beam)"/>
+<path d="m657 501 386 133-141 100-286-182Z" fill="url(#beam)"/>
+<ellipse cx="738" cy="509" rx="32" ry="47" transform="rotate(15 738 509)" fill="#11191f"/><ellipse cx="738" cy="509" rx="17" ry="28" transform="rotate(15 738 509)" fill="#69747a"/>
+<path d="m361 421 162-57 252 80-165 61Z" fill="#f2ce4e"/>
+<path d="m361 421 249 84 12 111-252-82Z" fill="url(#paint)"/>
+<path d="m610 505 165-61 8 107-161 65Z" fill="#d2a329"/>
+<path d="m401 352 145-44 150 53-139 54Z" fill="#edf0df"/>
+<path d="m401 352 156 63 8 88-167-56Z" fill="#dfbc3b"/>
+<path d="m557 415 139-54 45 90-177 52Z" fill="#d8b538"/>
+<path d="m414 365 57 23 2 61-61-20zm69 28 62 25 6 58-66-22z" fill="#233844"/><path d="m568 420 116-45 32 66-143 44Z" fill="#253b48"/>
+<path d="m419 367 48 20m28 12 45 18m38 6 99-38" stroke="#82a2b0" stroke-width="3" opacity=".42"/>
+<path d="m396 347 151-46 154 53-145 57Z" fill="#e8ece6"/>
+<g stroke="#151e23" fill="none" stroke-linejoin="round"><path d="m414 326 131-39 134 45-126 45Z" stroke-width="7"/><path d="m414 326 1 20m138 31v23m126-68v20m-134-65v16" stroke-width="5"/><path d="m439 319 137 47m-109-55 136 46m-107-54 135 44m-106-53 134 44" stroke-width="4"/></g>
+<path d="m369 503 8-31q42-3 62 37l8 33m109 54 1-40q40-14 61 32l5 28" fill="none" stroke="#182126" stroke-width="15"/>
+<ellipse cx="407" cy="534" rx="37" ry="51" transform="rotate(-12 407 534)" fill="#0f171c"/><ellipse cx="407" cy="534" rx="22" ry="31" transform="rotate(-12 407 534)" fill="#6a7376"/><ellipse cx="407" cy="534" rx="11" ry="17" transform="rotate(-12 407 534)" fill="#303e45"/>
+<ellipse cx="586" cy="592" rx="39" ry="54" transform="rotate(-12 586 592)" fill="#10181e"/><ellipse cx="586" cy="592" rx="24" ry="33" transform="rotate(-12 586 592)" fill="#8b9290"/><ellipse cx="586" cy="592" rx="12" ry="17" transform="rotate(-12 586 592)" fill="#36434a"/>
+<path d="m483 467 4 84 64 21m-51-96 19 6" stroke="#987b24" stroke-width="3" fill="none"/>
+<path d="m626 568 141-53 3 24-143 53Z" fill="#18242c"/><path d="m664 515 66-24 2 30-66 24Z" fill="#253139"/>
+<path d="m633 516 24-8 2 24-24 8zm103-39 25-9 2 23-25 9z" fill="#fff2bc"/>
+<path d="m631 514 27-10m76-28 29-10" stroke="#fff9dc" stroke-width="4"/>
+<ellipse cx="354" cy="466" rx="25" ry="42" transform="rotate(-12 354 466)" fill="#121c22"/><ellipse cx="354" cy="466" rx="14" ry="25" transform="rotate(-12 354 466)" fill="#8a9390"/>
+<path d="m376 430 5 33" stroke="#c84050" stroke-width="8"/><path d="M405 361 386 292" stroke="#202c33" stroke-width="3"/>
+<g transform="translate(176 533)"><path d="m-38 50 67-19 35 16-67 21Z" fill="#202a2d"/><path d="m-14 51 16-79 30 68Z" fill="#d65c2d"/><path d="m-6 14 22-6 8 18-34 9Z" fill="#dfdfcf"/></g>
+<g font-family="sans-serif" font-size="21" text-anchor="middle" fill="#e8d69e"><g transform="translate(244 671) rotate(-8)"><path d="M-65-27H65V9H-65Z" fill="#0b1720" opacity=".8"/><text y="-3">llave</text><path d="M-62 10H62" stroke="#e0b45a"/></g><g transform="translate(977 600) rotate(8)"><path d="M-68-28H68V9H-68Z" fill="#0b1720" opacity=".8"/><text y="-4">farola</text><path d="M-63 10H63" stroke="#e0b45a"/></g><g transform="translate(995 377)"><text y="0" font-size="16" opacity=".8">estrella</text><path d="M-37 7H37" stroke="#a3bdad" opacity=".6"/></g></g>
+<g fill="#ebd28b"><path d="m906 440 3 8 9 .5-7 6 2 9-7-5-8 5 3-9-7-6 9-.5Z"/><path d="m129 473 2 6 7 .5-5 4 2 7-6-4-6 4 2-7-5-4 7-.5Z" opacity=".65"/></g>
+<text x="65" y="88" fill="#d3b777" font-family="sans-serif" font-size="16" letter-spacing="5">GOLINGO · NIGHT DRIVE</text>
+<text x="60" y="163" fill="#f0ecda" font-family="Georgia,serif" font-size="70" font-style="italic">Curbwake.</text><text x="403" y="159" fill="#d9b963" font-family="sans-serif" font-size="23" letter-spacing="5">RC</text>
+<text x="66" y="201" fill="#a8bac4" font-family="sans-serif" font-size="18" letter-spacing="1.2">A little car. A street of words.</text>
+</svg>
