@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f3e9">
-  <meta name="description" content="Choose from three coastal roller coasters in Suncoast — GoLingo Word Coaster. Listen, repeat, and collect vocabulary, with a hideable learning card for a clear view.">
+  <meta name="description" content="Choose from seven Three.js roller coasters in Suncoast — GoLingo Word Coaster. Brave a launch and loop, spiral over the lagoon, race through a canyon, or ride under the stars while learning languages.">
   <title>Suncoast — GoLingo Word Coaster</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23f26445'/%3E%3Cpath d='M10 41C18 41 17 18 30 18S43 47 54 31' fill='none' stroke='%23fff6df' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./style.css?v=2.1.0">
-  <link rel="stylesheet" href="./learning.css?v=2.1.0">
+  <link rel="stylesheet" href="./style.css?v=2.2.0">
+  <link rel="stylesheet" href="./learning.css?v=2.2.0">
 </head>
 <body data-phase="loading">
   <canvas id="world" aria-label="Interactive 3D roller coaster in Suncoast island park"></canvas>
@@ -31,12 +31,12 @@
   <main id="welcome" class="welcome">
     <div class="welcome-content">
     <div class="eyebrow"><span class="line"></span> A NEW WORD AT EVERY TURN</div>
-    <h1>Ride the<br><em>sunshine.</em></h1>
+    <h1><span id="welcome-verb">Ride the</span><br><em id="welcome-word">sunshine.</em></h1>
     <p class="intro">Your words. A new adventure.<br>Listen, repeat, and collect as you ride the coast.</p>
     <div id="learning-menu"></div>
     <button id="choose-ride-menu" class="ride-menu-button" type="button" aria-haspopup="dialog" aria-controls="rides-dialog">
       <span class="ride-menu-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3 23c7 0 5-16 13-16s5 16 13 16M3 28v-5m9 5V10m8 18V10m9 18v-5"/></svg></span>
-      <span class="ride-menu-copy"><small>CHOOSE YOUR RIDE · 3 COASTERS</small><b id="selected-ride-name">The Sunburst</b><span id="selected-ride-detail">Signature · 62 m high</span></span><span class="ride-menu-arrow" aria-hidden="true">↗</span>
+      <span class="ride-menu-copy"><small id="ride-count-label">CHOOSE YOUR RIDE · 7 COASTERS</small><b id="selected-ride-name">The Sunburst</b><span id="selected-ride-detail">Signature · 62 m high</span></span><span class="ride-menu-arrow" aria-hidden="true">↗</span>
     </button>
     <div class="mode-picker" role="group" aria-label="Choose ride mode">
       <button class="mode active" data-mode="free" aria-pressed="true"><span class="mode-icon">≈</span><span>Learn &amp; ride<small>Listen and discover</small></span><span class="mode-radio"></span></button>
@@ -92,14 +92,16 @@
       <div class="dialog-actions"><button id="restart">Start again</button><button id="choose-ride-pause">Choose ride</button><button id="back-home">Back to park</button></div>
     </section>
     <section id="rides-dialog" class="dialog rides-dialog" aria-labelledby="rides-title" role="dialog" aria-modal="true" hidden>
-      <button id="close-rides" class="close-button" type="button" aria-label="Close ride picker">×</button><div class="eyebrow">ONE PARK. THREE ADVENTURES.</div><h2 id="rides-title">Choose your ride.</h2><p>Gentle coastal curves or a rush above the park. Your lesson and collected words come with you.</p>
+      <button id="close-rides" class="close-button" type="button" aria-label="Close ride picker">×</button>
+      <div class="rides-dialog-header"><div class="eyebrow">ONE PARK. SEVEN ADVENTURES.</div><h2 id="rides-title">Find your next rush.</h2><p>Loops, lagoon spirals, canyon tunnels, and a ride under the stars. Your lesson comes along.</p></div>
       <div id="ride-options" class="ride-options" role="group" aria-label="Available coaster routes"></div>
       <div class="rides-dialog-footer"><span>Choose a new route, then tap Ride &amp; learn.</span><button id="cancel-rides" type="button" class="text-button">Back</button></div>
     </section>
     <section id="help-dialog" class="dialog help-dialog" aria-labelledby="help-title" role="dialog" aria-modal="true" hidden>
       <button id="close-help" class="close-button" aria-label="Close help">×</button><div class="eyebrow">A QUICK FIELD GUIDE</div><h2 id="help-title">Ride. Listen. Remember.</h2><p>The coaster follows the rails. Your words become the adventure.</p>
       <div class="help-row"><b>Learn &amp; ride</b><span>Pass a word or sentence gate to collect it. Listen until the next gate, then practice the next entry. New words arrive each lap.</span></div>
-      <div class="help-row"><b>Choose a ride</b><span>Try Lagoon Glide, The Sunburst, or Sky Rocket from the park menu or the coaster button at the top. Each has its own route, height, and pace.</span></div>
+      <div class="help-row"><b>Choose a ride</b><span>Pick one of seven routes from the park menu or the top coaster button. Try Comet Loop’s launch and inversion, Tidal Twister’s spirals, Canyon Run’s tunnels, or Starlight Express after dark. Each has its own route and pace.</span></div>
+      <div class="help-row"><b>Launch &amp; loop</b><span>Comet Loop launches automatically, and the front-seat camera follows the train upside down. Choose Park view for a stationary horizon, or a gentler route such as Lagoon Glide.</span></div>
       <div class="help-row"><b>Clear your view</b><span>Tap Hide on the word card, or press <kbd>V</kbd>. Pronunciation and collection continue. Tap Show words to bring it back; your choice stays saved.</span></div>
       <div class="help-row"><b>Your lesson</b><span>Open Lesson to choose a language, paste GoLingo JSON or your own lines, and switch between words and sentences. Translation and repeat controls stay saved.</span></div>
       <div class="help-row"><b>Review</b><span>Tap the learning card to hear it again. Open the word basket to replay or export your discoveries for GoLingo.</span></div>
@@ -124,6 +126,6 @@
   <div id="fatal" class="fatal" hidden><h2>Let’s get you back on track.</h2><p id="fatal-message">The park couldn’t load. Please reload the page.</p><button onclick="location.reload()">RELOAD THE PARK</button></div>
   <noscript><div class="fatal"><h2>Suncoast needs JavaScript</h2><p>Enable JavaScript in your browser to ride.</p></div></noscript>
   <script>window.addEventListener('error',function(e){if(document.body.dataset.phase==='loading'){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent='The park couldn’t load. Please reload the page. '+(e.message||'');}});</script>
-  <script type="module" src="./main.js?v=2.1.0"></script>
+  <script type="module" src="./main.js?v=2.2.0"></script>
 </body>
 </html>

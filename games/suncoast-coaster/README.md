@@ -1,6 +1,6 @@
 # Suncoast — GoLingo Word Coaster
 
-A playable Three.js r160 language-learning roller coaster in a sunny island amusement park. The train follows the rails while the player hears, repeats, and collects words or sentences at eight learning gates per lap. All scenery, train geometry, track, textures, and ride sound are created procedurally. Three.js and its license are bundled locally; the game does not depend on a CDN.
+A playable Three.js r160 language-learning roller coaster with seven distinct circuits in an island amusement park. The train follows the rails while the player hears, repeats, and collects words or sentences at eight learning gates per lap. All scenery, train geometry, track, textures, and ride sound are created procedurally. Three.js and its license are bundled locally; the game does not depend on a CDN.
 
 ## Play
 
@@ -24,15 +24,21 @@ The vocabulary basket collects discoveries for replay, JSON export, and copying,
 | Pronunciation | Tap the current word or a basket entry | — |
 | Lesson and vocabulary | Lesson / basket buttons | — |
 
-## Three distinct rides
+## Seven distinct rides
 
 | Ride | Length | Maximum height | Experience |
 | --- | ---: | ---: | --- |
+| Comet Loop | 739 m | 58 m | Automatic magnetic launch, a full vertical loop, and illuminated launch pylons. |
+| Tidal Twister | 1,024 m | 64 m | A two-turn descending spiral over the lagoon, with animated fountains. |
+| Canyon Run | 554 m | 22 m | A low slalom between sandstone walls and two open rock tunnels at sunset. |
+| Starlight Express | 628 m | 50 m | Rolling airtime hills, luminous arches, stars, and track lanterns after dark. |
 | Lagoon Glide | 507 m | 24 m | Low hills, wide turns, gentler banking and speed. |
 | The Sunburst | 905 m | 62 m | The original skyline climb, steep drop, and sweeping raised crossings. |
 | Sky Rocket | 1,113 m | 88 m | The tallest climb, fast drops, and high banked crossover turns. |
 
-Each route has its own geometry, rail and train color, map, speed tuning, and challenge targets. All share the boarding station. The first lift automatically pulls the train uphill. Boost recharges when released; braking and boosting have no effect on the train's path. Low-speed assistance keeps the train moving up later hills.
+Each route has its own geometry, rail and train color, map, speed tuning, and challenge targets. All share the boarding station. Mechanical lifts and Comet Loop's magnetic launch work automatically. Boost recharges when released and during a powered section; braking and boosting have no effect on the train's path. Low-speed assistance keeps the train moving up later hills and restores momentum in Comet's loop after releasing the brake. Word gates are placed outside Comet's inversion and Canyon Run's tunnels.
+
+Comet's front-seat camera follows the train all the way upside down; its transported track frames remain continuous through vertical tangents and the station seam. Choose **Park view** for a stationary horizon, or **Lagoon Glide** for a gentler circuit. Canyon Run automatically uses warm sunset lighting, while Starlight Express switches to a moonlit sky and illuminated scenery. Choosing another ride restores that ride's atmosphere. The four additions appear first in the picker with **NEW** labels; the picker scrolls independently while its header and Back control stay visible on small screens.
 
 In **Thrill run**, pass all eight learning gates. Each awards 100 points, or 300 if your speed is within its displayed range. Results include perfect gates, top speed, ride time, and a local personal best for the selected route. **Learn & ride** continues around the circuit without a results interruption; new lesson entries arrive each lap.
 
@@ -73,7 +79,7 @@ See `sample-lesson.json` for a complete Japanese example. The export format uses
 
 ## Local development
 
-Serve this game directory with a static HTTP server, for example:
+Serve the this directory with a static HTTP server, for example:
 
 ```sh
 python3 -m http.server 8000 --directory .
@@ -89,6 +95,7 @@ No build or package installation is required. `npm run check` validates the main
 - `main.js`: train, cameras, arcade physics, challenge gates, controls, and game state.
 - `learning.js` and `learning.css`: imports, pronunciation, lesson controls, vocabulary collection, and export.
 - `track.js`: arc-length track frames, rails, supports, lift, and station.
+- `ride-effects.js`: launch lights, lagoon fountains, canyon tunnels, stars, lanterns, and ride-specific scenery.
 - `park.js`: island, ocean shader, Ferris wheel, carousel, landscaping, and park props.
 - `audio.js`: procedural Web Audio.
 - `vendor/three.module.js`: bundled Three.js r160.
@@ -96,4 +103,4 @@ No build or package installation is required. `npm run check` validates the main
 
 ## Verification limits
 
-JavaScript syntax, scene construction, track geometry, full-lap physics, and learning-state logic are checked separately from graphics. The available cloud preview browser reports WebGL disabled, so GPU rendering, frame rate, actual touch behavior, and audible pronunciation could not be verified there. A separate UI-only fixture checks menu, picker, and Hide/Show layout using the production HTML, CSS, and learning module; it does not simulate or verify the 3D scene.
+JavaScript syntax, scene construction, track geometry, complete free and thrill laps, camera continuity, gate reachability, resource disposal, and learning-state retention are checked separately from graphics. The available cloud preview browser reports WebGL disabled, so GPU rendering, frame rate, physical-device touch behavior, and audible pronunciation could not be verified there. A temporary UI-only fixture uses the production HTML, CSS, learning module, and game logic with a renderer double to check desktop, phone, and landscape layouts, ride switching, and Hide/Show behavior. This fixture is excluded from publication and does not verify the rendered 3D scene.

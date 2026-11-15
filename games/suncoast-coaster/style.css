@@ -24,24 +24,32 @@
 .track-card #track-title{font-family:Georgia,'Times New Roman',serif;font-size:inherit;color:var(--ink)}
 .track-card h2{gap:10px;margin-bottom:11px}
 .track-description{font-size:10px;line-height:1.65;color:#7e8b76;margin:0 0 19px}
-.rides-dialog{max-width:820px;padding:32px;text-align:left}
+.rides-dialog{max-width:940px;padding:30px;text-align:left;display:flex;flex-direction:column;height:min(760px,calc(100dvh - 48px));overflow:hidden}
+.rides-dialog-header{flex-shrink:0}
 .rides-dialog .eyebrow{justify-content:flex-start;margin-right:25px}
 .rides-dialog h2{margin-bottom:12px;font-size:40px}
-.rides-dialog>p{max-width:575px;margin-bottom:22px}
+.rides-dialog-header>p{max-width:640px;margin-bottom:18px}
 .rides-dialog .close-button{height:40px;width:40px;top:11px;right:12px}
-.ride-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.ride-option{position:relative;display:flex;flex-direction:column;text-align:left;border:1px solid #d7ddc9;border-radius:12px;padding:0;background:#f6f5e9;min-width:0;overflow:hidden;color:#294b3d}
+.ride-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;grid-auto-rows:max-content;align-items:stretch;align-content:start;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#9fae95 transparent;padding:5px 7px 7px 5px;margin:0 -7px 0 -5px}
+.ride-option{position:relative;display:flex;flex-direction:column;text-align:left;border:1px solid #d7ddc9;border-radius:12px;padding:0;background:#f6f5e9;min-width:0;overflow:hidden;color:#294b3d;touch-action:pan-y}
 .ride-option:hover{background:#fffdf5;border-color:var(--route-color)}
 .ride-option.selected{border:2px solid var(--route-color);background:#fffdf5;box-shadow:0 4px 18px #243d3610}
-.ride-option-map{display:block;width:100%;height:140px;background:linear-gradient(160deg,#e2eddc,#cfdfd6);flex-shrink:0;color:var(--route-color)}
+.ride-option-map{display:block;width:100%;height:112px;background:linear-gradient(160deg,#e2eddc,#cfdfd6);flex-shrink:0;color:var(--route-color)}
+.ride-option[data-theme="night"] .ride-option-map{background:radial-gradient(ellipse at 70% 20%,#4b577c,#192c48)}
+.ride-option[data-theme="sunset"] .ride-option-map{background:linear-gradient(145deg,#f0d5b5,#dcaf8c)}
+.ride-option[data-ride="tidal"] .ride-option-map{background:linear-gradient(145deg,#c3e9e3,#a8d8dc)}
 .ride-option-map path{stroke:currentColor;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .ride-option-copy{display:flex;flex-direction:column;gap:8px;padding:16px;flex:1;width:100%}
 .ride-option-intensity{color:var(--route-color);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px}
+.ride-option-badges{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:17px}
+.ride-option-new{padding:4px 6px;border-radius:4px;background:#e6eddc;color:#3c6449;font-size:7px;letter-spacing:1px;font-weight:700}
 .ride-option-copy strong{font-family:Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:-.5px}
 .ride-option-description{font-size:11px;color:#77886f;line-height:1.65;flex:1}
+.ride-option-features{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0}
+.ride-option-features>span{font-size:8px;line-height:1.25;padding:4px 6px;border:1px solid #d7ddc9;border-radius:5px;color:#526c56;background:#fff9ec}
 .ride-option-stats{font-size:10px;color:#49694d;margin-top:3px}
 .ride-option-action{display:block;margin-top:7px;padding-top:12px;border-top:1px solid #d7ddc9;font-size:10px;font-weight:600;color:var(--route-color)}
-.rides-dialog-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:18px;color:#859077;font-size:10px;line-height:1.5}
+.rides-dialog-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:12px;padding-top:9px;border-top:1px solid #d7ddc9;color:#78866d;font-size:10px;line-height:1.5;flex-shrink:0}
 .rides-dialog-footer .text-button{padding:10px 12px;min-height:40px}
 @media(max-width:760px){
   .header{gap:8px}.brand>span{font-size:14px;letter-spacing:1.4px}
@@ -50,7 +58,7 @@
   .welcome-content{padding-right:3px}.welcome .mode-picker{margin-bottom:12px}
   .ride-menu-button{padding:10px 12px;min-height:65px;margin-bottom:11px}.ride-menu-copy b{font-size:14px}.ride-menu-copy small{font-size:7px}
   body[data-phase="menu"] .track-card,body[data-phase="loading"] .track-card{display:none}
-  .rides-dialog{padding:26px 20px 16px;max-width:480px}.rides-dialog h2{font-size:32px;margin-top:12px}.rides-dialog>p{font-size:11px;margin-bottom:17px}
+  .rides-dialog{padding:26px 20px 16px;max-width:480px;height:min(790px,calc(100dvh - 32px))}.rides-dialog h2{font-size:32px;margin-top:12px}.rides-dialog-header>p{font-size:11px;margin-bottom:14px;line-height:1.6}
   .ride-options{grid-template-columns:1fr;gap:9px}.ride-option{flex-direction:row;align-items:stretch;min-height:123px}.ride-option-map{width:104px;height:auto;min-height:123px}
   .ride-option-copy{padding:11px 12px;gap:5px}.ride-option-copy strong{font-size:23px}.ride-option-description{font-size:10px;line-height:1.45}.ride-option-intensity{font-size:7px}.ride-option-stats{font-size:9px;margin:0}.ride-option-action{font-size:9px;margin:2px 0 0;padding:6px 0 0}
   .rides-dialog-footer{font-size:9px;margin-top:11px}
@@ -62,11 +70,21 @@
   .welcome .eyebrow,.welcome .intro,.welcome .start-note{display:none}.welcome #learning-menu{margin:0 0 7px}.welcome .gl-menu-summary{margin:0;height:33px}
   .ride-menu-button{min-height:58px;padding:7px 10px;margin-bottom:8px;gap:9px}.ride-menu-copy{gap:3px}.ride-menu-copy b{font-size:12px}.ride-menu-copy small{font-size:6px}.ride-menu-copy>span{font-size:8px}.ride-menu-icon{height:32px;width:30px}.ride-menu-icon svg{width:28px;height:28px}
   .welcome .mode{padding:8px 7px}.welcome .mode-picker{margin-bottom:9px}.welcome>.primary-button{padding:12px 16px;min-height:43px}
-  .rides-dialog{max-width:790px;padding:21px 24px 14px}.rides-dialog .eyebrow{font-size:6px}.rides-dialog h2{font-size:29px;margin:9px 0}.rides-dialog>p{font-size:10px;line-height:1.5;margin-bottom:12px}
+  .rides-dialog{max-width:890px;padding:18px 22px 10px;height:calc(100dvh - 32px)}.rides-dialog .eyebrow{font-size:6px}.rides-dialog h2{font-size:29px;margin:9px 0}.rides-dialog-header>p{font-size:10px;line-height:1.5;margin-bottom:10px}
   .ride-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ride-option{flex-direction:column;min-height:0}.ride-option-map{width:100%;height:64px;min-height:0}.ride-option-copy{padding:10px;gap:5px}.ride-option-copy strong{font-size:21px}.ride-option-description{font-size:9px;line-height:1.45}.ride-option-action{padding-top:7px;margin-top:3px;font-size:9px}.ride-option-stats{font-size:8px}.rides-dialog-footer{margin-top:7px;font-size:9px}.rides-dialog-footer .text-button{min-height:32px;padding:7px 10px}
   .track-description{font-size:9px;line-height:1.5;margin-bottom:13px}
 }
-@media(orientation:landscape) and (max-height:440px) and (max-width:760px){body:not([data-phase="menu"]) #fullscreen,body:not([data-phase="menu"]) #help{display:none}.ride-hud{left:47%}.rides-dialog>p{display:none}.rides-dialog{padding-top:18px}.ride-option-map{height:53px}.ride-option-description{min-height:27px}}
+@media(orientation:landscape) and (max-height:440px) and (max-width:760px){body:not([data-phase="menu"]) #fullscreen,body:not([data-phase="menu"]) #help{display:none}.ride-hud{left:47%}.rides-dialog-header>p{display:none}.rides-dialog{padding-top:18px}.ride-option-map{height:53px}.ride-option-description{min-height:27px}}
 
 .welcome .mode{width:calc((100% - 8px)/2);min-width:0}
 @media(orientation:landscape) and (max-height:600px){body[data-phase="menu"] .map-panel,body[data-phase="loading"] .map-panel{display:none}}
+
+/* Moonlight stays readable while the cards retain their familiar warm surfaces. */
+body[data-theme="night"] .vignette{background:linear-gradient(90deg,#111e39ed,#111e3960 40%,transparent 70%),linear-gradient(0deg,#101c3550,transparent 25%)}
+body[data-theme="night"] .brand,body[data-theme="night"] .park-status,body[data-theme="night"] .welcome-content>h1,body[data-theme="night"] .welcome-content>.eyebrow{color:#f6eedc}
+body[data-theme="night"] .welcome-content h1 em{color:#bfc5ff}
+body[data-theme="night"] .welcome-content>.intro,body[data-theme="night"] .start-note,body[data-theme="night"] .menu-footer{color:#c3cce0}
+body[data-theme="night"] .drive-hint{color:#f1e8d1;text-shadow:0 1px 5px #101f39}
+body[data-theme="night"] .mode{background:#fffaf0dc}
+@media(max-width:760px){body[data-theme="night"] .vignette{background:linear-gradient(0deg,#111e39f2,#111e39c9 48%,#111e3910 90%)}}
+@media(orientation:landscape) and (max-height:600px){body[data-theme="night"] .vignette{background:linear-gradient(90deg,#111e39ed,#111e3960 40%,transparent 70%)}}

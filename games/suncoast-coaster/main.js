@@ -1,8 +1,9 @@
 import * as THREE from './vendor/three.module.js';
-import {createTrack,RIDE_OPTIONS} from './track.js?v=2.1.0';
-import {createPark} from './park.js?v=2.1.0';
-import {RideAudio} from './audio.js?v=2.1.0';
-import {createLearning} from './learning.js?v=2.1.0';
+import {createTrack,RIDE_OPTIONS} from './track.js?v=2.2.0';
+import {createPark} from './park.js?v=2.2.0';
+import {createRideEffects} from './ride-effects.js?v=2.2.0';
+import {RideAudio} from './audio.js?v=2.2.0';
+import {createLearning} from './learning.js?v=2.2.0';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -38,7 +39,8 @@ sun.position.set(-105,185,80);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);
 Object.assign(sun.shadow.camera,{left:-170,right:170,top:170,bottom:-170,near:10,far:450});
 sun.shadow.bias=-.00025;sun.shadow.normalBias=.15;sun.shadow.radius=2;
-scene.add(sun,new THREE.HemisphereLight(0xdaf3ed,0xb8a16a,2.3));
+const hemisphere=new THREE.HemisphereLight(0xdaf3ed,0xb8a16a,2.3);
+scene.add(sun,hemisphere);
 const sky = new THREE.Mesh(new THREE.SphereGeometry(900,32,16),new THREE.ShaderMaterial({
   side:THREE.BackSide,depthWrite:false,
   uniforms:{top:{value:new THREE.Color('#9bcfd7')},bottom:{value:new THREE.Color('#fff1cd')}},
@@ -49,10 +51,33 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(900,32,16),new THREE.ShaderM
 $('loading-text').textContent='Laying out a little adventure…';
 let track = createTrack(scene,state.rideId);
 let park = createPark(scene,{trackSamples:track.samples});
+let effects = createRideEffects(scene,track);
 const audio = new RideAudio();
 let trackLength=track.length;
 const startDistance=18;
 const getSection = d => track.sections.find(s=>{const a=((d%trackLength)+trackLength)%trackLength;return a>=s.start&&a<s.end;})||track.sections[0];
+function applyEnvironment(){
+  const theme=track.ride.theme||'day';
+  const palettes={
+    day:{top:0x9bcfd7,bottom:0xfff1cd,fog:0xc5dcd1,sun:0xffe1af,sunPower:3.15,sky:0xdaf3ed,ground:0xb8a16a,fill:2.3,exposure:1.17,water:0x51b6b7,glint:0xb0e2d5},
+    sunset:{top:0xa7b9cf,bottom:0xffc393,fog:0xe2b692,sun:0xffbc80,sunPower:3.1,sky:0xc7d4ed,ground:0xc69260,fill:2.0,exposure:1.08,water:0x438f9f,glint:0xe9c7a0},
+    night:{top:0x081428,bottom:0x34476b,fog:0x202f4d,sun:0xb6d3ff,sunPower:1.65,sky:0x8da9e8,ground:0x4a536f,fill:1.65,exposure:1.05,water:0x15384d,glint:0x547fa3}
+  };
+  const p=palettes[theme]||palettes.day;
+  sky.material.uniforms.top.value.set(p.top);sky.material.uniforms.bottom.value.set(p.bottom);
+  scene.background.set(p.fog);scene.fog.color.set(p.fog);
+  sun.color.set(p.sun);sun.intensity=p.sunPower;
+  hemisphere.color.set(p.sky);hemisphere.groundColor.set(p.ground);hemisphere.intensity=p.fill;
+  renderer.toneMappingExposure=p.exposure;
+  if(theme!=='day')park.root.traverse(object=>{
+    const uniforms=object.material?.uniforms;
+    if(uniforms?.waterColor)uniforms.waterColor.value.set(p.water);
+    if(uniforms?.lightColor)uniforms.lightColor.value.set(p.glint);
+  });
+  document.body.dataset.theme=theme;
+  $('welcome-verb').textContent=theme==='night'?'Chase the':'Ride the';
+  $('welcome-word').textContent=theme==='night'?'starlight.':theme==='sunset'?'horizon.':'sunshine.';
+}
 function updateRideInfo(){
   const ride=track.ride;
   $('track-length').textContent=Math.round(trackLength).toLocaleString();
@@ -65,6 +90,7 @@ function updateRideInfo(){
   $('map-ride-name').textContent=ride.name.toUpperCase();
   $('selected-ride-name').textContent=ride.name;
   $('selected-ride-detail').textContent=`${ride.intensity} · ${Math.round(ride.heightMeters)} m high · ${Math.round(trackLength)} m`;
+  $('ride-count-label').textContent=`CHOOSE YOUR RIDE · ${RIDE_OPTIONS.length} COASTERS`;
   document.documentElement.style.setProperty('--ride-color',ride.color);
   document.body.dataset.ride=ride.id;
   fitMapToTrack();
@@ -111,13 +137,15 @@ const cars=[makeCar(0),makeCar(1),makeCar(2)];
 function updateTrain(){for(let i=0;i<cars.length;i++){const frame=track.getFrame(state.distance-i*4.23);cars[i].position.copy(frame.position);cars[i].quaternion.copy(frame.quaternion);}}
 updateTrain();
 
-// Arcade physics: gravity on descents, a mechanical first lift, and low-speed hill assistance.
+// Automatic lifts and launches, gravity on descents, and recovery assistance on hills.
 function nextSpeed(speed,distance,dt,brake=false,boost=false){
   const section=getSection(distance);
   const tangent=track.curve.getTangentAt((((distance%trackLength)+trackLength)%trackLength)/trackLength);
   if(section.type==='lift')return damp(speed,brake?4.2:track.ride.liftSpeed,1.65,dt);
+  if(section.type==='launch'&&!brake)return clamp(damp(speed,section.targetSpeed||track.ride.maxSpeed*.9,1.45,dt),3.2,track.ride.maxSpeed);
   let acceleration=-9.81*tangent.y*.85-.0043*speed*speed-.12;
-  if(speed<track.ride.assistSpeed&&!brake)acceleration+=Math.max(0,track.ride.assistSpeed-speed)*2.5+Math.max(0,9.81*tangent.y*.85);
+  const assistSpeed=section.type==='loop'?Math.max(track.ride.assistSpeed,section.minSpeed||14):track.ride.assistSpeed;
+  if(speed<assistSpeed&&!brake)acceleration+=Math.max(0,assistSpeed-speed)*2.5+Math.max(0,9.81*tangent.y*.85);
   if(boost)acceleration+=12.5*(typeof boost==='number'?clamp(boost,0,1):1);
   if(brake)acceleration-=19;
   if(section.type==='station'&&speed>10&&!boost)acceleration-=8;
@@ -125,8 +153,9 @@ function nextSpeed(speed,distance,dt,brake=false,boost=false){
 }
 
 const gateFractions=[.22,.31,.43,.53,.63,.73,.83,.93];
+const rideGateFractions=()=>track.ride.gateFractions||gateFractions;
 const gateNames=['Sunshine drop','Canyon crest','Palm ridge','Lagoon flyby','Ocean breeze','Coastal sweep','The home stretch','Last little rush'];
-const gates=gateFractions.map((fraction,i)=>({baseDistance:startDistance+trackLength*fraction,distance:startDistance+trackLength*fraction,name:gateNames[i],index:i,done:false,perfect:false,min:0,max:0,group:null,entry:null}));
+const gates=rideGateFractions().map((fraction,i)=>({baseDistance:startDistance+trackLength*fraction,distance:startDistance+trackLength*fraction,name:gateNames[i],index:i,done:false,perfect:false,min:0,max:0,group:null,entry:null}));
 // Set achievable ranges from a simulated unassisted lap, then vary the ideal pace.
 function calibrateGates(){
   let d=startDistance,v=6,index=0;const offsets=[-22,20,-18,20,-22,22,-18,20];
@@ -212,7 +241,8 @@ function showRidePicker(){
   ridePickerFrom={phase:state.phase,modal:activeModal};
   if(state.phase==='riding'){clearInput();setPhase('paused');audio.suspend();}
   modal('rides');
-  document.querySelector(`.ride-option[data-ride="${state.rideId}"]`)?.focus();
+  $('ride-options').scrollTop=0;
+  $('close-rides').focus();
 }
 function closeRidePicker(){
   const from=ridePickerFrom;ridePickerFrom=null;
@@ -226,14 +256,15 @@ function selectRide(id){
   if(id===state.rideId){closeRidePicker();return;}
   clearInput();audio.suspend();learning.setRunning(false);state.ready=false;
   try{
-    // Replace the route and route-aware planting; dispose the previous GPU resources.
+    // Build replacements before removing the current ride, then release its resources.
     const newTrack=createTrack(scene,id);
-    let newPark;
-    try{newPark=createPark(scene,{trackSamples:newTrack.samples});}catch(error){newTrack.dispose();throw error;}
-    track.dispose();park.dispose();track=newTrack;park=newPark;trackLength=track.length;state.rideId=id;
+    let newPark,newEffects;
+    try{newPark=createPark(scene,{trackSamples:newTrack.samples});newEffects=createRideEffects(scene,newTrack);}catch(error){newEffects?.dispose();newPark?.dispose();newTrack.dispose();throw error;}
+    effects.dispose();track.dispose();park.dispose();track=newTrack;park=newPark;effects=newEffects;trackLength=track.length;state.rideId=id;
+    applyEnvironment();
     trainMaterials.orange.color.set(track.ride.color);
     Object.assign(state,{distance:startDistance,traveled:0,speed:6,elapsed:0,score:0,perfect:0,lap:1,fuel:100,maxSpeed:0,practiced:0,cameraSnap:true});
-    gates.forEach((gate,i)=>{gate.baseDistance=startDistance+trackLength*gateFractions[i];gate.distance=gate.baseDistance;gate.done=false;gate.perfect=false;gate.name=getSection(gate.distance).name;const frame=track.getFrame(gate.distance);gate.group.position.copy(frame.position);gate.group.quaternion.copy(frame.quaternion);gate.sign.visible=true;gate.material.color.set(0xf4bf69);gate.material.emissive.set(0xd28e29);});
+    gates.forEach((gate,i)=>{gate.baseDistance=startDistance+trackLength*rideGateFractions()[i];gate.distance=gate.baseDistance;gate.done=false;gate.perfect=false;gate.name=getSection(gate.distance).name;const frame=track.getFrame(gate.distance);gate.group.position.copy(frame.position);gate.group.quaternion.copy(frame.quaternion);gate.sign.visible=true;gate.material.color.set(0xf4bf69);gate.material.emissive.set(0xd28e29);});
     calibrateGates();learning.beginRide();assignGateWords();
     particleLife=0;particleMaterial.opacity=0;updateRideInfo();home();drawMap();
     try{localStorage.setItem('suncoast-ride-v1',id);}catch{}
@@ -243,18 +274,23 @@ function selectRide(id){
 }
 function createRidePicker(){
   const ns='http://www.w3.org/2000/svg';
-  for(const ride of RIDE_OPTIONS){
+  for(const ride of [...RIDE_OPTIONS].sort((a,b)=>Number(!!b.isNew)-Number(!!a.isNew))){
     const button=document.createElement('button');button.type='button';button.className='ride-option';button.dataset.ride=ride.id;button.style.setProperty('--route-color',ride.color);
+    button.dataset.theme=ride.theme||'day';
     const graphic=document.createElementNS(ns,'svg');graphic.setAttribute('viewBox','0 0 190 144');graphic.setAttribute('aria-hidden','true');graphic.classList.add('ride-option-map');
     const points=ride.previewPoints;const xs=points.map(p=>p[0]),zs=points.map(p=>p[1]);const minX=Math.min(...xs),maxX=Math.max(...xs),minZ=Math.min(...zs),maxZ=Math.max(...zs);const scale=Math.min(162/(maxX-minX),112/(maxZ-minZ));
     const path=document.createElementNS(ns,'path');path.setAttribute('d',points.map((p,i)=>`${i?'L':'M'}${(95+(p[0]-(minX+maxX)/2)*scale).toFixed(1)},${(72+(p[1]-(minZ+maxZ)/2)*scale).toFixed(1)}`).join(' ')+' Z');graphic.append(path);
     const copy=document.createElement('span');copy.className='ride-option-copy';
-    const badge=document.createElement('small');badge.className='ride-option-intensity';badge.textContent=ride.intensity;
+    const badges=document.createElement('span');badges.className='ride-option-badges';
+    const badge=document.createElement('small');badge.className='ride-option-intensity';badge.textContent=ride.intensity;badges.append(badge);
+    if(ride.isNew){const fresh=document.createElement('small');fresh.className='ride-option-new';fresh.textContent='NEW';badges.append(fresh);}
     const name=document.createElement('strong');name.textContent=ride.name;
     const description=document.createElement('span');description.className='ride-option-description';description.textContent=ride.description;
     const stats=document.createElement('span');stats.className='ride-option-stats';stats.textContent=`${Math.round(ride.heightMeters)} m high · ${Math.round(ride.lengthMeters)} m circuit`;
     const action=document.createElement('span');action.className='ride-option-action';
-    copy.append(badge,name,description,stats,action);button.append(graphic,copy);button.addEventListener('click',()=>selectRide(ride.id));$('ride-options').append(button);
+    const features=document.createElement('span');features.className='ride-option-features';features.hidden=!ride.features?.length;
+    for(const text of ride.features||[]){const chip=document.createElement('span');chip.textContent=text;features.append(chip);}
+    copy.append(badges,name,description,features,stats,action);button.append(graphic,copy);button.addEventListener('click',()=>selectRide(ride.id));$('ride-options').append(button);
   }
   updateRideInfo();
 }
@@ -275,7 +311,7 @@ function crossGate(gate){gate.done=true;gate.perfect=state.mode==='thrill'&&stat
 
 function simulate(dt){
   let remaining=dt;
-  while(remaining>0){const h=Math.min(remaining,1/90);const lift=getSection(state.distance).type==='lift';const boostPower=state.boost&&state.fuel>0&&!state.brake&&!lift?Math.min(1,state.fuel/(27*h)):0;state.speed=nextSpeed(state.speed,state.distance,h,state.brake,boostPower);state.fuel=clamp(state.fuel-27*h*boostPower+(!state.boost?13*h:0),0,100);const travel=state.speed*h;state.distance+=travel;state.traveled+=travel;state.elapsed+=h;state.maxSpeed=Math.max(state.maxSpeed,state.speed);
+  while(remaining>0){const h=Math.min(remaining,1/90);const powered=['lift','launch'].includes(getSection(state.distance).type);const boostPower=state.boost&&state.fuel>0&&!state.brake&&!powered?Math.min(1,state.fuel/(27*h)):0;state.speed=nextSpeed(state.speed,state.distance,h,state.brake,boostPower);state.fuel=clamp(state.fuel-27*h*boostPower+(!state.boost||powered?13*h:0),0,100);const travel=state.speed*h;state.distance+=travel;state.traveled+=travel;state.elapsed+=h;state.maxSpeed=Math.max(state.maxSpeed,state.speed);
     for(const gate of gates)if(!gate.done&&state.distance>=gate.distance)crossGate(gate);
     if(state.traveled>=trackLength*state.lap){if(state.mode==='thrill'){finishRide();break;}state.lap++;assignGateWords();gates.forEach(g=>{g.distance=g.baseDistance+(state.lap-1)*trackLength;g.done=false;g.perfect=false;g.sign.visible=true;g.material.color.set(0xf4bf69);g.material.emissive.set(0xd28e29);});if(gates[0].entry)learning.present(gates[0].entry,{collect:false});if(learning.settings.showCard)toast('New lap. New words.',`Lap ${state.lap} · Your lesson keeps rolling.`,3);}
     remaining-=h;
@@ -318,12 +354,12 @@ function updateHUD(){
   const frame=track.getFrame(state.distance),section=getSection(state.distance);
   $('speed').textContent=Math.round(state.speed*3.6);$('speed-meter').style.width=`${Math.min(state.speed/track.ride.maxSpeed,1)*100}%`;$('altitude').textContent=Math.round(frame.position.y);
   $('score-label').textContent=state.mode==='thrill'?'THRILL SCORE':'PRACTICED';$('score').textContent=state.mode==='thrill'?state.score.toLocaleString():state.practiced;$('gate-count').textContent=`${gates.filter(g=>g.done).length} / 8 GATES`;
-  $('ride-time').textContent=formatTime(state.elapsed);$('stage').textContent=section.name.toUpperCase()+(section.type==='lift'?' · CHAIN LIFT':'');$('boost-meter').style.width=state.fuel+'%';$('map-lap').textContent=state.phase==='menu'?'PARK MAP':`LAP ${String(state.lap).padStart(2,'0')}`;
+  $('ride-time').textContent=formatTime(state.elapsed);$('stage').textContent=section.name.toUpperCase()+(section.type==='lift'?' · CHAIN LIFT':section.type==='launch'?' · POWERED LAUNCH':'');$('boost-meter').style.width=state.fuel+'%';$('map-lap').textContent=state.phase==='menu'?'PARK MAP':`LAP ${String(state.lap).padStart(2,'0')}`;
   $('map-progress').textContent=state.phase==='menu'?'READY WHEN YOU ARE':`${Math.floor(((state.traveled%trackLength)/trackLength)*100)}% OF THE CIRCUIT`;
   const nextGate=gates.find(g=>!g.done);
   const showTarget=state.mode==='thrill'&&!!nextGate&&state.phase==='riding';$('gate-target').hidden=!showTarget;
   if(showTarget){$('gate-name').textContent=`GATE ${String(nextGate.index+1).padStart(2,'0')} · ${Math.ceil(Math.max(0,nextGate.distance-state.distance))} M AHEAD`;$('target-speed').innerHTML=`${nextGate.min}–${nextGate.max} <small>KM/H</small>`;
-    const kmh=state.speed*3.6,inRange=kmh>=nextGate.min&&kmh<=nextGate.max;$('gate-target').classList.toggle('in-range',inRange);$('target-hint').textContent=section.type==='lift'?'Enjoy the climb. A drop is coming.':inRange?'Perfect pace. Hold it here.':kmh>nextGate.max?'Ease on the brake.':'A little boost will do it.';
+    const kmh=state.speed*3.6,inRange=kmh>=nextGate.min&&kmh<=nextGate.max;$('gate-target').classList.toggle('in-range',inRange);$('target-hint').textContent=section.type==='lift'?'Enjoy the climb. A drop is coming.':section.type==='launch'?'Hold on. The launch is automatic.':inRange?'Perfect pace. Hold it here.':kmh>nextGate.max?'Ease on the brake.':'A little boost will do it.';
   }
 }
 const map=$('minimap'),mapCtx=map.getContext('2d');
@@ -401,13 +437,13 @@ Object.defineProperty(window,'suncoast',{value:{get status(){return {phase:state
 let previous=performance.now(),time=0;
 function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-previous)/1000,.05);previous=now;time+=dt;
   if(state.phase==='riding'){simulate(dt);updateTrain();}
-  const onLift=getSection(state.distance).type==='lift';
-  audio.update({speed:state.speed,lift:onLift,riding:state.phase==='riding',boost:state.boost&&state.fuel>0&&!state.brake&&!onLift},dt);
-  if(state.phase!=='paused')park.update(time,dt);
+  const sectionType=getSection(state.distance).type;
+  audio.update({speed:state.speed,lift:sectionType==='lift',riding:state.phase==='riding',boost:!state.brake&&(sectionType==='launch'||state.boost&&state.fuel>0&&sectionType!=='lift')},dt);
+  if(state.phase!=='paused'){park.update(time,dt);effects.update(time,dt);}
   updateParticles(dt);updateCamera(dt,time);
   if(state.toastTime>0){state.toastTime-=dt;if(state.toastTime<=0)$('toast').classList.remove('show');}
   hudAccumulator+=dt;if(hudAccumulator>.08){hudAccumulator=0;if(state.phase==='riding')updateHUD();drawMap();}
   renderer.render(scene,camera);state.frameCount++;
 }
-createRidePicker();trainMaterials.orange.color.set(track.ride.color);
+createRidePicker();applyEnvironment();trainMaterials.orange.color.set(track.ride.color);
 state.ready=true;setPhase('menu');gates.forEach(g=>g.group.visible=false);$('start').disabled=false;drawMap();updateCamera(.1,0);renderer.render(scene,camera);$('loading').classList.add('fade');setTimeout(()=>$('loading').hidden=true,650);requestAnimationFrame(animate);
