@@ -250,3 +250,27 @@ test('Storage events and pageshow refresh counts, favorites and sorted order', (
   assert.equal(h.node('#matterhorn .game-favorite').getAttribute('aria-pressed'), 'true');
   h.click('#favorites-toggle'); assert.deepEqual(h.visible(), ['matterhorn']);
 });
+
+test('Aonami launches from Fishing and Language Learning with a GoLingo lesson payload', () => {
+  const h = createHub();
+  const card = h.node('#aonami-fishing');
+  assert.match(card.dataset.tags, /fishing/);
+  assert.match(card.dataset.tags, /language-learning/);
+  const link = h.node('#aonami-fishing a.game-cover');
+  assert.equal(link.getAttribute('href'), 'aonami-fishing/');
+  assert.equal(link.dataset.lessonKey, 'data');
+  assert.equal(link.dataset.lessonFormat, 'word-pack');
+  h.input('aonami'); assert.deepEqual(h.visible(), ['aonami-fishing']);
+  h.click('#aonami-fishing .demo-link');
+  assert.equal(h.count('aonami-fishing'), 1);
+});
+
+test('Aonami public game includes the complete embedded Japanese voice pack and source download', async () => {
+  const game = await readFile(new URL('../aonami-fishing/index.html', import.meta.url), 'utf8');
+  const download = await readFile(new URL('../aonami-fishing/aonami-fishing.html', import.meta.url), 'utf8');
+  assert.equal(game, download);
+  assert.equal((game.match(/data:audio\/mpeg;base64,/g) || []).length, 30);
+  assert.match(game, /id="voice-test"/);
+  assert.match(game, /id="action"/);
+  assert.match(game, /id="catch-translation"/);
+});
