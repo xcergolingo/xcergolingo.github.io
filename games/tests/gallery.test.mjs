@@ -278,6 +278,7 @@ test('Aonami public game includes the complete embedded Japanese voice pack and 
   assert.equal(game, download);
   assert.equal((game.match(/data:audio\/mpeg;base64,/g) || []).length, 30);
   assert.match(game, /id="voice-test"/);
+  assert.match(game, /Replay voice sample \(optional\)/, 'pronunciation should initialize with Start fishing');
   assert.match(game, /id="action"/);
   assert.match(game, /id="catch-translation"/);
 });
