@@ -65,9 +65,9 @@
   <div id="controlHint">WASD / arrows · Space brake · E interact · 1–5 cameras · B battery</div>
   <button id="contextAction" hidden><kbd>E</kbd><span id="contextText">Pick up key</span></button>
   <div class="touch-controls" aria-label="Touch driving controls">
-    <div id="wheel" role="slider" tabindex="0" aria-label="Steering wheel. Drag clockwise to turn right, counterclockwise to turn left." aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0">
+    <div id="wheel" role="slider" tabindex="0" aria-label="Steering wheel. Turn in a circle or drag sideways to steer. Hold GO with another finger to drive." aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0">
       <svg id="wheelGraphic" viewBox="0 0 160 160" aria-hidden="true"><circle cx="80" cy="80" r="65" fill="none" stroke="#abc2c6" stroke-opacity=".14" stroke-width="13"/><circle cx="80" cy="80" r="65" fill="none" stroke="#cad4cd" stroke-opacity=".63" stroke-width="2"/><circle cx="80" cy="80" r="56" fill="none" stroke="#53636a" stroke-opacity=".45" stroke-width="1"/><path d="M26 68 66 78M134 68 94 78M80 96v48" fill="none" stroke="#9eacae" stroke-opacity=".55" stroke-width="9"/><path d="M26 68 66 78M134 68 94 78M80 96v48" fill="none" stroke="#d5d9cc" stroke-opacity=".35" stroke-width="1"/><circle cx="80" cy="80" r="22" fill="#18232c" stroke="#879796" stroke-opacity=".55"/><circle cx="80" cy="80" r="16" fill="#111c25" stroke="#a4874e" stroke-opacity=".4"/><path d="M80 11v10" stroke="#e0b45a" stroke-width="4" stroke-linecap="round"/></svg>
-      <span class="wheel-label">YOLK</span><span class="wheel-caption">STEER</span>
+      <span id="wheelLabel" class="wheel-label">STEER</span><span class="wheel-caption">TURN OR SWIPE</span>
     </div>
     <div class="pedals">
       <button id="brake" class="pedal" aria-label="Hold brake"><svg viewBox="0 0 24 24"><path d="M7 6v12M17 6v12" stroke-width="3"/></svg><span>BRAKE</span></button>
@@ -316,9 +316,10 @@ body.compact-ui #quickPauseSlot #pauseBtn{position:static;width:38px;height:38px
 body.compact-ui #quickPauseSlot #pauseBtn svg{width:15px;height:15px}
 body.compact-ui .touch-controls{position:absolute;inset:0;pointer-events:none}
 body.compact-ui.touch .touch-controls{display:block}
-body.compact-ui #hud #wheel{width:128px;height:128px;left:calc(16px + var(--safe-left));bottom:calc(25px + var(--safe-bottom));border:0;background:rgba(12,22,29,.2);box-shadow:none;touch-action:none}
-body.compact-ui #hud .wheel-label{font-size:7px}
-body.compact-ui #hud .wheel-caption{display:none}
+body.compact-ui #hud #wheel{width:144px;height:144px;left:calc(13px + var(--safe-left));bottom:calc(23px + var(--safe-bottom));border:0;background:rgba(12,22,29,.20);box-shadow:none;touch-action:none;user-select:none;-webkit-user-select:none}
+body.compact-ui #hud #wheel.pressed{background:rgba(38,39,31,.38);filter:drop-shadow(0 0 12px #e0b45a40)}
+body.compact-ui #hud .wheel-label{font-size:9px;letter-spacing:.5px;color:#f2d89c;text-shadow:0 1px 5px #000}
+body.compact-ui #hud .wheel-caption{display:block;top:calc(100% + 2px);font-size:7px;letter-spacing:.8px;color:#d4b778;text-shadow:0 1px 6px #000}
 body.compact-ui #hud .pedals{right:calc(16px + var(--safe-right));bottom:calc(25px + var(--safe-bottom));display:grid;grid-template-columns:49px 58px;grid-template-rows:54px 44px;gap:6px}
 body.compact-ui #hud .pedal{font-size:7px;gap:5px;border-radius:7px;background:rgba(16,26,34,.61);border-color:#a9bdc333}
 body.compact-ui #hud .pedal svg{width:18px;height:18px}
@@ -413,7 +414,7 @@ body.compact-ui #modal .control-row span:last-child{font-size:9px}
 body.compact-ui #modal .modal-quote{display:none}
 body.compact-ui #modalPrimary,body.compact-ui #modalSecondary{font-size:11px;min-height:36px;padding:9px 12px}
 @container curb-screen (max-width:720px){
- body.compact-ui #hud #wheel{width:116px;height:116px;left:calc(12px + var(--safe-left));bottom:calc(23px + var(--safe-bottom))}
+ body.compact-ui #hud #wheel{width:134px;height:134px;left:calc(9px + var(--safe-left));bottom:calc(19px + var(--safe-bottom))}
  body.compact-ui #hud .pedals{right:calc(12px + var(--safe-right));bottom:calc(23px + var(--safe-bottom));grid-template-columns:46px 54px;grid-template-rows:50px 42px;gap:5px}
  body.compact-ui #modeUI #lessonCaption{max-width:calc(100% - 370px);bottom:calc(18px + var(--safe-bottom));padding:4px 5px}
  body.compact-ui #modeUI #lessonCaptionText{font-size:13px}
@@ -426,7 +427,7 @@ body.compact-ui #modalPrimary,body.compact-ui #modalSecondary{font-size:11px;min
  body.compact-ui #hud #intro .intro-title{font-size:26px}
 }
 @container curb-screen (max-height:340px){
- body.compact-ui #hud #wheel{width:104px;height:104px}
+ body.compact-ui #hud #wheel{width:122px;height:122px}
  body.compact-ui #hud #intro{padding:14px 18px;max-height:calc(var(--view-height,100dvh) - 72px)}
  body.compact-ui #hud #intro .intro-title{font-size:24px;margin-bottom:7px}
  body.compact-ui #hud #intro .intro-copy{font-size:10px;margin-bottom:10px}
@@ -1716,7 +1717,7 @@ async function bootCurbwake(THREE, mergeGeometries) {
   const ambientLines=['Lamp Street is holding its breath.','Battery sipping the night.','Hearts still warm.','A good hour on the curb.','The curb is a country.'];
   const placeNames=['01 / LAMP STREET','02 / HOPSCOTCH','03 / CUT LOT','04 / STEAM HOLE','05 / YELLOW FORK'];
   let audio=null,raf=0,lastTime=0,lastHud=0,lastGround=0,lastSpeed=0,slowFrames=0,frames=0,qualityReduced=false;
-  let rightDrag=null,wheelPointer=null,wheelStartX=0,wheelTravel=100;
+  let rightDrag=null,wheelPointer=null,wheelGesture=null;
   let toastTimer;
   // Browser audio is created only after the first intentional user input.
   function initAudio(){
@@ -1762,7 +1763,7 @@ async function bootCurbwake(THREE, mergeGeometries) {
     if($('viewDragHint')){$('viewDragHint').hidden=false;setTimeout(()=>{$('viewDragHint').hidden=true;},6500);}
     setTimeout(()=>{if($('controlHint'))$('controlHint').classList.add('faded');if($('quote'))$('quote').classList.add('faded');},7000);
   }
-  function releaseControls(){keys.clear();touch.throttle=touch.reverse=touch.brake=touch.steer=0;wheelPointer=null;rightDrag=null;state.throttle=0;document.querySelectorAll('.pressed').forEach(el=>el.classList.remove('pressed'));}
+  function releaseControls(){keys.clear();touch.throttle=touch.reverse=touch.brake=touch.steer=0;wheelPointer=null;wheelGesture=null;rightDrag=null;state.throttle=0;document.querySelectorAll('.pressed').forEach(el=>el.classList.remove('pressed'));}
   function setMenu(open){
     open=!!open;if(open===state.menuOpen)return;
     releaseControls();state.menuOpen=open;
@@ -1996,8 +1997,8 @@ async function bootCurbwake(THREE, mergeGeometries) {
     else state.speed+=clamp(delta,-accel*dt,accel*dt);
     const speedAbs=Math.abs(state.speed);
     if(speedAbs>.015){
-      // Retain a useful crawl turning circle while reducing steering gain at speed.
-      const yawRate=(1.25+.22/(1+speedAbs))*Math.min(speedAbs/.8,1)/(1+.38*speedAbs);
+      // The wheel has clear turning authority even at a slow RC crawler pace.
+      const yawRate=(1.52+.22/(1+speedAbs))*Math.min(speedAbs/.8,1)/(1+.38*speedAbs);
       state.heading+=state.steer*yawRate*Math.sign(state.speed)*dt;
     }
     forward.set(Math.sin(state.heading),0,Math.cos(state.heading));
@@ -2125,8 +2126,9 @@ async function bootCurbwake(THREE, mergeGeometries) {
       if(state.started&&state.gameMode==='search'&&state.elapsed-state.lastStatus>19)status(ambientLines[Math.floor(state.elapsed/19)%ambientLines.length]);
       updateHUD();
     }
-    if($('wheelGraphic'))$('wheelGraphic').style.transform='rotate('+(-state.steer*90)+'deg)';
+    if($('wheelGraphic'))$('wheelGraphic').style.transform='rotate('+(-state.steer*115)+'deg)';
     if($('wheel'))$('wheel').setAttribute('aria-valuenow',String(Math.round(-state.steer*100)));
+    if($('wheelLabel'))$('wheelLabel').textContent=Math.abs(state.steer)<.04?'STEER':(state.steer>0?'LEFT ':'RIGHT ')+Math.round(Math.abs(state.steer)*100)+'%';
     updateAudio();renderer.render(scene,camera);
     frames++;if(rawdt>.035)slowFrames++;
     if(frames===220&&!qualityReduced&&slowFrames>75){qualityReduced=true;renderer.setPixelRatio(Math.min(devicePixelRatio,1.15));renderer.setSize(viewport.width,viewport.height);}
@@ -2233,24 +2235,65 @@ async function bootCurbwake(THREE, mergeGeometries) {
   const wheel=$('wheel');
   function wheelResponse(value){
     const amount=Math.abs(clamp(value,-1,1));
-    if(amount<=.10)return 0;
-    const t=(amount-.10)/.90;
-    return Math.sign(value)*(.32*t+.68*t*t);
+    if(amount<=.035)return 0;
+    const t=(amount-.035)/.965;
+    return Math.sign(value)*(.76*t+.24*t*t);
+  }
+  function beginWheel(source,id,clientX,clientY){
+    if(state.paused||wheelGesture)return false;
+    start();
+    const point=viewport.toLocal(clientX,clientY),r=viewport.elementRect(wheel);
+    wheelGesture={source,id,x:point.x,y:point.y,cx:r.left+r.width/2,cy:r.top+r.height/2,radius:Math.min(r.width,r.height)/2,mode:null};
+    wheelPointer=source==='pointer'?id:null;
+    touch.steer=0;wheel.classList.add('pressed');wheel.setAttribute('aria-valuenow','0');
+    return true;
+  }
+  function moveWheel(clientX,clientY){
+    const g=wheelGesture;if(!g)return;
+    const point=viewport.toLocal(clientX,clientY),dx=point.x-g.x,dy=point.y-g.y;
+    const startX=g.x-g.cx,startY=g.y-g.cy,radialDistance=Math.hypot(startX,startY);
+    const tangential=radialDistance>1?(startX*dy-startY*dx)/radialDistance:0;
+    const radial=radialDistance>1?(startX*dx+startY*dy)/radialDistance:0;
+    if(!g.mode&&Math.hypot(dx,dy)>5){
+      // Tracing the rim rotates the real wheel. A thumb swipe through its center also works.
+      g.mode=radialDistance>g.radius*.34&&Math.abs(tangential)>Math.abs(radial)*.65?'rotate':'swipe';
+    }
+    if(!g.mode)return;
+    let value;
+    if(g.mode==='rotate'){
+      const endX=point.x-g.cx,endY=point.y-g.cy;
+      const angle=Math.atan2(startX*endY-startY*endX,startX*endX+startY*endY);
+      value=Math.hypot(endX,endY)>g.radius*.2?angle/1.05:tangential/(g.radius*.65);
+    }else value=dx/Math.max(32,g.radius*.74);
+    touch.steer=-wheelResponse(value);
+  }
+  function endWheel(source,id){
+    if(!wheelGesture||wheelGesture.source!==source||wheelGesture.id!==id)return;
+    wheelPointer=null;wheelGesture=null;touch.steer=0;wheel.classList.remove('pressed');wheel.setAttribute('aria-valuenow','0');
   }
   wheel?.addEventListener('pointerdown',e=>{
-    e.preventDefault();e.stopPropagation();if(state.paused||wheelPointer!==null&&wheelPointer!==e.pointerId)return;
-    start();const point=viewport.toLocal(e.clientX,e.clientY),r=viewport.elementRect(wheel);
-    wheelPointer=e.pointerId;wheelStartX=point.x;wheelTravel=Math.max(84,r.width*.78);
-    // A grab is neutral anywhere on the rim; steering begins with an intentional drag.
-    touch.steer=0;wheel.setPointerCapture(e.pointerId);wheel.classList.add('pressed');wheel.setAttribute('aria-valuenow','0');
+    e.preventDefault();e.stopPropagation();
+    if(beginWheel('pointer',e.pointerId,e.clientX,e.clientY)){
+      try{wheel.setPointerCapture(e.pointerId);}catch{} // Older embedded web views can reject capture.
+    }
   });
-  wheel?.addEventListener('pointermove',e=>{
-    if(e.pointerId!==wheelPointer)return;e.preventDefault();
-    const point=viewport.toLocal(e.clientX,e.clientY);
-    touch.steer=-wheelResponse((point.x-wheelStartX)/wheelTravel);
-  });
-  function releaseWheel(e){if(e.pointerId===wheelPointer){wheelPointer=null;touch.steer=0;wheel.classList.remove('pressed');wheel.setAttribute('aria-valuenow','0');}}
-  wheel?.addEventListener('pointerup',releaseWheel);wheel?.addEventListener('pointercancel',releaseWheel);wheel?.addEventListener('lostpointercapture',releaseWheel);
+  wheel?.addEventListener('pointermove',e=>{if(e.pointerId!==wheelPointer||!wheelGesture)return;e.preventDefault();moveWheel(e.clientX,e.clientY);});
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])wheel?.addEventListener(event,e=>endWheel('pointer',e.pointerId));
+  // Touch Events fallback for WKWebViews that omit Pointer Events on transformed controls.
+  wheel?.addEventListener('touchstart',e=>{
+    if(wheelGesture)return;
+    const t=e.changedTouches?.[0];if(t&&beginWheel('touch',t.identifier,t.clientX,t.clientY))e.preventDefault();
+  },{passive:false});
+  wheel?.addEventListener('touchmove',e=>{
+    if(wheelGesture?.source!=='touch')return;
+    const t=Array.from(e.changedTouches||[]).find(t=>t.identifier===wheelGesture.id);
+    if(t){e.preventDefault();moveWheel(t.clientX,t.clientY);}
+  },{passive:false});
+  for(const event of ['touchend','touchcancel'])wheel?.addEventListener(event,e=>{
+    if(wheelGesture?.source!=='touch')return;
+    const t=Array.from(e.changedTouches||[]).find(t=>t.identifier===wheelGesture.id);
+    if(t){e.preventDefault();endWheel('touch',t.identifier);}
+  },{passive:false});
   canvas.addEventListener('pointerdown',e=>{
     if(state.paused||rightDrag)return;start();canvas.focus({preventScroll:true});
     if(e.pointerType==='touch'||e.button===0||e.button===2){
