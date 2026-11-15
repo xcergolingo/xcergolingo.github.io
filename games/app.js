@@ -62,73 +62,234 @@
     );
     return {...lesson, primaryLanguage: lesson.primaryLanguage || lesson.translationLanguage || 'en', words};
   }
-  // Send the payload only on explicit launch. A URL hash is not sent to servers.
-  document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover').forEach(link => {
-    link.addEventListener('click', () => {
-      const url = new URL(link.href);
-      const lessonKey = ['data', 'golingo'].includes(link.dataset.lessonKey) ? link.dataset.lessonKey : 'golingoLesson';
-      if (activeLesson) url.hash = lessonKey + '=' + encodeURIComponent(JSON.stringify(launchLessonPayload(activeLesson, link.dataset.lessonFormat)));
-      else if (url.hash.startsWith('#' + lessonKey + '=')) url.hash = '';
-      link.href = url.toString();
-      link.target = '_self'; // WKWebView: reuse the existing page, never create an unhandled new tab.
-    });
-  });
   const cards = [...document.querySelectorAll('.game-card')];
-  document.getElementById('hub-count').textContent = cards.length + ' games';
-  // Browser-local reactions. No server-wide vote count is implied.
-  const likesKey = 'golingo:liked-games:v1';
-  let liked = {};
-  try { liked = JSON.parse(localStorage.getItem(likesKey) || '{}') || {}; } catch { liked = {}; }
+  const cardById = new Map(cards.filter(card => card.id).map(card => [card.id, card]));
   const grid = document.querySelector('.game-grid');
   const sortControl = document.getElementById('game-sort');
+  const searchControl = document.getElementById('game-search');
+  const clearSearch = document.getElementById('search-clear');
+  const favoritesToggle = document.getElementById('favorites-toggle');
+  const filterChips = [...document.querySelectorAll('[data-filter]')];
   const originalOrder = new Map(cards.map((card, i) => [card, i]));
+  const cardNames = new Map(cards.map(card => [card, card.querySelector('h3')?.textContent?.trim() || card.id]));
+  const sortModes = new Set(['default', 'plays', 'recent', 'likes', 'name']);
+  const categories = new Set(filterChips.map(chip => chip.dataset.filter));
+
+  // Device-local collections, never a claim about all visitors' activity.
+  // Keep the original likes key so existing reactions are preserved.
+  const likesKey = 'golingo:liked-games:v1';
+  const favoritesKey = 'golingo:favorite-games:v1';
+  const playsKey = 'golingo:game-plays:v1';
+  const viewKey = 'golingo:gallery-view:v1';
+  let localAvailable = true, sessionAvailable = true;
+
+  function objectFromJSON(raw) {
+    try {
+      const value = JSON.parse(raw || '{}');
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    } catch { return {}; }
+  }
+  function readLocal(key) {
+    try { return objectFromJSON(localStorage.getItem(key)); }
+    catch { localAvailable = false; return null; }
+  }
+  function booleanCollection(value) {
+    const safe = Object.create(null);
+    for (const id of cardById.keys()) {
+      if (value && Object.prototype.hasOwnProperty.call(value, id) && value[id] === true) safe[id] = true;
+    }
+    return safe;
+  }
+  function playCollection(value) {
+    const safe = Object.create(null);
+    for (const id of cardById.keys()) {
+      if (!value || !Object.prototype.hasOwnProperty.call(value, id)) continue;
+      const entry = value[id];
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry) || !Number.isSafeInteger(entry.count) || entry.count < 1) continue;
+      safe[id] = {
+        count: entry.count,
+        lastPlayed: Number.isSafeInteger(entry.lastPlayed) && entry.lastPlayed >= 0 ? entry.lastPlayed : 0
+      };
+    }
+    return safe;
+  }
+  let liked = booleanCollection(readLocal(likesKey));
+  let favorites = booleanCollection(readLocal(favoritesKey));
+  let plays = playCollection(readLocal(playsKey));
+
+  function updateStorageStatus() {
+    const note = document.getElementById('hub-storage-status');
+    if (!note) return;
+    note.textContent = !localAvailable
+      ? 'Device storage is unavailable. Your plays, favorites, and likes will last only until this page reloads or closes. Plays count game launches, not completed sessions.'
+      : 'Your plays, favorites, and likes are saved on this device. Plays count game launches, not completed sessions.' +
+        (sessionAvailable ? '' : ' Search and filters cannot be remembered in this session.');
+  }
+  function writeLocal(key, value) {
+    if (localAvailable) {
+      try { localStorage.setItem(key, JSON.stringify(value)); }
+      catch { localAvailable = false; }
+    }
+    updateStorageStatus();
+  }
+
+  let view = { search: '', category: 'all', favoritesOnly: false, sort: 'default' };
+  try {
+    const saved = objectFromJSON(sessionStorage.getItem(viewKey));
+    view = {
+      search: typeof saved.search === 'string' ? saved.search.slice(0, 200) : '',
+      category: categories.has(saved.category) ? saved.category : 'all',
+      favoritesOnly: saved.favoritesOnly === true,
+      sort: sortModes.has(saved.sort) ? saved.sort : 'default'
+    };
+  } catch { sessionAvailable = false; }
+  function rememberView() {
+    if (sessionAvailable) {
+      try { sessionStorage.setItem(viewKey, JSON.stringify(view)); }
+      catch { sessionAvailable = false; }
+    }
+    updateStorageStatus();
+  }
+
+  // Index original game content, not changing like/count/button text.
+  function normalizeSearch(value) {
+    return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[-–—]/g, ' ');
+  }
+  const searchIndex = new Map(cards.map(card => [card, normalizeSearch([
+    cardNames.get(card), card.querySelector('.game-copy > p')?.textContent || '',
+    [...card.querySelectorAll('.tags span')].map(tag => tag.textContent).join(' '), card.dataset.tags || ''
+  ].join(' '))]));
+  const playCount = card => plays[card.id]?.count || 0;
+
   function renderLike(card) {
     const button = card.querySelector('.game-like');
-    const isLiked = !!liked[card.id];
-    button.setAttribute('aria-pressed', String(isLiked));
-    button.setAttribute('aria-label', (isLiked ? 'Unlike ' : 'Like ') + (card.querySelector('h3')?.textContent || card.id));
-    button.innerHTML = (isLiked ? '👍 Liked' : '👍 Like') + ' <span aria-hidden="true">' + (isLiked ? '1' : '0') + '</span>';
+    if (!button) return;
+    const isLiked = !!…1026 tokens truncated…ty.hidden = count !== 0;
+      const noFavorites = view.favoritesOnly && favoriteCount === 0;
+      const heading = document.getElementById('hub-empty-title');
+      const description = document.getElementById('hub-empty-description');
+      if (heading) heading.textContent = noFavorites ? 'No favorites yet' : 'No games found';
+      if (description) description.textContent = noFavorites
+        ? 'Tap the heart on a game to save it here. Reset filters to explore the collection.'
+        : 'Try another search, choose All games, or turn off the Favorites filter.';
+    }
+    sortGames();
+    if (focusedCard?.hidden) favoritesToggle?.focus({ preventScroll: true });
   }
-  function sortGames() {
-    const mode = sortControl?.value || 'default';
-    const sorted = cards.slice().sort((a,b) => mode === 'likes'
-      ? Number(!!liked[b.id]) - Number(!!liked[a.id]) || originalOrder.get(a)-originalOrder.get(b)
-      : mode === 'name'
-      ? (a.querySelector('h3')?.textContent || '').localeCompare(b.querySelector('h3')?.textContent || '')
-      : originalOrder.get(a)-originalOrder.get(b));
-    sorted.forEach(card => grid.appendChild(card));
-  }
+
   cards.forEach(card => {
     if (!card.id) return;
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'game-like';
     const copy = card.querySelector('.game-copy');
     const tags = copy?.querySelector('.tags');
-    if (tags) tags.insertAdjacentElement('afterend', button);
-    else copy?.appendChild(button);
-    button.addEventListener('click', () => {
+    const actions = document.createElement('div');
+    actions.className = 'game-actions';
+    const likeButton = document.createElement('button');
+    likeButton.type = 'button';
+    likeButton.className = 'game-like';
+    const favoriteButton = document.createElement('button');
+    favoriteButton.type = 'button';
+    favoriteButton.className = 'game-favorite';
+    const playLabel = document.createElement('span');
+    playLabel.className = 'game-plays';
+    actions.append(likeButton, favoriteButton, playLabel);
+    if (tags) tags.insertAdjacentElement('afterend', actions);
+    else copy?.appendChild(actions);
+    likeButton.addEventListener('click', () => {
+      if (localAvailable) liked = booleanCollection(readLocal(likesKey) || liked);
       if (liked[card.id]) delete liked[card.id]; else liked[card.id] = true;
-      try { localStorage.setItem(likesKey, JSON.stringify(liked)); } catch {}
-      renderLike(card);
-      sortGames();
+      writeLocal(likesKey, liked);
+      cards.forEach(renderLike);
+      applyView();
+    });
+    favoriteButton.addEventListener('click', () => {
+      if (localAvailable) favorites = booleanCollection(readLocal(favoritesKey) || favorites);
+      if (favorites[card.id]) delete favorites[card.id]; else favorites[card.id] = true;
+      writeLocal(favoritesKey, favorites);
+      cards.forEach(renderFavorite);
+      applyView();
     });
     renderLike(card);
+    renderFavorite(card);
+    renderPlays(card);
   });
-  sortControl?.addEventListener('change', sortGames);
 
-  document.querySelectorAll('[data-filter]').forEach(chip => chip.addEventListener('click', () => {
-    const tag = chip.dataset.filter;
-    let count = 0;
-    cards.forEach(card => {
-      const show = tag === 'all' || (card.dataset.tags || '').split(' ').includes(tag);
-      card.hidden = !show; if (show) count++;
-    });
-    document.querySelectorAll('[data-filter]').forEach(other => {
-      const on = other === chip; other.classList.toggle('active', on); other.setAttribute('aria-pressed', String(on));
-    });
-    document.getElementById('hub-count').textContent = count + (count === 1 ? ' game' : ' games');
-  }));
+  function changeView(update) {
+    Object.assign(view, update);
+    rememberView();
+    applyView();
+  }
+  filterChips.forEach(chip => chip.addEventListener('click', () => changeView({ category: chip.dataset.filter })));
+  sortControl?.addEventListener('change', () => changeView({ sort: sortModes.has(sortControl.value) ? sortControl.value : 'default' }));
+  searchControl?.addEventListener('input', () => changeView({ search: searchControl.value.slice(0, 200) }));
+  searchControl?.addEventListener('search', () => changeView({ search: searchControl.value.slice(0, 200) }));
+  searchControl?.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && view.search) {
+      event.preventDefault();
+      changeView({ search: '' });
+    }
+  });
+  clearSearch?.addEventListener('click', () => {
+    changeView({ search: '' });
+    searchControl?.focus();
+  });
+  favoritesToggle?.addEventListener('click', () => changeView({ favoritesOnly: !view.favoritesOnly }));
+  document.getElementById('filters-reset')?.addEventListener('click', () => {
+    changeView({ search: '', category: 'all', favoritesOnly: false });
+    searchControl?.focus();
+  });
+
+  // Launch counters measure gallery link activations, not game completion,
+  // preview views, or App Store downloads. Rapid double taps count once.
+  const recentLaunches = new Map();
+  function recordLaunch(card) {
+    const now = Date.now();
+    const previous = recentLaunches.get(card.id);
+    if (previous !== undefined && now >= previous && now - previous < 1500) return;
+    recentLaunches.set(card.id, now);
+    if (localAvailable) plays = playCollection(readLocal(playsKey) || plays);
+    plays[card.id] = { count: Math.min(Number.MAX_SAFE_INTEGER, playCount(card) + 1), lastPlayed: now };
+    writeLocal(playsKey, plays);
+    renderPlays(card);
+    // Sorting here could move a touched link before the browser navigates.
+    // pageshow refreshes the order on return, including the back/forward cache.
+  }
+  function launchGame(event) {
+    if (event.defaultPrevented || (event.type === 'auxclick' ? event.button !== 1 : event.button !== 0)) return;
+    const link = event.currentTarget;
+    const card = cardById.get(link.dataset.gameId || link.closest('.game-card')?.id);
+    if (!card) return;
+    const url = new URL(link.href);
+    if (!['https:', 'http:'].includes(url.protocol)) return;
+    const transferKey = ['data', 'golingo'].includes(link.dataset.lessonKey) ? link.dataset.lessonKey : 'golingoLesson';
+    if (activeLesson) url.hash = transferKey + '=' + encodeURIComponent(JSON.stringify(launchLessonPayload(activeLesson, link.dataset.lessonFormat)));
+    else if (url.hash.startsWith('#' + transferKey + '=')) url.hash = '';
+    link.href = url.toString();
+    link.target = '_self'; // WKWebView: keep the normal launch in this WebView.
+    recordLaunch(card);
+    // Leave navigation to the native link, preserving keyboard/modifier clicks.
+  }
+  document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover, #dialog-demo').forEach(link => {
+    link.addEventListener('click', launchGame);
+    link.addEventListener('auxclick', launchGame);
+  });
+  function refreshCollections() {
+    // If a write failed, retain this page's in-memory changes rather than
+    // replacing them with an older persisted copy.
+    if (localAvailable) {
+      liked = booleanCollection(readLocal(likesKey) || liked);
+      favorites = booleanCollection(readLocal(favoritesKey) || favorites);
+      plays = playCollection(readLocal(playsKey) || plays);
+    }
+    cards.forEach(card => { renderLike(card); renderFavorite(card); renderPlays(card); });
+    updateStorageStatus();
+    applyView();
+  }
+  window.addEventListener('pageshow', refreshCollections);
+  window.addEventListener('storage', event => {
+    if (event.key === null || [likesKey, favoritesKey, playsKey].includes(event.key)) refreshCollections();
+  });
+  updateStorageStatus();
+  applyView();
 
   const dialog = document.getElementById('preview-dialog');
   const video = document.getElementById('preview-video');
@@ -187,6 +348,13 @@
     document.getElementById('preview-description').textContent = game.description;
     document.getElementById('dialog-demo').href = game.demo;
     document.getElementById('dialog-demo').target = '_self';
+    const demoLink = document.getElementById('dialog-demo');
+    demoLink.dataset.gameId = id;
+    const cardLink = cardById.get(id)?.querySelector('.demo-link');
+    for (const key of ['lessonKey', 'lessonFormat']) {
+      if (cardLink?.dataset[key]) demoLink.dataset[key] = cardLink.dataset[key];
+      else delete demoLink.dataset[key];
+    }
     document.getElementById('video-error').hidden = true;
     video.poster = `media/${id}.jpg`; video.src = `media/${id}.mp4`;
     video.setAttribute('aria-label', `${game.name} silent gameplay preview`);

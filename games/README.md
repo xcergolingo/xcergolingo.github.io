@@ -2,6 +2,29 @@
 
 A responsive gallery for GoLingo language games, with category filters and shared lesson data.
 
+## Find games, save favorites, and track your plays
+
+- Search titles, descriptions, and tags. Search ignores case and accents; multiple search terms must all match a card.
+- Use **My favorites** together with search and a category. A heart on each game adds or removes that game without changing its Like.
+- Sort by **Most played (this device)**, **Recently played (this device)**, **Most liked (on this device)**, name, or original card order.
+- A **play** is an explicit launch from a game cover, a card's game link, or a preview dialog's game link. It is not a verified successful load, completed session, or unique visitor. Preview videos, App Store links, likes, favorites, and gallery reloads do not count. Rapid duplicate taps on one game are counted once.
+- Counts begin when this feature is first used. There are no recovered historical counts or seeded popularity numbers.
+- Favorites, likes, and play history are personal to this browser/app's website storage. They are not totals across all visitors and do not synchronize between devices. Clearing website data removes them. No user vocabulary is sent to an analytics service.
+- Search, category, favorites-only mode, and sort are kept for this tab so returning from a game preserves the selection. If persistent storage is unavailable, the gallery stays usable and explicitly explains that changes are temporary.
+
+The static GitHub Pages site does not have a shared counter backend. A public all-user popularity ranking would require an authenticated, rate-limited service; do not expose a GitHub write token or API secret in browser code to implement one.
+
+Personal storage keys are `golingo:liked-games:v1` (preserved), `golingo:favorite-games:v1`, and `golingo:game-plays:v1`. The tab-only view key is `golingo:gallery-view:v1`. Stable card IDs keep data attached to games when their positions, labels, or versioned links change.
+
+Run the DOM regression checks from the repository root:
+
+```sh
+npm install --prefix /tmp/golingo-gallery-dom-tests linkedom@0.18.12 --ignore-scripts
+GALLERY_TEST_DEPENDENCIES=/tmp/golingo-gallery-dom-tests node --test games/tests/gallery.test.mjs
+```
+
+These checks execute the gallery script against its actual HTML, without a browser or network. For rendering and real navigation checks, install Playwright and a compatible Chromium browser, then run `node games/tests/gallery.browser.test.mjs`. The browser suite uses an isolated local server and intercepts game navigation; neither suite changes production counters.
+
 **Website:** https://xcergolingo.github.io/games/
 
 **Download GoLingo:** https://apps.apple.com/app/id1194977025
