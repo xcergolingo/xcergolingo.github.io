@@ -261,8 +261,15 @@ test('Aonami launches from Fishing and Language Learning with a GoLingo lesson p
   assert.equal(link.dataset.lessonKey, 'data');
   assert.equal(link.dataset.lessonFormat, 'word-pack');
   h.input('aonami'); assert.deepEqual(h.visible(), ['aonami-fishing']);
+  h.node('#lesson-input').value = JSON.stringify(lesson);
+  h.click('#lesson-save');
   h.click('#aonami-fishing .demo-link');
   assert.equal(h.count('aonami-fishing'), 1);
+  const outgoingUrl = new URL(h.node('#aonami-fishing .demo-link').href);
+  const outgoingPayload = JSON.parse(new URLSearchParams(outgoingUrl.hash.slice(1)).get('data'));
+  assert.deepEqual(outgoingPayload.words[0], lesson.words[0]);
+  assert.equal(outgoingPayload.learningLanguage, lesson.learningLanguage);
+  assert.equal(outgoingPayload.primaryLanguage, lesson.primaryLanguage);
 });
 
 test('Aonami public game includes the complete embedded Japanese voice pack and source download', async () => {

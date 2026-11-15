@@ -11,7 +11,7 @@ A first-person Three.js fishing and GoLingo vocabulary game set on a sunny Japan
 3. On **ヒット！**, tap **HOOK**. Tap or hold **REEL** while fighting to speak the word again, and release when line tension turns red.
 4. Catch a fish to reveal the Japanese word and English translation. It is added to the local review basket.
 
-The built-in Japanese deck contains 30 words and actual prerecorded speech embedded into the HTML. **Test Japanese voice** on the opening screen checks pronunciation before fishing. Imported GoLingo JSON can use its `audioUrl` fields or the browser speech engine. Ambient ocean audio is independent from word audio.
+The built-in Japanese deck contains 30 words and actual prerecorded speech embedded into the HTML. **Test voice** on the opening screen checks pronunciation before fishing. When launched from the GoLingo game gallery, Aonami automatically reads the active lesson carried in its `#data=` URL fragment, including its learning language and every word–translation pair, before the first cast. It also accepts `#golingoLesson=`, `#golingo=`, and legacy `?data=` handoffs. An imported word's `audioUrl` or `audioURL` is played directly where supplied; otherwise the game uses device text-to-speech. Ambient ocean audio is independent from word audio.
 
 ## Files
 
