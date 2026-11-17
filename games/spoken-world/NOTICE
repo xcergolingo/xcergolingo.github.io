@@ -1,0 +1,18 @@
+Spoken World
+Copyright 2026 ryannli (https://github.com/ryannli)
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes or uses the following third-party work:
+
+- Three.js r128 (https://threejs.org), MIT License, Copyright 2010-2021 Three.js Authors.
+  Not included in this repository: the page loads it from cdnjs.
+
+- Jost typeface, embedded in app/index.html. Copyright 2020 The Jost Project Authors
+  (https://github.com/indestructible-type/Jost). SIL Open Font License 1.1: licenses/Jost-OFL.txt
+
+- DM Mono typeface, embedded in app/index.html. Copyright 2020 The DM Mono Project Authors
+  (https://www.github.com/googlefonts/dm-mono). SIL Open Font License 1.1: licenses/DM-Mono-OFL.txt
+
+The example clips in app/media/ are part of this project: the "previz" clips were recorded in Spoken World,
+and the "real" clips were generated from them with a video model (Gemini Omni).
