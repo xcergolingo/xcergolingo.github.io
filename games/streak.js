@@ -7,9 +7,55 @@
   const progress=document.getElementById('challenge-progress');
   const fill=document.getElementById('challenge-fill');
   const milestone=document.getElementById('challenge-milestone');
-  if(!days||!message||!progress||!fill||!milestone)return;
+  const missedBox=document.getElementById('challenge-missed');
+  const missedSummary=document.getElementById('challenge-missed-summary');
+  const missedList=document.getElementById('challenge-missed-list');
+  if(!days||!message||!progress||!fill||!milestone||!missedBox||!missedSummary||!missedList)return;
   let db=null,initialized=false,knownOwner=null,active=false,lastError='',refreshing=false;
   const user=()=>window.GoLingoCognito?.getUser?.()||null;
+  let missedStatus=null;
+  function friendlyDate(value){
+    if(typeof value!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(value))return String(value);
+    const parts=value.split('-').map(Number);
+    const date=new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12));
+    return new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(date);
+  }
+  function renderMissing(status){
+    missedStatus=status||null;
+    const count=Number(status?.missed_count)||0;
+    if(!count){
+      missedBox.hidden=true;missedList.replaceChildren();return;
+    }
+    missedBox.hidden=false;
+    missedSummary.textContent=status.streak_reset
+      ? 'Streak reset: '+count+' missed day'+(count===1?'':'s')+'. Your previous streak was '+(Number(status.previous_streak)||0)+' days.'
+      : 'Previous streak break: '+count+' missed day'+(count===1?'':'s')+'. Your current streak restarted at Day 1.';
+    const dates=Array.isArray(status.missed_dates)?status.missed_dates:[];
+    missedList.replaceChildren();
+    for(const date of dates){
+      const element=document.createElement('li');
+      element.textContent=friendlyDate(date);
+      missedList.append(element);
+    }
+    if(count>dates.length){
+      const element=document.createElement('li');
+      element.textContent='… and '+(count-dates.length)+' earlier missed days';
+      missedList.append(element);
+    }
+  }
+  async function refreshMissing(owner){
+    try{
+      const {data,error}=await db.rpc('golingo_get_game_missed_days');
+      if(error)throw error;
+      if(owner!==user()?.id)return;
+      const value=Array.isArray(data)?data[0]:data;
+      renderMissing(value||null);
+    }catch(error){
+      missedBox.hidden=false;
+      missedSummary.textContent='Missed-day history is awaiting the Supabase migration.';
+      missedList.replaceChildren();
+    }
+  }
   function render(record){
     const streak=Number(record?.streak)||0;
     const longest=Number(record?.longest)||0;
@@ -38,6 +84,7 @@
     progress.setAttribute('aria-valuenow','0');
     fill.style.width='0%';
     milestone.hidden=true;
+    renderMissing(null);
     message.textContent='Open Online Games inside the GoLingo app and sign in there to track your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
   function setupMissing(error){
@@ -60,6 +107,7 @@
       knownOwner=owner;
       const item=Array.isArray(data)?data[0]:data;
       render(item||null);
+      await refreshMissing(owner);
     }catch(error){setupMissing(error)}
     finally{refreshing=false}
   }
@@ -72,6 +120,7 @@
       if(owner!==user()?.id)return;
       const item=Array.isArray(data)?data[0]:data;
       if(item)render(item);
+      await refreshMissing(owner);
     }catch(error){
       // A failed server request NEVER counts as a streak day.
       setupMissing(error);
