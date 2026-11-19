@@ -84,12 +84,18 @@
     window.dispatchEvent(new CustomEvent('golingo:auth-state',{detail:{signedIn:enabled}}));
   }
   function showError(error) { note('Cloud error: ' + (error?.message || String(error))); }
+  // Serialize user actions and background sync. Previously a Publish tap
+  // during synchronization silently returned without changing is_public.
+  let taskTail=Promise.resolve();
   function disableWhileRunning(fn) {
-    return async () => {
-      if (busy) return;
-      busy=true; syncButton.disabled=true;
-      try { await fn(); } catch(error) { showError(error); }
-      finally { busy=false;syncButton.disabled=false; }
+    return () => {
+      const task=taskTail.catch(()=>{}).then(async()=>{
+        busy=true; syncButton.disabled=true;
+        try { await fn(); } catch(error) { showError(error); }
+        finally { busy=false; syncButton.disabled=false; }
+      });
+      taskTail=task;
+      return task;
     };
   }
   async function saveRemote(gameId,lesson,lastPlayed) {
@@ -248,7 +254,12 @@
       if(error) throw error;
       if(!data?.length || !data[0].is_public) throw Error('Could not confirm publication.');
       await refreshMine();await refreshCommunity();
-      note('Published. Other players can now find and play this lesson.');
+      // Confirm visibility through the anonymous client, not only the owner.
+      const {data:publicRows,error:publicError}=await publicDb.from(tableName)
+        .select('id').eq('id',data[0].id).eq('is_public',true).limit(1);
+      if(publicError || !publicRows?.length)
+        throw Error('Published for your account, but public visibility could not be verified. Please retry Sync or contact support.');
+      note('✓ Published and visible to other GoLingo players.');
     });
     await wrapped();
   }
