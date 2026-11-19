@@ -173,7 +173,42 @@
       !!document.getElementById(item.game_id) && item.lesson_json);
     const summary=document.getElementById('cloud-community-summary');
     if(summary) summary.textContent='Community lessons · discover & play ('+entries.length+')';
-    if(!entries.length){ sharedList.textContent='No public lessons found yet. Published lessons will appear here for everyone, including visitors not signed in.';return; }
+    if(!entries.length){
+      sharedList.textContent='No public lessons found yet. Published lessons will appear here for everyone, including visitors not signed in.';
+      document.querySelectorAll('.game-community').forEach(panel=>panel.remove());
+      return;
+    }
+    // Place public lessons under their matching game as well as in the
+    // gallery-wide community collection. No login is required to replay.
+    for(const card of installedCards()) {
+      const copy=card.querySelector('.game-copy');
+      if(!copy)continue;
+      let panel=copy.querySelector('.game-community');
+      const own=entries.filter(item=>item.game_id===card.id);
+      if(!own.length){panel?.remove();continue}
+      if(!panel){
+        panel=document.createElement('details');
+        panel.className='game-community';
+        copy.append(panel);
+      }
+      panel.replaceChildren();
+      const summary=document.createElement('summary');
+      summary.textContent='Community lessons · '+own.length+' shared';
+      panel.append(summary);
+      const list=document.createElement('ul');
+      list.className='game-community-list';
+      for(const item of own.slice(0,25)){
+        const li=document.createElement('li');
+        const label=document.createElement('span');
+        label.textContent=item.title || lessonText(item.lesson_json);
+        const play=makeButton('Play',()=>{
+          try {window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}
+          catch(error){showError(error)}
+        },'cloud-row-action');
+        li.append(label,play);list.append(li);
+      }
+      panel.append(list);
+    }
     for(const item of entries) {
       const li=document.createElement('li');li.className='cloud-community-entry';
       const label=document.createElement('span');

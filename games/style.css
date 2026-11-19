@@ -127,3 +127,10 @@
 .cloud-community-list{max-height:540px;overflow-y:auto}
 #cloud-community[open]>summary{margin-bottom:12px}
 .game-like[disabled],.game-favorite[disabled]{opacity:.65}
+
+.game-community{margin-top:12px;border-radius:12px;border:1px solid #bfd5c2;background:#edf7ef;padding:12px}
+.game-community summary{font-size:12px;font-weight:750;cursor:pointer;color:#295842}
+.game-community-list{list-style:none;margin:9px 0 0;padding:0;display:grid;gap:6px}
+.game-community-list li{display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px;overflow-wrap:anywhere}
+.game-community-list li span{min-width:0}
+.game-community-list button{flex-shrink:0}
