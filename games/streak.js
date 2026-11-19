@@ -15,7 +15,7 @@
   const user=()=>window.GoLingoCognito?.getUser?.()||null;
   let missedStatus=null;
   function friendlyDate(value){
-    if(typeof value!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(value))return String(value);
+    if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return String(value);
     const parts=value.split('-').map(Number);
     const date=new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12));
     return new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(date);
