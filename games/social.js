@@ -136,7 +136,36 @@
     }catch(error){notify('Favorite could not be saved: '+error.message)}
     finally{inFlight.delete('fav:'+gameId)}
   }
-  window.GoLingoSocial={toggleLike,toggleFavorite,refresh};
+  async function importDeviceReactions(){
+    const account=currentUser();
+    if(!account){signInPrompt();return}
+    if(!confirm('Import this device’s older likes and favorites into your GoLingo account? Only import your own activity.'))return;
+    let oldLikes={},oldFavorites={};
+    try{oldLikes=JSON.parse(localStorage.getItem('golingo:liked-games:v1')||'{}')||{}}catch{}
+    try{oldFavorites=JSON.parse(localStorage.getItem('golingo:favorite-games:v1')||'{}')||{}}catch{}
+    const favIds=gameIds.filter(id=>oldFavorites[id]===true);
+    const likeIds=gameIds.filter(id=>oldLikes[id]===true);
+    const button=document.getElementById('social-import-legacy');
+    if(button)button.disabled=true;
+    try{
+      if(favIds.length){
+        const records=favIds.map(gameId=>({user_id:account,game_id:gameId}));
+        const {error}=await accountDb.from('golingo_game_favorites')
+          .upsert(records,{onConflict:'user_id,game_id'});
+        if(error)throw error;
+      }
+      for(const id of likeIds){
+        const {error}=await accountDb.rpc('golingo_set_game_like',
+          {p_game_id:id,p_liked:true});
+        if(error)throw error;
+      }
+      await refresh();
+      notify('Imported '+favIds.length+' favorites and '+likeIds.length+' likes into your GoLingo account.');
+    }catch(error){notify('Could not finish importing: '+error.message)}
+    finally{if(button)button.disabled=false}
+  }
+  document.getElementById('social-import-legacy')?.addEventListener('click',importDeviceReactions);
+  window.GoLingoSocial={toggleLike,toggleFavorite,refresh,importDeviceReactions};
   window.addEventListener('golingo:auth-state',()=>{if(ready)refresh()});
   window.addEventListener('golingo:game-launch',()=>{if(ready)flushLaunches()});
   window.addEventListener('pageshow',()=>{if(ready){refresh();flushLaunches()}});
