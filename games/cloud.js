@@ -21,7 +21,7 @@
   function scopedKey(gameId){return localPrefix + gameId + ':cognito:' + user.id;}
   const maxPerGame = 20;
   const counts = ['words', 'sentences', 'phrases', 'items', 'entries'];
-  let db, user = null, busy = false;
+  let db, publicDb, user = null, busy = false;
   let syncTimer;
   const validId = id => /^[a-z0-9-]{1,90}$/.test(id);
   function note(msg) { status.textContent = msg; }
@@ -81,6 +81,7 @@
     mineArea.hidden=!enabled;
     if (enabled) document.getElementById('cloud-account-label').textContent = user.email || 'Signed in';
     window.GoLingoGalleryRefreshHistory?.();
+    window.dispatchEvent(new CustomEvent('golingo:auth-state',{detail:{signedIn:enabled}}));
   }
   function showError(error) { note('Cloud error: ' + (error?.message || String(error))); }
   function disableWhileRunning(fn) {
@@ -160,14 +161,19 @@
     }
   }
   async function refreshCommunity() {
-    const {data,error}=await db.from(tableName)
+    const {data,error}=await publicDb.from(tableName)
       .select('id,game_id,title,lesson_json,last_played_at')
-      .eq('is_public',true).order('last_played_at',{ascending:false}).limit(60);
-    if(error) throw error;
+      .eq('is_public',true).order('last_played_at',{ascending:false}).limit(200);
     sharedList.replaceChildren();
+    if(error) {
+      sharedList.textContent='Unable to load community lessons: '+error.message;
+      return;
+    }
     const entries=(data||[]).filter(item=>validId(item.game_id) &&
       !!document.getElementById(item.game_id) && item.lesson_json);
-    if(!entries.length){ sharedList.textContent='No public lessons yet.';return; }
+    const summary=document.getElementById('cloud-community-summary');
+    if(summary) summary.textContent='Community lessons · discover & play ('+entries.length+')';
+    if(!entries.length){ sharedList.textContent='No public lessons found yet. Published lessons will appear here for everyone, including visitors not signed in.';return; }
     for(const item of entries) {
       const li=document.createElement('li');li.className='cloud-community-entry';
       const label=document.createElement('span');
@@ -253,6 +259,11 @@
       document.head.append(library);
     });
     if(!window.supabase?.createClient) throw Error('Cloud library unavailable');
+    // Always read public lessons anonymously; Cognito account credentials are
+    // never required for the community listing.
+    publicDb=window.supabase.createClient(config.url,config.anonKey,{
+      auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
+    });
     if (!config.cognito?.enabled) {
       authArea.hidden=true;signedArea.hidden=true;mineArea.hidden=true;
       document.getElementById('cloud-community').hidden=true;
