@@ -320,65 +320,127 @@
       li.append(name,shareAction(item.id,item.title,item.game_id),unpublish);mineList.append(li);
     }
   }
+
+  const community={rows:[],visible:1};
+  const communitySearch=document.getElementById('community-search');
+  const communityGame=document.getElementById('community-game');
+  const communityLearning=document.getElementById('community-learning');
+  const communityNative=document.getElementById('community-native');
+  const communityGroup=document.getElementById('community-group');
+  const communityMore=document.getElementById('community-more');
+  const communityCount=document.getElementById('community-count');
+  const langFallback={en:'English',it:'Italian',ja:'Japanese',zh:'Chinese',es:'Spanish',
+    fr:'French',de:'German',pt:'Portuguese',ko:'Korean',vi:'Vietnamese',ru:'Russian',
+    ar:'Arabic',hi:'Hindi',th:'Thai',uk:'Ukrainian',nl:'Dutch',id:'Indonesian',
+    he:'Hebrew','zh-Hans':'Chinese (Simplified)','zh-Hant':'Chinese (Traditional)'};
+  const displayNames=typeof Intl.DisplayNames==='function'?new Intl.DisplayNames(['en'],{type:'language'}):null;
+  function langCode(value){
+    if(!value||typeof value!=='string')return '';
+    const original=value.trim();
+    if(/^(zh-CHS|zh-CN)$/i.test(original))return 'zh-Hans';
+    if(/^(zh-CHT|zh-TW)$/i.test(original))return 'zh-Hant';
+    if(/^(vi-VN)$/i.test(original))return 'vi';
+    if(/^(iw)$/i.test(original))return 'he';
+    const code=original.split(/[-_]/)[0].toLowerCase();
+    return /^[a-z]{2,3}$/.test(code)?code:original;
+  }
+  function langName(value){
+    const code=langCode(value);
+    if(!code)return 'Unspecified';
+    if(langFallback[code])return langFallback[code];
+    try{
+      const name=displayNames?.of(code);
+      if(name&&name.toLowerCase()!==code.toLowerCase())return name;
+    }catch{}
+    return code;
+  }
+  const learning=lesson=>langCode(lesson?.learningLanguage||lesson?.targetLanguage||lesson?.language||lesson?.to);
+  const native=lesson=>langCode(lesson?.primaryLanguage||lesson?.translationLanguage||lesson?.nativeLanguage||lesson?.from);
+  const languagePair=lesson=>langName(learning(lesson))+' → '+langName(native(lesson));
+  const gameTitle=id=>document.getElementById(id)?.querySelector('h3')?.textContent?.trim()||id;
+  function searchable(row){
+    const wordText=counts.flatMap(field=>Array.isArray(row.lesson_json?.[field])?row.lesson_json[field]:[])
+      .map(v=>typeof v==='string'?v:Object.values(v||{}).filter(x=>typeof x==='string').join(' ')).join(' ');
+    return [row.title,gameTitle(row.game_id),languagePair(row.lesson_json),wordText].join(' ').toLocaleLowerCase();
+  }
+  function populate(select,values,label){
+    const prior=select.value;
+    const vals=[...new Set(values.filter(Boolean))].sort((a,b)=>label(a).localeCompare(label(b)));
+    const first=select.options[0].textContent;
+    select.replaceChildren(new Option(first,''));
+    for(const value of vals)select.add(new Option(label(value),value));
+    select.value=vals.includes(prior)?prior:'';
+  }
+  function renderCommunity(){
+    let rows=community.rows.filter(row=>
+      (!communitySearch.value.trim()||searchable(row).includes(communitySearch.value.trim().toLocaleLowerCase())) &&
+      (!communityGame.value||row.game_id===communityGame.value) &&
+      (!communityLearning.value||learning(row.lesson_json)===communityLearning.value) &&
+      (!communityNative.value||native(row.lesson_json)===communityNative.value));
+    const grouped=communityGroup.value;
+    if(grouped!=='latest'){
+      const groupLabel=row=>grouped==='game'?gameTitle(row.game_id):grouped==='learning'?langName(learning(row.lesson_json)):langName(native(row.lesson_json));
+      rows=[...rows].sort((a,b)=>groupLabel(a).localeCompare(groupLabel(b))||
+        Date.parse(b.last_played_at)-Date.parse(a.last_played_at));
+    }
+    const count=Math.min(community.visible,rows.length);
+    sharedList.replaceChildren();
+    for(const item of rows.slice(0,count)){
+      const li=document.createElement('li');li.className='cloud-community-entry community-entry';
+      const text=document.createElement('div');text.className='community-entry-text';
+      const languages=document.createElement('strong');languages.textContent=languagePair(item.lesson_json);
+      const title=document.createElement('span');title.textContent=item.title||lessonText(item.lesson_json);
+      const game=document.createElement('small');game.textContent=gameTitle(item.game_id);
+      text.append(languages,title,game);
+      const actions=document.createElement('div');actions.className='community-entry-actions';
+      const play=makeButton('Play lesson',()=>{
+        try{window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}
+        catch(error){showError(error)}
+      },'cloud-row-action');
+      actions.append(play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));
+      li.append(text,actions);sharedList.append(li);
+    }
+    if(!rows.length){const empty=document.createElement('li');empty.className='community-empty';empty.textContent=community.rows.length?'No matching lessons.':'No public lessons yet.';sharedList.append(empty)}
+    communityCount.textContent='Showing '+count+' of '+rows.length+' published lessons';
+    communityMore.hidden=count>=rows.length;
+    communityMore.textContent='More · next '+Math.min(3,rows.length-count);
+  }
+  function communityReset(){community.visible=1;renderCommunity()}
+  communitySearch.addEventListener('input',communityReset);
+  for(const select of [communityGame,communityLearning,communityNative,communityGroup])
+    select.addEventListener('change',communityReset);
+  communityMore.addEventListener('click',()=>{community.visible+=3;renderCommunity()});
+
   async function refreshCommunity() {
     const {data,error}=await publicDb.from(tableName)
       .select('id,game_id,title,lesson_json,last_played_at')
       .eq('is_public',true).order('last_played_at',{ascending:false}).limit(200);
-    sharedList.replaceChildren();
-    if(error) {
-      sharedList.textContent='Unable to load community lessons: '+error.message;
-      return;
-    }
+    if(error){sharedList.textContent='Community lessons unavailable: '+error.message;communityMore.hidden=true;return}
     const entries=(data||[]).filter(item=>validId(item.game_id) &&
       !!document.getElementById(item.game_id) && item.lesson_json);
-    const summary=document.getElementById('cloud-community-summary');
-    if(summary) summary.textContent='Community lessons · discover & play ('+entries.length+')';
-    if(!entries.length){
-      sharedList.textContent='No public lessons found yet. Published lessons will appear here for everyone, including visitors not signed in.';
-      document.querySelectorAll('.game-community').forEach(panel=>panel.remove());
-      return;
-    }
-    // Place public lessons under their matching game as well as in the
-    // gallery-wide community collection. No login is required to replay.
-    for(const card of installedCards()) {
-      const copy=card.querySelector('.game-copy');
-      if(!copy)continue;
+    community.rows=entries;
+    populate(communityGame,entries.map(item=>item.game_id),gameTitle);
+    populate(communityLearning,entries.map(item=>learning(item.lesson_json)),langName);
+    populate(communityNative,entries.map(item=>native(item.lesson_json)),langName);
+    communityReset();
+    // Each game still offers an optional, collapsed list of its public lessons.
+    for(const card of installedCards()){
+      const copy=card.querySelector('.game-copy');if(!copy)continue;
       let panel=copy.querySelector('.game-community');
-      const own=entries.filter(item=>item.game_id===card.id);
-      if(!own.length){panel?.remove();continue}
-      if(!panel){
-        panel=document.createElement('details');
-        panel.className='game-community';
-        copy.append(panel);
-      }
+      const matches=entries.filter(item=>item.game_id===card.id);
+      if(!matches.length){panel?.remove();continue}
+      if(!panel){panel=document.createElement('details');panel.className='game-community';copy.append(panel)}
       panel.replaceChildren();
-      const summary=document.createElement('summary');
-      summary.textContent='Community lessons · '+own.length+' shared';
-      panel.append(summary);
-      const list=document.createElement('ul');
-      list.className='game-community-list';
-      for(const item of own.slice(0,25)){
+      const summary=document.createElement('summary');summary.textContent='Community lessons · '+matches.length+' shared';panel.append(summary);
+      const list=document.createElement('ul');list.className='game-community-list';
+      for(const item of matches.slice(0,25)){
         const li=document.createElement('li');
         const label=document.createElement('span');
-        label.textContent=item.title || lessonText(item.lesson_json);
-        const play=makeButton('Play',()=>{
-          try {window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}
-          catch(error){showError(error)}
-        },'cloud-row-action');
+        label.textContent=languagePair(item.lesson_json)+' · '+(item.title||lessonText(item.lesson_json));
+        const play=makeButton('Play',()=>{try{window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}catch(error){showError(error)}},'cloud-row-action');
         li.append(label,play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));list.append(li);
       }
       panel.append(list);
-    }
-    for(const item of entries) {
-      const li=document.createElement('li');li.className='cloud-community-entry';
-      const label=document.createElement('span');
-      const game=document.getElementById(item.game_id)?.querySelector('h3')?.textContent || item.game_id;
-      label.textContent=(item.title || lessonText(item.lesson_json))+' · '+game;
-      const play=makeButton('Play lesson',()=> {
-        try { window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json); }
-        catch(error){showError(error);}
-      },'cloud-row-action');
-      li.append(label,play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));sharedList.append(li);
     }
   }
   const syncNow=disableWhileRunning(async ()=>{
