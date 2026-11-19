@@ -1,0 +1,259 @@
+'use strict';
+/* Optional cloud sync and public sharing for GoLingo game lesson history.
+   This file is inert until the owner configures games/cloud-config.json and
+   runs cloud-schema.sql with Row-Level Security enabled. */
+(async () => {
+  const root = document.getElementById('golingo-cloud');
+  if (!root) return;
+  const status = document.getElementById('cloud-status');
+  const authArea = document.getElementById('cloud-auth');
+  const signedArea = document.getElementById('cloud-signed-in');
+  const emailInput = document.getElementById('cloud-email');
+  const signInButton = document.getElementById('cloud-sign-in');
+  const signOutButton = document.getElementById('cloud-sign-out');
+  const syncButton = document.getElementById('cloud-sync');
+  const sharedList = document.getElementById('cloud-community-list');
+  const sharedRefresh = document.getElementById('cloud-community-refresh');
+  const mineList = document.getElementById('cloud-published-list');
+  const mineArea = document.getElementById('cloud-my-publications');
+  const tableName = 'golingo_game_lessons';
+  const localPrefix = 'golingo:game-lesson-history:v1:';
+  const maxPerGame = 20;
+  const counts = ['words', 'sentences', 'phrases', 'items', 'entries'];
+  let db, user = null, busy = false;
+  let syncTimer;
+  const validId = id => /^[a-z0-9-]{1,90}$/.test(id);
+  function note(msg) { status.textContent = msg; }
+  function lessonText(lesson) {
+    const language = String(lesson.learningLanguage || lesson.language || lesson.targetLanguage || 'Language').slice(0, 30);
+    const words = counts.flatMap(k => Array.isArray(lesson[k]) ? lesson[k] : [])
+      .map(v => typeof v === 'string' ? v : (v?.word || v?.text || v?.phrase || v?.sentence || ''))
+      .filter(Boolean).slice(0,3).map(s => String(s).replace(/\s+/g,' ').trim().slice(0,32));
+    return language + (words.length ? ' · ' + words.join(' · ') : '');
+  }
+  function canonical(v) {
+    if (Array.isArray(v)) return '[' + v.map(canonical).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k)+':'+canonical(v[k])).join(',') + '}';
+    return JSON.stringify(v);
+  }
+  async function fingerprint(lesson) {
+    const bytes = new TextEncoder().encode(canonical(lesson));
+    const hash = await crypto.subtle.digest('SHA-256',bytes);
+    return [...new Uint8Array(hash)].map(n => n.toString(16).padStart(2,'0')).join('');
+  }
+  function localItems(gameId) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(localPrefix+gameId)||'[]');
+      return Array.isArray(raw) ? raw.filter(x => x?.lesson && x?.fingerprint).slice(0,maxPerGame) : [];
+    } catch { return []; }
+  }
+  function installedCards() { return [...document.querySelectorAll('.game-card[id]')]; }
+  function makeButton(title,handler,cls) {
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className=cls||'hub-chip'; btn.textContent=title;
+    btn.addEventListener('click',handler);
+    return btn;
+  }
+  function renderSignedIn() {
+    const enabled=!!user;
+    authArea.hidden=enabled;
+    signedArea.hidden=!enabled;
+    mineArea.hidden=!enabled;
+    if (enabled) document.getElementById('cloud-account-label').textContent = user.email || 'Signed in';
+    window.GoLingoGalleryRefreshHistory?.();
+  }
+  function showError(error) { note('Cloud error: ' + (error?.message || String(error))); }
+  function disableWhileRunning(fn) {
+    return async () => {
+      if (busy) return;
+      busy=true; syncButton.disabled=true;
+      try { await fn(); } catch(error) { showError(error); }
+      finally { busy=false;syncButton.disabled=false; }
+    };
+  }
+  async function saveRemote(gameId,lesson,lastPlayed) {
+    if (!user || !validId(gameId) || !lesson || JSON.stringify(lesson).length>100000) return;
+    const fp=await fingerprint(lesson);
+    const base={user_id:user.id,game_id:gameId,fingerprint:fp,
+      title:lessonText(lesson),lesson_json:lesson,
+      last_played_at:new Date(lastPlayed || Date.now()).toISOString(), is_public:false};
+    // Do not overwrite an existing row's publication state when replaying.
+    const {error:insertError}=await db.from(tableName).upsert(base,
+      {onConflict:'user_id,game_id,fingerprint',ignoreDuplicates:true});
+    if(insertError) throw insertError;
+    const {error:updateError}=await db.from(tableName)
+      .update({last_played_at:base.last_played_at})
+      .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp);
+    if(updateError) throw updateError;
+  }
+  async function fetchMine() {
+    const {data,error}=await db.from(tableName)
+      .select('id,game_id,fingerprint,title,lesson_json,last_played_at,is_public')
+      .eq('user_id',user.id).order('last_played_at',{ascending:false}).limit(1500);
+    if (error) throw error;
+    return data || [];
+  }
+  async function mergeRemote(data) {
+    for (const card of installedCards()) {
+      const gameId=card.id;
+      const records=(data||[]).filter(x=>x.game_id===gameId);
+      if(!records.length) continue;
+      const merged=localItems(gameId);
+      const seen=new Set(merged.map(x=>x.fingerprint));
+      for (const row of records) {
+        // Local uses the complete canonical lesson as its fingerprint.
+        const localFingerprint=canonical(row.lesson_json);
+        if (seen.has(localFingerprint)) {
+          const existing=merged.find(x=>x.fingerprint===localFingerprint);
+          if (existing && (Date.parse(row.last_played_at)||0)>existing.lastPlayed)
+            existing.lastPlayed=Date.parse(row.last_played_at);
+        } else {
+          merged.push({fingerprint:localFingerprint,lesson:row.lesson_json,
+            label:row.title,lastPlayed:Date.parse(row.last_played_at)||0});
+          seen.add(localFingerprint);
+        }
+      }
+      merged.sort((a,b)=>b.lastPlayed-a.lastPlayed);
+      try { localStorage.setItem(localPrefix+gameId,JSON.stringify(merged.slice(0,maxPerGame))); }
+      catch { note('Cloud loaded, but device storage is full or unavailable.'); }
+    }
+    window.GoLingoGalleryRefreshHistory?.();
+  }
+  async function refreshMine() {
+    if (!user) return;
+    const data=await fetchMine();
+    await mergeRemote(data);
+    mineList.replaceChildren();
+    const published=data.filter(x=>x.is_public);
+    if(!published.length){mineList.textContent='You have not published any lessons.';return;}
+    for (const item of published) {
+      const li=document.createElement('li'); li.className='cloud-community-entry';
+      const name=document.createElement('span'); name.textContent=item.title+' · '+item.game_id;
+      const unpublish=makeButton('Unpublish',disableWhileRunning(async ()=>{
+        const {error}=await db.from(tableName).update({is_public:false})
+          .eq('id',item.id).eq('user_id',user.id);
+        if(error) throw error;
+        note('Lesson is private again.'); await refreshMine();await refreshCommunity();
+      }),'cloud-row-action');
+      li.append(name,unpublish);mineList.append(li);
+    }
+  }
+  async function refreshCommunity() {
+    const {data,error}=await db.from(tableName)
+      .select('id,game_id,title,lesson_json,last_played_at')
+      .eq('is_public',true).order('last_played_at',{ascending:false}).limit(60);
+    if(error) throw error;
+    sharedList.replaceChildren();
+    const entries=(data||[]).filter(item=>validId(item.game_id) &&
+      !!document.getElementById(item.game_id) && item.lesson_json);
+    if(!entries.length){ sharedList.textContent='No public lessons yet.';return; }
+    for(const item of entries) {
+      const li=document.createElement('li');li.className='cloud-community-entry';
+      const label=document.createElement('span');
+      const game=document.getElementById(item.game_id)?.querySelector('h3')?.textContent || item.game_id;
+      label.textContent=(item.title || lessonText(item.lesson_json))+' · '+game;
+      const play=makeButton('Play lesson',()=> {
+        try { window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json); }
+        catch(error){showError(error);}
+      },'cloud-row-action');
+      li.append(label,play);sharedList.append(li);
+    }
+  }
+  const syncNow=disableWhileRunning(async ()=>{
+    if(!user) { note('Sign in before syncing.');return; }
+    note('Syncing private lesson histories…');
+    let uploaded=0;
+    for(const card of installedCards()) {
+      for(const item of localItems(card.id)) {
+        await saveRemote(card.id,item.lesson,item.lastPlayed);
+        uploaded++;
+      }
+    }
+    await refreshMine();
+    await refreshCommunity();
+    note('Cloud sync complete · '+uploaded+' local lessons checked. Duplicates are not created.');
+  });
+  async function publish(gameId,lesson) {
+    if(!user) { note('Sign in to publish a lesson.');return; }
+    if(!confirm('Publish this entire lesson publicly for other GoLingo players? All words, sentences, and translations in it will be visible.')) return;
+    const wrapped=disableWhileRunning(async ()=>{
+      note('Publishing lesson…');
+      await saveRemote(gameId,lesson,Date.now());
+      const fp=await fingerprint(lesson);
+      const {error}=await db.from(tableName).update({is_public:true})
+        .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp);
+      if(error) throw error;
+      note('Published. Other players can now find and play this lesson.');
+      await refreshMine();await refreshCommunity();
+    });
+    await wrapped();
+  }
+  window.GoLingoCloud={isSignedIn:()=>!!user,publish};
+  window.addEventListener('golingo:game-lesson-played',e=>{
+    if(!user) return;
+    const {gameId,lesson}=e.detail||{};
+    if(!validId(gameId) || !lesson) return;
+    // Queue rather than blocking native link navigation; on return sync scans
+    // any locally saved launches that did not finish uploading before navigation.
+    clearTimeout(syncTimer);
+    syncTimer=setTimeout(()=>saveRemote(gameId,lesson,Date.now()).catch(showError),150);
+  });
+  window.addEventListener('pageshow',()=>{
+    if(user) syncNow();
+  });
+  try {
+    const configResponse=await fetch('cloud-config.json',{cache:'no-store'});
+    if(!configResponse.ok) throw Error('not-configured');
+    const config=await configResponse.json();
+    if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(config.url||'') ||
+       typeof config.anonKey!=='string' || config.anonKey.length<20) throw Error('not-configured');
+    const library=document.createElement('script');
+    library.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    await new Promise((resolve,reject)=>{
+      library.onload=resolve;library.onerror=()=>reject(Error('Cloud library could not load'));
+      document.head.append(library);
+    });
+    if(!window.supabase?.createClient) throw Error('Cloud library unavailable');
+    db=window.supabase.createClient(config.url,config.anonKey,{
+      auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}
+    });
+    const {data:{session},error}=await db.auth.getSession();
+    if(error) throw error;
+    user=session?.user || null;
+    db.auth.onAuthStateChange((_event,session)=>{
+      user=session?.user || null;
+      renderSignedIn();
+      if(user) setTimeout(()=>syncNow(),0);
+    });
+    signInButton.addEventListener('click',disableWhileRunning(async ()=>{
+      const email=emailInput.value.trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { note('Enter a valid email address.');return; }
+      const {error}=await db.auth.signInWithOtp({
+        email,options:{emailRedirectTo:location.origin+location.pathname+'#games'}
+      });
+      if(error) throw error;
+      note('Check your email for a secure sign-in link.');
+    }));
+    signOutButton.addEventListener('click',disableWhileRunning(async ()=>{
+      const {error}=await db.auth.signOut();
+      if(error) throw error;
+      user=null;renderSignedIn();note('Signed out. Local lessons remain on this device.');
+    }));
+    syncButton.addEventListener('click',syncNow);
+    sharedRefresh.addEventListener('click',()=>refreshCommunity().catch(showError));
+    root.dataset.ready='true';
+    renderSignedIn();
+    note(user?'Signed in. Cloud sync is available.':'Sign in to synchronize private lessons and publish selected lessons.');
+    await refreshCommunity();
+    if(user) await syncNow();
+  }catch(error) {
+    window.GoLingoCloud=null;
+    root.dataset.ready='false';
+    authArea.hidden=true;
+    signedArea.hidden=true;
+    mineArea.hidden=true;
+    note(error.message==='not-configured'
+      ? 'Cloud sync and community sharing require an owner-configured Supabase project. Local lesson history still works.'
+      : 'Cloud is unavailable: '+error.message+'. Local lesson history still works.');
+  }
+})();

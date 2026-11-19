@@ -93,3 +93,21 @@
 .game-history-play:hover{background:#e4f0db}
 .game-history-remove{flex:0 0 36px;border:1px solid #d9d9d0;background:white;border-radius:9px;color:#715c56;font-size:22px;cursor:pointer}
 .game-history-play:focus-visible,.game-history-remove:focus-visible{outline:3px solid #3e8562;outline-offset:2px}
+
+/* Optional secure cloud synchronization */
+.golingo-cloud{margin:24px 0;padding:20px;border-radius:16px;background:#f0f5ee;border:1px solid #cad9c9}
+.golingo-cloud h3{font-size:18px;margin:0 0 9px}
+.golingo-cloud p{font-size:12px;line-height:1.6;margin:8px 0}
+.golingo-cloud [hidden]{display:none!important}
+.cloud-auth label{display:block;font-size:12px;margin:10px 0 7px}
+.cloud-auth-row,.cloud-controls{display:flex;gap:8px;flex-wrap:wrap}
+.cloud-auth-row input{min-width:200px;flex:1;min-height:43px;padding:9px 12px;border:1px solid #b2c5b3;border-radius:9px;font-size:16px;background:white}
+.golingo-cloud details{margin-top:13px;border-top:1px solid #cbd9cb;padding-top:12px}
+.golingo-cloud summary{font-size:13px;font-weight:700;cursor:pointer}
+.cloud-community-list{list-style:none;padding:0;margin:10px 0;display:grid;gap:7px}
+.cloud-community-entry{display:flex;gap:10px;justify-content:space-between;align-items:center;border:1px solid #d4ddd1;border-radius:10px;background:#fff;padding:10px;font-size:12px}
+.cloud-community-entry span{min-width:0;overflow-wrap:anywhere}
+.cloud-row-action{border:1px solid #a7c4ac;background:#edf5e7;border-radius:8px;color:#235039;font-size:12px;font-weight:700;min-height:36px;padding:7px 10px;cursor:pointer;flex-shrink:0}
+.game-history-publish{font-size:11px;font-weight:700;border:1px solid #a7c4ac;border-radius:8px;background:#e5f3dd;color:#235039;padding:6px;cursor:pointer}
+.cloud-row-action:focus-visible,.game-history-publish:focus-visible{outline:3px solid #3e8562;outline-offset:2px}
+@media(max-width:540px){.golingo-cloud{padding:14px}.cloud-community-entry{flex-wrap:wrap}.cloud-community-entry .cloud-row-action{width:100%}}

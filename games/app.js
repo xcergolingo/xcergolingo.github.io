@@ -375,6 +375,7 @@
       return;
     }
     renderGameHistory(id);
+    window.dispatchEvent(new CustomEvent('golingo:game-lesson-played',{detail:{gameId:id,lesson}}));
   }
   function renderGameHistory(id) {
     const card = cardById.get(id);
@@ -411,6 +412,14 @@
         const next = readGameHistory(id).filter(saved => saved.fingerprint !== item.fingerprint);
         if (writeGameHistory(id, next)) renderGameHistory(id);
       });
+      if (window.GoLingoCloud?.isSignedIn()) {
+        const publish = document.createElement('button');
+        publish.type = 'button'; publish.className = 'game-history-publish';
+        publish.textContent = 'Publish';
+        publish.setAttribute('aria-label','Publish ' + (item.label || lessonHistoryLabel(item.lesson)) + ' publicly');
+        publish.addEventListener('click', () => window.GoLingoCloud.publish(id,item.lesson));
+        row.append(publish);
+      }
       row.append(play, remove);
       list.append(row);
     }
@@ -457,6 +466,14 @@
     link.addEventListener('click', launchGame);
     link.addEventListener('auxclick', launchGame);
   });
+  window.GoLingoGalleryRefreshHistory = () => cards.forEach(card => renderGameHistory(card.id));
+  window.GoLingoPlaySavedLesson = (gameId, lesson) => {
+    const card = cardById.get(gameId);
+    if (!card || !lesson) return;
+    saveLesson(JSON.stringify(lesson));
+    const link = card.querySelector('.demo-link');
+    if (link) link.click();
+  };
   function refreshCollections() {
     // If a write failed, retain this page's in-memory changes rather than
     // replacing them with an older persisted copy.
