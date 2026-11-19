@@ -12,13 +12,30 @@
     return p&&p.iss===issuer&&p.token_use==='id'&&typeof p.sub==='string'&&
       p.exp*1000>Date.now()+30000?{id:p.sub,email:p.email||null}:null;
   }
-  function getToken(){return getUser()?token:null}
+  function getToken(){
+    if (getUser()) return token;
+    if (token && nativeAvailable()) {
+      token=null; onChange(null);
+      requestNativeToken();
+    }
+    return null;
+  }
   function receiveNativeToken(jwt){
     if(typeof jwt!=='string')return false;
     const old=token;token=jwt;
     if(!getUser()){token=old;return false}
     onChange(getUser());return true;
   }
+  function nativeSessionUnavailable(reason){
+    if(!nativeAvailable()) return;
+    // The native app is not authenticated through its Cognito User Pool.
+    // Do NOT fall back to using an Apple-issued token as if it were Cognito.
+    const el=document.getElementById('cloud-status');
+    if(el) el.textContent='GoLingo app session unavailable for cloud sync: '+String(reason||'Please sign in to Cognito in the app.');
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden && nativeAvailable()) requestNativeToken();
+  });
   function nativeAvailable(){return !!window.webkit?.messageHandlers?.goLingoAuth?.postMessage}
   function requestNativeToken(){
     if(!nativeAvailable())return;
@@ -76,5 +93,5 @@
     onChange(null);
   }
   window.GoLingoCognito={initialize,signIn,signOut,getToken,getUser,receiveNativeToken,
-    requestNativeToken,nativeAvailable,hasBrowserLogin:()=>!!domain()};
+    requestNativeToken,nativeSessionUnavailable,nativeAvailable,hasBrowserLogin:()=>!!domain()};
 })();
