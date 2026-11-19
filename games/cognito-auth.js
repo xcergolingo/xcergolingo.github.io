@@ -39,7 +39,7 @@
     sessionStorage.setItem(pendingKey,JSON.stringify({verifier,state,time:Date.now()}));
     const url=new URL(origin+'/oauth2/authorize');
     url.search=new URLSearchParams({response_type:'code',client_id:config.webClientId,
-      redirect_uri:location.origin+'/games/',scope:'openid email profile',
+      redirect_uri:location.origin+'/games/',scope:'openid email',
       state,code_challenge:b64(digest),code_challenge_method:'S256'}).toString();
     location.assign(url.href);
   }
