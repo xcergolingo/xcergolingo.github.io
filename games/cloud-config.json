@@ -2,7 +2,7 @@
   "url": "https://namaoahskvjmtaraerdg.supabase.co",
   "anonKey": "sb_publishable_I6Pn9qMopF7AFPrpabBcAA_VjZyO4pQ",
   "cognito": {
-    "enabled": false,
+    "enabled": true,
     "region": "us-east-1",
     "userPoolId": "us-east-1_m1wn7aFbx",
     "webClientId": "3go6j8895unq5lq6craa86l7eq",

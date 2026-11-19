@@ -352,7 +352,15 @@
     return historyPrefix + gameId + (lessonHistoryOwner ? ':cognito:' + lessonHistoryOwner : '');
   }
   window.GoLingoSetLessonHistoryOwner = (ownerId) => {
-    lessonHistoryOwner = typeof ownerId === 'string' && /^[a-zA-Z0-9_-]{1,120}$/.test(ownerId) ? ownerId : null;
+    const next = typeof ownerId === 'string' && /^[a-zA-Z0-9_-]{1,120}$/.test(ownerId) ? ownerId : null;
+    if (lessonHistoryOwner !== next) {
+      lessonHistoryOwner = next;
+      // Avoid carrying another account's currently loaded lesson across logins.
+      activeLesson = null;
+      try { sessionStorage.removeItem(lessonKey); } catch {}
+      lessonInput.value = '';
+      lessonStatus.textContent = 'No lesson loaded';
+    }
     cards.forEach(card => renderGameHistory(card.id));
   };
   function readGameHistory(id) {
