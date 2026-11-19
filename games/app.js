@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  const FALLBACK_URL = 'https://apps.apple.com/app/id1194977025';
+  const FALLBACK_URL = 'https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025';
   const games = {
     lagoon: { name: 'Lagoon', description: 'Explore a tropical world, discover vocabulary, and collect words for review.', demo: 'https://xcergolingo.github.io/far-cry-lagoon/' },
     'word-folio': { name: 'Word Folio', description: 'Open your pop-up word book. Hear a word, reveal its meaning, and turn the page.', demo: 'https://xcergolingo.github.io/word-folio/' },

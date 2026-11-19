@@ -85,7 +85,7 @@
     fill.style.width='0%';
     milestone.hidden=true;
     renderMissing(null);
-    message.textContent='Open Online Games inside the GoLingo app and sign in there to track your daily streak. Browser play does not qualify for the proposed reward campaign.';
+    message.textContent='Download or open GoLingo for iPhone. Sign in inside the app, then open Online Games to record your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
   function setupMissing(error){
     lastError=String(error?.message||error);

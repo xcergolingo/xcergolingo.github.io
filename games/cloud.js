@@ -241,6 +241,10 @@
     }
     window.GoLingoSetLessonHistoryOwner?.(user?.id || null);
     const enabled=!!user;
+    const inApp=!!window.GoLingoCognito?.nativeAvailable?.();
+    const browserSignIn=document.getElementById('cloud-sign-in-browser');
+    if(browserSignIn)browserSignIn.hidden=inApp;
+    signInButton.hidden=!inApp;
     authArea.hidden=enabled;
     signedArea.hidden=!enabled;
     mineArea.hidden=!enabled;
@@ -631,7 +635,7 @@
         window.GoLingoCognito.requestNativeToken();
         note('Requesting existing GoLingo app login…');
       }else {
-        note('Download GoLingo and open games inside the app to connect your account and track challenge days.');
+        window.location.assign('https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025');
       }
     }));
     signOutButton.addEventListener('click',()=>{
@@ -672,7 +676,7 @@
     sharedRefresh.addEventListener('click',()=>refreshCommunity().catch(showError));
     root.dataset.ready='true';
     renderSignedIn();
-    note(user?'GoLingo app account connected. Cloud sync is available.':'Public lessons are available here. To sign in, save favorites and track the 365-day challenge, download GoLingo and open Games inside the app.');
+    note(user?'GoLingo app account connected. Cloud sync is available.':'Sign in through the GoLingo iPhone app only. Download or launch GoLingo, sign in, and open Online Games.');
     await refreshCommunity();
     // Share links work even for signed-out visitors and deep-link into the game.
     // Do not depend on Cognito or the viewer's own saved lesson history.

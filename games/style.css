@@ -280,3 +280,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .challenge-missed strong{display:block;margin-bottom:9px;line-height:1.5}
 .challenge-missed summary{cursor:pointer;font-weight:750}
 .challenge-missed-list{margin:9px 0 0;padding-left:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:5px 15px;font-size:12px}
+
+/* Clear app-only login destination */
+.cloud-auth .cloud-auth-title{font-size:17px;font-weight:800;color:#125f93;margin:0 0 8px}
+.cloud-auth .cloud-auth-note{font-size:12px;line-height:1.55;color:#426d86}
+.cloud-auth #cloud-sign-in-browser[hidden],.cloud-auth #cloud-sign-in[hidden]{display:none!important}
+.cloud-auth .app-only-cta{white-space:normal;text-align:center;max-width:100%}

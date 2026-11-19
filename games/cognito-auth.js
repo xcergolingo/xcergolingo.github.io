@@ -6,7 +6,7 @@
   const legacyToken='golingo:cognito:id-token:v1';
   const legacyPkce='golingo:cognito:pkce:v1';
   const issuer='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_m1wn7aFbx';
-  const appStore='https://apps.apple.com/app/id1194977025';
+  const appStore='https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025';
   let token=null,source=null,onChange=()=>{};
   const nativeAvailable=()=>!!window.webkit?.messageHandlers?.goLingoAuth?.postMessage;
   function decode(value){
