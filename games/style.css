@@ -146,3 +146,6 @@
 .game-social-feedback.is-error{color:#af3232}
 .game-row-feedback{font-size:11px;color:#a33b2b}
 .game-history-done{color:#155d3a!important;background:#dcefdc!important}
+
+.cloud-release-tag{display:inline-block;vertical-align:middle;color:#276448;font-size:11px;font-weight:750;border:1px solid #a7ccb2;border-radius:8px;background:#e6f5e7;padding:2px 6px;white-space:nowrap}
+.game-history-publish{min-height:40px;padding:7px 10px;font-size:12px;font-weight:750}

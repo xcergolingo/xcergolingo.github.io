@@ -465,7 +465,7 @@
         } else {
           const publish = document.createElement('button');
           publish.type = 'button'; publish.className = 'game-history-publish';
-          publish.textContent = state === null ? 'Checking…' : 'Publish';
+          publish.textContent = state === null ? 'Checking…' : 'Publish lesson';
           publish.disabled = state === null;
           publish.setAttribute('aria-label', 'Publish ' + label + ' publicly');
           publish.addEventListener('click', async () => {
@@ -489,7 +489,7 @@
               }
               errorLabel.textContent='Not published: '+(window.GoLingoCloudLastError||'Cloud request failed');
             } else {
-              publish.textContent='Publish';
+              publish.textContent='Publish lesson';
             }
           }catch(error){
             publish.textContent='Retry Publish';

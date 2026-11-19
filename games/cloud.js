@@ -295,7 +295,8 @@
     note('Cloud sync complete · '+uploaded+' local lessons checked. Duplicates are not created.');
   });
   async function publish(gameId,lesson) {
-    if(!user) { note('Sign in to publish a lesson.');return; }
+    if(!user) { note('Sign in to publish a lesson.');return false; }
+    note('Choose whether to publish this lesson…');
     const approved=await confirmInPage('Publish this lesson?',
       'Its words, sentences and translations will be visible to everyone in the GoLingo community. You can unpublish later.',
       'Publish to community');
@@ -319,7 +320,7 @@
       note('✓ Published and visible to other GoLingo players.');
       return true;
     });
-    await wrapped();
+    return await wrapped();
   }
   async function unpublish(gameId,lesson) {
     if (!user || publicationStatus(gameId,lesson) !== true) return;
