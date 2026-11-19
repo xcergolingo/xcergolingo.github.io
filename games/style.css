@@ -241,3 +241,29 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 @media(max-width:820px){.hero-carousel .hero-screen{height:auto;aspect-ratio:4/3;border-radius:24px}}
 @media(max-width:600px){.hero-carousel .hero-screen{height:auto;aspect-ratio:4/3;border-radius:22px;transform:none}.hero-visual{margin:0}.hero-slide-top{top:14px;left:15px}.hero-slide-bottom{bottom:18px;left:17px;right:17px}.hero-slide-copy strong{font-size:22px}.hero-slide-play{width:48px;height:48px}.hero-carousel-controls{margin-top:12px}.hero-visual>.hero-caption{margin-top:12px}}
 @media(prefers-reduced-motion:reduce){.hero-carousel .hero-fallback{animation:none!important}}
+
+/* GoLingo 365-day launch streak campaign — no cash promise until rules approved */
+.challenge-campaign{padding-top:15px;padding-bottom:42px}
+.challenge-campaign-card{padding:32px;background:linear-gradient(122deg,#e6f7ff 0%,#fff 57%,#dff4ff 100%);border:1px solid #addbec;border-radius:26px;box-shadow:0 14px 34px #137faf0c}
+.challenge-brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.challenge-eyebrow{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#096f9e}
+.challenge-status{border:1px solid #9dcee6;background:white;padding:7px 11px;border-radius:100px;font-size:11px;color:#357391;font-weight:700}
+.challenge-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
+.challenge-copy h2{font-size:clamp(27px,3.8vw,46px);letter-spacing:-1.4px;line-height:1.14;color:#133f65;margin:0 0 17px}
+.challenge-copy h2 span{color:#0d98d1}
+.challenge-copy>p{font-size:14px;line-height:1.65;color:#426b84;margin:0 0 11px}
+.challenge-copy .challenge-reward{color:#135784;font-size:16px}
+.challenge-reward strong{font-size:clamp(18px,2.2vw,28px);font-weight:800}
+.challenge-copy .challenge-disclosure{font-size:11px;color:#5a788b}
+.challenge-progress{padding:25px;background:#fff;border-radius:20px;border:1px solid #b4dbef;box-shadow:0 10px 26px #297fa513}
+.challenge-progress-title{display:block;color:#4484a3;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.challenge-progress-number{display:flex;align-items:baseline;gap:10px;margin:12px 0 15px}
+.challenge-progress-number strong{font-size:clamp(40px,5vw,66px);font-weight:800;color:#138fcb;letter-spacing:-2.5px;line-height:1}
+.challenge-progress-number>span{font-size:13px;color:#6b8ba1}
+.challenge-track{width:100%;height:12px;border-radius:12px;background:#d7edf8;overflow:hidden}
+.challenge-track>span{display:block;width:0;height:100%;border-radius:12px;background:linear-gradient(90deg,#53c5f8,#168dcd);transition:width .35s ease}
+.challenge-progress p{font-size:12px;line-height:1.6;color:#486e86;margin:14px 0 0}
+.challenge-milestone{display:block;background:#e6f8df;border-radius:12px;padding:10px;margin-top:14px;font-weight:800;color:#2c682e;font-size:12px}
+.challenge-milestone[hidden]{display:none}
+.challenge-progress .challenge-reset-note{font-size:10px;color:#7994a3}
+@media(max-width:720px){.challenge-campaign{padding:0 21px 30px}.challenge-campaign-card{padding:22px;border-radius:20px}.challenge-grid{grid-template-columns:1fr;gap:18px}.challenge-copy h2{font-size:30px}.challenge-copy>p{font-size:13px}.challenge-progress{padding:20px}}

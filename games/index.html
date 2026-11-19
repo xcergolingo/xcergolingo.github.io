@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f6f7f1">
+<meta name="theme-color" content="#e8f7ff">
 <meta name="description" content="Explore 40 GoLingo games, including Pogo Penguin — Word Hops, Cannon Crash 3D — Word Blast, Aonami — Coastal Fishing, Stillwater — Night Fishing, Koi Garden — Tap &amp; Learn, Curbwake RC, Sakuragaoka — Spring Word Hunt, Sky Reach — Word Flight, GoLingo Goal Club, Panda Lingo — Bamboo Garden, Word Archer, Starry Nightrider, Putt & Speak, Skyfield RC, Snow Kings — Winter Language Adventure, Argon Airspace, Pinefall — Word Hunt, Longshot — Word Marksman, Yokohama City Flight, Ink &amp; Iron — Word Patrol, Last Rewind, Suncoast — Word Coaster, True Hero, Word Fleet, Koi Garden, Flappy Words, Cloud Sea Airship, Sword Riding Immortal, Roadster Rush, Willow Falls Word Fishing, Lagoon, Word Folio, Super Flying Man, Dolphin Pursuit, The Flooded Garden, Matterhorn, Skybreaker, Gigacity, Aeloria, and Holo Cards.">
 <meta property="og:type" content="website"><meta property="og:title" content="GoLingo Games — Your words. A whole new world.">
 <meta property="og:description" content="Fish beside a sunlit red lighthouse in Aonami and collect Japanese vocabulary. Fly through Sky Reach, learn with Pip the panda, cycle through Starry Nightrider, hunt for words, drive, dive, row, ski, or command a fleet. 40 ways to practice words and sentences with GoLingo.">
@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://xcergolingo.github.io/games/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23163029'/%3E%3Cpath d='M42 20a17 17 0 1 0 5 21V31H32v8h7a9 9 0 1 1-3-13z' fill='%23d7f67a'/%3E%3C/svg%3E">
 <title>GoLingo Games — Your words. A whole new world.</title>
-<link rel="stylesheet" href="style.css?v=skyblue-carousel-1"><script defer src="app.js?v=skyblue-carousel-1"></script>
+<link rel="stylesheet" href="style.css?v=daily-streak-beta-1"><script defer src="app.js?v=daily-streak-beta-1"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -47,6 +47,22 @@
   <p class="hero-carousel-hint">Swipe to explore games · tap preview to play</p>
 </div>
 <div class="hero-caption"><span class="little-stars" aria-hidden="true">✳</span> All GoLingo games · one tap to play</div></div></section>
+<section id="golingo-challenge" class="challenge-campaign wrap" aria-labelledby="challenge-title">
+<div class="challenge-campaign-card">
+  <div class="challenge-brand"><span class="challenge-eyebrow">GOLINGO 365-DAY CHALLENGE</span><span class="challenge-status">Coming soon · reward rules pending</span></div>
+  <div class="challenge-grid"><div class="challenge-copy"><h2 id="challenge-title">Play every day. Build a <span>365-day streak.</span></h2>
+    <p>Make language learning a daily habit with GoLingo Games. Sign in to record one game-launch day at a time and watch your streak grow.</p>
+    <p class="challenge-reward">Potential <strong>$365 reward</strong> at 365 consecutive days</p>
+    <p class="challenge-disclosure">Cash campaign is not yet active. Official rules, verified-play requirements, eligibility and payout procedures are pending. Today's launch tracking does not create a cash entitlement.</p>
+  </div><div class="challenge-progress" aria-label="Your daily GoLingo game launch streak">
+    <span class="challenge-progress-title">YOUR DAILY STREAK</span>
+    <div class="challenge-progress-number"><strong id="challenge-days">—</strong><span>/ 365 days</span></div>
+    <div class="challenge-track" role="progressbar" aria-label="Progress to 365 days" aria-valuemin="0" aria-valuemax="365" aria-valuenow="0" id="challenge-progress"><span id="challenge-fill"></span></div>
+    <p id="challenge-message" role="status">Sign in to GoLingo to see your daily game-launch streak.</p>
+    <span id="challenge-milestone" class="challenge-milestone" hidden>🏆 365 days achieved! Challenge milestone reached.</span>
+    <p class="challenge-reset-note">One launch per UTC day · consecutive days · account-based</p>
+  </div></div>
+</div></section>
 <div class="language-strip" aria-label="Example learning languages"><div class="wrap language-strip-inner"><span>WORDS OPEN WORLDS</span><div><b>Hola</b><b lang="ja">こんにちは</b><b>Bonjour</b><b lang="zh">你好</b><b>Ciao</b><b>Olá</b><b>Hallo</b></div><svg aria-hidden="true"><use href="#spark"/></svg></div></div>
 <section class="shared-lesson-landing wrap" id="shared-lesson-landing" hidden aria-live="polite" aria-labelledby="shared-lesson-heading">
   <h2 id="shared-lesson-heading">Opening shared GoLingo lesson…</h2>
@@ -334,6 +350,7 @@
 <script defer src="cloud.js?v=share-preview-collapse-2"></script>
 <script defer src="cognito-diagnostic.js?v=oauth-scope-2"></script>
 <script defer src="social.js?v=publish-favorites-fix-2"></script>
+<script defer src="streak.js?v=daily-streak-beta-1"></script>
 </body></html>
 
 

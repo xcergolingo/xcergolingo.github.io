@@ -553,7 +553,24 @@
     link.target = '_self'; // WKWebView: keep the normal launch in this WebView.
     if (activeLesson) rememberGameLesson(card.id, activeLesson);
     recordLaunch(card);
-    // Leave navigation to the native link, preserving keyboard/modifier clicks.
+    // A game launch recorded on the Supabase server is one day of streak credit.
+    // Wait briefly for confirmation before navigation. Unauthenticated and
+    // unsupported browsers retain their normal immediate navigation path.
+    if (window.GoLingoStreak?.canTrack?.() &&
+        !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+      const destination=url.toString();
+      let finished=false;
+      const continueToGame=()=>{
+        if(finished)return;
+        finished=true;
+        window.location.assign(destination);
+      };
+      const fallback=setTimeout(continueToGame,2200);
+      Promise.resolve(window.GoLingoStreak.recordLaunch(card.id)).catch(()=>{})
+        .finally(()=>{clearTimeout(fallback);continueToGame()});
+    }
+    // Leave navigation to the native link when not tracking a signed-in launch.
   }
   document.querySelectorAll('.game-card .demo-link, .game-card a.game-cover, #dialog-demo').forEach(link => {
     link.addEventListener('click', launchGame);
