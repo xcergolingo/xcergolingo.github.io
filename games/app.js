@@ -120,10 +120,9 @@
   function updateStorageStatus() {
     const note = document.getElementById('hub-storage-status');
     if (!note) return;
-    note.textContent = !localAvailable
-      ? 'Device storage is unavailable. Your plays, favorites, and likes will last only until this page reloads or closes. Plays count game launches, not completed sessions.'
-      : 'Your plays, favorites, and likes are saved on this device. Plays count game launches, not completed sessions.' +
-        (sessionAvailable ? '' : ' Search and filters cannot be remembered in this session.');
+    note.textContent = socialLoaded
+      ? 'Play and like totals reflect activity recorded across GoLingo users. Favorites are private to the signed-in account. Historical device-only counts are not included.'
+      : 'Loading shared play and like totals. Global counts require the game-social-schema.sql database setup; older device-only counts are not combined.';
   }
   function writeLocal(key, value) {
     if (localAvailable) {
@@ -159,7 +158,21 @@
     cardNames.get(card), card.querySelector('.game-copy > p')?.textContent || '',
     [...card.querySelectorAll('.tags span')].map(tag => tag.textContent).join(' '), card.dataset.tags || ''
   ].join(' '))]));
-  const playCount = card => plays[card.id]?.count || 0;
+  // Public cloud counts and private Cognito account reactions are supplied by social.js.
+  let socialLoaded = false, socialSignedIn = false;
+  let socialTotals = Object.create(null);
+  const playCount = card => socialLoaded ? (socialTotals[card.id]?.plays || 0) : (plays[card.id]?.count || 0);
+  const likeCount = card => socialLoaded ? (socialTotals[card.id]?.likes || 0) : Number(!!liked[card.id]);
+  window.GoLingoGallerySetSocial = ({totals,likes,accountFavorites,signedIn}) => {
+    socialLoaded = true;
+    socialSignedIn = !!signedIn;
+    socialTotals = totals || Object.create(null);
+    liked = booleanCollection(likes || {});
+    favorites = booleanCollection(accountFavorites || {});
+    cards.forEach(card => {renderLike(card);renderFavorite(card);renderPlays(card);});
+    updateStorageStatus();applyView();
+  };
+
 
   function renderLike(card) {
     const button = card.querySelector('.game-like');
@@ -167,7 +180,9 @@
     const isLiked = !!liked[card.id];
     button.setAttribute('aria-pressed', String(isLiked));
     button.setAttribute('aria-label', (isLiked ? 'Unlike ' : 'Like ') + cardNames.get(card));
-    button.innerHTML = (isLiked ? '👍 Liked' : '👍 Like') + ' <span aria-hidden="true">' + (isLiked ? '1' : '0') + '</span>';
+    button.innerHTML = (isLiked ? '👍 Liked' : '👍 Like') + ' <span aria-hidden="true">' + (socialLoaded ? likeCount(card).toLocaleString() : '—') + '</span>';
+    button.title = socialLoaded ? (socialSignedIn ? 'Total likes from GoLingo accounts' : 'Sign in with GoLingo to like this game') : 'Loading shared likes';
+
   }
   function renderFavorite(card) {
     const button = card.querySelector('.game-favorite');
@@ -176,21 +191,23 @@
     button.setAttribute('aria-pressed', String(saved));
     button.setAttribute('aria-label', (saved ? 'Remove ' : 'Add ') + cardNames.get(card) + (saved ? ' from favorites' : ' to favorites'));
     button.innerHTML = '<span class="favorite-icon" aria-hidden="true">' + (saved ? '♥' : '♡') + '</span> ' + (saved ? 'Favorited' : 'Favorite');
+    button.title = socialSignedIn ? 'Saved to your GoLingo account' : 'Sign in with GoLingo to save favorites';
+
   }
   function renderPlays(card) {
     const label = card.querySelector('.game-plays');
     if (!label) return;
     const count = playCount(card);
-    label.textContent = count.toLocaleString() + (count === 1 ? ' play' : ' plays');
-    label.title = 'Game launches on this device, not completed sessions';
-    label.setAttribute('aria-label', count.toLocaleString() + (count === 1 ? ' launch' : ' launches') + ' of ' + cardNames.get(card) + ' on this device');
+    label.textContent = (socialLoaded ? count.toLocaleString() : '—') + (count === 1 ? ' play' : ' plays');
+    label.title = socialLoaded ? 'Total recorded gallery launches across devices (not completed sessions)' : 'Loading worldwide recorded launches';
+    label.setAttribute('aria-label', (socialLoaded ? count.toLocaleString() : 'Loading') + ' recorded launches of ' + cardNames.get(card) + ' across GoLingo users');
   }
   function sortGames() {
     const sorted = cards.slice().sort((a, b) => {
       let difference = 0;
       if (view.sort === 'plays') difference = playCount(b) - playCount(a);
       else if (view.sort === 'recent') difference = (plays[b.id]?.lastPlayed || 0) - (plays[a.id]?.lastPlayed || 0);
-      else if (view.sort === 'likes') difference = Number(!!liked[b.id]) - Number(!!liked[a.id]);
+      else if (view.sort === 'likes') difference = likeCount(b) - likeCount(a);
       else if (view.sort === 'name') difference = cardNames.get(a).localeCompare(cardNames.get(b));
       return difference || originalOrder.get(a) - originalOrder.get(b);
     });
@@ -265,20 +282,8 @@
     actions.append(likeButton, favoriteButton, playLabel);
     if (tags) tags.insertAdjacentElement('afterend', actions);
     else copy?.appendChild(actions);
-    likeButton.addEventListener('click', () => {
-      if (localAvailable) liked = booleanCollection(readLocal(likesKey) || liked);
-      if (liked[card.id]) delete liked[card.id]; else liked[card.id] = true;
-      writeLocal(likesKey, liked);
-      cards.forEach(renderLike);
-      applyView();
-    });
-    favoriteButton.addEventListener('click', () => {
-      if (localAvailable) favorites = booleanCollection(readLocal(favoritesKey) || favorites);
-      if (favorites[card.id]) delete favorites[card.id]; else favorites[card.id] = true;
-      writeLocal(favoritesKey, favorites);
-      cards.forEach(renderFavorite);
-      applyView();
-    });
+    likeButton.addEventListener('click', () => window.GoLingoSocial?.toggleLike(card.id));
+    favoriteButton.addEventListener('click', () => window.GoLingoSocial?.toggleFavorite(card.id));
     renderLike(card);
     renderFavorite(card);
     renderPlays(card);
@@ -321,6 +326,17 @@
     plays[card.id] = { count: Math.min(Number.MAX_SAFE_INTEGER, playCount(card) + 1), lastPlayed: now };
     writeLocal(playsKey, plays);
     renderPlays(card);
+    // Queue gallery launches before following the game link, so navigation
+    // cannot silently cancel the public counter request.
+    try {
+      const key = 'golingo:pending-game-launches:v1';
+      const queue = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(queue)) {
+        queue.push(card.id);
+        localStorage.setItem(key, JSON.stringify(queue.slice(-80)));
+      }
+    } catch {}
+    window.dispatchEvent(new CustomEvent('golingo:game-launch',{detail:{gameId:card.id}}));
     // Sorting here could move a touched link before the browser navigates.
     // pageshow refreshes the order on return, including the back/forward cache.
   }
@@ -512,8 +528,10 @@
     // If a write failed, retain this page's in-memory changes rather than
     // replacing them with an older persisted copy.
     if (localAvailable) {
-      liked = booleanCollection(readLocal(likesKey) || liked);
-      favorites = booleanCollection(readLocal(favoritesKey) || favorites);
+      if (!socialLoaded) {
+        liked = booleanCollection(readLocal(likesKey) || liked);
+        favorites = booleanCollection(readLocal(favoritesKey) || favorites);
+      }
       plays = playCollection(readLocal(playsKey) || plays);
     }
     cards.forEach(card => { renderLike(card); renderFavorite(card); renderPlays(card); renderGameHistory(card.id); });

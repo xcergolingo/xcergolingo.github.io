@@ -123,3 +123,7 @@
 .game-history-unpublish:focus-visible{outline:3px solid #3e8562;outline-offset:2px}
 .game-history-publish:disabled{opacity:.65;cursor:wait}
 @media(max-width:540px){.game-history-entry{flex-wrap:wrap}.game-history-play{flex-basis:60%}.game-history-published{order:-1}}
+
+.cloud-community-list{max-height:540px;overflow-y:auto}
+#cloud-community[open]>summary{margin-bottom:12px}
+.game-like[disabled],.game-favorite[disabled]{opacity:.65}
