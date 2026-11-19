@@ -38,7 +38,7 @@
     progress.setAttribute('aria-valuenow','0');
     fill.style.width='0%';
     milestone.hidden=true;
-    message.textContent='Sign in with GoLingo to track your daily game-launch streak.';
+    message.textContent='Open Online Games inside the GoLingo app and sign in there to track your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
   function setupMissing(error){
     lastError=String(error?.message||error);

@@ -9,7 +9,7 @@
   }
   let active=false;
   try {active=sessionStorage.getItem(marker)==='1'}catch {}
-  if(!active)return;
+  if(!active || !window.GoLingoCognito?.nativeAvailable?.())return;
   const parent=document.getElementById('golingo-cloud');
   if(!parent)return;
   const box=document.createElement('section');

@@ -244,7 +244,7 @@
     authArea.hidden=enabled;
     signedArea.hidden=!enabled;
     mineArea.hidden=!enabled;
-    if (enabled) document.getElementById('cloud-account-label').textContent = user.email || 'Signed in';
+    if (enabled) document.getElementById('cloud-account-label').textContent = user.email || 'Signed in through GoLingo';
     window.GoLingoGalleryRefreshHistory?.();
     window.dispatchEvent(new CustomEvent('golingo:auth-state',{detail:{signedIn:enabled}}));
   }
@@ -630,7 +630,9 @@
       if(window.GoLingoCognito.nativeAvailable()){
         window.GoLingoCognito.requestNativeToken();
         note('Requesting existing GoLingo app login…');
-      }else await window.GoLingoCognito.signIn();
+      }else {
+        note('Download GoLingo and open games inside the app to connect your account and track challenge days.');
+      }
     }));
     signOutButton.addEventListener('click',()=>{
       window.GoLingoCognito.signOut();user=null;renderSignedIn();
@@ -670,7 +672,7 @@
     sharedRefresh.addEventListener('click',()=>refreshCommunity().catch(showError));
     root.dataset.ready='true';
     renderSignedIn();
-    note(user?'Cognito account connected. Private cloud sync is available.':'Sign in with GoLingo to synchronize private lessons.');
+    note(user?'GoLingo app account connected. Cloud sync is available.':'Public lessons are available here. To sign in, save favorites and track the 365-day challenge, download GoLingo and open Games inside the app.');
     await refreshCommunity();
     // Share links work even for signed-out visitors and deep-link into the game.
     // Do not depend on Cognito or the viewer's own saved lesson history.

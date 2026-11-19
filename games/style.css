@@ -267,3 +267,10 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .challenge-milestone[hidden]{display:none}
 .challenge-progress .challenge-reset-note{font-size:10px;color:#7994a3}
 @media(max-width:720px){.challenge-campaign{padding:0 21px 30px}.challenge-campaign-card{padding:22px;border-radius:20px}.challenge-grid{grid-template-columns:1fr;gap:18px}.challenge-copy h2{font-size:30px}.challenge-copy>p{font-size:13px}.challenge-progress{padding:20px}}
+
+/* App-exclusive challenge sign-in and download CTA */
+.cloud-auth .app-only-cta{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#159bd6;color:white;border-color:#159bd6;font-weight:800;padding:12px 18px;border-radius:12px}
+.cloud-auth .app-only-cta:hover{background:#0d81b9}
+.cloud-auth #cloud-sign-in[hidden]{display:none!important}
+.challenge-copy .challenge-in-app{font-weight:750;color:#185c83;font-size:13px}
+.challenge-download{display:inline-flex;align-items:center;justify-content:center;margin:8px 0 16px;text-decoration:none}

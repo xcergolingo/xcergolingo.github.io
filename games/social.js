@@ -117,7 +117,7 @@
     line.classList.toggle('is-error',isError);
   }
   function signInPrompt(){
-    notify('Sign in with GoLingo to like games or save favorites to your account.');
+    notify('Likes and cloud favorites require the GoLingo app. Download GoLingo and open Online Games inside the app.');
     document.getElementById('golingo-cloud')?.scrollIntoView({behavior:'smooth',block:'center'});
   }
   async function toggleLike(gameId){
@@ -135,7 +135,7 @@
   async function toggleFavorite(gameId){
     if(!gameSet.has(gameId)||inFlight.has('fav:'+gameId))return;
     const account=currentUser();
-    if(!account){reactionFeedback(gameId,'Sign in with GoLingo to save favorites',true);signInPrompt();return}
+    if(!account){reactionFeedback(gameId,'Open this game in the GoLingo app to save favorites',true);signInPrompt();return}
     inFlight.add('fav:'+gameId);
     const adding=!favorites[gameId];
     reactionFeedback(gameId,'Saving favorite…');
