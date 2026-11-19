@@ -358,6 +358,17 @@
   const native=lesson=>langCode(lesson?.primaryLanguage||lesson?.translationLanguage||lesson?.nativeLanguage||lesson?.from);
   const languagePair=lesson=>langName(learning(lesson))+' → '+langName(native(lesson));
   const gameTitle=id=>document.getElementById(id)?.querySelector('h3')?.textContent?.trim()||id;
+  function humanLessonTitle(item){
+    const title=String(item.title||'').trim();
+    const code=learning(item.lesson_json);
+    const first=title.split(' · ');
+    if(first.length>1 && (langCode(first[0])===code || first[0].toLowerCase()===code))
+      return first.slice(1).join(' · ');
+    if(title)return title;
+    return counts.flatMap(k=>Array.isArray(item.lesson_json?.[k])?item.lesson_json[k]:[])
+      .map(x=>typeof x==='string'?x:x?.word||x?.sentence||x?.text||x?.phrase||'')
+      .filter(Boolean).slice(0,3).join(' · ')||'Language lesson';
+  }
   function searchable(row){
     const wordText=counts.flatMap(field=>Array.isArray(row.lesson_json?.[field])?row.lesson_json[field]:[])
       .map(v=>typeof v==='string'?v:Object.values(v||{}).filter(x=>typeof x==='string').join(' ')).join(' ');
@@ -389,7 +400,7 @@
       const li=document.createElement('li');li.className='cloud-community-entry community-entry';
       const text=document.createElement('div');text.className='community-entry-text';
       const languages=document.createElement('strong');languages.textContent=languagePair(item.lesson_json);
-      const title=document.createElement('span');title.textContent=item.title||lessonText(item.lesson_json);
+      const title=document.createElement('span');title.textContent=humanLessonTitle(item);
       const game=document.createElement('small');game.textContent=gameTitle(item.game_id);
       text.append(languages,title,game);
       const actions=document.createElement('div');actions.className='community-entry-actions';
@@ -436,7 +447,7 @@
       for(const item of matches.slice(0,25)){
         const li=document.createElement('li');
         const label=document.createElement('span');
-        label.textContent=languagePair(item.lesson_json)+' · '+(item.title||lessonText(item.lesson_json));
+        label.textContent=languagePair(item.lesson_json)+' · '+humanLessonTitle(item);
         const play=makeButton('Play',()=>{try{window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}catch(error){showError(error)}},'cloud-row-action');
         li.append(label,play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));list.append(li);
       }
