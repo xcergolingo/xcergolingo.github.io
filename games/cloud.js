@@ -118,29 +118,36 @@
         message.textContent='Link copied. Paste it into a message to share.';
       }catch{link.focus();link.select();message.textContent='Select and copy the link above to share.'}
     });
-    const nativeShare=makeButton('Share with image',async()=>{
-      if(!navigator.share){link.focus();link.select();message.textContent='Native sharing unavailable. Copy the link above.';return}
-      // Prepare an actual PNG image file from the game's cover art.
-      // Some share destinations ignore URLs when attachments are provided:
-      // always include the destination in the text, too.
-      const shareText='Play '+game+' with my GoLingo lesson:\n'+url;
-      let attachment=null;
-      try{
-        const blob=await previewPng(gameId);
-        if(blob && typeof File!=='undefined'){
-          const file=new File([blob],gameId+'-golingo-game.png',{type:'image/png'});
-          if(navigator.canShare?.({files:[file]}))attachment=file;
-        }
-      }catch{}
-      const content=attachment?{title:'GoLingo — '+game,text:shareText,files:[attachment]}:
-        {title:'GoLingo — '+game,text:shareText,url};
-      try{
-        await navigator.share(content);
-        message.textContent=attachment?'Shared game preview image and lesson link.':'Shared lesson link. Image attachment was not supported.';
-      }catch(error){
-        if(error?.name!=='AbortError')message.textContent='Could not open sharing. Use Copy link instead.';
+    // Pre-render before the tap so Web Share can run with transient user
+    // activation. A failed/unsupported image gracefully falls back to URL.
+    let imageFile=null;
+    const imageReady=previewPng(gameId).then(blob=>{
+      if(blob && typeof File!=='undefined') {
+        const file=new File([blob],gameId+'-golingo-game.png',{type:'image/png'});
+        if(navigator.canShare?.({files:[file]}))imageFile=file;
       }
+    }).catch(()=>{});
+    const nativeShare=makeButton('Share with image',()=>{
+      if(!navigator.share){
+        link.focus();link.select();
+        message.textContent='Native sharing unavailable. Copy the link above.';
+        return;
+      }
+      const shareText='Play '+game+' with my GoLingo lesson:\n'+url;
+      const content=imageFile
+        ? {title:'GoLingo — '+game,text:shareText,files:[imageFile]}
+        : {title:'GoLingo — '+game,text:shareText,url};
+      // No await or asynchronous image conversion before navigator.share().
+      navigator.share(content).then(()=>{
+        message.textContent=imageFile?'Shared game image and lesson link.':
+          'Shared lesson link. The image was unavailable or not supported.';
+      }).catch(error=>{
+        if(error?.name!=='AbortError')
+          message.textContent='Could not open sharing. Use Copy link instead.';
+      });
     });
+    imageReady.then(()=>{nativeShare.textContent=imageFile?'Share with image':'Share link'})
+      .catch(()=>{});
     const close=makeButton('Close',()=>finish());
     function finish(){shade.remove();document.removeEventListener('keydown',onKey)}
     function onKey(e){if(e.key==='Escape'){e.preventDefault();finish()}}
