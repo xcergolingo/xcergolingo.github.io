@@ -461,7 +461,18 @@
           unpublish.textContent = 'Unpublish';
           unpublish.setAttribute('aria-label', 'Unpublish ' + label);
           unpublish.addEventListener('click', () => window.GoLingoCloud.unpublish(id, item.lesson));
-          row.append(published, unpublish);
+          row.append(published);
+          const publishedId=window.GoLingoCloud.publicationId?.(id,item.lesson);
+          if(publishedId){
+            const share=document.createElement('button');
+            share.type='button';
+            share.className='game-history-unpublish game-history-share';
+            share.textContent='Share';
+            share.setAttribute('aria-label','Share a link to play '+label);
+            share.addEventListener('click',()=>window.GoLingoCloud.shareLesson(publishedId,label,id));
+            row.append(share);
+          }
+          row.append(unpublish);
         } else {
           const publish = document.createElement('button');
           publish.type = 'button'; publish.className = 'game-history-publish';
@@ -551,10 +562,12 @@
   window.GoLingoGalleryRefreshHistory = () => cards.forEach(card => renderGameHistory(card.id));
   window.GoLingoPlaySavedLesson = (gameId, lesson) => {
     const card = cardById.get(gameId);
-    if (!card || !lesson) return;
+    if (!card || !lesson) return false;
     saveLesson(JSON.stringify(lesson));
     const link = card.querySelector('.demo-link');
-    if (link) link.click();
+    if (!link) return false;
+    link.click();
+    return true;
   };
   function refreshCollections() {
     // If a write failed, retain this page's in-memory changes rather than

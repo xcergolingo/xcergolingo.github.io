@@ -149,3 +149,14 @@
 
 .cloud-release-tag{display:inline-block;vertical-align:middle;color:#276448;font-size:11px;font-weight:750;border:1px solid #a7ccb2;border-radius:8px;background:#e6f5e7;padding:2px 6px;white-space:nowrap}
 .game-history-publish{min-height:40px;padding:7px 10px;font-size:12px;font-weight:750}
+
+/* Shareable published lessons and direct game launching */
+.shared-lesson-landing{margin:20px auto 26px;padding:20px;border:1px solid #b8d4b9;background:#edf7ed;border-radius:18px;scroll-margin-top:16px}
+.shared-lesson-landing[hidden]{display:none}
+.shared-lesson-landing h2{font-size:clamp(19px,3.5vw,27px);margin:0 0 9px;color:#194332}
+.shared-lesson-landing p{margin:0 0 12px;overflow-wrap:anywhere;color:#345847}
+.golingo-share-dialog input{display:block;width:100%;max-width:100%;padding:11px;border-radius:9px;border:1px solid #bdceba;color:#244536;background:#f5f8f2;font-size:13px}
+.golingo-share-dialog .golingo-share-message{font-size:12px;margin:8px 0;color:#306a48;min-height:17px}
+.cloud-share-action{white-space:nowrap}
+.game-history-share{color:#18543a;border-color:#b4d4bc;font-weight:800}
+.game-community-list li{flex-wrap:wrap}

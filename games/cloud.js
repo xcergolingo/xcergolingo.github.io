@@ -56,8 +56,106 @@
     btn.addEventListener('click',handler);
     return btn;
   }
+
+  function shareLesson(id,title,gameId) {
+    if(!uuidValid(id)) {note('This lesson does not have a valid public link yet.');return}
+    const url=lessonShareUrl(id);
+    const shade=document.createElement('div');shade.className='golingo-confirm-shade';
+    const dialog=document.createElement('section');dialog.className='golingo-confirm-dialog golingo-share-dialog';
+    dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
+    const heading=document.createElement('h3');heading.textContent='Share this game lesson';
+    const description=document.createElement('p');
+    description.textContent='Anyone with this link can open '+(gameId||'the game')+' with '+(title||'this lesson')+'. No account is required to play.';
+    const link=document.createElement('input');link.type='text';link.readOnly=true;link.value=url;
+    link.setAttribute('aria-label','Shareable game and lesson link');
+    const message=document.createElement('p');message.className='golingo-share-message';message.setAttribute('role','status');
+    const actions=document.createElement('div');actions.className='golingo-confirm-actions';
+    const copy=makeButton('Copy link',async()=>{
+      try {
+        if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(url);
+        else {link.focus();link.select();if(!document.execCommand('copy'))throw Error('Copy unavailable')}
+        message.textContent='Link copied. Paste it into a message to share.';
+      }catch {link.focus();link.select();message.textContent='Select and copy the link above to share.'}
+    });
+    const nativeShare=makeButton('Share…',async()=>{
+      if(!navigator.share){link.focus();link.select();message.textContent='Copy the link above to share.';return}
+      try{await navigator.share({title:'GoLingo — '+(title||'Shared lesson'),text:'Play this language lesson in GoLingo Games',url})}
+      catch(error){if(error?.name!=='AbortError')message.textContent='Sharing unavailable. Use Copy link instead.'}
+    });
+    const close=makeButton('Close',()=>finish());
+    function finish(){
+      shade.remove();document.removeEventListener('keydown',onKey);
+    }
+    function onKey(e){if(e.key==='Escape'){e.preventDefault();finish()}}
+    shade.addEventListener('click',e=>{if(e.target===shade)finish()});
+    document.addEventListener('keydown',onKey);
+    actions.append(copy,nativeShare,close);
+    dialog.append(heading,description,link,message,actions);shade.append(dialog);document.body.append(shade);
+    copy.focus();
+  }
+  function shareAction(id,title,gameId) {
+    const button=makeButton('Share link',()=>shareLesson(id,title,gameId),'cloud-row-action cloud-share-action');
+    button.setAttribute('aria-label','Share '+title+' as a link to play '+gameId);
+    return button;
+  }
+  async function openSharedLink() {
+    const params=new URLSearchParams(location.search);
+    const shared=params.get('share');
+    if(shared===null)return;
+    const panel=document.getElementById('shared-lesson-landing');
+    const heading=document.getElementById('shared-lesson-heading');
+    const info=document.getElementById('shared-lesson-detail');
+    const play=document.getElementById('shared-lesson-play');
+    if(!panel || !heading || !info || !play)return;
+    panel.hidden=false;
+    heading.textContent='Opening shared GoLingo lesson…';
+    info.textContent='Finding the published lesson and its game.';
+    play.hidden=true;
+    panel.scrollIntoView({block:'start'});
+    if(!uuidValid(shared)) {
+      heading.textContent='Invalid shared lesson link';
+      info.textContent='The lesson link is incomplete or invalid.';
+      return;
+    }
+    const {data,error}=await publicDb.from(tableName)
+      .select('id,game_id,title,lesson_json')
+      .eq('id',shared).eq('is_public',true).maybeSingle();
+    if(error||!data){
+      heading.textContent='Shared lesson unavailable';
+      info.textContent=error?'Could not load this lesson. Please try again.':'This lesson is private, unpublished or no longer available.';
+      return;
+    }
+    const card=document.getElementById(data.game_id);
+    if(!validId(data.game_id)||!card?.classList.contains('game-card')||!data.lesson_json){
+      heading.textContent='Game unavailable';
+      info.textContent='This game is not available in the GoLingo gallery.';
+      return;
+    }
+    heading.textContent='Play '+(card.querySelector('h3')?.textContent||'GoLingo Game');
+    info.textContent=data.title||lessonText(data.lesson_json);
+    play.hidden=false;
+    play.onclick=()=>{
+      try {
+        window.GoLingoPlaySavedLesson?.(data.game_id,data.lesson_json);
+      }catch(e){info.textContent='Unable to start game: '+e.message}
+    };
+    // A tap on the shared URL is enough to enter the game, including inside
+    // GoLingo WKWebView. Explicit Play button remains if navigation is blocked.
+    play.click();
+  }
+
   let publicationOwner = null;
   let publishedLessons = new Set();
+  let publishedLessonIds = new Map();
+  const uuidValid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
+  function lessonShareUrl(id) {
+    const url=new URL('https://xcergolingo.github.io/games/');
+    url.searchParams.set('share',id);
+    return url.href;
+  }
+  function publicationId(gameId,lesson) {
+    return user && publicationOwner===user.id ? publishedLessonIds.get(publicationKey(gameId,lesson)) || null : null;
+  }
   function publicationKey(gameId,lesson) { return gameId + '\u0000' + canonical(lesson); }
   function publicationStatus(gameId,lesson) {
     if (!user || publicationOwner !== user.id) return null;
@@ -65,14 +163,17 @@
   }
   function updatePublicationStates(data) {
     publicationOwner = user?.id || null;
-    publishedLessons = new Set((data || []).filter(item => item.is_public)
-      .map(item => publicationKey(item.game_id,item.lesson_json)));
+    const published=(data || []).filter(item=>item.is_public);
+    publishedLessons = new Set(published.map(item => publicationKey(item.game_id,item.lesson_json)));
+    publishedLessonIds = new Map(published.filter(item=>uuidValid(item.id))
+      .map(item=>[publicationKey(item.game_id,item.lesson_json),item.id]));
     window.GoLingoGalleryRefreshHistory?.();
   }
   function renderSignedIn() {
     if (publicationOwner !== (user?.id || null)) {
       publicationOwner = null;
       publishedLessons.clear();
+      publishedLessonIds.clear();
     }
     window.GoLingoSetLessonHistoryOwner?.(user?.id || null);
     const enabled=!!user;
@@ -216,7 +317,7 @@
         if(error) throw error;
         note('Lesson is private again.'); await refreshMine();await refreshCommunity();
       }),'cloud-row-action');
-      li.append(name,unpublish);mineList.append(li);
+      li.append(name,shareAction(item.id,item.title,item.game_id),unpublish);mineList.append(li);
     }
   }
   async function refreshCommunity() {
@@ -264,7 +365,7 @@
           try {window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json)}
           catch(error){showError(error)}
         },'cloud-row-action');
-        li.append(label,play);list.append(li);
+        li.append(label,play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));list.append(li);
       }
       panel.append(list);
     }
@@ -277,7 +378,7 @@
         try { window.GoLingoPlaySavedLesson?.(item.game_id,item.lesson_json); }
         catch(error){showError(error);}
       },'cloud-row-action');
-      li.append(label,play);sharedList.append(li);
+      li.append(label,play,shareAction(item.id,item.title||lessonText(item.lesson_json),item.game_id));sharedList.append(li);
     }
   }
   const syncNow=disableWhileRunning(async ()=>{
@@ -341,7 +442,7 @@
     });
     await wrapped();
   }
-  window.GoLingoCloud={isSignedIn:()=>!!user,publicationStatus,publish,unpublish};
+  window.GoLingoCloud={isSignedIn:()=>!!user,publicationStatus,publicationId,shareLesson,publish,unpublish};
   window.addEventListener('golingo:game-lesson-played',e=>{
     if(!user) return;
     const {gameId,lesson}=e.detail||{};
@@ -434,6 +535,9 @@
     renderSignedIn();
     note(user?'Cognito account connected. Private cloud sync is available.':'Sign in with GoLingo to synchronize private lessons.');
     await refreshCommunity();
+    // Share links work even for signed-out visitors and deep-link into the game.
+    // Do not depend on Cognito or the viewer's own saved lesson history.
+    await openSharedLink();
     if(user) await syncNow();
   }catch(error) {
     window.GoLingoCloud=null;
