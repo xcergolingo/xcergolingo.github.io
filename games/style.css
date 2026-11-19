@@ -134,3 +134,15 @@
 .game-community-list li{display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px;overflow-wrap:anywhere}
 .game-community-list li span{min-width:0}
 .game-community-list button{flex-shrink:0}
+
+/* Reliable GoLingo in-page confirmation in WKWebView */
+.golingo-confirm-shade{position:fixed;inset:0;z-index:2147483500;background:rgba(12,31,24,.65);display:flex;align-items:center;justify-content:center;padding:24px;overscroll-behavior:contain}
+.golingo-confirm-dialog{width:min(100%,440px);border-radius:18px;background:#fff;color:#173e30;padding:24px;box-shadow:0 22px 80px rgba(0,0,0,.25);font-family:inherit}
+.golingo-confirm-dialog h3{font-size:20px;margin:0 0 12px}
+.golingo-confirm-dialog p{font-size:15px;line-height:1.55;margin:0 0 18px}
+.golingo-confirm-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.golingo-confirm-accept{background:#1a4737!important;color:white!important}
+.game-social-feedback{font-size:11px;flex:1 0 100%;color:#285f43}
+.game-social-feedback.is-error{color:#af3232}
+.game-row-feedback{font-size:11px;color:#a33b2b}
+.game-history-done{color:#155d3a!important;background:#dcefdc!important}

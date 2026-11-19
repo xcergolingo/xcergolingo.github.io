@@ -468,7 +468,27 @@
           publish.textContent = state === null ? 'Checking…' : 'Publish';
           publish.disabled = state === null;
           publish.setAttribute('aria-label', 'Publish ' + label + ' publicly');
-          publish.addEventListener('click', () => window.GoLingoCloud.publish(id,item.lesson));
+          publish.addEventListener('click', async () => {
+          if(publish.disabled)return;
+          publish.disabled=true;
+          try{
+            const published=await window.GoLingoCloud.publish(id,item.lesson);
+            if(!publish.isConnected)return;
+            if(published){
+              publish.textContent='✓ Published';
+              publish.classList.add('game-history-done');
+              publish.setAttribute('aria-label',label+' is published');
+            } else {
+              publish.textContent='Publish';
+            }
+          }catch(error){
+            publish.textContent='Retry Publish';
+            const status=document.createElement('small');
+            status.className='game-row-feedback';
+            status.textContent='Could not publish: '+(error?.message||'Please retry');
+            row.append(status);
+          }finally{if(publish.isConnected)publish.disabled=false}
+        });
           row.append(publish);
         }
       }

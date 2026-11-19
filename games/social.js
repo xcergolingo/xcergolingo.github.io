@@ -108,6 +108,14 @@
         storageStatus.textContent='Shared game statistics are awaiting Supabase setup. '+error.message;
     }finally{flushing=false}
   }
+  function reactionFeedback(gameId,text,isError=false){
+    const host=document.getElementById(gameId)?.querySelector('.game-actions');
+    if(!host)return;
+    let line=host.querySelector('.game-social-feedback');
+    if(!line){line=document.createElement('small');line.className='game-social-feedback';line.setAttribute('role','status');host.append(line)}
+    line.textContent=text;
+    line.classList.toggle('is-error',isError);
+  }
   function signInPrompt(){
     notify('Sign in with GoLingo to like games or save favorites to your account.');
     document.getElementById('golingo-cloud')?.scrollIntoView({behavior:'smooth',block:'center'});
@@ -127,18 +135,27 @@
   async function toggleFavorite(gameId){
     if(!gameSet.has(gameId)||inFlight.has('fav:'+gameId))return;
     const account=currentUser();
-    if(!account){signInPrompt();return}
+    if(!account){reactionFeedback(gameId,'Sign in with GoLingo to save favorites',true);signInPrompt();return}
     inFlight.add('fav:'+gameId);
+    const adding=!favorites[gameId];
+    reactionFeedback(gameId,'Saving favorite…');
     try{
       const response=favorites[gameId]
         ? await accountDb.from('golingo_game_favorites').delete()
            .eq('user_id',account).eq('game_id',gameId)
         : await accountDb.from('golingo_game_favorites')
-           .upsert({user_id:account,game_id:gameId},{onConflict:'user_id,game_id'});
-      if(response.error)throw response.error;
+           .insert({user_id:account,game_id:gameId});
+      if(response.error && !(adding && response.error.code==='23505'))throw response.error;
+      favorites[gameId]=adding;
+      if(!adding)delete favorites[gameId];
+      render();
+      reactionFeedback(gameId,adding?'♥ Added to your GoLingo favorites':'Removed from favorites');
       await refresh();
-    }catch(error){notify('Favorite could not be saved: '+error.message)}
-    finally{inFlight.delete('fav:'+gameId)}
+    }catch(error){
+      reactionFeedback(gameId,'Favorite could not be saved: '+error.message,true);
+      notify('Favorite could not be saved: '+error.message);
+      await refresh();
+    }finally{inFlight.delete('fav:'+gameId)}
   }
   async function importDeviceReactions(){
     const account=currentUser();

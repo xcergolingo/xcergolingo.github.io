@@ -84,6 +84,53 @@
     window.dispatchEvent(new CustomEvent('golingo:auth-state',{detail:{signedIn:enabled}}));
   }
   function showError(error) { note('Cloud error: ' + (error?.message || String(error))); }
+  // WKWebView may suppress window.confirm() unless its UIDelegate implements
+  // JavaScript confirmation panels. Use a real in-page confirmation instead.
+  function confirmInPage(title,description,acceptText) {
+    return new Promise(resolve=>{
+      const previous=document.activeElement;
+      const shade=document.createElement('div');
+      shade.className='golingo-confirm-shade';
+      const dialog=document.createElement('section');
+      dialog.className='golingo-confirm-dialog';
+      dialog.setAttribute('role','dialog');
+      dialog.setAttribute('aria-modal','true');
+      const heading=document.createElement('h3');
+      heading.textContent=title;
+      heading.id='golingo-confirm-title';
+      dialog.setAttribute('aria-labelledby',heading.id);
+      const message=document.createElement('p');message.textContent=description;
+      const actions=document.createElement('div');actions.className='golingo-confirm-actions';
+      const cancel=document.createElement('button');
+      cancel.className='hub-chip';cancel.type='button';cancel.textContent='Cancel';
+      const accept=document.createElement('button');
+      accept.className='hub-chip golingo-confirm-accept';accept.type='button';
+      accept.textContent=acceptText;
+      actions.append(cancel,accept);dialog.append(heading,message,actions);
+      shade.append(dialog);document.body.append(shade);
+      function finish(value){
+        document.removeEventListener('keydown',onKey,true);
+        shade.remove();
+        previous?.focus?.({preventScroll:true});
+        resolve(value);
+      }
+      function onKey(event){
+        if(event.key==='Escape'){event.preventDefault();finish(false)}
+        if(event.key==='Tab'){
+          const focusables=[cancel,accept];
+          const index=focusables.indexOf(document.activeElement);
+          event.preventDefault();
+          focusables[(index+(event.shiftKey?1:3))%2].focus();
+        }
+      }
+      document.addEventListener('keydown',onKey,true);
+      cancel.addEventListener('click',()=>finish(false));
+      accept.addEventListener('click',()=>finish(true));
+      shade.addEventListener('click',event=>{if(event.target===shade)finish(false)});
+      cancel.focus();
+    });
+  }
+
   // Serialize user actions and background sync. Previously a Publish tap
   // during synchronization silently returned without changing is_public.
   let taskTail=Promise.resolve();
@@ -91,7 +138,8 @@
     return () => {
       const task=taskTail.catch(()=>{}).then(async()=>{
         busy=true; syncButton.disabled=true;
-        try { await fn(); } catch(error) { showError(error); }
+        try { return await fn(); }
+        catch(error) { showError(error); return false; }
         finally { busy=false; syncButton.disabled=false; }
       });
       taskTail=task;
@@ -243,7 +291,10 @@
   });
   async function publish(gameId,lesson) {
     if(!user) { note('Sign in to publish a lesson.');return; }
-    if(!confirm('Publish this entire lesson publicly for other GoLingo players? All words, sentences, and translations in it will be visible.')) return;
+    const approved=await confirmInPage('Publish this lesson?',
+      'Its words, sentences and translations will be visible to everyone in the GoLingo community. You can unpublish later.',
+      'Publish to community');
+    if(!approved)return false;
     const wrapped=disableWhileRunning(async ()=>{
       note('Publishing lesson…');
       await saveRemote(gameId,lesson,Date.now());
@@ -260,12 +311,15 @@
       if(publicError || !publicRows?.length)
         throw Error('Published for your account, but public visibility could not be verified. Please retry Sync or contact support.');
       note('✓ Published and visible to other GoLingo players.');
+      return true;
     });
     await wrapped();
   }
   async function unpublish(gameId,lesson) {
     if (!user || publicationStatus(gameId,lesson) !== true) return;
-    if (!confirm('Remove this lesson from public sharing? Your private history will remain saved.')) return;
+    if(!await confirmInPage('Unpublish lesson?',
+      'This lesson will disappear from the community, but remain in your private history.',
+      'Unpublish')) return false;
     const wrapped=disableWhileRunning(async ()=>{
       note('Unpublishing lesson…');
       const fp=await fingerprint(lesson);
@@ -276,6 +330,7 @@
       if(!data?.length) throw Error('Could not confirm that this lesson was unpublished.');
       await refreshMine();await refreshCommunity();
       note('Lesson unpublished. It remains in your private history.');
+      return true;
     });
     await wrapped();
   }
@@ -339,7 +394,9 @@
     const importLegacyButton=document.getElementById('cloud-import-legacy');
     importLegacyButton?.addEventListener('click',disableWhileRunning(async()=>{
       if(!user)return;
-      if(!confirm('Import older device-only lessons into this GoLingo account? Only do this if all those lessons belong to you.'))return;
+      if(!await confirmInPage('Import earlier lessons?',
+        'Only import lessons that belong to this GoLingo account.',
+        'Import my lessons'))return;
       let imported=0;
       for(const card of installedCards()){
         let legacy=[];
