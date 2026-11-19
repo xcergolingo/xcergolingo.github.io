@@ -5,7 +5,7 @@
     "enabled": false,
     "region": "us-east-1",
     "userPoolId": "us-east-1_m1wn7aFbx",
-    "webClientId": "",
+    "webClientId": "3go6j8895unq5lq6craa86l7eq",
     "hostedUiDomain": "https://golingo.auth.us-east-1.amazoncognito.com"
   }
 }
