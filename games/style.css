@@ -82,3 +82,14 @@
 .hub-empty .button{min-height:44px;padding:10px 18px;font-size:12px}
 @media(max-width:820px){.hub-search{flex-basis:100%}.hub-browse .hub-sort{flex:1}.hub-browse .hub-sort select{width:100%}.hub-browse .hub-sort>label{font-size:11px}.favorites-toggle{align-self:flex-end}.game-plays{margin-left:0}}
 @media(max-width:480px){.hub-browse{gap:12px}.hub-browse .hub-sort{flex-basis:100%}.favorites-toggle{width:100%;justify-content:center}.hub-storage-note{font-size:10px;margin-bottom:17px}.hub-search-field{padding-left:12px;gap:8px}.hub-search-field input{font-size:16px}.game-actions{gap:7px;margin-bottom:15px}.game-actions .game-like,.game-favorite{padding-left:10px;padding-right:10px}.game-plays{flex-basis:100%;margin-top:1px}.hub-empty{padding:32px 18px}}
+
+/* Per-game private lesson history */
+.game-history{margin-top:14px;padding:11px 13px;border:1px solid #cddcc4;border-radius:12px;background:#f3f7ee}
+.game-history[hidden],#history-storage-warning[hidden]{display:none}
+.game-history summary{cursor:pointer;font-size:12px;font-weight:750;color:#315e45;user-select:none;-webkit-user-select:none}
+.game-history-list{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:7px}
+.game-history-entry{display:flex;align-items:stretch;gap:6px;min-width:0}
+.game-history-play{flex:1;min-width:0;text-align:left;font-size:12px;line-height:1.5;padding:9px 10px;border:1px solid #cbd9c2;border-radius:9px;background:white;color:#254b39;cursor:pointer;overflow-wrap:anywhere}
+.game-history-play:hover{background:#e4f0db}
+.game-history-remove{flex:0 0 36px;border:1px solid #d9d9d0;background:white;border-radius:9px;color:#715c56;font-size:22px;cursor:pointer}
+.game-history-play:focus-visible,.game-history-remove:focus-visible{outline:3px solid #3e8562;outline-offset:2px}

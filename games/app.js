@@ -324,6 +324,119 @@
     // Sorting here could move a touched link before the browser navigates.
     // pageshow refreshes the order on return, including the back/forward cache.
   }
+
+  // Per-game lesson history is private to this browser/device.
+  // Identical content (regardless of object key order) uses one history entry.
+  const historyPrefix = 'golingo:game-lesson-history:v1:';
+  const historyLimit = 20;
+  const lessonFields = ['words', 'sentences', 'phrases', 'items', 'entries'];
+  function canonicalLesson(value) {
+    if (Array.isArray(value)) return '[' + value.map(canonicalLesson).join(',') + ']';
+    if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(key =>
+      JSON.stringify(key) + ':' + canonicalLesson(value[key])).join(',') + '}';
+    return JSON.stringify(value);
+  }
+  function lessonHistoryLabel(lesson) {
+    const lang = String(lesson.learningLanguage || lesson.language || lesson.targetLanguage || 'Language').slice(0, 30);
+    const entries = lessonFields.flatMap(key => Array.isArray(lesson[key]) ? lesson[key] : []);
+    const terms = entries.map(entry => {
+      if (typeof entry === 'string') return entry;
+      if (!entry || typeof entry !== 'object') return '';
+      return entry.word || entry.text || entry.phrase || entry.sentence || '';
+    }).filter(Boolean).slice(0, 3).map(term => String(term).replace(/\s+/g, ' ').trim().slice(0, 32));
+    return lang + (terms.length ? ' · ' + terms.join(' · ') : '');
+  }
+  function readGameHistory(id) {
+    try {
+      const items = JSON.parse(localStorage.getItem(historyPrefix + id) || '[]');
+      return Array.isArray(items) ? items.filter(item =>
+        item && typeof item === 'object' && typeof item.fingerprint === 'string' &&
+        item.lesson && typeof item.lesson === 'object' && !Array.isArray(item.lesson)
+      ).slice(0, historyLimit) : [];
+    } catch { return []; }
+  }
+  function writeGameHistory(id, items) {
+    try {
+      localStorage.setItem(historyPrefix + id, JSON.stringify(items.slice(0, historyLimit)));
+      return true;
+    } catch { return false; }
+  }
+  function rememberGameLesson(id, lesson) {
+    if (!id || !lesson) return;
+    const fingerprint = canonicalLesson(lesson);
+    const history = readGameHistory(id);
+    const found = history.find(item => item.fingerprint === fingerprint);
+    const entry = found || { fingerprint, lesson, label: lessonHistoryLabel(lesson), lastPlayed: 0 };
+    entry.lastPlayed = Date.now();
+    const next = [entry, ...history.filter(item => item.fingerprint !== fingerprint)].slice(0, historyLimit);
+    if (!writeGameHistory(id, next)) {
+      const note = document.getElementById('history-storage-warning');
+      if (note) note.hidden = false;
+      return;
+    }
+    renderGameHistory(id);
+  }
+  function renderGameHistory(id) {
+    const card = cardById.get(id);
+    const panel = card?.querySelector('.game-history');
+    if (!panel) return;
+    const items = readGameHistory(id);
+    panel.hidden = items.length === 0;
+    const list = panel.querySelector('.game-history-list');
+    list.replaceChildren();
+    for (const item of items) {
+      const row = document.createElement('li');
+      row.className = 'game-history-entry';
+      const play = document.createElement('button');
+      play.type = 'button';
+      play.className = 'game-history-play';
+      play.textContent = item.label || lessonHistoryLabel(item.lesson);
+      play.title = 'Load and play this lesson again';
+      play.addEventListener('click', () => {
+        try {
+          saveLesson(JSON.stringify(item.lesson));
+          // Open the same game using its own established transfer format.
+          const link = card.querySelector('.demo-link');
+          if (link) link.click();
+        } catch (error) {
+          lessonStatus.textContent = 'Cannot replay: ' + error.message;
+        }
+      });
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'game-history-remove';
+      remove.setAttribute('aria-label', 'Remove saved lesson ' + (item.label || lessonHistoryLabel(item.lesson)));
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        const next = readGameHistory(id).filter(saved => saved.fingerprint !== item.fingerprint);
+        if (writeGameHistory(id, next)) renderGameHistory(id);
+      });
+      row.append(play, remove);
+      list.append(row);
+    }
+  }
+  cards.forEach(card => {
+    if (!card.id) return;
+    const copy = card.querySelector('.game-copy');
+    if (!copy) return;
+    const panel = document.createElement('details');
+    panel.className = 'game-history';
+    panel.hidden = true;
+    const heading = document.createElement('summary');
+    heading.textContent = 'Played lessons · load & replay';
+    const list = document.createElement('ul');
+    list.className = 'game-history-list';
+    panel.append(heading, list);
+    copy.append(panel);
+    renderGameHistory(card.id);
+  });
+  const storageWarning = document.createElement('p');
+  storageWarning.id = 'history-storage-warning';
+  storageWarning.className = 'hub-storage-note';
+  storageWarning.textContent = 'Lesson history could not be saved. This browser may have blocked storage or run out of space.';
+  storageWarning.hidden = true;
+  document.querySelector('.hub-tools')?.append(storageWarning);
+
   function launchGame(event) {
     if (event.defaultPrevented || (event.type === 'auxclick' ? event.button !== 1 : event.button !== 0)) return;
     const link = event.currentTarget;
@@ -336,6 +449,7 @@
     else if (url.hash.startsWith('#' + transferKey + '=')) url.hash = '';
     link.href = url.toString();
     link.target = '_self'; // WKWebView: keep the normal launch in this WebView.
+    if (activeLesson) rememberGameLesson(card.id, activeLesson);
     recordLaunch(card);
     // Leave navigation to the native link, preserving keyboard/modifier clicks.
   }
@@ -351,7 +465,7 @@
       favorites = booleanCollection(readLocal(favoritesKey) || favorites);
       plays = playCollection(readLocal(playsKey) || plays);
     }
-    cards.forEach(card => { renderLike(card); renderFavorite(card); renderPlays(card); });
+    cards.forEach(card => { renderLike(card); renderFavorite(card); renderPlays(card); renderGameHistory(card.id); });
     updateStorageStatus();
     applyView();
   }
