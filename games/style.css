@@ -177,3 +177,13 @@
 .community-entry-actions button{flex:1 1 100px;min-width:0}
 .community-empty{list-style:none;padding:14px;border:1px dashed #c0cfbd;border-radius:12px;color:#5a715f}
 @media(min-width:700px){.community-filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Collapsed community sort/list controls and game-preview sharing */
+.community-filter-compact{display:flex;flex-direction:column;gap:10px}
+.community-filter-compact>.community-search{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#315a44}
+.community-filter-compact>.community-search input{width:100%;min-height:43px;border:1px solid #c3d3c0;border-radius:9px;padding:9px;background:white;color:#244a39;font:inherit;font-size:13px}
+.community-options{border:1px solid #c9d8c8;border-radius:12px;background:#f4f8f0;padding:10px}
+.community-options>summary{font-size:13px;font-weight:750;cursor:pointer;color:#24543b;list-style-position:inside}
+.community-options[open]>summary{margin-bottom:13px}
+.community-options:not([open]) .community-filters{display:none}
+.golingo-share-preview{display:block;width:100%;aspect-ratio:1200/630;object-fit:cover;border-radius:12px;margin:12px 0;max-height:260px;background:#e1e9df}

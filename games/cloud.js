@@ -57,40 +57,97 @@
     return btn;
   }
 
+  function gamePreviewSource(gameId) {
+    const cover=document.getElementById(gameId)?.querySelector('a.game-cover img');
+    if(!cover)return null;
+    try {
+      const src=new URL(cover.getAttribute('src'),location.href);
+      // Never download arbitrary external images into the canvas.
+      return src.origin===location.origin ? src.href : null;
+    }catch {return null}
+  }
+  async function previewPng(gameId) {
+    const source=gamePreviewSource(gameId);
+    if(!source)return null;
+    const image=new Image();
+    image.decoding='async';
+    image.src=source;
+    await new Promise((resolve,reject)=>{
+      if(image.complete && image.naturalWidth){resolve();return}
+      image.onload=resolve;
+      image.onerror=()=>reject(Error('Game preview unavailable'));
+    });
+    const canvas=document.createElement('canvas');
+    canvas.width=1200;canvas.height=630;
+    const context=canvas.getContext('2d');
+    if(!context)return null;
+    context.fillStyle='#16372d';context.fillRect(0,0,1200,630);
+    const w=image.naturalWidth,h=image.naturalHeight;
+    if(!w||!h)return null;
+    const scale=Math.max(1200/w,630/h);
+    context.drawImage(image,(1200-w*scale)/2,(630-h*scale)/2,w*scale,h*scale);
+    return await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  }
   function shareLesson(id,title,gameId) {
-    if(!uuidValid(id)) {note('This lesson does not have a valid public link yet.');return}
+    if(!uuidValid(id)){note('This lesson does not have a valid public link yet.');return}
     const url=lessonShareUrl(id);
+    const game=gameTitle(gameId);
     const shade=document.createElement('div');shade.className='golingo-confirm-shade';
     const dialog=document.createElement('section');dialog.className='golingo-confirm-dialog golingo-share-dialog';
     dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
-    const heading=document.createElement('h3');heading.textContent='Share this game lesson';
+    const heading=document.createElement('h3');heading.textContent='Share game & lesson';
     const description=document.createElement('p');
-    description.textContent='Anyone with this link can open '+(gameId||'the game')+' with '+(title||'this lesson')+'. No account is required to play.';
+    description.textContent='Share '+game+' with '+(title||'this lesson')+'. Anyone can open the link and play.';
+    const imageSource=gamePreviewSource(gameId);
+    if(imageSource){
+      const preview=document.createElement('img');
+      preview.className='golingo-share-preview';
+      preview.src=imageSource;
+      preview.alt=game+' game preview image';
+      preview.loading='eager';
+      dialog.append(heading,preview);
+    }else{dialog.append(heading)}
     const link=document.createElement('input');link.type='text';link.readOnly=true;link.value=url;
     link.setAttribute('aria-label','Shareable game and lesson link');
     const message=document.createElement('p');message.className='golingo-share-message';message.setAttribute('role','status');
     const actions=document.createElement('div');actions.className='golingo-confirm-actions';
     const copy=makeButton('Copy link',async()=>{
-      try {
+      try{
         if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(url);
         else {link.focus();link.select();if(!document.execCommand('copy'))throw Error('Copy unavailable')}
         message.textContent='Link copied. Paste it into a message to share.';
-      }catch {link.focus();link.select();message.textContent='Select and copy the link above to share.'}
+      }catch{link.focus();link.select();message.textContent='Select and copy the link above to share.'}
     });
-    const nativeShare=makeButton('Share…',async()=>{
-      if(!navigator.share){link.focus();link.select();message.textContent='Copy the link above to share.';return}
-      try{await navigator.share({title:'GoLingo — '+(title||'Shared lesson'),text:'Play this language lesson in GoLingo Games',url})}
-      catch(error){if(error?.name!=='AbortError')message.textContent='Sharing unavailable. Use Copy link instead.'}
+    const nativeShare=makeButton('Share with image',async()=>{
+      if(!navigator.share){link.focus();link.select();message.textContent='Native sharing unavailable. Copy the link above.';return}
+      // Prepare an actual PNG image file from the game's cover art.
+      // Some share destinations ignore URLs when attachments are provided:
+      // always include the destination in the text, too.
+      const shareText='Play '+game+' with my GoLingo lesson:\n'+url;
+      let attachment=null;
+      try{
+        const blob=await previewPng(gameId);
+        if(blob && typeof File!=='undefined'){
+          const file=new File([blob],gameId+'-golingo-game.png',{type:'image/png'});
+          if(navigator.canShare?.({files:[file]}))attachment=file;
+        }
+      }catch{}
+      const content=attachment?{title:'GoLingo — '+game,text:shareText,files:[attachment]}:
+        {title:'GoLingo — '+game,text:shareText,url};
+      try{
+        await navigator.share(content);
+        message.textContent=attachment?'Shared game preview image and lesson link.':'Shared lesson link. Image attachment was not supported.';
+      }catch(error){
+        if(error?.name!=='AbortError')message.textContent='Could not open sharing. Use Copy link instead.';
+      }
     });
     const close=makeButton('Close',()=>finish());
-    function finish(){
-      shade.remove();document.removeEventListener('keydown',onKey);
-    }
+    function finish(){shade.remove();document.removeEventListener('keydown',onKey)}
     function onKey(e){if(e.key==='Escape'){e.preventDefault();finish()}}
     shade.addEventListener('click',e=>{if(e.target===shade)finish()});
     document.addEventListener('keydown',onKey);
     actions.append(copy,nativeShare,close);
-    dialog.append(heading,description,link,message,actions);shade.append(dialog);document.body.append(shade);
+    dialog.append(description,link,message,actions);shade.append(dialog);document.body.append(shade);
     copy.focus();
   }
   function shareAction(id,title,gameId) {
