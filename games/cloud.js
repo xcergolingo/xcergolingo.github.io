@@ -8,7 +8,6 @@
   const status = document.getElementById('cloud-status');
   const authArea = document.getElementById('cloud-auth');
   const signedArea = document.getElementById('cloud-signed-in');
-  const emailInput = document.getElementById('cloud-email');
   const signInButton = document.getElementById('cloud-sign-in');
   const signOutButton = document.getElementById('cloud-sign-out');
   const syncButton = document.getElementById('cloud-sync');
@@ -214,36 +213,37 @@
       document.head.append(library);
     });
     if(!window.supabase?.createClient) throw Error('Cloud library unavailable');
+    if (!config.cognito?.enabled) {
+      authArea.hidden=true;signedArea.hidden=true;mineArea.hidden=true;
+      document.getElementById('cloud-community').hidden=true;
+      note('Cognito cloud authentication is staged but not active yet. Complete AWS role-claim and database migration steps first. Local lessons still work.');
+      return;
+    }
+    if(!window.GoLingoCognito)throw Error('Cognito authentication bridge not loaded');
     db=window.supabase.createClient(config.url,config.anonKey,{
-      auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}
+      accessToken:async()=>window.GoLingoCognito.getToken(),
+      auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
     });
-    const {data:{session},error}=await db.auth.getSession();
-    if(error) throw error;
-    user=session?.user || null;
-    db.auth.onAuthStateChange((_event,session)=>{
-      user=session?.user || null;
-      renderSignedIn();
-      if(user) setTimeout(()=>syncNow(),0);
+    await window.GoLingoCognito.initialize(config,profile=>{
+      user=profile;renderSignedIn();
+      if(profile)setTimeout(()=>syncNow(),0);
     });
+    user=window.GoLingoCognito.getUser();
     signInButton.addEventListener('click',disableWhileRunning(async ()=>{
-      const email=emailInput.value.trim();
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { note('Enter a valid email address.');return; }
-      const {error}=await db.auth.signInWithOtp({
-        email,options:{emailRedirectTo:location.origin+location.pathname+'#games'}
-      });
-      if(error) throw error;
-      note('Check your email for a secure sign-in link.');
+      if(window.GoLingoCognito.nativeAvailable()){
+        window.GoLingoCognito.requestNativeToken();
+        note('Requesting existing GoLingo app login…');
+      }else await window.GoLingoCognito.signIn();
     }));
-    signOutButton.addEventListener('click',disableWhileRunning(async ()=>{
-      const {error}=await db.auth.signOut();
-      if(error) throw error;
-      user=null;renderSignedIn();note('Signed out. Local lessons remain on this device.');
-    }));
+    signOutButton.addEventListener('click',()=>{
+      window.GoLingoCognito.signOut();user=null;renderSignedIn();
+      note('Signed out of game cloud. Local lessons remain on this device.');
+    });
     syncButton.addEventListener('click',syncNow);
     sharedRefresh.addEventListener('click',()=>refreshCommunity().catch(showError));
     root.dataset.ready='true';
     renderSignedIn();
-    note(user?'Signed in. Cloud sync is available.':'Sign in to synchronize private lessons and publish selected lessons.');
+    note(user?'Cognito account connected. Private cloud sync is available.':'Sign in with GoLingo to synchronize private lessons.');
     await refreshCommunity();
     if(user) await syncNow();
   }catch(error) {

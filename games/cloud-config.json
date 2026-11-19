@@ -1,4 +1,11 @@
 {
   "url": "https://namaoahskvjmtaraerdg.supabase.co",
-  "anonKey": "sb_publishable_I6Pn9qMopF7AFPrpabBcAA_VjZyO4pQ"
+  "anonKey": "sb_publishable_I6Pn9qMopF7AFPrpabBcAA_VjZyO4pQ",
+  "cognito": {
+    "enabled": false,
+    "region": "us-east-1",
+    "userPoolId": "us-east-1_m1wn7aFbx",
+    "webClientId": "",
+    "hostedUiDomain": ""
+  }
 }

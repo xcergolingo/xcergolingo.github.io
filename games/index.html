@@ -49,11 +49,7 @@
 <section id="golingo-cloud" class="golingo-cloud" aria-labelledby="cloud-title">
 <h3 id="cloud-title">Cloud lessons &amp; community sharing</h3>
 <p id="cloud-status" role="status">Checking cloud configuration…</p>
-<div id="cloud-auth" class="cloud-auth">
-<label for="cloud-email">Sign in with email to sync your lessons privately</label>
-<div class="cloud-auth-row"><input id="cloud-email" type="email" autocomplete="email" placeholder="Email address"><button id="cloud-sign-in" class="hub-chip" type="button">Email me a sign-in link</button></div>
-</div>
-<div id="cloud-signed-in" hidden><p>Account: <strong id="cloud-account-label"></strong></p><div class="cloud-controls"><button id="cloud-sync" type="button" class="hub-chip">Sync lesson history</button><button id="cloud-sign-out" type="button" class="hub-chip">Sign out</button></div><small>Saved lessons are private. To share one, expand a game's Played lessons and select Publish.</small></div>
+<div id="cloud-auth" class="cloud-auth"><p>Use your existing GoLingo account. App login is automatic once the native bridge is installed.</p><div class="cloud-auth-row"><button id="cloud-sign-in" class="hub-chip" type="button">Sign in with GoLingo</button></div></div><div id="cloud-signed-in" hidden><p>Account: <strong id="cloud-account-label"></strong></p><div class="cloud-controls"><button id="cloud-sync" type="button" class="hub-chip">Sync lesson history</button><button id="cloud-sign-out" type="button" class="hub-chip">Sign out</button></div><small>Saved lessons are private. To share one, expand a game's Played lessons and select Publish.</small></div>
 <details id="cloud-community"><summary>Community lessons · discover &amp; play</summary><button id="cloud-community-refresh" type="button" class="hub-chip">Refresh shared lessons</button><ul id="cloud-community-list" class="cloud-community-list"></ul></details>
 <details id="cloud-my-publications" hidden><summary>My published lessons · manage sharing</summary><ul id="cloud-published-list" class="cloud-community-list"></ul></details>
 <p class="cloud-privacy">Public sharing is opt-in. Lesson contents become visible only when you choose Publish; you can unpublish later.</p>
@@ -300,7 +296,8 @@
 <footer class="footer wrap"><div><a class="brand" href="https://www.golingoapp.com/" target="_blank" rel="noopener"><span class="brand-mark" aria-hidden="true">g<span>↗</span></span><span>GoLingo<span class="brand-dot">.</span></span></a><p>A world of words. A little more play.</p></div><div class="footer-links"><a href="#games">The games</a><a href="https://www.golingoapp.com/" target="_blank" rel="noopener">GoLingoApp.com ↗</a><a class="download-link" href="https://apps.apple.com/app/id1194977025">Download GoLingo ↗</a></div><div class="footer-bottom"><span>© <span id="year">2026</span> GoLingo. All rights reserved.</span><span>Made for curious minds.</span></div></footer>
 <div class="mobile-install"><span><strong>GoLingo</strong><small>Learn languages through play.</small></span><a class="button button-small download-link" href="https://apps.apple.com/app/id1194977025">Download <svg><use href="#download-icon"/></svg></a></div>
 <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-head"><div><p class="eyebrow">GOLINGO / GAMEPLAY PREVIEW</p><h2 id="preview-title">Lagoon</h2></div><button id="close-preview" aria-label="Close gameplay preview">×</button></div><video id="preview-video" controls playsinline preload="metadata" aria-describedby="preview-description"></video><p id="video-error" class="video-error" hidden>The video could not load. You can still try this game using the browser-demo link below.</p><div class="dialog-bottom"><div><p id="preview-description"></p><small>Actual gameplay · sample vocabulary · silent preview</small></div><a class="button download-link" href="https://apps.apple.com/app/id1194977025">Get GoLingo to play <svg><use href="#arrow"/></svg></a></div><a id="dialog-demo" class="demo-link" href="https://xcergolingo.github.io/far-cry-lagoon/">Try the browser demo ↗</a></dialog>
-<script defer src="cloud.js?v=cloud-ready-1"></script>
+<script defer src="cognito-auth.js?v=cognito-bridge-1"></script>
+<script defer src="cloud.js?v=cognito-bridge-1"></script>
 </body></html>
 
 
