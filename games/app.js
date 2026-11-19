@@ -198,7 +198,9 @@
     const label = card.querySelector('.game-plays');
     if (!label) return;
     const count = playCount(card);
-    label.textContent = (socialLoaded ? count.toLocaleString() : '—') + (count === 1 ? ' play' : ' plays');
+    label.textContent = socialLoaded
+      ? count.toLocaleString() + (count === 1 ? ' global play' : ' global plays')
+      : 'Loading global plays…';
     label.title = socialLoaded ? 'Total recorded gallery launches across devices (not completed sessions)' : 'Loading worldwide recorded launches';
     label.setAttribute('aria-label', (socialLoaded ? count.toLocaleString() : 'Loading') + ' recorded launches of ' + cardNames.get(card) + ' across GoLingo users');
   }

@@ -7,7 +7,7 @@
   const gameSet = new Set(gameIds);
   const pendingKey='golingo:pending-game-launches:v1';
   const deviceKey='golingo:gallery-device-uuid:v1';
-  let publicDb, accountDb, ready=false, refreshing=false, flushing=false, inFlight=new Set();
+  let publicDb, accountDb, ready=false, refreshing=false, refreshRequested=false, flushing=false, inFlight=new Set();
   let totals=Object.create(null), likes=Object.create(null), favorites=Object.create(null);
   let owner=null;
   const cloudStatus=document.getElementById('cloud-status');
@@ -51,7 +51,8 @@
     totals=map;
   }
   async function refresh(){
-    if(!ready||refreshing)return;
+    if(!ready)return;
+    if(refreshing){refreshRequested=true;return}
     refreshing=true;
     try{
       await readMetrics();
@@ -75,7 +76,10 @@
       if(storageStatus){
         storageStatus.textContent='Shared counts and account favorites are not available yet. Run game-social-schema.sql in Supabase. '+error.message;
       }
-    }finally{refreshing=false}
+    }finally{
+      refreshing=false;
+      if(refreshRequested){refreshRequested=false;queueMicrotask(()=>refresh())}
+    }
   }
   function queue(){
     try{
