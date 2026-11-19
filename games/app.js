@@ -346,9 +346,18 @@
     }).filter(Boolean).slice(0, 3).map(term => String(term).replace(/\s+/g, ' ').trim().slice(0, 32));
     return lang + (terms.length ? ' · ' + terms.join(' · ') : '');
   }
+  // Per-account lesson history. Anonymous and legacy histories remain separate.
+  let lessonHistoryOwner = null;
+  function historyStorageKey(gameId) {
+    return historyPrefix + gameId + (lessonHistoryOwner ? ':cognito:' + lessonHistoryOwner : '');
+  }
+  window.GoLingoSetLessonHistoryOwner = (ownerId) => {
+    lessonHistoryOwner = typeof ownerId === 'string' && /^[a-zA-Z0-9_-]{1,120}$/.test(ownerId) ? ownerId : null;
+    cards.forEach(card => renderGameHistory(card.id));
+  };
   function readGameHistory(id) {
     try {
-      const items = JSON.parse(localStorage.getItem(historyPrefix + id) || '[]');
+      const items = JSON.parse(localStorage.getItem(historyStorageKey(id)) || '[]');
       return Array.isArray(items) ? items.filter(item =>
         item && typeof item === 'object' && typeof item.fingerprint === 'string' &&
         item.lesson && typeof item.lesson === 'object' && !Array.isArray(item.lesson)
@@ -357,7 +366,7 @@
   }
   function writeGameHistory(id, items) {
     try {
-      localStorage.setItem(historyPrefix + id, JSON.stringify(items.slice(0, historyLimit)));
+      localStorage.setItem(historyStorageKey(id), JSON.stringify(items.slice(0, historyLimit)));
       return true;
     } catch { return false; }
   }

@@ -17,6 +17,8 @@
   const mineArea = document.getElementById('cloud-my-publications');
   const tableName = 'golingo_game_lessons';
   const localPrefix = 'golingo:game-lesson-history:v1:';
+  const isSafeSubject = sub => typeof sub === 'string' && /^[a-zA-Z0-9_-]{1,120}$/.test(sub);
+  function scopedKey(gameId){return localPrefix + gameId + ':cognito:' + user.id;}
   const maxPerGame = 20;
   const counts = ['words', 'sentences', 'phrases', 'items', 'entries'];
   let db, user = null, busy = false;
@@ -41,8 +43,9 @@
     return [...new Uint8Array(hash)].map(n => n.toString(16).padStart(2,'0')).join('');
   }
   function localItems(gameId) {
+    if(!user || !isSafeSubject(user.id)) return [];
     try {
-      const raw = JSON.parse(localStorage.getItem(localPrefix+gameId)||'[]');
+      const raw = JSON.parse(localStorage.getItem(scopedKey(gameId))||'[]');
       return Array.isArray(raw) ? raw.filter(x => x?.lesson && x?.fingerprint).slice(0,maxPerGame) : [];
     } catch { return []; }
   }
@@ -54,6 +57,7 @@
     return btn;
   }
   function renderSignedIn() {
+    window.GoLingoSetLessonHistoryOwner?.(user?.id || null);
     const enabled=!!user;
     authArea.hidden=enabled;
     signedArea.hidden=!enabled;
@@ -113,7 +117,7 @@
         }
       }
       merged.sort((a,b)=>b.lastPlayed-a.lastPlayed);
-      try { localStorage.setItem(localPrefix+gameId,JSON.stringify(merged.slice(0,maxPerGame))); }
+      try { localStorage.setItem(scopedKey(gameId),JSON.stringify(merged.slice(0,maxPerGame))); }
       catch { note('Cloud loaded, but device storage is full or unavailable.'); }
     }
     window.GoLingoGalleryRefreshHistory?.();
@@ -239,6 +243,34 @@
       window.GoLingoCognito.signOut();user=null;renderSignedIn();
       note('Signed out of game cloud. Local lessons remain on this device.');
     });
+    const importLegacyButton=document.getElementById('cloud-import-legacy');
+    importLegacyButton?.addEventListener('click',disableWhileRunning(async()=>{
+      if(!user)return;
+      if(!confirm('Import older device-only lessons into this GoLingo account? Only do this if all those lessons belong to you.'))return;
+      let imported=0;
+      for(const card of installedCards()){
+        let legacy=[];
+        try{legacy=JSON.parse(localStorage.getItem(localPrefix+card.id)||'[]');}catch{}
+        if(!Array.isArray(legacy))continue;
+        const current=localItems(card.id);
+        const seen=new Set(current.map(x=>x.fingerprint));
+        for(const item of legacy){
+          if(!item?.lesson || typeof item.fingerprint!=='string' || seen.has(item.fingerprint))continue;
+          current.push(item);seen.add(item.fingerprint);imported++;
+        }
+        if(current.length){
+          current.sort((a,b)=>b.lastPlayed-a.lastPlayed);
+          localStorage.setItem(scopedKey(card.id),JSON.stringify(current.slice(0,maxPerGame)));
+        }
+      }
+      window.GoLingoGalleryRefreshHistory?.();
+      note('Imported '+imported+' older device lessons. Syncing privately…');
+      for(const card of installedCards()){
+        for(const item of localItems(card.id))await saveRemote(card.id,item.lesson,item.lastPlayed);
+      }
+      await refreshMine();
+      note('Older lessons imported and synchronized.');
+    }));
     syncButton.addEventListener('click',syncNow);
     sharedRefresh.addEventListener('click',()=>refreshCommunity().catch(showError));
     root.dataset.ready='true';
