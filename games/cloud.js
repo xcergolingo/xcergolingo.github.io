@@ -83,7 +83,7 @@
     if(insertError) throw insertError;
     const {error:updateError}=await db.from(tableName)
       .update({last_played_at:base.last_played_at})
-      .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp);
+      .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp).lt('last_played_at',base.last_played_at);
     if(updateError) throw updateError;
   }
   async function fetchMine() {
@@ -252,6 +252,7 @@
     authArea.hidden=true;
     signedArea.hidden=true;
     mineArea.hidden=true;
+    document.getElementById('cloud-community').hidden=true;
     note(error.message==='not-configured'
       ? 'Cloud sync and community sharing require an owner-configured Supabase project. Local lesson history still works.'
       : 'Cloud is unavailable: '+error.message+'. Local lesson history still works.');
