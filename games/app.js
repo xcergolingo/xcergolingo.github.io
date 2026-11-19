@@ -594,55 +594,147 @@
   const video = document.getElementById('preview-video');
   const hero = document.getElementById('hero-video');
   const motionButton = document.getElementById('motion-toggle');
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const saveData = !!navigator.connection?.saveData;
-  let heroAllowed = !reducedMotion.matches && !saveData;
-  let heroInView = false, returnFocus = null, dialogWasPlaying = false;
+  const heroFallback=document.getElementById('hero-fallback');
+  const carousel=document.getElementById('hero-carousel');
+  const heroLink=document.getElementById('hero-game-link');
+  const heroMediaType=document.getElementById('hero-media-type');
+  const heroTitle=document.getElementById('hero-slide-title');
+  const heroSubtitle=document.getElementById('hero-slide-subtitle');
+  const heroPosition=document.getElementById('hero-position');
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const saveData=!!navigator.connection?.saveData;
+  // Only three game demo clips are available today. Other games show their
+  // actual cover artwork with gentle pan/zoom (not fabricated gameplay video).
+  const clipFiles={
+    'lagoon':'media/lagoon.mp4',
+    'word-folio':'media/word-folio.mp4',
+    'super-flying-man':'media/super-flying-man.mp4'
+  };
+  const slides=cards.filter(card=>card.querySelector('.demo-link') && card.querySelector('a.game-cover img')).map(card=>({
+    id:card.id,
+    title:cardNames.get(card)||card.id,
+    poster:card.querySelector('a.game-cover img').getAttribute('src'),
+    demo:card.querySelector('.demo-link'),
+    clip:clipFiles[card.id]||null
+  }));
+  let slideIndex=0;
+  let carouselPlaying=!reducedMotion.matches && !saveData;
+  let heroInView=false;
+  let carouselTimer=null;
+  let touchStart=null;
+  let returnFocus=null,dialogWasPlaying=false;
   function applyDownload(url) {
     try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== 'https:' || !['apps.apple.com', 'itunes.apple.com', 'www.golingoapp.com', 'golingoapp.com'].includes(parsed.hostname)) return;
-      document.querySelectorAll('.download-link').forEach(link => { link.href = parsed.href; });
-      if (parsed.hostname === 'apps.apple.com') document.getElementById('platform-note').textContent = 'Download on the App Store. Play inside GoLingo.';
-    } catch { /* Static download links remain usable without metadata. */ }
+      const parsed=new URL(url);
+      if(parsed.protocol!=='https:'||!['apps.apple.com','itunes.apple.com','www.golingoapp.com','golingoapp.com'].includes(parsed.hostname))return;
+      document.querySelectorAll('.download-link').forEach(link=>{link.href=parsed.href});
+      if(parsed.hostname==='apps.apple.com')document.getElementById('platform-note').textContent='Download on the App Store. Play inside GoLingo.';
+    }catch{}
   }
-  applyDownload(document.querySelector('.download-link')?.href || FALLBACK_URL);
-  if (location.protocol !== 'file:') fetch('media/app.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(data => {
-    if (data?.verified && data.downloadUrl) applyDownload(data.downloadUrl);
-  }).catch(() => {});
-  document.getElementById('year').textContent = String(new Date().getFullYear());
-  function syncMotionLabel() {
-    motionButton.textContent = hero.paused ? 'Play preview' : 'Pause preview';
-    motionButton.setAttribute('aria-label', hero.paused ? 'Play the decorative Lagoon preview' : 'Pause the decorative Lagoon preview');
+  applyDownload(document.querySelector('.download-link')?.href||FALLBACK_URL);
+  if(location.protocol!=='file:')fetch('media/app.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(data=>{
+    if(data?.verified&&data.downloadUrl)applyDownload(data.downloadUrl);
+  }).catch(()=>{});
+  document.getElementById('year').textContent=String(new Date().getFullYear());
+  function stopCarouselTimer(){
+    if(carouselTimer!==null){clearInterval(carouselTimer);carouselTimer=null}
   }
-  function playHero() {
-    if (!hero.src) hero.src = hero.dataset.src;
-    hero.muted = true;
-    hero.play().then(syncMotionLabel).catch(syncMotionLabel);
+  function updateMotionLabel(){
+    motionButton.textContent=carouselPlaying?'Pause':'Play';
+    motionButton.setAttribute('aria-label',carouselPlaying?'Pause carousel':'Play carousel');
   }
-  function syncHero() {
-    if (heroAllowed && heroInView && !document.hidden && !dialog.open) playHero();
-    else { hero.pause(); syncMotionLabel(); }
+  function updateHeroPlayback(){
+    const slide=slides[slideIndex];
+    if(!slide)return;
+    const shouldAnimate=carouselPlaying&&heroInView&&!document.hidden&&!dialog.open;
+    carousel.classList.toggle('carousel-animated',shouldAnimate);
+    if(slide.clip&&shouldAnimate){
+      if(!hero.src||!hero.currentSrc)hero.src=slide.clip;
+      hero.muted=true;
+      hero.play().catch(()=>{heroFallback.hidden=false});
+    }else hero.pause();
+    stopCarouselTimer();
+    if(shouldAnimate&&slides.length>1){
+      carouselTimer=setInterval(()=>{
+        if(document.hidden||dialog.open)return;
+        showSlide(slideIndex+1);
+      },6800);
+    }
+    updateMotionLabel();
   }
-  hero.addEventListener('play', syncMotionLabel);
-  hero.addEventListener('pause', syncMotionLabel);
-  hero.addEventListener('error', () => { motionButton.hidden = true; });
-  motionButton.addEventListener('click', () => {
-    heroAllowed = hero.paused;
-    if (heroAllowed) playHero(); else { hero.pause(); syncMotionLabel(); }
+  function showSlide(index){
+    if(!slides.length)return;
+    slideIndex=(index%slides.length+slides.length)%slides.length;
+    const item=slides[slideIndex];
+    hero.pause();
+    hero.removeAttribute('src');
+    hero.load();
+    hero.hidden=!item.clip;
+    heroFallback.hidden=!!item.clip;
+    heroFallback.src=item.poster;
+    hero.poster=item.poster;
+    hero.dataset.src=item.clip||'';
+    // Preserve GoLingo lesson transfer parameters when launching the game.
+    heroLink.href=item.demo.href;
+    heroLink.dataset.gameId=item.id;
+    for(const key of ['lessonKey','lessonFormat']){
+      if(item.demo.dataset[key])heroLink.dataset[key]=item.demo.dataset[key];
+      else delete heroLink.dataset[key];
+    }
+    heroLink.setAttribute('aria-label','Play '+item.title+' with GoLingo');
+    heroTitle.textContent=item.title;
+    heroSubtitle.textContent='Tap to play this language game';
+    heroMediaType.textContent=item.clip?'GAMEPLAY VIDEO':'GAME COVER PREVIEW';
+    heroPosition.textContent=(slideIndex+1)+' / '+slides.length;
+    updateHeroPlayback();
+  }
+  document.getElementById('hero-prev').addEventListener('click',()=>showSlide(slideIndex-1));
+  document.getElementById('hero-next').addEventListener('click',()=>showSlide(slideIndex+1));
+  motionButton.addEventListener('click',()=>{carouselPlaying=!carouselPlaying;updateHeroPlayback()});
+  // Hero is a normal in-gallery game link and uses the same launch handler as
+  // a gallery card, so lesson data and launch counting remain intact.
+  heroLink.addEventListener('click',launchGame);
+  carousel.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return;
+    touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  },{passive:true});
+  carousel.addEventListener('touchend',e=>{
+    if(!touchStart||e.changedTouches.length!==1)return;
+    const dx=e.changedTouches[0].clientX-touchStart.x;
+    const dy=e.changedTouches[0].clientY-touchStart.y;
+    touchStart=null;
+    if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){
+      e.preventDefault();
+      showSlide(slideIndex+(dx<0?1:-1));
+    }
+  },{passive:false});
+  carousel.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();showSlide(slideIndex-1)}
+    if(e.key==='ArrowRight'){e.preventDefault();showSlide(slideIndex+1)}
   });
-  if ('IntersectionObserver' in window) new IntersectionObserver(entries => {
-    heroInView = entries[0].isIntersecting; syncHero();
-  }, { threshold: .15 }).observe(hero);
-  reducedMotion.addEventListener?.('change', event => { heroAllowed = !event.matches && !saveData; syncHero(); });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { dialogWasPlaying = !video.paused; video.pause(); }
-    else if (dialog.open && dialogWasPlaying) video.play().catch(() => {});
-    syncHero();
+  hero.addEventListener('error',()=>{
+    hero.hidden=true;
+    heroFallback.hidden=false;
+    heroMediaType.textContent='GAME COVER PREVIEW';
   });
+  if('IntersectionObserver' in window)new IntersectionObserver(entries=>{
+    heroInView=entries[0].isIntersecting;
+    updateHeroPlayback();
+  },{threshold:.12}).observe(carousel);
+  else heroInView=true;
+  reducedMotion.addEventListener?.('change',e=>{
+    if(e.matches)carouselPlaying=false;
+    updateHeroPlayback();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){dialogWasPlaying=!video.paused;video.pause()}
+    else if(dialog.open&&dialogWasPlaying)video.play().catch(()=>{});
+    updateHeroPlayback();
+  });
+  showSlide(0);
   function openPreview(id, trigger) {
     const game = games[id]; if (!game) return;
-    returnFocus = trigger; hero.pause();
+    returnFocus = trigger; hero.pause(); stopCarouselTimer();
     document.getElementById('preview-title').textContent = game.name;
     document.getElementById('preview-description').textContent = game.description;
     document.getElementById('dialog-demo').href = game.demo;
@@ -666,7 +758,7 @@
   function cleanupPreview() {
     video.pause(); video.removeAttribute('src'); video.load();
     document.body.style.overflow = '';
-    returnFocus?.focus({ preventScroll: true }); syncHero();
+    returnFocus?.focus({ preventScroll: true }); updateHeroPlayback();
   }
   document.getElementById('close-preview').addEventListener('click', () => {
     if (typeof dialog.close === 'function') dialog.close(); else { dialog.removeAttribute('open'); cleanupPreview(); }
