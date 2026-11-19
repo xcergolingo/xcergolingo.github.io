@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://xcergolingo.github.io/games/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23163029'/%3E%3Cpath d='M42 20a17 17 0 1 0 5 21V31H32v8h7a9 9 0 1 1-3-13z' fill='%23d7f67a'/%3E%3C/svg%3E">
 <title>GoLingo Games — Your words. A whole new world.</title>
-<link rel="stylesheet" href="style.css?v=ios-app-signin-2"><script defer src="app.js?v=ios-app-signin-2"></script>
+<link rel="stylesheet" href="style.css?v=streak-medals-public-1"><script defer src="app.js?v=ios-app-signin-2"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -50,6 +50,17 @@
 <section id="golingo-challenge" class="challenge-campaign wrap" aria-labelledby="challenge-title">
 <div class="challenge-campaign-card">
   <div class="challenge-brand"><span class="challenge-eyebrow">GOLINGO 365-DAY CHALLENGE</span><span class="challenge-status">Coming soon · reward rules pending</span></div>
+  <div class="challenge-community-stats" aria-label="GoLingo streak community statistics">
+    <div><span>Still on a streak</span><strong id="streak-active-users">—</strong></div>
+    <div><span>Reached 365 days</span><strong id="streak-365-users">—</strong></div>
+    <div><span>Currently 365+ days</span><strong id="streak-current-365">—</strong></div>
+  </div>
+  <p id="streak-public-status" class="streak-public-status" role="status">Loading public streak totals…</p>
+  <div class="challenge-medal-guide" aria-label="GoLingo streak medal milestones">
+    <div class="medal-medal"><span class="medal-symbol medal-silver">🥈</span><b>Silver</b><small>365 consecutive days</small><strong id="streak-silver-count">—</strong><small>highest medal holders</small></div>
+    <div class="medal-medal"><span class="medal-symbol medal-gold">🥇</span><b>Gold</b><small>730 consecutive days</small><strong id="streak-gold-count">—</strong><small>highest medal holders</small></div>
+    <div class="medal-medal"><span class="medal-symbol medal-diamond">💎</span><b>Diamond</b><small>1,095 consecutive days</small><strong id="streak-diamond-count">—</strong><small>highest medal holders</small></div>
+  </div>
   <div class="challenge-grid"><div class="challenge-copy"><h2 id="challenge-title">Play every day. Build a <span>365-day streak.</span></h2>
     <p>Make language learning a daily habit. Download GoLingo, sign in to your account and open Online Games <strong>inside the app</strong> to track your daily streak.</p>
     <p class="challenge-reward">Proposed <strong>$365 reward</strong> at 365 consecutive days</p><p class="challenge-in-app">Only activity launched through the GoLingo app can enter the challenge tracker. Playing directly in a browser is not eligible for the proposed reward.</p><a class="button challenge-download download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Download GoLingo to join</a>
@@ -58,6 +69,7 @@
     <span class="challenge-progress-title">YOUR DAILY STREAK</span>
     <div class="challenge-progress-number"><strong id="challenge-days">—</strong><span>/ 365 days</span></div>
     <div class="challenge-track" role="progressbar" aria-label="Progress to 365 days" aria-valuemin="0" aria-valuemax="365" aria-valuenow="0" id="challenge-progress"><span id="challenge-fill"></span></div>
+    <p id="challenge-earned-medal" class="challenge-earned-medal" hidden></p>
     <p id="challenge-message" role="status">Open Online Games in the GoLingo app to track your daily streak. Browser activity does not count.</p>
     <span id="challenge-milestone" class="challenge-milestone" hidden>🏆 365 days achieved! Challenge milestone reached.</span>
     <section id="challenge-missed" class="challenge-missed" hidden aria-live="polite">
@@ -68,6 +80,17 @@
     </section>
     <p class="challenge-reset-note">One launch per UTC day · consecutive days · account-based</p>
   </div></div>
+<div class="challenge-prize-plan">
+<h3>Future reward milestones <span class="challenge-plan-tag">Campaign not active</span></h3>
+<p>Planned awards for qualifying users. No paid subscription required. Winning and payout are subject to official rules, verified activity and review.</p>
+<div class="prize-tier-grid">
+<div><strong>$365</strong><span>Proposed 365-day completion reward</span><small>Daily game learning and one published sentence, subject to validation</small></div>
+<div><strong>$1,000</strong><span>Proposed drawing at 100 Silver achievers</span><small>One selected prize, pending official rules</small></div>
+<div><strong>$10,000</strong><span>Proposed drawing at 1,000 qualifying achievers</span><small>One selected prize, pending official rules</small></div>
+<div><strong>Tesla Model 3</strong><span>Proposed drawing at 10,000 qualifying achievers</span><small>One selected prize, pending official rules and vehicle specification</small></div>
+</div>
+<p class="challenge-plan-note">Planned drawing qualification requires a current verified streak of at least 365 days. Sharing may help friends discover GoLingo, but does not currently increase drawing entries or odds. App Store reviews are voluntary and never required for rewards. No purchase or paid subscription required; official entry rules and any free alternative entry method are still to be published.</p>
+</div>
 </div></section>
 <div class="language-strip" aria-label="Example learning languages"><div class="wrap language-strip-inner"><span>WORDS OPEN WORLDS</span><div><b>Hola</b><b lang="ja">こんにちは</b><b>Bonjour</b><b lang="zh">你好</b><b>Ciao</b><b>Olá</b><b>Hallo</b></div><svg aria-hidden="true"><use href="#spark"/></svg></div></div>
 <section class="shared-lesson-landing wrap" id="shared-lesson-landing" hidden aria-live="polite" aria-labelledby="shared-lesson-heading">
@@ -365,7 +388,7 @@
 <script defer src="cloud.js?v=ios-app-signin-2"></script>
 <script defer src="cognito-diagnostic.js?v=app-login-only-1"></script>
 <script defer src="social.js?v=app-login-only-1"></script>
-<script defer src="streak.js?v=ios-app-signin-2"></script>
+<script defer src="streak.js?v=streak-medals-public-1"></script>
 </body></html>
 
 

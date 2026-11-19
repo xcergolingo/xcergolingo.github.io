@@ -13,6 +13,40 @@
   if(!days||!message||!progress||!fill||!milestone||!missedBox||!missedSummary||!missedList)return;
   let db=null,initialized=false,knownOwner=null,active=false,lastError='',refreshing=false;
   const user=()=>window.GoLingoCognito?.getUser?.()||null;
+  const publicStats={
+    active:document.getElementById('streak-active-users'),
+    ever:document.getElementById('streak-365-users'),
+    current:document.getElementById('streak-current-365'),
+    silver:document.getElementById('streak-silver-count'),
+    gold:document.getElementById('streak-gold-count'),
+    diamond:document.getElementById('streak-diamond-count'),
+    status:document.getElementById('streak-public-status')
+  };
+  const earnedMedal=document.getElementById('challenge-earned-medal');
+  let publicDb=null;
+  function renderMedal(longest){
+    if(!earnedMedal)return;
+    const tier=longest>=1095?['💎','Diamond']:longest>=730?['🥇','Gold']:longest>=365?['🥈','Silver']:null;
+    earnedMedal.hidden=!tier;
+    if(tier)earnedMedal.textContent=tier[0]+' '+tier[1]+' medal earned · Best streak '+longest+' days';
+  }
+  async function refreshPublicTotals(){
+    if(!publicDb)return;
+    try{
+      const {data,error}=await publicDb.rpc('golingo_public_streak_totals');
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row)throw Error('No totals returned');
+      for(const [field,name] of [['active','active_streak_users'],['ever','lifetime_365_users'],['current','current_365_users'],['silver','silver_medal_users'],['gold','gold_medal_users'],['diamond','diamond_medal_users']]){
+        const number=Number(row[name]);
+        publicStats[field].textContent=Number.isSafeInteger(number)&&number>=0?number.toLocaleString():'—';
+      }
+      publicStats.status.textContent='Live counts of recorded GoLingo gallery-launch streaks (UTC). Medal counts show each user’s highest earned tier.';
+    }catch(error){
+      publicStats.status.textContent='Public streak totals are awaiting database setup.';
+    }
+  }
+
   let missedStatus=null;
   function friendlyDate(value){
     if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return String(value);
@@ -65,6 +99,7 @@
     progress.setAttribute('aria-valuenow',String(Math.min(365,streak)));
     fill.style.width=width+'%';
     milestone.hidden=!record?.goal_reached;
+    renderMedal(longest);
     if(record?.goal_reached){
       message.textContent='Milestone completed! '+longest+' consecutive recorded launch days at your longest streak. This is not cash-prize approval.';
     }else if(record?.done_today){
@@ -84,6 +119,7 @@
     progress.setAttribute('aria-valuenow','0');
     fill.style.width='0%';
     milestone.hidden=true;
+    renderMedal(0);
     renderMissing(null);
     message.textContent='Download or open GoLingo for iPhone. Sign in inside the app, then open Online Games to record your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
@@ -121,6 +157,7 @@
       const item=Array.isArray(data)?data[0]:data;
       if(item)render(item);
       await refreshMissing(owner);
+      refreshPublicTotals();
     }catch(error){
       // A failed server request NEVER counts as a streak day.
       setupMissing(error);
@@ -134,7 +171,7 @@
   window.addEventListener('golingo:auth-state',()=>{if(initialized)refresh()});
   window.addEventListener('pageshow',()=>{if(initialized)refresh()});
   document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&initialized)refresh();
+    if(!document.hidden&&initialized){refresh();refreshPublicTotals()}
   });
   // Native Cognito bridge can finish after other gallery scripts initialize.
   let lastSeen=null;
@@ -157,7 +194,10 @@
       accessToken:async()=>window.GoLingoCognito?.getToken?.()||null,
       auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
     });
+    publicDb=window.supabase.createClient(config.url,config.anonKey,{
+      auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
+    });
     initialized=true;
-    await refresh();
+    await Promise.all([refresh(),refreshPublicTotals()]);
   }catch(error){setupMissing(error)}
 })();
