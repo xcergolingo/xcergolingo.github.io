@@ -83,7 +83,11 @@
     window.GoLingoGalleryRefreshHistory?.();
     window.dispatchEvent(new CustomEvent('golingo:auth-state',{detail:{signedIn:enabled}}));
   }
-  function showError(error) { note('Cloud error: ' + (error?.message || String(error))); }
+  function showError(error) {
+    const text=error?.message || String(error);
+    window.GoLingoCloudLastError=text;
+    note('Cloud error: ' + text);
+  }
   // WKWebView may suppress window.confirm() unless its UIDelegate implements
   // JavaScript confirmation panels. Use a real in-page confirmation instead.
   function confirmInPage(title,description,acceptText) {
@@ -131,6 +135,7 @@
     });
   }
 
+  window.GoLingoConfirm=confirmInPage;
   // Serialize user actions and background sync. Previously a Publish tap
   // during synchronization silently returned without changing is_public.
   let taskTail=Promise.resolve();
@@ -294,7 +299,8 @@
     const approved=await confirmInPage('Publish this lesson?',
       'Its words, sentences and translations will be visible to everyone in the GoLingo community. You can unpublish later.',
       'Publish to community');
-    if(!approved)return false;
+    if(!approved)return null;
+    window.GoLingoCloudLastError='';
     const wrapped=disableWhileRunning(async ()=>{
       note('Publishing lesson…');
       await saveRemote(gameId,lesson,Date.now());

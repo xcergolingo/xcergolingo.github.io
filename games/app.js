@@ -478,6 +478,16 @@
               publish.textContent='✓ Published';
               publish.classList.add('game-history-done');
               publish.setAttribute('aria-label',label+' is published');
+            } else if(published === false) {
+              publish.textContent='Retry Publish';
+              let errorLabel=row.querySelector('.game-row-feedback');
+              if(!errorLabel){
+                errorLabel=document.createElement('small');
+                errorLabel.className='game-row-feedback';
+                errorLabel.setAttribute('role','alert');
+                row.append(errorLabel);
+              }
+              errorLabel.textContent='Not published: '+(window.GoLingoCloudLastError||'Cloud request failed');
             } else {
               publish.textContent='Publish';
             }

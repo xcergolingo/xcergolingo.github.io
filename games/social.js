@@ -160,7 +160,12 @@
   async function importDeviceReactions(){
     const account=currentUser();
     if(!account){signInPrompt();return}
-    if(!confirm('Import this device’s older likes and favorites into your GoLingo account? Only import your own activity.'))return;
+    const okay=window.GoLingoConfirm
+      ? await window.GoLingoConfirm('Import earlier likes and favorites?',
+        'Import only your own device likes and favorites into this GoLingo account.',
+        'Import my favorites')
+      : false;
+    if(!okay)return;
     let oldLikes={},oldFavorites={};
     try{oldLikes=JSON.parse(localStorage.getItem('golingo:liked-games:v1')||'{}')||{}}catch{}
     try{oldFavorites=JSON.parse(localStorage.getItem('golingo:favorite-games:v1')||'{}')||{}}catch{}
