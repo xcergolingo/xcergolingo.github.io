@@ -56,7 +56,24 @@
     btn.addEventListener('click',handler);
     return btn;
   }
+  let publicationOwner = null;
+  let publishedLessons = new Set();
+  function publicationKey(gameId,lesson) { return gameId + '\u0000' + canonical(lesson); }
+  function publicationStatus(gameId,lesson) {
+    if (!user || publicationOwner !== user.id) return null;
+    return publishedLessons.has(publicationKey(gameId,lesson));
+  }
+  function updatePublicationStates(data) {
+    publicationOwner = user?.id || null;
+    publishedLessons = new Set((data || []).filter(item => item.is_public)
+      .map(item => publicationKey(item.game_id,item.lesson_json)));
+    window.GoLingoGalleryRefreshHistory?.();
+  }
   function renderSignedIn() {
+    if (publicationOwner !== (user?.id || null)) {
+      publicationOwner = null;
+      publishedLessons.clear();
+    }
     window.GoLingoSetLessonHistoryOwner?.(user?.id || null);
     const enabled=!!user;
     authArea.hidden=enabled;
@@ -125,6 +142,7 @@
   async function refreshMine() {
     if (!user) return;
     const data=await fetchMine();
+    updatePublicationStates(data);
     await mergeRemote(data);
     mineList.replaceChildren();
     const published=data.filter(x=>x.is_public);
@@ -183,15 +201,33 @@
       note('Publishing lesson…');
       await saveRemote(gameId,lesson,Date.now());
       const fp=await fingerprint(lesson);
-      const {error}=await db.from(tableName).update({is_public:true})
-        .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp);
+      const {data,error}=await db.from(tableName).update({is_public:true})
+        .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp)
+        .select('id,is_public');
       if(error) throw error;
-      note('Published. Other players can now find and play this lesson.');
+      if(!data?.length || !data[0].is_public) throw Error('Could not confirm publication.');
       await refreshMine();await refreshCommunity();
+      note('Published. Other players can now find and play this lesson.');
     });
     await wrapped();
   }
-  window.GoLingoCloud={isSignedIn:()=>!!user,publish};
+  async function unpublish(gameId,lesson) {
+    if (!user || publicationStatus(gameId,lesson) !== true) return;
+    if (!confirm('Remove this lesson from public sharing? Your private history will remain saved.')) return;
+    const wrapped=disableWhileRunning(async ()=>{
+      note('Unpublishing lesson…');
+      const fp=await fingerprint(lesson);
+      const {data,error}=await db.from(tableName).update({is_public:false})
+        .eq('user_id',user.id).eq('game_id',gameId).eq('fingerprint',fp)
+        .select('id,is_public');
+      if(error) throw error;
+      if(!data?.length) throw Error('Could not confirm that this lesson was unpublished.');
+      await refreshMine();await refreshCommunity();
+      note('Lesson unpublished. It remains in your private history.');
+    });
+    await wrapped();
+  }
+  window.GoLingoCloud={isSignedIn:()=>!!user,publicationStatus,publish,unpublish};
   window.addEventListener('golingo:game-lesson-played',e=>{
     if(!user) return;
     const {gameId,lesson}=e.detail||{};

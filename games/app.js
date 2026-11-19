@@ -430,12 +430,29 @@
         if (writeGameHistory(id, next)) renderGameHistory(id);
       });
       if (window.GoLingoCloud?.isSignedIn()) {
-        const publish = document.createElement('button');
-        publish.type = 'button'; publish.className = 'game-history-publish';
-        publish.textContent = 'Publish';
-        publish.setAttribute('aria-label','Publish ' + (item.label || lessonHistoryLabel(item.lesson)) + ' publicly');
-        publish.addEventListener('click', () => window.GoLingoCloud.publish(id,item.lesson));
-        row.append(publish);
+        const state = window.GoLingoCloud.publicationStatus(id, item.lesson);
+        const label = item.label || lessonHistoryLabel(item.lesson);
+        if (state === true) {
+          const published = document.createElement('span');
+          published.className = 'game-history-published';
+          published.textContent = '✓ Published';
+          published.setAttribute('aria-label', label + ' is published to the community');
+          const unpublish = document.createElement('button');
+          unpublish.type = 'button';
+          unpublish.className = 'game-history-unpublish';
+          unpublish.textContent = 'Unpublish';
+          unpublish.setAttribute('aria-label', 'Unpublish ' + label);
+          unpublish.addEventListener('click', () => window.GoLingoCloud.unpublish(id, item.lesson));
+          row.append(published, unpublish);
+        } else {
+          const publish = document.createElement('button');
+          publish.type = 'button'; publish.className = 'game-history-publish';
+          publish.textContent = state === null ? 'Checking…' : 'Publish';
+          publish.disabled = state === null;
+          publish.setAttribute('aria-label', 'Publish ' + label + ' publicly');
+          publish.addEventListener('click', () => window.GoLingoCloud.publish(id,item.lesson));
+          row.append(publish);
+        }
       }
       row.append(play, remove);
       list.append(row);

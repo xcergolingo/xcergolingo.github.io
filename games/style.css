@@ -117,3 +117,9 @@
 .golingo-diagnostic button{margin:6px 8px 4px 0}
 .golingo-diagnostic .diagnostic-pass{color:#1f6940;font-weight:700}
 .golingo-diagnostic .diagnostic-fail{color:#a13729;font-weight:700}
+
+.game-history-published{display:inline-flex;align-items:center;padding:6px 9px;border:1px solid #a4c9ad;border-radius:8px;background:#dcefdc;color:#176037;font-size:11px;font-weight:800;white-space:nowrap}
+.game-history-unpublish{border:1px solid #c6d5c6;border-radius:8px;background:#fff;color:#3e6650;font-size:11px;font-weight:700;padding:6px;cursor:pointer}
+.game-history-unpublish:focus-visible{outline:3px solid #3e8562;outline-offset:2px}
+.game-history-publish:disabled{opacity:.65;cursor:wait}
+@media(max-width:540px){.game-history-entry{flex-wrap:wrap}.game-history-play{flex-basis:60%}.game-history-published{order:-1}}
