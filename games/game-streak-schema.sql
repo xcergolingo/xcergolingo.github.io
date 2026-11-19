@@ -41,7 +41,7 @@ as $$
 declare
   uid text;
   today_utc date:=(now() at time zone 'UTC')::date;
-  was_new boolean:=false;
+  inserted_rows integer:=0;
   prior public.golingo_game_streaks%rowtype;
   next_streak integer;
 begin
@@ -55,8 +55,8 @@ begin
   insert into public.golingo_game_daily_launches(user_id,activity_day,game_id)
     values(uid,today_utc,p_game_id)
     on conflict(user_id,activity_day) do nothing;
-  get diagnostics was_new=row_count;
-  if was_new then
+  get diagnostics inserted_rows=row_count;
+  if inserted_rows>0 then
     select * into prior from public.golingo_game_streaks where user_id=uid for update;
     if found then
       next_streak:=case when prior.last_day=today_utc-1 then prior.current_streak+1 else 1 end;
