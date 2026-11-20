@@ -313,3 +313,27 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .challenge-plan-note{font-size:11px!important}
 @media(max-width:730px){.challenge-community-stats,.challenge-medal-guide{grid-template-columns:repeat(3,minmax(0,1fr))}.challenge-community-stats>div{padding:10px}.prize-tier-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.prize-tier-grid>div{padding:12px}.prize-tier-grid strong{font-size:16px}}
 @media(max-width:370px){.challenge-medal-guide{grid-template-columns:1fr}.challenge-community-stats{gap:5px}}
+
+/* Compact 365-day challenge; users opt in to the full campaign content */
+.challenge-details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap;margin:0}
+.challenge-details>summary::-webkit-details-marker{display:none}
+.challenge-details>summary::marker{content:""}
+.challenge-summary-copy{display:flex;flex-direction:column;gap:4px}
+.challenge-summary-copy strong{font-size:clamp(19px,3.2vw,27px);color:#165b86}
+.challenge-summary-copy small{font-size:12px;color:#5d86a1}
+.challenge-summary-side{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.challenge-expand-label{color:#0b89c6;font-weight:800;font-size:13px}
+.challenge-summary .challenge-expand-label:after{content:"  ▾"}
+.challenge-details[open] .challenge-expand-label{font-size:0}
+.challenge-details[open] .challenge-expand-label:before{content:"Hide challenge";font-size:13px}
+.challenge-details[open] .challenge-expand-label:after{content:"  ▴";font-size:13px}
+.challenge-content{padding-top:24px}
+.campaign-share-message{margin:0 0 19px;padding:15px 16px;border-radius:15px;background:#f7fcff;border:1px solid #b5ddf3}
+.campaign-share-message p{font-size:13px;line-height:1.6;color:#245a78;margin:0 0 11px}
+.campaign-share-message small{display:block;margin-top:9px;color:#64859b;font-size:11px;line-height:1.5}
+.challenge-share-action{background:#138fc7!important;color:#fff!important;font-weight:800!important;border-color:#138fc7!important}
+.challenge-my-activity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.challenge-my-activity>div{background:#fff;border:1px solid #c7e4f1;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:8px}
+.challenge-my-activity span{font-size:12px;color:#517993}
+.challenge-my-activity strong{font-size:30px;color:#0f83bc}
+.challenge-my-activity p{grid-column:1/-1;color:#65879a;font-size:11px;line-height:1.5;margin:0}

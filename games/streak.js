@@ -13,6 +13,75 @@
   if(!days||!message||!progress||!fill||!milestone||!missedBox||!missedSummary||!missedList)return;
   let db=null,initialized=false,knownOwner=null,active=false,lastError='',refreshing=false;
   const user=()=>window.GoLingoCognito?.getUser?.()||null;
+  const sharesEl=document.getElementById('challenge-shares');
+  const publishedEl=document.getElementById('challenge-published');
+  const engagementStatus=document.getElementById('challenge-engagement-status');
+  const shareGamesButton=document.getElementById('challenge-share-games');
+  let engagementOwner=null;
+  function resetEngagement(){
+    engagementOwner=null;
+    if(sharesEl)sharesEl.textContent='—';
+    if(publishedEl)publishedEl.textContent='—';
+    if(engagementStatus)engagementStatus.textContent='Sign in inside the GoLingo iPhone app to view your cloud activity counts.';
+  }
+  async function refreshEngagement(){
+    if(!initialized||!db||!user()?.id){resetEngagement();return}
+    const owner=user().id;
+    try{
+      const {data,error}=await db.rpc('golingo_get_game_engagement_counts');
+      if(error)throw error;
+      if(user()?.id!==owner)return;
+      const result=Array.isArray(data)?data[0]:data;
+      if(!result)throw Error('No activity counts found');
+      engagementOwner=owner;
+      sharesEl.textContent=(Number(result.share_actions)||0).toLocaleString();
+      publishedEl.textContent=(Number(result.published_lessons)||0).toLocaleString();
+      engagementStatus.textContent='Cloud account totals · share actions count copies and Share sheet completions, not confirmed recipients.';
+    }catch(error){
+      if(user()?.id!==owner)return;
+      sharesEl.textContent='—';publishedEl.textContent='—';
+      engagementStatus.textContent='Account counters need Supabase setup. Run game-campaign-engagement.sql.';
+    }
+  }
+  async function recordShare(target,action){
+    if(!canTrack())return false;
+    if(typeof target!=='string'||!/^(gallery|game:[a-z0-9-]{1,90}|lesson:[0-9a-f-]{36})$/i.test(target))return false;
+    if(!['copy','share'].includes(action))return false;
+    try{
+      const {error}=await db.rpc('golingo_record_game_share_action',{p_target:target,p_action:action});
+      if(error)throw error;
+      await refreshEngagement();
+      return true;
+    }catch(error){return false}
+  }
+  function recordEventAfterShare(action) {
+    // Never infer that sharing actually reached a recipient.
+    recordShare('gallery',action);
+  }
+  if(shareGamesButton)shareGamesButton.addEventListener('click',()=>{
+    const url='https://xcergolingo.github.io/games/';
+    const text='Explore GoLingo language-learning games! '+url;
+    if(navigator.share) {
+      // Keep native share synchronous with the user's tap.
+      navigator.share({title:'GoLingo Games',text,url}).then(()=>{
+        recordEventAfterShare('share');
+      }).catch(async error=>{
+        if(error?.name!=='AbortError') {
+          if(engagementStatus)engagementStatus.textContent='Sharing unavailable. You can copy the link instead.';
+        }
+      });
+    }else if(navigator.clipboard?.writeText){
+      navigator.clipboard.writeText(url).then(()=>{
+        recordEventAfterShare('copy');
+        if(engagementStatus)engagementStatus.textContent='Games link copied. Share it with friends!';
+      }).catch(()=>{
+        if(engagementStatus)engagementStatus.textContent='Copy this URL to share: '+url;
+      });
+    }else{
+      if(engagementStatus)engagementStatus.textContent='Copy this URL to share: '+url;
+    }
+  });
+
   const publicStats={
     active:document.getElementById('streak-active-users'),
     ever:document.getElementById('streak-365-users'),
@@ -121,6 +190,7 @@
     milestone.hidden=true;
     renderMedal(0);
     renderMissing(null);
+    resetEngagement();
     message.textContent='Download or open GoLingo for iPhone. Sign in inside the app, then open Online Games to record your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
   function setupMissing(error){
@@ -144,6 +214,7 @@
       const item=Array.isArray(data)?data[0]:data;
       render(item||null);
       await refreshMissing(owner);
+      await refreshEngagement();
     }catch(error){setupMissing(error)}
     finally{refreshing=false}
   }
@@ -158,6 +229,7 @@
       if(item)render(item);
       await refreshMissing(owner);
       refreshPublicTotals();
+      refreshEngagement();
     }catch(error){
       // A failed server request NEVER counts as a streak day.
       setupMissing(error);
@@ -167,7 +239,8 @@
   function canTrack(){
     return initialized&&!!db&&!!user()?.id&&!!window.GoLingoCognito?.getToken?.();
   }
-  window.GoLingoStreak={canTrack,recordLaunch,refresh};
+  window.GoLingoStreak={canTrack,recordLaunch,refresh,refreshEngagement,recordShare};
+  window.addEventListener('golingo:community-changed',()=>{if(initialized)refreshEngagement()});
   window.addEventListener('golingo:auth-state',()=>{if(initialized)refresh()});
   window.addEventListener('pageshow',()=>{if(initialized)refresh()});
   document.addEventListener('visibilitychange',()=>{

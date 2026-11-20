@@ -116,6 +116,7 @@
         if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(url);
         else {link.focus();link.select();if(!document.execCommand('copy'))throw Error('Copy unavailable')}
         message.textContent='Link copied. Paste it into a message to share.';
+        window.GoLingoStreak?.recordShare?.('lesson:'+id,'copy');
       }catch{link.focus();link.select();message.textContent='Select and copy the link above to share.'}
     });
     // Pre-render before the tap so Web Share can run with transient user
@@ -141,6 +142,7 @@
       navigator.share(content).then(()=>{
         message.textContent=imageFile?'Shared game image and lesson link.':
           'Shared lesson link. The image was unavailable or not supported.';
+        window.GoLingoStreak?.recordShare?.('lesson:'+id,'share');
       }).catch(error=>{
         if(error?.name!=='AbortError')
           message.textContent='Could not open sharing. Use Copy link instead.';
@@ -560,6 +562,7 @@
       if(publicError || !publicRows?.length)
         throw Error('Published for your account, but public visibility could not be verified. Please retry Sync or contact support.');
       note('✓ Published and visible to other GoLingo players.');
+      window.dispatchEvent(new Event('golingo:community-changed'));
       return true;
     });
     return await wrapped();
@@ -579,6 +582,7 @@
       if(!data?.length) throw Error('Could not confirm that this lesson was unpublished.');
       await refreshMine();await refreshCommunity();
       note('Lesson unpublished. It remains in your private history.');
+      window.dispatchEvent(new Event('golingo:community-changed'));
       return true;
     });
     await wrapped();
