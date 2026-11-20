@@ -164,7 +164,7 @@
     challengeText.textContent='Build a daily learning streak, earn Silver (365 days), Gold (730 days), or Diamond (1,095 days) honors, and climb the GoLingo Top 10 leaderboard rankings.';
     const prizeText=document.createElement('p');
     prizeText.className='favorite-invite-prizes';
-    prizeText.textContent='Planned $100 completion reward + chances to win $1,000, $10,000, and a Tesla Model 3.';
+    prizeText.textContent='Planned $100 completion reward + a $1,000 drawing per 1,000 achievers, a $10,000 drawing per 10,000 achievers, and one Tesla Model 3 drawing at 100,000 total achievers.';
     const campaignNotice=document.createElement('small');
     campaignNotice.textContent='Campaign coming soon. Cash and vehicle rewards are not guaranteed or active; verified eligibility, official rules, and prize drawings will apply. No paid subscription required.';
     challenge.append(challengeTitle,challengeText,prizeText,campaignNotice);
