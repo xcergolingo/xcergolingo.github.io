@@ -408,3 +408,29 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 #golingo-challenge .challenge-prize-highlights>span{display:inline-block;background:#dff7ff;border:1px solid #8acff0;border-radius:11px;padding:9px 12px;color:#064e7b;font-weight:750;font-size:clamp(12px,2.5vw,15px);line-height:1.4}
 #golingo-challenge .challenge-prize-highlights b{font-weight:900;color:#007cbb}
 @media(max-width:600px){#golingo-challenge .challenge-prize-highlights>span{flex:1 1 190px}}
+
+/* Compact lesson sections and searchable multi-select game tags */
+.tag-filter-panel{margin-bottom:20px;border:1px solid #b8dff1;border-radius:17px;background:#f2fbff;padding:14px}
+.tag-filter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.tag-filter-heading label{font-size:14px;font-weight:800;color:#155b87}
+#tag-selected-count{font-size:11px;color:#497e9f;font-weight:700}
+#tag-search{display:block;width:100%;min-height:43px;border-radius:11px;border:1px solid #abdbef;color:#235270;background:white;padding:10px 13px;font-size:13px;margin-bottom:12px}
+.tag-filter-panel .hub-filters{display:flex;gap:7px;flex-wrap:wrap;margin:0;max-height:178px;overflow-y:auto;align-content:start}
+.tag-filter-panel .hub-chip{min-height:36px;padding:7px 11px;border-radius:9px;background:white;color:#286384;border:1px solid #b5dcef;font-size:12px}
+.tag-filter-panel .hub-chip.active,.tag-filter-panel .hub-chip[aria-pressed=true]{background:#128fc8;border-color:#128fc8;color:white}
+.tag-filter-panel .hub-chip[hidden]{display:none!important}
+.tag-empty{font-size:12px;color:#5f7e90;margin:10px 0 0}
+.tag-empty[hidden]{display:none}
+.lesson-panel-collapsible,.golingo-cloud{overflow:visible}
+.lesson-panel-collapsible>summary,.golingo-cloud>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lesson-panel-collapsible>summary::-webkit-details-marker,.golingo-cloud>summary::-webkit-details-marker{display:none}
+.lesson-panel-collapsible>summary::marker,.golingo-cloud>summary::marker{content:''}
+.lesson-panel-collapsible>.lesson-panel-summary strong,.golingo-cloud>.cloud-panel-summary strong{font-size:clamp(17px,3.6vw,22px);color:#155e88;line-height:1.35}
+.lesson-panel-collapsible>summary span,.golingo-cloud>summary span{font-size:12px;color:#0d87be;white-space:nowrap;font-weight:800}
+.lesson-panel-collapsible>summary span:after,.golingo-cloud>summary span:after{content:' ▾'}
+.lesson-panel-collapsible[open]>summary span,.golingo-cloud[open]>summary span{font-size:0}
+.lesson-panel-collapsible[open]>summary span:before,.golingo-cloud[open]>summary span:before{content:'Hide section';font-size:12px}
+.lesson-panel-collapsible[open]>summary span:after,.golingo-cloud[open]>summary span:after{content:' ▴';font-size:12px}
+.lesson-panel-body,.cloud-panel-body{padding-top:17px}
+.lesson-panel-body>div>p{margin-top:0}
+@media(max-width:600px){.tag-filter-panel{padding:12px}.tag-filter-panel .hub-filters{max-height:155px}.lesson-panel-collapsible>summary,.golingo-cloud>summary{align-items:start;flex-direction:column;gap:5px}}

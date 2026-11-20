@@ -68,6 +68,9 @@
   const sortControl = document.getElementById('game-sort');
   const searchControl = document.getElementById('game-search');
   const clearSearch = document.getElementById('search-clear');
+  const tagSearch=document.getElementById('tag-search');
+  const tagEmpty=document.getElementById('tag-empty');
+  const selectedCount=document.getElementById('tag-selected-count');
   const favoritesToggle = document.getElementById('favorites-toggle');
   const filterChips = [...document.querySelectorAll('[data-filter]')];
   const originalOrder = new Map(cards.map((card, i) => [card, i]));
@@ -132,12 +135,14 @@
     updateStorageStatus();
   }
 
-  let view = { search: '', category: 'all', favoritesOnly: false, sort: 'default' };
+  let view = { search: '', categories: [], favoritesOnly: false, sort: 'default' };
   try {
     const saved = objectFromJSON(sessionStorage.getItem(viewKey));
     view = {
       search: typeof saved.search === 'string' ? saved.search.slice(0, 200) : '',
-      category: categories.has(saved.category) ? saved.category : 'all',
+      categories: Array.isArray(saved.categories)
+        ? [...new Set(saved.categories.filter(tag => categories.has(tag) && tag !== 'all'))]
+        : (categories.has(saved.category) && saved.category !== 'all' ? [saved.category] : []),
       favoritesOnly: saved.favoritesOnly === true,
       sort: sortModes.has(saved.sort) ? saved.sort : 'default'
     };
@@ -228,16 +233,20 @@
     const tokens = normalizeSearch(view.search).trim().split(/\s+/).filter(Boolean);
     let count = 0;
     cards.forEach(card => {
-      const categoryMatch = view.category === 'all' || (card.dataset.tags || '').split(/\s+/).includes(view.category);
+      const cardTags=(card.dataset.tags || '').split(/\s+/);
+      const categoryMatch = view.categories.length===0 || view.categories.some(tag=>cardTags.includes(tag));
       const show = categoryMatch && (!view.favoritesOnly || !!favorites[card.id]) && tokens.every(token => searchIndex.get(card).includes(token));
       card.hidden = !show;
       if (show) count++;
     });
     filterChips.forEach(chip => {
-      const on = chip.dataset.filter === view.category;
+      const on = chip.dataset.filter === 'all' ? view.categories.length===0 : view.categories.includes(chip.dataset.filter);
       chip.classList.toggle('active', on);
       chip.setAttribute('aria-pressed', String(on));
     });
+    if(selectedCount) selectedCount.textContent=view.categories.length
+      ? view.categories.length+' tag'+(view.categories.length===1?'':'s')+' selected'
+      : 'All tags';
     if (searchControl && searchControl.value !== view.search) searchControl.value = view.search;
     if (clearSearch) clearSearch.hidden = !view.search;
     if (sortControl) sortControl.value = view.sort;
@@ -296,7 +305,26 @@
     rememberView();
     applyView();
   }
-  filterChips.forEach(chip => chip.addEventListener('click', () => changeView({ category: chip.dataset.filter })));
+  filterChips.forEach(chip => chip.addEventListener('click', () => {
+    const tag=chip.dataset.filter;
+    if(tag==='all'){changeView({categories:[]});return}
+    const selected=new Set(view.categories);
+    if(selected.has(tag))selected.delete(tag);else selected.add(tag);
+    changeView({categories:[...selected]});
+  }));
+  function updateTagSearch(){
+    const query=normalizeSearch(tagSearch?.value||'').trim();
+    let matches=0;
+    for(const chip of filterChips){
+      const visible=chip.dataset.filter==='all' || normalizeSearch(chip.textContent||'').includes(query);
+      chip.hidden=!visible;
+      if(visible && chip.dataset.filter!=='all')matches++;
+    }
+    if(tagEmpty)tagEmpty.hidden=matches>0;
+  }
+  tagSearch?.addEventListener('input',updateTagSearch);
+  tagSearch?.addEventListener('search',updateTagSearch);
+  updateTagSearch();
   sortControl?.addEventListener('change', () => changeView({ sort: sortModes.has(sortControl.value) ? sortControl.value : 'default' }));
   searchControl?.addEventListener('input', () => changeView({ search: searchControl.value.slice(0, 200) }));
   searchControl?.addEventListener('search', () => changeView({ search: searchControl.value.slice(0, 200) }));
@@ -312,7 +340,8 @@
   });
   favoritesToggle?.addEventListener('click', () => changeView({ favoritesOnly: !view.favoritesOnly }));
   document.getElementById('filters-reset')?.addEventListener('click', () => {
-    changeView({ search: '', category: 'all', favoritesOnly: false });
+    changeView({ search: '', categories: [], favoritesOnly: false });
+    if(tagSearch){tagSearch.value='';updateTagSearch()}
     searchControl?.focus();
   });
 
