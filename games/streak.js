@@ -13,6 +13,13 @@
   if(!days||!message||!progress||!fill||!milestone||!missedBox||!missedSummary||!missedList)return;
   let db=null,initialized=false,knownOwner=null,active=false,lastError='',refreshing=false;
   const user=()=>window.GoLingoCognito?.getUser?.()||null;
+  const welcome=document.getElementById('challenge-welcome');
+  const downloadJoin=document.getElementById('challenge-download');
+  function refreshJoinView(){
+    const signed=!!user()?.id;
+    if(welcome)welcome.hidden=!signed;
+    if(downloadJoin)downloadJoin.hidden=signed;
+  }
   const sharesEl=document.getElementById('challenge-shares');
   const publishedEl=document.getElementById('challenge-published');
   const engagementStatus=document.getElementById('challenge-engagement-status');
@@ -191,6 +198,7 @@
     renderMedal(0);
     renderMissing(null);
     resetEngagement();
+    refreshJoinView();
     message.textContent='Download or open GoLingo for iPhone. Sign in inside the app, then open Online Games to record your daily streak. Browser play does not qualify for the proposed reward campaign.';
   }
   function setupMissing(error){
@@ -205,6 +213,7 @@
     const current=user();
     if(!current){signedOut();return}
     const owner=current.id;
+    refreshJoinView();
     refreshing=true;
     try{
       const {data,error}=await db.rpc('golingo_get_daily_game_streak');
@@ -240,8 +249,9 @@
     return initialized&&!!db&&!!user()?.id&&!!window.GoLingoCognito?.getToken?.();
   }
   window.GoLingoStreak={canTrack,recordLaunch,refresh,refreshEngagement,recordShare};
+  refreshJoinView();
   window.addEventListener('golingo:community-changed',()=>{if(initialized)refreshEngagement()});
-  window.addEventListener('golingo:auth-state',()=>{if(initialized)refresh()});
+  window.addEventListener('golingo:auth-state',()=>{refreshJoinView();if(initialized)refresh()});
   window.addEventListener('pageshow',()=>{if(initialized)refresh()});
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden&&initialized){refresh();refreshPublicTotals()}
