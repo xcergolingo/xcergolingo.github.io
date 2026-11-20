@@ -66,7 +66,7 @@
     recordShare('gallery',action);
   }
   if(shareGamesButton)shareGamesButton.addEventListener('click',()=>{
-    const url='https://xcergolingo.github.io/games/';
+    const url=window.GoLingoProfiles?.decorateUrl?.('https://xcergolingo.github.io/games/')||'https://xcergolingo.github.io/games/';
     const text='Explore GoLingo language-learning games! '+url;
     if(navigator.share) {
       // Keep native share synchronous with the user's tap.

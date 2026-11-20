@@ -90,7 +90,7 @@
   }
   function shareLesson(id,title,gameId) {
     if(!uuidValid(id)){note('This lesson does not have a valid public link yet.');return}
-    const url=lessonShareUrl(id);
+    const url=window.GoLingoProfiles?.decorateUrl?.(lessonShareUrl(id))||lessonShareUrl(id);
     const game=gameTitle(gameId);
     const shade=document.createElement('div');shade.className='golingo-confirm-shade';
     const dialog=document.createElement('section');dialog.className='golingo-confirm-dialog golingo-share-dialog';
