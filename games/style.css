@@ -528,3 +528,10 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .favorite-invite-close{background:#fff;color:#285e7d;border:1px solid #b7d9ed;cursor:pointer}
 .favorite-invite-dialog small{display:block;color:#577b95;line-height:1.5;font-size:11px}
 @media(max-width:500px){.favorite-invite-actions{flex-direction:column}.favorite-invite-close{width:100%}}
+
+/* Promotional challenge info in the browser Favorite invitation. */
+.favorite-invite-challenge{border-radius:14px;border:1px solid #7fc9ec;background:linear-gradient(125deg,#dff6ff,#fff);padding:14px;margin:4px 0 18px}
+.favorite-invite-challenge>strong{display:block;font-size:15px;color:#09699e;line-height:1.35;margin-bottom:7px}
+.favorite-invite-challenge p{margin:0 0 8px!important;font-size:13px!important;line-height:1.5!important;color:#205e82}
+.favorite-invite-challenge .favorite-invite-prizes{font-weight:800;color:#0a699c}
+.favorite-invite-challenge small{font-size:10.5px;line-height:1.45;color:#507790}

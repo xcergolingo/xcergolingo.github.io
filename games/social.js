@@ -156,6 +156,18 @@
     for(const feature of ['♡ Save favorite games to your GoLingo account','✓ Save words, sentences, and lesson history','↗ Publish and share games with your own learning content']){
       const item=document.createElement('li');item.textContent=feature;features.append(item);
     }
+    const challenge=document.createElement('div');
+    challenge.className='favorite-invite-challenge';
+    const challengeTitle=document.createElement('strong');
+    challengeTitle.textContent='🏆 Join the GoLingo 365-Day Challenge';
+    const challengeText=document.createElement('p');
+    challengeText.textContent='Build a daily learning streak and earn Silver (365 days), Gold (730 days), or Diamond (1,095 days) honors.';
+    const prizeText=document.createElement('p');
+    prizeText.className='favorite-invite-prizes';
+    prizeText.textContent='Planned $100 completion reward + chances to win $1,000, $10,000, and a Tesla Model 3.';
+    const campaignNotice=document.createElement('small');
+    campaignNotice.textContent='Campaign coming soon. Cash and vehicle rewards are not guaranteed or active; verified eligibility, official rules, and prize drawings will apply. No paid subscription required.';
+    challenge.append(challengeTitle,challengeText,prizeText,campaignNotice);
     const buttons=document.createElement('div');buttons.className='favorite-invite-actions';
     if(!isApp){
       const download=document.createElement('a');
@@ -171,7 +183,7 @@
     note.textContent=isApp
       ?'Already signed in? Reopen Online Games to reconnect your account.'
       :'GoLingo is currently available for Apple iPhone (iOS). Browser visitors can play games, but account favorites and cloud publishing require GoLingo.';
-    dialog.append(heading,description,features,buttons,note);
+    dialog.append(heading,description,features,challenge,buttons,note);
     shade.append(dialog);document.body.append(shade);favoriteInvite=shade;
     const trigger=document.activeElement;
     const dismiss=()=>{
