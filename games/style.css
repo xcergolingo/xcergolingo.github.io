@@ -380,3 +380,25 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 #golingo-challenge .challenge-leaderboard-table th{font-weight:750;background:#e7f6fc}
 #golingo-challenge #challenge-leaderboard-info{font-size:11px;line-height:1.5;color:#64849a;margin:12px 0 0}
 @media(max-width:600px){#golingo-challenge .challenge-campaign-card{padding:18px}#golingo-challenge .challenge-summary-side{width:100%;justify-content:flex-start}#golingo-challenge .challenge-summary-copy strong{font-size:21px}#golingo-challenge .challenge-profile-panel,#golingo-challenge .challenge-leaderboard-panel{padding:12px}#golingo-challenge .challenge-prize-heading h3{font-size:19px}}
+
+/* High-visibility sky-blue GoLingo 365-day reward banner */
+#golingo-challenge .challenge-campaign-card{background:linear-gradient(135deg,#00a8f1 0%,#0cc9f0 46%,#b9faff 100%);border:2px solid #49c9f6;box-shadow:0 15px 38px #087bb849;position:relative;overflow:hidden}
+#golingo-challenge .challenge-campaign-card:before{content:"";position:absolute;width:260px;height:260px;right:-95px;top:-115px;border-radius:50%;background:#ffffff38;pointer-events:none}
+#golingo-challenge .challenge-details{position:relative;z-index:1;border:0}
+#golingo-challenge .challenge-summary{background:linear-gradient(125deg,#ffffffef,#e8fbffef);border:1px solid #ffffffd9;border-radius:18px;padding:21px!important;box-shadow:0 7px 25px #005d9c2a;gap:16px!important}
+#golingo-challenge .challenge-summary-copy{flex:1 1 230px;gap:8px!important}
+#golingo-challenge .challenge-hero-kicker{font-size:11px;font-weight:850;letter-spacing:1.35px;color:#006da4;line-height:1.5}
+#golingo-challenge .challenge-summary-copy strong{font-size:clamp(21px,4vw,31px);font-weight:850;line-height:1.23;color:#084875;overflow-wrap:break-word}
+#golingo-challenge .challenge-hero-money{font-weight:900;color:#007bbd}
+#golingo-challenge .challenge-hero-tesla{color:#057fb4}
+#golingo-challenge .challenge-hero-separator{color:#00a6d1}
+#golingo-challenge .challenge-summary-copy small{color:#426e89;font-size:12px;line-height:1.5}
+#golingo-challenge .challenge-summary-side{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+#golingo-challenge .challenge-status{border:1px solid #8dd0ed;background:#f1fbff;color:#225d80;font-size:11px;font-weight:750;line-height:1.4;padding:8px 12px}
+#golingo-challenge .challenge-expand-label{border-radius:999px;background:#057fbb;color:white;padding:10px 15px;font-size:12px;font-weight:800;white-space:nowrap}
+#golingo-challenge .challenge-summary .challenge-expand-label:after{content:" ▾"}
+#golingo-challenge .challenge-details[open] .challenge-expand-label{font-size:0;padding:10px 15px}
+#golingo-challenge .challenge-details[open] .challenge-expand-label:before{content:"Hide rewards & progress";font-size:12px}
+#golingo-challenge .challenge-details[open] .challenge-expand-label:after{content:" ▴";font-size:12px}
+#golingo-challenge .challenge-content{padding:22px 7px 4px}
+@media(max-width:600px){#golingo-challenge .challenge-campaign-card{padding:13px!important}#golingo-challenge .challenge-summary{padding:18px!important}#golingo-challenge .challenge-summary-copy strong{font-size:23px}#golingo-challenge .challenge-summary-side{width:100%;justify-content:space-between;gap:8px}}
