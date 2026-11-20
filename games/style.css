@@ -513,3 +513,18 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 }
 #golingo-challenge .challenge-deadline-notice strong,
 #golingo-challenge .challenge-deadline-note strong{color:#115077}
+
+/* Explain GoLingo account benefits when a browser visitor taps Favorite. */
+.favorite-invite-shade{position:fixed;inset:0;z-index:2147483500;background:rgba(5,32,52,.68);display:flex;align-items:center;justify-content:center;padding:18px;overscroll-behavior:contain}
+.favorite-invite-dialog{width:min(100%,470px);max-height:min(90vh,720px);overflow:auto;border-radius:22px;background:#f5fbff;border:2px solid #75ceee;padding:clamp(18px,4vw,29px);box-shadow:0 22px 90px #001b3973;color:#194a6b}
+.favorite-invite-dialog h2{font-size:clamp(21px,5vw,27px);line-height:1.2;margin:0 0 12px;color:#086b9f}
+.favorite-invite-dialog p{font-size:14px;line-height:1.6;margin:0 0 13px}
+.favorite-invite-dialog ul{padding:0;list-style:none;display:grid;gap:9px;margin:0 0 22px}
+.favorite-invite-dialog li{border:1px solid #d1eafa;border-radius:10px;padding:10px 12px;background:#fff;font-weight:600;font-size:13px;line-height:1.4}
+.favorite-invite-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.favorite-invite-download,.favorite-invite-close{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:11px 15px;border-radius:12px;text-decoration:none;font-size:13px;font-weight:800}
+.favorite-invite-download{background:#0b95d0;border:1px solid #0b95d0;color:#fff;flex:1 1 190px}
+.favorite-invite-download:hover{background:#077eb4}
+.favorite-invite-close{background:#fff;color:#285e7d;border:1px solid #b7d9ed;cursor:pointer}
+.favorite-invite-dialog small{display:block;color:#577b95;line-height:1.5;font-size:11px}
+@media(max-width:500px){.favorite-invite-actions{flex-direction:column}.favorite-invite-close{width:100%}}

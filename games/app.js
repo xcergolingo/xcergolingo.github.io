@@ -196,7 +196,7 @@
     button.setAttribute('aria-pressed', String(saved));
     button.setAttribute('aria-label', (saved ? 'Remove ' : 'Add ') + cardNames.get(card) + (saved ? ' from favorites' : ' to favorites'));
     button.innerHTML = '<span class="favorite-icon" aria-hidden="true">' + (saved ? '♥' : '♡') + '</span> ' + (saved ? 'Favorited' : 'Favorite');
-    button.title = socialSignedIn ? 'Saved to your GoLingo account' : 'Sign in with GoLingo to save favorites';
+    button.title = socialSignedIn ? 'Saved to your GoLingo account' : 'Download GoLingo for iPhone to favorite games and save or publish your lessons';
 
   }
   function renderPlays(card) {
