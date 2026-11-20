@@ -161,7 +161,7 @@
     const challengeTitle=document.createElement('strong');
     challengeTitle.textContent='🏆 Join the GoLingo 365-Day Challenge';
     const challengeText=document.createElement('p');
-    challengeText.textContent='Build a daily learning streak and earn Silver (365 days), Gold (730 days), or Diamond (1,095 days) honors.';
+    challengeText.textContent='Build a daily learning streak, earn Silver (365 days), Gold (730 days), or Diamond (1,095 days) honors, and climb the GoLingo Top 10 leaderboard rankings.';
     const prizeText=document.createElement('p');
     prizeText.className='favorite-invite-prizes';
     prizeText.textContent='Planned $100 completion reward + chances to win $1,000, $10,000, and a Tesla Model 3.';
