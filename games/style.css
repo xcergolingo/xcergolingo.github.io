@@ -402,3 +402,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 #golingo-challenge .challenge-details[open] .challenge-expand-label:after{content:" ▴";font-size:12px}
 #golingo-challenge .challenge-content{padding:22px 7px 4px}
 @media(max-width:600px){#golingo-challenge .challenge-campaign-card{padding:13px!important}#golingo-challenge .challenge-summary{padding:18px!important}#golingo-challenge .challenge-summary-copy strong{font-size:23px}#golingo-challenge .challenge-summary-side{width:100%;justify-content:space-between;gap:8px}}
+
+/* Prize opportunities highlighted in the collapsed challenge banner */
+#golingo-challenge .challenge-prize-highlights{display:flex;flex-wrap:wrap;gap:8px;margin:3px 0 1px}
+#golingo-challenge .challenge-prize-highlights>span{display:inline-block;background:#dff7ff;border:1px solid #8acff0;border-radius:11px;padding:9px 12px;color:#064e7b;font-weight:750;font-size:clamp(12px,2.5vw,15px);line-height:1.4}
+#golingo-challenge .challenge-prize-highlights b{font-weight:900;color:#007cbb}
+@media(max-width:600px){#golingo-challenge .challenge-prize-highlights>span{flex:1 1 190px}}
