@@ -498,3 +498,18 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
   #shared-learning-data > summary > span,
   #golingo-cloud > summary > span{flex:0 0 auto}
 }
+
+/* Proposed cash-campaign deadline protection disclosure */
+#golingo-challenge .challenge-deadline-notice,
+#golingo-challenge .challenge-deadline-note{
+  margin:12px 0 17px;
+  padding:12px 14px;
+  background:#edfaff;
+  color:#245f7e;
+  border:1px solid #add6e7;
+  border-radius:12px;
+  font-size:12px;
+  line-height:1.65;
+}
+#golingo-challenge .challenge-deadline-notice strong,
+#golingo-challenge .challenge-deadline-note strong{color:#115077}

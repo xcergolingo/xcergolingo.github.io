@@ -8,10 +8,12 @@ To enable, run \`games/game-streak-schema.sql\` once in your Supabase SQL Editor
 **Limitations:** a click opening a game is not proof of playing or learning; a user may launch games directly rather than through the gallery; an offline launch might fail to register; and a token/session/network error can miss the day. Therefore, this is a game-launch streak **beta**, not sufficient to adjudicate cash eligibility. A prize campaign requires verified in-game activity events, anti-abuse measures, robust event ingestion, replay protection, a claim review process and failure/appeal procedures.
 
 ## Cash award campaign — pending approval
-The marketing page says **“365-day challenge — potential $365 reward”** and **“Campaign coming soon; official rules and eligibility pending.”** It makes NO promise that current tracking earns money. Do not activate the cash offer or advertise it as guaranteed until the operator has:
-1. Established budget, reward cap and whether all qualifying people are paid; e.g., 100 winners = $36,500.
+The marketing page says **“365-day challenge — potential $100 reward”** and **“Campaign coming soon; official rules and eligibility pending.”** It makes NO promise that current tracking earns money. Do not activate the cash offer or advertise it as guaranteed until the operator has:
+1. Established budget, reward cap and whether all qualifying people are paid; e.g., 100 recipients = $10,000.
 2. Published terms (start/end dates, time zone, age/location eligibility, what counts as a verified play/day, missed-day and outage policy, how winners claim, time to payout, verification and disputes, taxes).
 3. Obtained promotion/legal review for every target jurisdiction. In Florida, certain promotions with prize values exceeding $5,000 in the aggregate have registration and financial security requirements if their structure qualifies under the state's game promotion rules.
 4. Implemented an authenticated verified-gameplay event service and payout workflow. No automatic cash transfers are made by this feature.
+
+**Deadline changes / existing learners:** Proposed rule: GoLingo may change future enrollment cutoffs prospectively with public notice, only as allowed by approved official rules and law. Learners who officially entered and began qualifying activity before a cutoff remain eligible to finish within their original published completion window. Their qualifying terms cannot be retroactively weakened. The app must record enrollment timestamps, locked rules versions, qualifying start days and completion windows on the server before this guarantee can be operational. Current beta tracking alone does not establish official participation.
 
 GoLingo founder/administrator must decide activation date. Today's beta events must not be retroactively treated as a binding reward offer unless expressly included in finalized official rules.
