@@ -535,3 +535,10 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .favorite-invite-challenge p{margin:0 0 8px!important;font-size:13px!important;line-height:1.5!important;color:#205e82}
 .favorite-invite-challenge .favorite-invite-prizes{font-weight:800;color:#0a699c}
 .favorite-invite-challenge small{font-size:10.5px;line-height:1.45;color:#507790}
+
+/* Clear signed-in Apple account connection and one-tap retry on iPad/iPhone */
+#golingo-challenge .challenge-profile-guest{display:flex;flex-direction:column;gap:11px;align-items:flex-start;padding:12px 0}
+#golingo-challenge .challenge-profile-guest p{margin:0;font-weight:700;color:#1c688e;line-height:1.55;font-size:13px}
+#golingo-challenge .challenge-profile-guest small{font-size:12px;line-height:1.5;color:#527990}
+#golingo-challenge #challenge-profile-connect{display:inline-flex;min-height:44px;background:#118eca;color:#fff;font-weight:800;border-color:#118eca;border-radius:10px}
+#golingo-challenge #challenge-profile-connect[hidden]{display:none!important}

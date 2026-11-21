@@ -7,7 +7,11 @@
   const legacyPkce='golingo:cognito:pkce:v1';
   const issuer='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_m1wn7aFbx';
   const appStore='https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025';
-  let token=null,source=null,onChange=()=>{};
+  let token=null,source=null,onChange=()=>{},lastReason='not-connected';
+  function emitStatus(){
+    window.dispatchEvent(new CustomEvent('golingo:cognito-auth-status',{detail:{reason:lastReason}}));
+  }
+  const authStatus=()=>({connected:!!getUser(),reason:lastReason,bridgeAvailable:nativeAvailable()});
   const nativeAvailable=()=>!!window.webkit?.messageHandlers?.goLingoAuth?.postMessage;
   function decode(value){
     try{return JSON.parse(atob(value.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}
@@ -21,9 +25,12 @@
       {id:p.sub,email:p.email||null}:null;
   }
   function requestNativeToken(){
-    if(!nativeAvailable())return false;
-    window.webkit.messageHandlers.goLingoAuth.postMessage({type:'requestCognitoIdToken'});
-    return true;
+    if(!nativeAvailable()){lastReason='no-bridge';emitStatus();return false}
+    lastReason='waiting-for-token';emitStatus();
+    try{
+      window.webkit.messageHandlers.goLingoAuth.postMessage({type:'requestCognitoIdToken'});
+      return true;
+    }catch{lastReason='bridge-error';emitStatus();return false}
   }
   function getToken(){
     if(getUser())return token;
@@ -35,13 +42,21 @@
     if(!nativeAvailable()||typeof jwt!=='string')return false;
     const previous=token,previousSource=source;
     token=jwt;source='native';
-    if(!getUser()){token=previous;source=previousSource;return false}
+    if(!getUser()){
+      const payload=decode(jwt);
+      lastReason=payload?.role!=='authenticated'&&payload?.token_use==='id'?'missing-role':'wrong-token';
+      token=previous;source=previousSource;
+      emitStatus();
+      return false;
+    }
+    lastReason='connected';
     onChange(getUser());
+    emitStatus();
     return true;
   }
   function nativeSessionUnavailable(reason){
     if(!nativeAvailable())return;
-    token=null;source=null;onChange(null);
+    token=null;source=null;lastReason='app-session-unavailable';onChange(null);emitStatus();
     const element=document.getElementById('cloud-status');
     if(element)element.textContent='GoLingo app login required: '+String(reason||'Sign in to your GoLingo account in the app.');
   }
@@ -57,18 +72,20 @@
     onChange=change;
     // Old browser sessions must not automatically sign in after this update.
     try{sessionStorage.removeItem(legacyToken);sessionStorage.removeItem(legacyPkce)}catch{}
-    token=null;source=null;
-    if(nativeAvailable())requestNativeToken();
-    onChange(null);
+    // A native reply can arrive before cloud.js initializes. Preserve an
+    // already accepted native token rather than wiping the app session.
+    if(!getUser()){token=null;source=null}
+    onChange(getUser());
+    if(nativeAvailable()&&!getUser())requestNativeToken();
     return Promise.resolve();
   }
   function signOut(){
-    token=null;source=null;onChange(null);
+    token=null;source=null;lastReason='signed-out';onChange(null);emitStatus();
   }
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden&&nativeAvailable())requestNativeToken();
   });
   window.GoLingoCognito={initialize,signIn,signOut,getToken,getUser,
     receiveNativeToken,requestNativeToken,nativeSessionUnavailable,
-    nativeAvailable,hasBrowserLogin:()=>false};
+    nativeAvailable,authStatus,hasBrowserLogin:()=>false};
 })();

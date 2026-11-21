@@ -65,7 +65,11 @@
   <section id="challenge-profile-panel" class="challenge-profile-panel" aria-labelledby="challenge-profile-title">
     <h3 id="challenge-profile-title">My GoLingo profile</h3>
     <p>Choose a unique public name for your game achievements. Your email and account ID remain private. Joining the top-10 leaderboard is optional.</p>
-    <div id="challenge-profile-guest" class="challenge-profile-guest">Sign in through the GoLingo iPhone app to create your profile.</div>
+    <div id="challenge-profile-guest" class="challenge-profile-guest">
+      <p id="challenge-profile-connection" role="status">Checking your GoLingo app connection…</p>
+      <button id="challenge-profile-connect" type="button" class="hub-chip">Connect my GoLingo account</button>
+      <small id="challenge-profile-help">Already signed in with Apple? Tap Connect to link your existing app session. You do not need to create another account.</small>
+    </div>
     <form id="challenge-profile-form" hidden>
       <label for="challenge-profile-name">Public online name</label>
       <div class="challenge-profile-row">
@@ -439,12 +443,12 @@
 <footer class="footer wrap"><div><a class="brand" href="https://www.golingoapp.com/" target="_blank" rel="noopener"><span class="brand-mark" aria-hidden="true">g<span>↗</span></span><span>GoLingo<span class="brand-dot">.</span></span></a><p>A world of words. A little more play.</p></div><div class="footer-links"><a href="#games">The games</a><a href="https://www.golingoapp.com/" target="_blank" rel="noopener">GoLingoApp.com ↗</a><a class="download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Download GoLingo ↗</a></div><div class="footer-bottom"><span>© <span id="year">2026</span> GoLingo. All rights reserved.</span><span>Made for curious minds.</span></div></footer>
 <div class="mobile-install"><span><strong>GoLingo</strong><small>Learn languages through play.</small></span><a class="button button-small download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Download <svg><use href="#download-icon"/></svg></a></div>
 <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-head"><div><p class="eyebrow">GOLINGO / GAMEPLAY PREVIEW</p><h2 id="preview-title">Lagoon</h2></div><button id="close-preview" aria-label="Close gameplay preview">×</button></div><video id="preview-video" controls playsinline preload="metadata" aria-describedby="preview-description"></video><p id="video-error" class="video-error" hidden>The video could not load. You can still try this game using the browser-demo link below.</p><div class="dialog-bottom"><div><p id="preview-description"></p><small>Actual gameplay · sample vocabulary · silent preview</small></div><a class="button download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Get GoLingo to play <svg><use href="#arrow"/></svg></a></div><a id="dialog-demo" class="demo-link" href="https://xcergolingo.github.io/far-cry-lagoon/">Try the browser demo ↗</a></dialog>
-<script defer src="cognito-auth.js?v=ios-app-signin-2"></script>
+<script defer src="cognito-auth.js?v=apple-login-profile-reconnect-1"></script>
 <script defer src="cloud.js?v=profile-referral-2"></script>
 <script defer src="cognito-diagnostic.js?v=app-login-only-1"></script>
 <script defer src="social.js?v=tesla-100k-reward-tiers-1"></script>
 <script defer src="streak.js?v=profile-referral-2"></script>
-<script defer src="profiles.js?v=profile-leaderboard-1"></script>
+<script defer src="profiles.js?v=apple-login-profile-reconnect-1"></script>
 </body></html>
 
 

@@ -9,6 +9,9 @@
  const publicToggle=$('challenge-profile-public');
  const info=$('challenge-profile-info');
  const guest=$('challenge-profile-guest');
+ const connect=$('challenge-profile-connect');
+ const connection=$('challenge-profile-connection');
+ const help=$('challenge-profile-help');
  const personal=$('challenge-my-link');
  const personalLink=$('challenge-referral-link');
  const visits=$('challenge-link-visits');
@@ -66,11 +69,38 @@
      try{sessionStorage.setItem(key,String(Date.now()))}catch{}
    }catch{}
  }
+ function showConnectionStatus(requesting=false){
+   if(!connection)return;
+   const bridge=window.GoLingoCognito;
+   const infoState=bridge?.authStatus?.()||null;
+   const available=!!bridge?.nativeAvailable?.();
+   if(connect)connect.hidden=!available;
+   if(!available){
+     connection.textContent='Your GoLingo Apple sign-in is not reaching Online Games. This page has no app authentication bridge.';
+     if(help)help.textContent='Open Online Games from the latest GoLingo app. If it still shows this message, the iOS/iPadOS app needs its GoLingo authentication bridge enabled. No new Apple ID or account is required.';
+   }else if(infoState?.reason==='missing-role'){
+     connection.textContent='GoLingo account detected, but its game access token is missing the authenticated role claim.';
+     if(help)help.textContent='Sign out and sign back in inside GoLingo, then tap Connect. If it continues, the app developer must update the Cognito token claims.';
+   }else if(infoState?.reason==='wrong-token'){
+     connection.textContent='GoLingo sent a token, but Online Games could not validate it for this account.';
+     if(help)help.textContent='Open GoLingo, sign in again with Apple, and tap Connect. Do not share tokens or passwords.';
+   }else{
+     connection.textContent=requesting?'Requesting your existing GoLingo login from the app…':'Your Apple sign-in has not yet connected to Online Games.';
+     if(help)help.textContent='If you already signed in with Apple, tap Connect my GoLingo account. You do not need to create another account.';
+   }
+ }
  function setSignedOut(){
    owner=null;profile=null;
    form.hidden=true;guest.hidden=false;personal.hidden=true;
-   info.textContent='Save your profile after signing in to GoLingo.';
+   info.textContent='Save your profile after connecting your GoLingo account.';
+   showConnectionStatus();
  }
+ connect?.addEventListener('click',()=>{
+   const bridge=window.GoLingoCognito;
+   if(bridge?.nativeAvailable?.()&&bridge.requestNativeToken()){
+     showConnectionStatus(true);
+   }else showConnectionStatus();
+ });
  async function refreshProfile(){
    if(!authed)return;
    const id=current();
@@ -176,7 +206,8 @@
    }finally{refresh.disabled=false}
  }
  refresh.addEventListener('click',refreshLeaderboard);
- window.addEventListener('golingo:auth-state',()=>{if(authed)refreshProfile()});
+ window.addEventListener('golingo:auth-state',()=>{if(authed)refreshProfile();else showConnectionStatus()});
+ window.addEventListener('golingo:cognito-auth-status',()=>{if(!current())showConnectionStatus()});
  window.addEventListener('golingo:community-changed',()=>{if(anon)refreshLeaderboard()});
  document.addEventListener('visibilitychange',()=>{
    if(!document.hidden&&authed){refreshProfile();refreshLeaderboard()}
