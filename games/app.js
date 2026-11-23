@@ -199,6 +199,7 @@
     quickPinned=signedIn&&cardById.has(pinnedGameId)?pinnedGameId:null;
     quickRecent=signedIn&&cardById.has(lastPlayedGameId)?lastPlayedGameId:null;
     renderQuick();applyView();
+    updateFirstCarouselPreview();
   };
   function jumpQuick(id){
     if(!id||!cardById.has(id))return;
@@ -713,6 +714,21 @@
     demo:card.querySelector('.demo-link'),
     clip:clipFiles[card.id]||null
   }));
+  // Keep the original rotation order for every preview after the user's
+  // last-played game. The account-specific item is shown first.
+  const originalSlides=slides.slice();
+  let firstPreviewGameId=null;
+  function updateFirstCarouselPreview(){
+    const next=quickRecent&&originalSlides.some(item=>item.id===quickRecent)?quickRecent:null;
+    if(next===firstPreviewGameId)return;
+    firstPreviewGameId=next;
+    slides.splice(0,slides.length,...originalSlides);
+    if(next){
+      const idx=slides.findIndex(item=>item.id===next);
+      if(idx>0)slides.unshift(...slides.splice(idx,1));
+    }
+    showSlide(0);
+  }
   let slideIndex=0;
   let carouselPlaying=!reducedMotion.matches && !saveData;
   let heroInView=false;
