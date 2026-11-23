@@ -166,6 +166,7 @@
   // Public cloud counts and private Cognito account reactions are supplied by social.js.
   let socialLoaded = false, socialSignedIn = false;
   let quickPinned=null,quickRecent=null;
+  const quickAccessRow=document.getElementById('quick-access-row');
   const pinnedTitle=document.getElementById('quick-pinned-title');
   const recentTitle=document.getElementById('quick-last-title');
   const pinnedJump=document.getElementById('quick-pinned-jump');
@@ -194,6 +195,7 @@
     });
   }
   window.GoLingoGallerySetQuickAccess=({pinnedGameId,lastPlayedGameId,signedIn})=>{
+    if(quickAccessRow)quickAccessRow.hidden=!signedIn;
     quickPinned=signedIn&&cardById.has(pinnedGameId)?pinnedGameId:null;
     quickRecent=signedIn&&cardById.has(lastPlayedGameId)?lastPlayedGameId:null;
     renderQuick();applyView();

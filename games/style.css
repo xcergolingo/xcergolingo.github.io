@@ -551,3 +551,5 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 .game-pin{border-radius:24px;min-height:40px;padding:8px 11px;border:1px solid #95cbe4;background:#e5f7ff;color:#0f719e;font-size:12px;font-weight:800;cursor:pointer}.game-pin[aria-pressed=true]{background:#128fc8;color:#fff;border-color:#128fc8}.game-pin[hidden]{display:none!important}
 .quick-card-badges{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.quick-card-badges[hidden]{display:none!important}.quick-card-badges span{border-radius:7px;background:#dcf4ff;color:#0a678d;padding:5px 8px;font-size:11px;font-weight:800}
 @media(max-width:560px){.quick-access-row{grid-template-columns:1fr}.quick-access-button{min-height:65px}}
+
+.quick-access-row[hidden]{display:none!important}
