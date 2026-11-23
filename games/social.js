@@ -10,6 +10,46 @@
   let publicDb, accountDb, ready=false, refreshing=false, refreshRequested=false, flushing=false, inFlight=new Set();
   let totals=Object.create(null), likes=Object.create(null), favorites=Object.create(null);
   let owner=null;
+  let quick={pin:null,recent:null};
+  const quickIssue='Account quick access requires game-quick-access.sql in Supabase.';
+  const renderQuick=()=>window.GoLingoGallerySetQuickAccess?.({pinnedGameId:quick.pin,lastPlayedGameId:quick.recent,signedIn:!!owner});
+  async function loadQuick(account){
+    try{
+      const {data,error}=await accountDb.rpc('golingo_get_game_quick_access');
+      if(error)throw error;
+      if(account!==currentUser())return;
+      const item=Array.isArray(data)?data[0]:data;
+      quick={pin:gameSet.has(item?.pinned_game_id)?item.pinned_game_id:null,
+        recent:gameSet.has(item?.last_played_game_id)?item.last_played_game_id:null};
+      renderQuick();
+    }catch(error){if(account===currentUser()&&storageStatus)storageStatus.textContent=quickIssue}
+  }
+  async function recordRecentPlay(gameId){
+    const account=currentUser();
+    if(!ready||!account||!gameSet.has(gameId))return false;
+    try{
+      const {error}=await accountDb.rpc('golingo_mark_recent_game',{p_game_id:gameId});
+      if(error)throw error;
+      if(account!==currentUser())return false;
+      quick.recent=gameId;renderQuick();return true;
+    }catch(error){return false}
+  }
+  async function togglePinned(gameId){
+    if(!gameSet.has(gameId))return;
+    if(!currentUser()){showFavoriteInvite(gameId);return}
+    if(!favorites[gameId]){reactionFeedback(gameId,'Favorite this game before pinning it.',true);return}
+    if(inFlight.has('pin:'+gameId))return;
+    inFlight.add('pin:'+gameId);
+    const target=quick.pin===gameId?null:gameId;
+    try{
+      const {data,error}=await accountDb.rpc('golingo_pin_favorite_game',{p_game_id:target});
+      if(error)throw error;
+      quick.pin=typeof data==='string'&&gameSet.has(data)?data:null;
+      renderQuick();
+      reactionFeedback(gameId,target?'📌 Pinned at top':'Unpinned');
+    }catch(error){reactionFeedback(gameId,quickIssue,true)}
+    finally{inFlight.delete('pin:'+gameId)}
+  }
   const cloudStatus=document.getElementById('cloud-status');
   const storageStatus=document.getElementById('hub-storage-status');
   const notify=text=>{if(cloudStatus)cloudStatus.textContent=text;};
@@ -72,6 +112,8 @@
         owner=null;likes=Object.create(null);favorites=Object.create(null);
       }
       render();
+      if(account)await loadQuick(account);
+      else {quick={pin:null,recent:null};renderQuick()}
     }catch(error){
       if(storageStatus){
         storageStatus.textContent='Shared counts and account favorites are not available yet. Run game-social-schema.sql in Supabase. '+error.message;
@@ -221,7 +263,13 @@
            .insert({user_id:account,game_id:gameId});
       if(response.error && !(adding && response.error.code==='23505'))throw response.error;
       favorites[gameId]=adding;
-      if(!adding)delete favorites[gameId];
+      if(!adding){
+        delete favorites[gameId];
+        if(quick.pin===gameId){
+          quick.pin=null;renderQuick();
+          accountDb.rpc('golingo_pin_favorite_game',{p_game_id:null}).catch(()=>{});
+        }
+      }
       render();
       reactionFeedback(gameId,adding?'♥ Added to your GoLingo favorites':'Removed from favorites');
       await refresh();
@@ -265,7 +313,7 @@
     finally{if(button)button.disabled=false}
   }
   document.getElementById('social-import-legacy')?.addEventListener('click',importDeviceReactions);
-  window.GoLingoSocial={toggleLike,toggleFavorite,refresh,importDeviceReactions};
+  window.GoLingoSocial={toggleLike,toggleFavorite,togglePinned,recordRecentPlay,refresh,importDeviceReactions};
   window.addEventListener('golingo:auth-state',()=>{if(ready)refresh()});
   window.addEventListener('golingo:game-launch',()=>{if(ready)flushLaunches()});
   window.addEventListener('pageshow',()=>{if(ready){refresh();flushLaunches()}});

@@ -165,6 +165,46 @@
   ].join(' '))]));
   // Public cloud counts and private Cognito account reactions are supplied by social.js.
   let socialLoaded = false, socialSignedIn = false;
+  let quickPinned=null,quickRecent=null;
+  const pinnedTitle=document.getElementById('quick-pinned-title');
+  const recentTitle=document.getElementById('quick-last-title');
+  const pinnedJump=document.getElementById('quick-pinned-jump');
+  const recentJump=document.getElementById('quick-last-jump');
+  function renderQuick(){
+    if(pinnedTitle)pinnedTitle.textContent=quickPinned?cardNames.get(cardById.get(quickPinned)):'None yet';
+    if(recentTitle)recentTitle.textContent=quickRecent?cardNames.get(cardById.get(quickRecent)):'No recorded launch yet';
+    if(pinnedJump)pinnedJump.disabled=!quickPinned;
+    if(recentJump)recentJump.disabled=!quickRecent;
+    cards.forEach(card=>{
+      const pin=card.querySelector('.game-pin');
+      if(pin){
+        pin.hidden=!socialSignedIn||!favorites[card.id];
+        pin.setAttribute('aria-pressed',String(quickPinned===card.id));
+        pin.textContent=quickPinned===card.id?'📌 Pinned':'📌 Pin to top';
+      }
+      let badge=card.querySelector('.quick-card-badges');
+      if(!badge){
+        badge=document.createElement('div');badge.className='quick-card-badges';
+        card.querySelector('.game-copy')?.prepend(badge);
+      }
+      badge.replaceChildren();
+      if(quickPinned===card.id){const mark=document.createElement('span');mark.textContent='📌 Pinned favorite';badge.append(mark)}
+      if(quickRecent===card.id){const mark=document.createElement('span');mark.textContent='↻ Last played';badge.append(mark)}
+      badge.hidden=!badge.children.length;
+    });
+  }
+  window.GoLingoGallerySetQuickAccess=({pinnedGameId,lastPlayedGameId,signedIn})=>{
+    quickPinned=signedIn&&cardById.has(pinnedGameId)?pinnedGameId:null;
+    quickRecent=signedIn&&cardById.has(lastPlayedGameId)?lastPlayedGameId:null;
+    renderQuick();applyView();
+  };
+  function jumpQuick(id){
+    if(!id||!cardById.has(id))return;
+    changeView({search:'',categories:[],favoritesOnly:false});
+    cardById.get(id).scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  pinnedJump?.addEventListener('click',()=>jumpQuick(quickPinned));
+  recentJump?.addEventListener('click',()=>jumpQuick(quickRecent));
   let socialTotals = Object.create(null);
   const playCount = card => socialLoaded ? (socialTotals[card.id]?.plays || 0) : (plays[card.id]?.count || 0);
   const likeCount = card => socialLoaded ? (socialTotals[card.id]?.likes || 0) : Number(!!liked[card.id]);
@@ -175,7 +215,7 @@
     liked = booleanCollection(likes || {});
     favorites = booleanCollection(accountFavorites || {});
     cards.forEach(card => {renderLike(card);renderFavorite(card);renderPlays(card);});
-    updateStorageStatus();applyView();
+    updateStorageStatus();renderQuick();applyView();
   };
 
 
@@ -212,6 +252,9 @@
   function sortGames() {
     const sorted = cards.slice().sort((a, b) => {
       let difference = 0;
+      const rank=c=>c.id===quickPinned?0:c.id===quickRecent?1:2;
+      difference=rank(a)-rank(b);
+      if(difference)return difference;
       if (view.sort === 'plays') difference = playCount(b) - playCount(a);
       else if (view.sort === 'recent') difference = (plays[b.id]?.lastPlayed || 0) - (plays[a.id]?.lastPlayed || 0);
       else if (view.sort === 'likes') difference = likeCount(b) - likeCount(a);
@@ -288,13 +331,16 @@
     const favoriteButton = document.createElement('button');
     favoriteButton.type = 'button';
     favoriteButton.className = 'game-favorite';
+    const pinButton=document.createElement('button');
+    pinButton.type='button';pinButton.className='game-pin';pinButton.hidden=true;
     const playLabel = document.createElement('span');
     playLabel.className = 'game-plays';
-    actions.append(likeButton, favoriteButton, playLabel);
+    actions.append(likeButton, favoriteButton, pinButton, playLabel);
     if (tags) tags.insertAdjacentElement('afterend', actions);
     else copy?.appendChild(actions);
     likeButton.addEventListener('click', () => window.GoLingoSocial?.toggleLike(card.id));
     favoriteButton.addEventListener('click', () => window.GoLingoSocial?.toggleFavorite(card.id));
+    pinButton.addEventListener('click',()=>window.GoLingoSocial?.togglePinned(card.id));
     renderLike(card);
     renderFavorite(card);
     renderPlays(card);
@@ -585,7 +631,7 @@
     // A game launch recorded on the Supabase server is one day of streak credit.
     // Wait briefly for confirmation before navigation. Unauthenticated and
     // unsupported browsers retain their normal immediate navigation path.
-    if (window.GoLingoStreak?.canTrack?.() &&
+    if ((window.GoLingoStreak?.canTrack?.() || (window.GoLingoCognito?.getUser?.()?.id && window.GoLingoSocial?.recordRecentPlay)) &&
         !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
       const destination=url.toString();
@@ -596,8 +642,10 @@
         window.location.assign(destination);
       };
       const fallback=setTimeout(continueToGame,2200);
-      Promise.resolve(window.GoLingoStreak.recordLaunch(card.id)).catch(()=>{})
-        .finally(()=>{clearTimeout(fallback);continueToGame()});
+      Promise.allSettled([
+        Promise.resolve(window.GoLingoStreak?.canTrack?.()?window.GoLingoStreak.recordLaunch(card.id):null),
+        Promise.resolve(window.GoLingoSocial?.recordRecentPlay?.(card.id))
+      ]).finally(()=>{clearTimeout(fallback);continueToGame()});
     }
     // Leave navigation to the native link when not tracking a signed-in launch.
   }

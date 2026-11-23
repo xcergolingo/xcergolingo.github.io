@@ -542,3 +542,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#168fe0
 #golingo-challenge .challenge-profile-guest small{font-size:12px;line-height:1.5;color:#527990}
 #golingo-challenge #challenge-profile-connect{display:inline-flex;min-height:44px;background:#118eca;color:#fff;font-weight:800;border-color:#118eca;border-radius:10px}
 #golingo-challenge #challenge-profile-connect[hidden]{display:none!important}
+
+/* Saved GoLingo account quick access */
+.quick-access-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.quick-access-button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:14px 16px;border-radius:14px;background:#e5f7ff;border:1px solid #a3d7ed;color:#165d84;text-align:left;min-height:79px}
+.quick-access-button>span{font-weight:800;font-size:12px}.quick-access-button>strong{font-weight:750;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.quick-access-button:not(:disabled){cursor:pointer;background:#d4f2ff}.quick-access-button:not(:disabled):hover{border-color:#1687be;background:#c8edff}.quick-access-button:disabled{opacity:.75}
+.game-pin{border-radius:24px;min-height:40px;padding:8px 11px;border:1px solid #95cbe4;background:#e5f7ff;color:#0f719e;font-size:12px;font-weight:800;cursor:pointer}.game-pin[aria-pressed=true]{background:#128fc8;color:#fff;border-color:#128fc8}.game-pin[hidden]{display:none!important}
+.quick-card-badges{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.quick-card-badges[hidden]{display:none!important}.quick-card-badges span{border-radius:7px;background:#dcf4ff;color:#0a678d;padding:5px 8px;font-size:11px;font-weight:800}
+@media(max-width:560px){.quick-access-row{grid-template-columns:1fr}.quick-access-button{min-height:65px}}
