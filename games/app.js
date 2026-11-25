@@ -47,6 +47,69 @@
     sessionStorage.removeItem(lessonKey); activeLesson = null; lessonInput.value = '';
     lessonStatus.textContent = 'No lesson loaded';
   });
+  // Curated spiritual lesson: stable IDs keep replay history deduplicated.
+  const spiritual = {
+    en:['English','We are oneness.','We are the light.','The creator loves all of us.','I am sorry.','Forgive me.','Thank you.','I love you.'],
+    es:['Spanish','Somos uno.','Somos la luz.','El Creador nos ama a todos.','Lo siento.','Perdóname.','Gracias.','Te amo.'],
+    fr:['French','Nous ne faisons qu’un.','Nous sommes la lumière.','Le Créateur nous aime tous.','Je suis désolé(e).','Pardonne-moi.','Merci.','Je t’aime.'],
+    de:['German','Wir sind eins.','Wir sind das Licht.','Der Schöpfer liebt uns alle.','Es tut mir leid.','Vergib mir.','Danke.','Ich liebe dich.'],
+    it:['Italian','Siamo una cosa sola.','Siamo la luce.','Il Creatore ci ama tutti.','Mi dispiace.','Perdonami.','Grazie.','Ti amo.'],
+    pt:['Portuguese','Somos um só.','Somos a luz.','O Criador ama todos nós.','Sinto muito.','Perdoe-me.','Agradeço.','Eu te amo.'],
+    zh:['Chinese (Simplified)','我们是一体的。','我们就是光。','造物主爱我们每一个人。','对不起。','请原谅我。','谢谢你。','我爱你。'],
+    ja:['Japanese','私たちは一つです。','私たちは光です。','創造主は私たちすべてを愛しています。','ごめんなさい。','許してください。','ありがとう。','愛しています。'],
+    ko:['Korean','우리는 하나입니다.','우리는 빛입니다.','창조주께서는 우리 모두를 사랑하십니다.','미안합니다.','용서해 주세요.','감사합니다.','사랑합니다.'],
+    vi:['Vietnamese','Chúng ta là một.','Chúng ta là ánh sáng.','Đấng Tạo Hóa yêu thương tất cả chúng ta.','Tôi xin lỗi.','Hãy tha thứ cho tôi.','Cảm ơn bạn.','Tôi yêu bạn.'],
+    th:['Thai','เราเป็นหนึ่งเดียวกัน','เราคือแสงสว่าง','พระผู้สร้างรักเราทุกคน','ขอโทษ','โปรดให้อภัยฉัน','ขอบคุณ','ฉันรักคุณ'],
+    ru:['Russian','Мы едины.','Мы — свет.','Творец любит нас всех.','Мне очень жаль.','Прости меня.','Спасибо.','Я люблю тебя.'],
+    uk:['Ukrainian','Ми єдині.','Ми — світло.','Творець любить нас усіх.','Мені шкода.','Пробач мені.','Дякую.','Я тебе люблю.'],
+    ar:['Arabic','نحن واحد.','نحن النور.','الخالق يحبنا جميعًا.','أعتذر.','سامحني.','شكرًا لك.','أحبك.'],
+    hi:['Hindi','हम सब एक हैं।','हम प्रकाश हैं।','सृष्टिकर्ता हम सभी से प्रेम करते हैं।','मुझे खेद है।','मुझे क्षमा करें।','धन्यवाद।','मुझे तुमसे प्यार है।'],
+    nl:['Dutch','Wij zijn één.','Wij zijn het licht.','De Schepper houdt van ons allemaal.','Het spijt me.','Vergeef me.','Dank je.','Ik hou van je.'],
+    pl:['Polish','Jesteśmy jednością.','Jesteśmy światłem.','Stwórca kocha nas wszystkich.','Przepraszam.','Wybacz mi.','Dziękuję.','Kocham cię.'],
+    tr:['Turkish','Biz biriz.','Biz ışığız.','Yaratıcı hepimizi sever.','Özür dilerim.','Beni affet.','Teşekkür ederim.','Seni seviyorum.'],
+    id:['Indonesian','Kita adalah satu.','Kita adalah cahaya.','Sang Pencipta mengasihi kita semua.','Saya minta maaf.','Maafkan saya.','Terima kasih.','Aku mencintaimu.'],
+    ms:['Malay','Kita semua satu.','Kita adalah cahaya.','Pencipta mengasihi kita semua.','Saya minta maaf.','Maafkan saya.','Terima kasih.','Saya sayang kamu.'],
+    sv:['Swedish','Vi är ett.','Vi är ljuset.','Skaparen älskar oss alla.','Förlåt.','Förlåt mig.','Tack.','Jag älskar dig.'],
+    da:['Danish','Vi er ét.','Vi er lyset.','Skaberen elsker os alle.','Det gør mig ondt.','Tilgiv mig.','Tak.','Jeg elsker dig.'],
+    fi:['Finnish','Olemme yhtä.','Olemme valo.','Luoja rakastaa meitä kaikkia.','Olen pahoillani.','Anna minulle anteeksi.','Kiitos.','Rakastan sinua.'],
+    no:['Norwegian','Vi er ett.','Vi er lyset.','Skaperen elsker oss alle.','Jeg beklager.','Tilgi meg.','Takk.','Jeg elsker deg.'],
+    el:['Greek','Είμαστε ένα.','Είμαστε το φως.','Ο Δημιουργός μάς αγαπά όλους.','Λυπάμαι.','Συγχώρεσέ με.','Ευχαριστώ.','Σ’ αγαπώ.'],
+    he:['Hebrew','כולנו אחד.','אנחנו האור.','הבורא אוהב את כולנו.','אני מצטער/ת.','סלח/י לי.','תודה.','אני אוהב/ת אותך.'],
+    ro:['Romanian','Suntem una.','Suntem lumina.','Creatorul ne iubește pe toți.','Îmi pare rău.','Iartă-mă.','Mulțumesc.','Te iubesc.'],
+    cs:['Czech','Jsme jedno.','Jsme světlo.','Stvořitel nás všechny miluje.','Je mi to líto.','Odpusť mi.','Děkuji.','Miluji tě.']
+  };
+  const spPrimary=document.getElementById('spiritual-primary'),spLearning=document.getElementById('spiritual-learning');
+  if(spPrimary&&spLearning){
+    for(const [code,values] of Object.entries(spiritual).sort((a,b)=>a[1][0].localeCompare(b[1][0]))){
+      for(const select of [spPrimary,spLearning])select.add(new Option(values[0],code));
+    }
+    spPrimary.value='en';spLearning.value='es';
+    const preview=document.getElementById('spiritual-preview'),status=document.getElementById('spiritual-status'),load=document.getElementById('spiritual-load');
+    function refreshSpiritual(){
+      preview.replaceChildren();
+      const same=spPrimary.value===spLearning.value;
+      load.disabled=same;
+      status.textContent=same?'Choose two different languages.':'';
+      spiritual[spLearning.value].slice(1).forEach((sentence,i)=>{
+        const li=document.createElement('li'),target=document.createElement('strong'),translation=document.createElement('small');
+        target.textContent=sentence;target.lang=spLearning.value;target.dir='auto';
+        translation.textContent=spiritual[spPrimary.value][i+1];translation.lang=spPrimary.value;translation.dir='auto';
+        li.append(target,translation);preview.append(li);
+      });
+    }
+    spPrimary.addEventListener('change',refreshSpiritual);spLearning.addEventListener('change',refreshSpiritual);
+    load.addEventListener('click',()=>{
+      if(spPrimary.value===spLearning.value)return;
+      const primaryLanguage=spPrimary.value,learningLanguage=spLearning.value;
+      const words=spiritual[learningLanguage].slice(1).map((word,i)=>({id:'one-light-'+(i+1),word,translation:spiritual[primaryLanguage][i+1],sentence:word,sentenceTranslation:spiritual[primaryLanguage][i+1]}));
+      try{
+        saveLesson(JSON.stringify({primaryLanguage,learningLanguage,translationLanguage:primaryLanguage,words}));
+        status.textContent='Seven sentences loaded. Choose any game below.';
+        document.getElementById('games')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+      }catch(error){status.textContent='Could not load lesson: '+error.message;}
+    });
+    refreshSpiritual();
+  }
   // Some games use a words-only schema; adapt only cards that opt in.
   function launchLessonPayload(lesson, format) {
     if (format !== 'word-pack') return lesson;
