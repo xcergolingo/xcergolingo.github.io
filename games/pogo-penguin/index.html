@@ -133,7 +133,7 @@
       <div class="settingsHead"><h2>📚 Your GoLingo words</h2><button id="closeLearning" aria-label="Close word settings">×</button></div>
       <p>Paste the JSON from GoLingo. Every word keeps its own translation and pronunciation language.</p>
       <textarea id="jsonInput" spellcheck="false" aria-label="GoLingo vocabulary JSON" placeholder='{"primaryLanguage":"en","learningLanguage":"ja","words":[{"id":"101","word":"水","translation":"water"}]}'></textarea>
-      <div class="settingLine"><label for="showTranslationSetting">Show translation after landing</label><input id="showTranslationSetting" type="checkbox" /></div>
+      <div class="settingLine"><label for="showTranslationSetting">Show translation after landing</label><input id="showTranslationSetting" type="checkbox" checked /></div>
       <div class="settingLine"><label for="repeatSetting">Repeat spoken word automatically</label><input id="repeatSetting" type="checkbox" checked /></div>
       <div class="settingsActions"><button class="primary" id="loadWords">LOAD WORDS</button><button class="secondaryBtn" id="exportBasket">EXPORT BASKET</button></div>
       <p id="importStatus" role="status">16 sample Japanese words are ready to play.</p>
@@ -178,7 +178,7 @@
       ['波','wave'],['ペンギン','penguin'],['友達','friend'],['冒険','adventure']
     ].map(([word,translation],i)=>({id:String(i+1),word,translation}));
     let vocabulary=DEMO_WORDS,learningLanguage='ja',primaryLanguage='en';
-    let showTranslation=false,repeatSpeech=true,pausedFrom='title';
+    let showTranslation=true,repeatSpeech=true,pausedFrom='title';
     let collected=[],seenWords=new Set(),speechToken=0,speechTimer=null,activeWordAudio=null,audioWordIndex=-1;
     const wordTextures=new Map();
     const LANGUAGES={ja:'ja-JP',zh:'zh-CN',ko:'ko-KR',en:'en-US',es:'es-ES',fr:'fr-FR',de:'de-DE',pt:'pt-PT',it:'it-IT',vi:'vi-VN',ru:'ru-RU',ar:'ar-SA',hi:'hi-IN',th:'th-TH',uk:'uk-UA',nl:'nl-NL',sv:'sv-SE'};
