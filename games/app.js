@@ -787,15 +787,15 @@
     hero.poster=item.poster;
     hero.dataset.src=item.clip||'';
     // Preserve GoLingo lesson transfer parameters when launching the game.
-    heroLink.href=item.demo.href;
+    heroLink.href='#'+encodeURIComponent(item.id);
     heroLink.dataset.gameId=item.id;
     for(const key of ['lessonKey','lessonFormat']){
       if(item.demo.dataset[key])heroLink.dataset[key]=item.demo.dataset[key];
       else delete heroLink.dataset[key];
     }
-    heroLink.setAttribute('aria-label','Play '+item.title+' with GoLingo');
+    heroLink.setAttribute('aria-label','Find '+item.title+' in the game list');
     heroTitle.textContent=item.title;
-    heroSubtitle.textContent='Tap to play this language game';
+    heroSubtitle.textContent='Tap to find this game in the list';
     heroMediaType.textContent=item.clip?'GAMEPLAY VIDEO':'GAME COVER PREVIEW';
     heroPosition.textContent=(slideIndex+1)+' / '+slides.length;
     updateHeroPlayback();
@@ -803,9 +803,11 @@
   document.getElementById('hero-prev').addEventListener('click',()=>showSlide(slideIndex-1));
   document.getElementById('hero-next').addEventListener('click',()=>showSlide(slideIndex+1));
   motionButton.addEventListener('click',()=>{carouselPlaying=!carouselPlaying;updateHeroPlayback()});
-  // Hero is a normal in-gallery game link and uses the same launch handler as
-  // a gallery card, so lesson data and launch counting remain intact.
-  heroLink.addEventListener('click',launchGame);
+  // Preview navigation never launches a game or records a play.
+  heroLink.addEventListener('click',event=>{
+    event.preventDefault();
+    jumpQuick(heroLink.dataset.gameId);
+  });
   carousel.addEventListener('touchstart',e=>{
     if(e.touches.length!==1)return;
     touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
