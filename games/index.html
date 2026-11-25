@@ -12,7 +12,7 @@
 <link rel="canonical" href="https://xcergolingo.github.io/games/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23163029'/%3E%3Cpath d='M42 20a17 17 0 1 0 5 21V31H32v8h7a9 9 0 1 1-3-13z' fill='%23d7f67a'/%3E%3C/svg%3E">
 <title>GoLingo Games — Your words. A whole new world.</title>
-<link rel="stylesheet" href="style.css?v=pinned-recent-account-2"><script defer src="app.js?v=preview-jump-to-card-1"></script>
+<link rel="stylesheet" href="style.css?v=pinned-recent-account-2"><script defer src="app.js?v=one-world-one-light-1"></script>
 <style>
 #challenge-promo-float{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid #ffdc82;border-radius:22px;background:linear-gradient(135deg,#fff3bd,#ffc34b);color:#573400;box-shadow:0 5px 22px #593b0033;font:inherit;text-align:left;cursor:pointer;max-width:calc(100vw - 28px)}
 #challenge-promo-float strong,#challenge-promo-float small{display:block;line-height:1.3}
@@ -22,7 +22,20 @@
 #challenge-promo-float[hidden]{display:none}
 #golingo-challenge{scroll-margin-top:90px}
 </style>
-</head>
+<style>
+#spiritual-lesson{background:linear-gradient(145deg,#fff9e8,#f0faff);border:1px solid #e8d8a6;border-radius:20px;padding:clamp(16px,4vw,28px);margin:0 0 24px;color:#203e51}
+#spiritual-lesson h2{font-size:clamp(21px,4vw,30px);margin:8px 0}
+#spiritual-lesson .spiritual-kicker{font-size:12px;font-weight:800;letter-spacing:.12em;color:#896011}
+.spiritual-selects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.spiritual-selects label{font-size:13px;font-weight:700;min-width:0}
+.spiritual-selects select{display:block;width:100%;margin-top:6px;padding:10px 6px;border:1px solid #a9c9d9;border-radius:9px;background:white;color:#203e51;font-size:16px}
+#spiritual-preview{padding-inline-start:24px;margin:16px 0}
+#spiritual-preview li{padding:9px 0;border-bottom:1px solid #dce5e8}
+#spiritual-preview strong,#spiritual-preview small{display:block;text-align:start;overflow-wrap:anywhere}
+#spiritual-preview small{color:#526575;margin-top:4px}
+#spiritual-load{white-space:normal;max-width:100%}
+#spiritual-load:disabled{opacity:.5;cursor:not-allowed}
+</style></head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="download-icon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></symbol><symbol id="play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol><symbol id="spark" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/></symbol><symbol id="external" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></symbol></svg>
@@ -62,7 +75,11 @@
 <div class="challenge-campaign-card">
   <details id="challenge-details" class="challenge-details">
 <summary class="challenge-brand challenge-summary"><span class="challenge-summary-copy"><span class="challenge-hero-kicker">🏆 GOLINGO 365-DAY CHALLENGE</span><strong><span class="challenge-hero-money">$100</span> planned completion reward <span class="challenge-hero-separator">+</span> <span class="challenge-hero-tesla">a chance to win a Tesla Model 3!</span></strong><span class="challenge-prize-highlights"><span>10 chances to win <b>$1,000</b></span><span>1 <b>$10,000</b> drawing per 10,000 achievers</span></span><small>$1,000 per 1,000 achievers · $10,000 per 10,000 · one Tesla Model 3 drawing at 100,000 total achievers · rules pending</small></span><span class="challenge-summary-side"><span class="challenge-status">Coming soon · official rules pending</span><span class="challenge-expand-label">Show rewards &amp; progress</span></span></summary>
-<div class="challenge-content">
+<div class="challenge-content"><section id="spiritual-lesson" aria-labelledby="spiritual-title">
+<p class="spiritual-kicker">ONE WORLD · ONE LIGHT</p><h2 id="spiritual-title">We are oneness. We are the light.</h2><p>Learn seven messages of unity, love, gratitude and forgiveness in 28 languages. Choose your languages, load the sentences and play your favorite game.</p>
+<div class="spiritual-selects"><label>Primary language<select id="spiritual-primary"></select></label><label>Learning language<select id="spiritual-learning"></select></label></div>
+<ol id="spiritual-preview"></ol><button class="button" id="spiritual-load" type="button">Load sentences &amp; choose a game →</button><p id="spiritual-status" role="status"></p>
+</section>
   <div class="campaign-share-message">
     <p><strong>Share GoLingo Games with friends!</strong> Help more language learners discover the games so our community can reach the 1,000, 10,000 and 100,000 achiever milestones sooner.</p>
     <button type="button" id="challenge-share-games" class="hub-chip challenge-share-action">Share GoLingo Games</button>
@@ -457,7 +474,7 @@
 <section class="wrap hub-footer-note">Choose a category, save your lesson, then launch a game. Your lesson remains available when you return to this page.</section></main>
 <footer class="footer wrap"><div><a class="brand" href="https://www.golingoapp.com/" target="_blank" rel="noopener"><span class="brand-mark" aria-hidden="true">g<span>↗</span></span><span>GoLingo<span class="brand-dot">.</span></span></a><p>A world of words. A little more play.</p></div><div class="footer-links"><a href="#games">The games</a><a href="https://www.golingoapp.com/" target="_blank" rel="noopener">GoLingoApp.com ↗</a><a class="download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Download GoLingo ↗</a></div><div class="footer-bottom"><span>© <span id="year">2026</span> GoLingo. All rights reserved.</span><span>Made for curious minds.</span></div></footer>
 <div class="mobile-install"><span><strong>GoLingo</strong><small>Learn languages through play.</small></span><a class="button button-small download-link" href="https://apps.apple.com/us/app/learn-lingo-with-golingo-ai/id1194977025">Download <svg><use href="#download-icon"/></svg></a></div>
-<button id="challenge-promo-float" type="button" aria-controls="challenge-details" aria-label="Explore the upcoming GoLingo 365-day challenge"><span aria-hidden="true" style="font-size:24px">🏆</span><span><strong>365-Day Challenge</strong><small>$100 reward + Tesla chance</small><small>Coming soon · rules pending</small></span><span aria-hidden="true">›</span></button>
+<button id="challenge-promo-float" type="button" aria-controls="challenge-details" aria-label="Explore the upcoming GoLingo 365-day challenge"><span aria-hidden="true" style="font-size:24px">🏆</span><span><strong>365-Day Challenge</strong><small>We are oneness. We are the light.</small><small>$100 reward + Tesla chance</small><small>Coming soon · rules pending</small></span><span aria-hidden="true">›</span></button>
 <script>
 (function(){
  const button=document.getElementById('challenge-promo-float');
