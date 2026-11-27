@@ -481,6 +481,7 @@
  const section=document.getElementById('golingo-challenge');
  const details=document.getElementById('challenge-details');
  if(!button||!section||!details)return;
+ if(location.hash==='#golingo-challenge'){details.open=true;requestAnimationFrame(()=>section.scrollIntoView({block:'start'}));}
  button.addEventListener('click',function(){
   details.open=true;
   section.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
