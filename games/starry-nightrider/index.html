@@ -158,7 +158,7 @@
     };
     window.addEventListener('starry:webgl-unavailable', loadFallback, {once:true});
     // Versioned URLs stop iOS WKWebView from reusing stale game code after an update.
-    try { await import('./game-3d.js?v=12'); }
+    try { await import('./game-3d.js?v=14'); }
     catch (error) { console.error('3D engine could not initialize:', error); loadFallback(); }
   </script>
 </body>
