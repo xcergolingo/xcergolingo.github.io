@@ -149,7 +149,7 @@
       const freshCanvas = oldCanvas.cloneNode(false);
       oldCanvas.replaceWith(freshCanvas);
       const script = document.createElement('script');
-      script.src = './fallback.js?v=12';
+      script.src = './fallback.js?v=14';
       document.body.appendChild(script);
       const hint = document.querySelector('#missionNote span:last-child');
       if (hint) hint.textContent = '2D compatibility mode: this browser cannot display the new 3D models.';
