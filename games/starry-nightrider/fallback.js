@@ -704,10 +704,15 @@
 
   function speakOne(text,language,onDone,audioURL='',force=false) {
     if((!state.audioOn&&!force) || !text || (!state.started&&!force) || (state.paused&&!force)){onDone?.(false);return;}
-    const token=voiceToken;let finished=false;
+    const token=voiceToken;let finished=false;let watchdog=0;
     const done=ok=>{
-      if(finished||token!==voiceToken)return;finished=true;playingAudio=null;currentUtterance=null;
+      if(finished||token!==voiceToken)return;
+      finished=true;clearTimeout(watchdog);playingAudio=null;currentUtterance=null;
       onDone?.(ok);
+    };
+    const armWatchdog=(ms,recover)=>{
+      clearTimeout(watchdog);
+      watchdog=setTimeout(()=>{if(!finished&&token===voiceToken)recover();},ms);
     };
     if(audioURL) {
       try {
@@ -718,12 +723,14 @@
           const sound=sharedWordAudio||(sharedWordAudio=new Audio());playingAudio=sound;sound.src=url.href;
           sound.onended=()=>done(true);
           const fallback=()=>{
-            if(finished||token!==voiceToken)return;finished=true;playingAudio=null;
+            if(finished||token!==voiceToken)return;
+            clearTimeout(watchdog);finished=true;playingAudio=null;
             sound.onended=null;sound.onerror=null;try{sound.pause();}catch{}
             speakOne(text,language,onDone,'',force);
           };
           sound.onerror=fallback;
-          sound.play()?.catch?.(fallback);return;
+          sound.play()?.catch?.(fallback);
+          armWatchdog(20000,fallback);return;
         }
       }catch{}
     }
@@ -746,8 +753,13 @@
         'Pronunciation could not play. Tap Test Voice; check your media volume and installed language voices.';
       updateSoundUi();done(false);
     };
-    try { window.speechSynthesis.resume();window.speechSynthesis.speak(u); }
-    catch{voiceNotice='Tap Test Voice to try pronunciation again.';updateSoundUi();done(false);}
+    try {
+      window.speechSynthesis.resume();window.speechSynthesis.speak(u);
+      armWatchdog(Math.min(20000,Math.max(6500,text.length*350+3500)),()=>{
+        try{window.speechSynthesis.cancel();}catch{}
+        done(false);
+      });
+    }catch{voiceNotice='Tap Test Voice to try pronunciation again.';updateSoundUi();done(false);}
   }
   function startWordLoop(item) {
     cancelSpeech();if(!item || !state.audioOn || !state.started||state.paused)return;
@@ -755,8 +767,8 @@
     const step=()=>{
       if(token!==voiceToken||state.paused||!state.started||!state.audioOn)return;
       speakOne(item.word,lesson.learningLanguage,ok=>{
-        if(token!==voiceToken||ok===false)return;
-        if(state.repeat) utteranceTimer=setTimeout(step,state.speechGap);
+        if(token!==voiceToken)return;
+        if(state.repeat) utteranceTimer=setTimeout(step,ok===false?Math.max(3000,state.speechGap):state.speechGap);
       },item.audioURL);
     };
     step();
