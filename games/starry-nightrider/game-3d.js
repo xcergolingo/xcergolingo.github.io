@@ -1028,10 +1028,19 @@ function start3D() {
   }
   function speak(text,audioURL='',onComplete=()=>{},force=false){
     if((!state.audioOn&&!force)||!text||(!state.started&&!force)||(state.paused&&!force)||document.hidden){onComplete(false);return;}
-    const version=speechVersion;let completed=false;
+    const version=speechVersion;let completed=false;let watchdog=0;
     const done=ok=>{
       if(completed||version!==speechVersion)return;
-      completed=true;onComplete(ok);
+      completed=true;clearTimeout(watchdog);onComplete(ok);
+    };
+    // Safari/WKWebView sometimes never emits SpeechSynthesisUtterance.onend.
+    // Recover from a stalled voice or recorded clip instead of losing the repeat loop.
+    const armWatchdog=(ms,recover)=>{
+      clearTimeout(watchdog);
+      watchdog=setTimeout(()=>{
+        if(completed||version!==speechVersion)return;
+        recover();
+      },ms);
     };
     const voiceFail=()=>{
       voiceBlocked=true;voiceMessage='Voice needs a tap or an installed voice. Use Test voice below.';
@@ -1049,7 +1058,13 @@ function start3D() {
       u.onstart=()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Word pronunciation is playing.';renderAudioStatus();};
       u.onend=()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Word voice is ready.';renderAudioStatus();done(true);};
       u.onerror=()=>{if(version===speechVersion)voiceFail();};
-      try{window.speechSynthesis.resume();window.speechSynthesis.speak(u);}catch{voiceFail();}
+      try{
+        window.speechSynthesis.resume();window.speechSynthesis.speak(u);
+        armWatchdog(Math.min(20000,Math.max(6500,text.length*350+3500)),()=>{
+          try{window.speechSynthesis.cancel();}catch{}
+          voiceFail();
+        });
+      }catch{voiceFail();}
     };
     if(audioURL&&sharedWordAudio){
       try{
@@ -1058,6 +1073,7 @@ function start3D() {
           let failed=false;const audio=sharedWordAudio;currentAudio=audio;
           const fallback=()=>{
             if(failed||version!==speechVersion)return;failed=true;
+            clearTimeout(watchdog);
             audio.onended=audio.onerror=null;try{audio.pause();}catch{}
             currentAudio=null;tts();
           };
@@ -1065,6 +1081,7 @@ function start3D() {
           audio.onended=()=>{if(version!==speechVersion)return;currentAudio=null;voiceBlocked=false;voiceMessage='Recorded word audio is ready.';renderAudioStatus();done(true);};
           audio.onerror=fallback;
           const result=audio.play();
+          armWatchdog(20000,fallback);
           result?.then(()=>{if(version!==speechVersion)return;voiceBlocked=false;voiceMessage='Recorded word audio is playing.';renderAudioStatus();}).catch(fallback);
           return;
         }
@@ -1078,7 +1095,8 @@ function start3D() {
     const next=()=>{
       if(version!==speechVersion||!state.started||state.paused||!state.audioOn||document.hidden)return;
       speak(item.word,item.audioURL||'',played=>{
-        if(played&&version===speechVersion&&state.repeat)speechTimeout=setTimeout(next,state.speechGap);
+        if(version===speechVersion&&state.repeat)
+          speechTimeout=setTimeout(next,played?state.speechGap:Math.max(state.speechGap,3000));
       });
     };
     if(initialDelay)speechTimeout=setTimeout(next,initialDelay);else next();
@@ -1089,8 +1107,8 @@ function start3D() {
     rideAudio.unlock();voiceBlocked=false;stopSpeech();
     const version=speechVersion;
     speak(item.word,item.audioURL||'',played=>{
-      if(played&&version===speechVersion&&!state.paused&&state.current&&state.repeat)
-        speechTimeout=setTimeout(()=>repeatWord(state.current),state.speechGap);
+      if(version===speechVersion&&!state.paused&&state.current&&state.repeat)
+        speechTimeout=setTimeout(()=>repeatWord(state.current),played?state.speechGap:Math.max(state.speechGap,3000));
     },true);
   }
   function blip(hz=720){if(state.fxOn)rideAudio.chime(hz);}
